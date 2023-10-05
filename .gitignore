@@ -24,7 +24,7 @@
 *.elf
 *.bin
 *.ppl
-.*.swp
+*.swp
 *~
 *.lps
 *.elg
@@ -51,8 +51,6 @@
 *.env
 *.dbg
 *.lrt
-__history
-__recovery
 bin
 backup
 lib

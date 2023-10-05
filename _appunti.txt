@@ -1,0 +1,30 @@
+Struttura XML di Progetto
+  Counters (Lista con i valori a -1)
+  CropAreas (Lista con in UserData l'indice del Counter)
+
+Struttura XML di Lavoro
+  Cartella di Destinazione
+  Formato di Destinazione
+  Taker + Params
+  Counters (Lista con i valori)
+  Counters_Previous (Lista con i valori per il Re-Take)
+  CropAreas (Lista con in UserData l'indice del Counter)
+
+Ad ogni Take
+  Cattura Immagine in imgManipulation
+  Counters_Previous :=Counters (Copiare solo i Value)
+  Salvataggio di tutti i crop (imgManipulation.getAllBitmaps)
+    nella Callback
+      incrementa il Valore del Counter della Crop Area(in UserData l'indice del Counter)
+      Salva il file come Counter.preValue+Value+postValue+.formato
+  Salva XML di Lavoro
+
+Ad ogni Re-Take
+  Cattura Immagine in imgManipulation
+  Counters :=Counters_Previous (Copiare solo i Value)
+  Salvataggio di tutti i crop (imgManipulation.getAllBitmaps)
+    nella Callback
+      incrementa il Valore del Counter della Crop Area(in UserData l'indice del Counter)
+      Salva il file come Counter.preValue+Value+postValue+.formato
+  Salva XML di Lavoro
+

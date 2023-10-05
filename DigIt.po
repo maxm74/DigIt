@@ -1,0 +1,95 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: tdigit_main.btpreview.caption
+msgctxt "TDIGIT_MAIN.BTPREVIEW.CAPTION"
+msgid "Preview (F5)"
+msgstr ""
+
+#: tdigit_main.btretake.caption
+msgctxt "TDIGIT_MAIN.BTRETAKE.CAPTION"
+msgid "Retake (F7)"
+msgstr ""
+
+#: tdigit_main.bttake.caption
+msgctxt "TDIGIT_MAIN.BTTAKE.CAPTION"
+msgid "Take (F6)"
+msgstr ""
+
+#: tdigit_main.button1.caption
+msgid "Button1"
+msgstr ""
+
+#: tdigit_main.caption
+msgid "DigIt_Main"
+msgstr ""
+
+#: tdigit_main.combobox1.text
+msgid "Minutes"
+msgstr ""
+
+#: tdigit_main.diacalendar.cancelcaption
+msgid "Annulla"
+msgstr ""
+
+#: tdigit_main.diacalendar.okcaption
+msgid "&OK"
+msgstr ""
+
+#: tdigit_main.edit1.text
+msgid "Edit1"
+msgstr ""
+
+#: tdigit_main.rbtakeat.caption
+msgid "Take At"
+msgstr ""
+
+#: tdigit_main.rbtakeevery.caption
+msgid "Take Every"
+msgstr ""
+
+#: tdigit_main.rbtimeroff.caption
+msgid "Off"
+msgstr ""
+
+#: tdigit_main.tbcapture.caption
+msgctxt "TDIGIT_MAIN.TBCAPTURE.CAPTION"
+msgid "Capture"
+msgstr ""
+
+#: tdigit_main.tbtimer.caption
+msgid "Timer"
+msgstr ""
+
+#: tdigit_main.tbworktop.caption
+msgctxt "TDIGIT_MAIN.TBWORKTOP.CAPTION"
+msgid "Worktop"
+msgstr ""
+
+#: tdigit_main.tests.caption
+msgid "Tests"
+msgstr ""
+
+#: tform1.caption
+msgid "Form1"
+msgstr ""
+
+#: tform1.tbcapture.caption
+msgctxt "tform1.tbcapture.caption"
+msgid "Capture"
+msgstr ""
+
+#: tform1.tbworktop.caption
+msgctxt "tform1.tbworktop.caption"
+msgid "Worktop"
+msgstr ""
+
+#: tform1.toolbar1.caption
+msgid "ToolBar1"
+msgstr ""
+
+#: tform1.toolbutton1.caption
+msgctxt "tform1.toolbutton1.caption"
+msgid "Preview"
+msgstr ""
+

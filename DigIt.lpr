@@ -1,0 +1,23 @@
+program DigIt;
+
+{$mode objfpc}{$H+}
+
+uses
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  cthreads,
+  {$ENDIF}{$ENDIF}
+  Interfaces, // this includes the LCL widgetset
+  Forms, lazcontrols, pexpandpanels,
+  DigIt_form_main, Digit_Bridge, Digit_Taker_Twain, DigIt_Utils, DigIt_Counters, DigIt_types, Digit_Taker_Folder, 
+  DigIt_Form_Templates;
+
+{$R *.res}
+
+begin
+  RequireDerivedFormResource := True;
+  Application.Scaled:=True;
+  Application.Initialize;
+  Application.CreateForm(TDigIt_Main, DigIt_Main);
+  Application.Run;
+end.
+

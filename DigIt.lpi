@@ -78,34 +78,31 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="9">
+    <RequiredPackages Count="8">
       <Item1>
         <PackageName Value="DelphiTwain"/>
       </Item1>
       <Item2>
-        <PackageName Value="MaxM_UI"/>
+        <PackageName Value="LazControls"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="LazControlDsgn"/>
       </Item3>
       <Item4>
-        <PackageName Value="LazControlDsgn"/>
+        <PackageName Value="laz.virtualtreeview_package"/>
       </Item4>
       <Item5>
-        <PackageName Value="laz.virtualtreeview_package"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item5>
       <Item6>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="bgracontrols"/>
       </Item6>
       <Item7>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="Pexpandpanels"/>
       </Item7>
       <Item8>
-        <PackageName Value="Pexpandpanels"/>
-      </Item8>
-      <Item9>
         <PackageName Value="LCL"/>
-      </Item9>
+      </Item8>
     </RequiredPackages>
     <Units Count="10">
       <Unit0>
@@ -156,6 +153,7 @@
         <Filename Value="digit_form_templates.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Templates"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_Form_Templates"/>
       </Unit9>

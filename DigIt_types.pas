@@ -13,16 +13,48 @@ unit DigIt_Types;
 
 interface
 
-uses SysUtils;
+uses SysUtils, ComCtrls;
+
+type
+
+  { TFileListItem }
+
+  TFileListItem=class(TListItem)
+  protected
+    rFileName:String;
+
+    procedure setFileName(AValue: String);
+  public
+    constructor Create(AOwner: TListItems; AFileName:String);
+
+    property FileName:String read rFileName write setFileName;
+  end;
 
 const
   Config_XMLWork='digit.xml';
   Config_Options='digit.ini';
 
+  XMLWork_Captured='CapturedFile/';
+
 var
    ConfigDir:String;
 
 implementation
+
+{ TFileListItem }
+
+procedure TFileListItem.setFileName(AValue: String);
+begin
+  if rFileName=AValue then Exit;
+  rFileName:=AValue;
+  Caption:=ExtractFileName(AValue);
+end;
+
+constructor TFileListItem.Create(AOwner: TListItems; AFileName: String);
+begin
+  inherited Create(AOwner);
+  setFileName(AFileName);
+end;
 
 initialization
    ConfigDir :=GetAppConfigDir(False);

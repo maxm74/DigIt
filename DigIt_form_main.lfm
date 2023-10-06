@@ -1,7 +1,7 @@
 object DigIt_Main: TDigIt_Main
-  Left = 238
+  Left = 256
   Height = 749
-  Top = 3
+  Top = 0
   Width = 1024
   Caption = 'DigIt'
   ClientHeight = 749
@@ -1382,19 +1382,6 @@ object DigIt_Main: TDigIt_Main
     Button.GlyphLayout = glRight
     AnimationSpeed = 20
     Animated = False
-    object lvCaptured: TLazVirtualStringTree
-      Left = 1
-      Height = 125
-      Top = 54
-      Width = 1022
-      Align = alClient
-      DefaultText = 'Node'
-      Header.AutoSizeIndex = 0
-      Header.Columns = <>
-      Header.MainColumn = -1
-      ScrollBarOptions.ScrollBars = ssAutoHorizontal
-      TabOrder = 0
-    end
     object tbCaptured: TToolBar
       Left = 1
       Height = 26
@@ -1404,7 +1391,7 @@ object DigIt_Main: TDigIt_Main
       Images = imgListCaptured
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 1
+      TabOrder = 0
       object tbCapturedRotateLeft: TToolButton
         Left = 1
         Top = 2
@@ -1431,6 +1418,28 @@ object DigIt_Main: TDigIt_Main
         BevelOuter = bvSpace
         TabOrder = 0
       end
+    end
+    object lvCaptured: TListView
+      Left = 1
+      Height = 125
+      Top = 54
+      Width = 1022
+      Align = alClient
+      AutoSort = False
+      Columns = <>
+      ColumnClick = False
+      IconOptions.Arrangement = iaLeft
+      LargeImages = imgListThumb
+      ParentShowHint = False
+      ReadOnly = True
+      ScrollBars = ssAutoHorizontal
+      ShowColumnHeaders = False
+      ShowHint = True
+      TabOrder = 1
+      ViewStyle = vsIcon
+      OnCreateItemClass = lvCapturedCreateItemClass
+      OnCustomDrawItem = lvCapturedCustomDrawItem
+      OnShowHint = lvCapturedShowHint
     end
   end
   object imgManipulation: TBGRAImageManipulation
@@ -2620,5 +2629,11 @@ object DigIt_Main: TDigIt_Main
     Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
     Left = 341
     Top = 142
+  end
+  object imgListThumb: TImageList
+    Height = 80
+    Width = 80
+    Left = 960
+    Top = 600
   end
 end

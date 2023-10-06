@@ -14,7 +14,7 @@ unit DigIt_Utils;
 interface
 
 uses
-  Classes, SysUtils, DOM, XMLConf, Laz2_DOM, Laz_XMLStreaming, Laz2_XMLCfg,
+  Classes, SysUtils, ComCtrls, DOM, XMLConf, Laz2_DOM, Laz_XMLStreaming, Laz2_XMLCfg,
   FPImage, Menus, DigIt_types, BGRAPapers;
 
 function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
@@ -32,6 +32,11 @@ procedure PaperSizesMenuTag_decode(ATag:Integer; var ResUnit: TResolutionUnit; v
 function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 
 procedure BuildTakersMenu(AOwner: TComponent; menuTakers: TMenu; menuOnClick: TNotifyEvent);
+
+procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
+                          var newWidth, newHeight:Integer);
+
+function FindFileListItem(AList:TListItems; AFileName:String):TFileListItem;
 
 implementation
 
@@ -276,6 +281,40 @@ begin
     end;
   end;
 end;
+
+procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
+                          var newWidth, newHeight:Integer);
+var
+   rW, rH:Single;
+
+begin
+  rW := imgWidth / thumbWidth;
+  rH := imgHeight / thumbHeight;
+
+  if (rW > rH)
+  then begin
+         newHeight := round(imgHeight / rW);
+         newWidth := thumbWidth;
+       end
+  else begin
+         newWidth := round(imgWidth / rH);
+         newHeight := thumbHeight;
+       end;
+end;
+
+function FindFileListItem(AList: TListItems; AFileName: String): TFileListItem;
+var
+   i:Integer;
+
+begin
+  Result:=nil;
+  for i:=AList.Count-1 downto 0 do
+  begin
+    if (TFileListItem(AList[i]).FileName=AFileName)
+    then begin Result:=TFileListItem(AList[i]); break; end;
+  end;
+end;
+
 
 end.
 

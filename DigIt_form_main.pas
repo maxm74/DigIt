@@ -51,6 +51,8 @@ type
     BCLabel8: TBCLabel;
     BCLabel9: TBCLabel;
     btPageSizesToCrops: TSpeedButton;
+    imgListThumb: TImageList;
+    lvCaptured: TListView;
     panelPageSize: TBCPanel;
     btBox_Add: TBGRASpeedButton;
     btCFlipHLeft: TSpeedButton;
@@ -106,7 +108,6 @@ type
     lbPrevious: TLabel;
     lbTakerSummary: TLabel;
     lbCounterExample: TLabel;
-    lvCaptured: TLazVirtualStringTree;
     menuOptions: TMenuItem;
     OpenProject: TOpenDialog;
     panelCaptured: TPanel;
@@ -180,6 +181,10 @@ type
     procedure edPageWidthChange(Sender: TObject);
     procedure edPage_UnitTypeChange(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
+    procedure lvCapturedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
+      var DefaultDraw: Boolean);
+    procedure lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure TakerMenuClick(Sender: TObject);
     procedure edCounterNameEditingDone(Sender: TObject);
     procedure edCounterValueChange(Sender: TObject);
@@ -227,6 +232,7 @@ type
     SaveExt,
     SavePath,
     rProject_File: String;
+    testI: Integer;
 
     function GetCurrentCropArea: TCropArea;
     function GetCurrentCounter: TDigIt_Counter;
@@ -236,7 +242,7 @@ type
     procedure UI_FillTaker;
     procedure UI_Load;
     function UI_FindSaveFormat(AExt:String):Integer;
-    procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea);
+    procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
     procedure UpdateCounterExampleLabel(ACounter :TDigIt_Counter);
@@ -245,6 +251,8 @@ type
     procedure LoadImage(AImageFile:String);
     procedure XML_LoadWork;
     procedure XML_SaveWork;
+    procedure XML_LoadCapturedFiles;
+    procedure XML_SaveCapturedFile(AItem:TFileListItem);
     procedure XML_LoadProject(AFileName:String);
     procedure XML_SaveProject(AFileName:String);
     procedure Taker_SelectUserParams(curClass :TDigIt_TakerClasses);
@@ -423,7 +431,9 @@ begin
       curImageFile :=takerInst.Take;
       LoadImage(curImageFile);
       Counters.CopyValuesToPrevious;
+      lvCaptured.BeginUpdate;
       imgManipulation.getAllBitmaps(@SaveCallBack);
+      lvCaptured.EndUpdate;
       XML_SaveWork;
 
       lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary;
@@ -443,7 +453,9 @@ begin
       curImageFile :=takerInst.ReTake;
       LoadImage(curImageFile);
       Counters.CopyPreviousToValues;
-      imgManipulation.getAllBitmaps(@SaveCallBack);
+      lvCaptured.BeginUpdate;
+      imgManipulation.getAllBitmaps(@SaveCallBack, 1);
+      lvCaptured.EndUpdate;
       XML_SaveWork;
     end;
   finally
@@ -830,6 +842,54 @@ begin
   panelMainToolbar.Width:=tbMain.Width div 2;
 end;
 
+procedure TDigIt_Main.lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
+begin
+  ItemClass :=TFileListItem;
+end;
+
+procedure TDigIt_Main.lvCapturedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
+  var DefaultDraw: Boolean);
+var
+   itemRect, destRect:TRect;
+   Bitmap :TBGRABitmap;
+   newWidth, newHeight:Integer;
+
+begin
+  try
+  itemRect :=Item.DisplayRect(drBounds);
+ // iRect :=Item.DisplayRect(drIcon);
+ // iRect :=Item.DisplayRect(drLabel);
+ // iRect :=Item.DisplayRect(drSelectBounds);
+
+  //lvCaptured.Canvas.Brush.Color:=clLime;
+  //lvCaptured.Canvas.FillRect(itemRect);
+
+  Bitmap := TBGRABitmap.Create;
+  //DetectFileFormat(AImageFile);
+  Bitmap.LoadFromFile(TFileListItem(Item).FileName);
+
+  GetThumnailSize(itemRect.Width, itemRect.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
+  destRect.Left:=itemRect.Left+((itemRect.Width-newWidth) div 2);
+  destRect.Top:=itemRect.Top+((itemRect.Height-newHeight) div 2);
+  destRect.Width:=newWidth;
+  destRect.Height:=newHeight;
+  Bitmap.Draw(lvCaptured.Canvas, destRect, True);
+  DefaultDraw:=True;
+  finally
+    Bitmap.Free;
+  end;
+end;
+
+procedure TDigIt_Main.lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
+var
+   tt:TFileListItem;
+
+begin
+  tt:=TFileListItem(lvCaptured.GetItemAt(HintInfo^.CursorPos.X, HintInfo^.CursorPos.Y));
+  if (tt<>nil)
+  then HintInfo^.HintStr:=tt.FileName;
+end;
+
 procedure TDigIt_Main.TakerMenuClick(Sender: TObject);
 var
    curClass :TDigIt_TakerClasses;
@@ -920,23 +980,44 @@ begin
   //
 end;
 
-procedure TDigIt_Main.SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea);
+procedure TDigIt_Main.SaveCallBack(Bitmap: TBGRABitmap; CropArea: TCropArea; AUserData: Integer);
 var
   cropCounter:TDigIt_Counter;
+  savedFile:String;
+  captItem:TFileListItem;
 
 begin
   if (CropArea<>nil) then
   begin
-    if (CropArea.UserData>-1) then
-    begin
-      cropCounter :=TDigIt_Counter(Counters.items[CropArea.UserData]);
-      if (cropCounter=nil)
-      then Bitmap.SaveToFile(SavePath+DirectorySeparator+CropArea.Name+'.'+SaveExt)
-      else begin
-             cropCounter.Value:=cropCounter.Value+1;
-             Bitmap.SaveToFile(SavePath+DirectorySeparator+cropCounter.GetValue+'.'+SaveExt);
-           end;
-    end;
+    if (CropArea.UserData<0)
+    then begin
+           savedFile:=SavePath+DirectorySeparator+CropArea.Name+'.'+SaveExt;
+           Bitmap.SaveToFile(savedFile);
+         end
+    else begin
+           cropCounter :=TDigIt_Counter(Counters.items[CropArea.UserData]);
+           cropCounter.Value:=cropCounter.Value+1;
+           savedFile:=SavePath+DirectorySeparator+cropCounter.GetValue+'.'+SaveExt;
+           Bitmap.SaveToFile(savedFile);
+         end;
+
+    if (AUserData=0)
+    then begin   //Take, add file to Captured List
+           captItem :=TFileListItem(lvCaptured.Items.Add);
+           captItem.FileName:=savedFile;
+           XML_SaveCapturedFile(captItem);
+         end
+    else begin
+           captItem :=FindFileListItem(lvCaptured.Items, savedFile);
+           if (captItem=nil)
+           then begin
+                  captItem :=TFileListItem(lvCaptured.Items.Add);
+                  captItem.FileName:=savedFile;
+                  XML_SaveCapturedFile(captItem);
+                end;
+           //else lvCaptured;   { #todo 2 -oMaxM : Update Item }
+         end;
+    captItem.MakeVisible(False);
   end;
 end;
 
@@ -1045,6 +1126,7 @@ begin
     end;
     Counters.Load(XMLWork, True);
     imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
+    //XML_LoadCapturedFiles;     { #todo 10 -oMaxM : Move All XML_Load to OnShow (divide by Zero) }
     UI_Load;
     cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
@@ -1066,6 +1148,53 @@ begin
      XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
      imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
      XMLWork.Flush;
+  finally
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadCapturedFiles;
+var
+   i, newCount, newSelected:Integer;
+   curFileName:String;
+
+begin
+  try
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(ConfigDir+Config_XMLWork);
+
+     newCount := XMLWork.GetValue(XMLWork_Captured+'Count', -1);
+     if (newCount=-1)
+     then raise Exception.Create('XML Path not Found - '+XMLWork_Captured+'Count');
+
+     lvCaptured.BeginUpdate;
+
+     lvCaptured.Clear;
+     newSelected :=XMLWork.GetValue(XMLWork_Captured+'Selected', -1);
+
+     for i:=0 to newCount-1 do
+     begin
+       curFileName :=XMLWork.GetValue(XMLWork_Captured+'Item' + IntToStr(i)+'/FileName', '');
+       if (curFileName<>'')  { #todo -oMaxM : if null? there is a problem? }
+       then TFileListItem(lvCaptured.Items.Add).FileName :=curFileName;
+     end;
+
+     if (newSelected>-1) and (newSelected<newCount)
+     then lvCaptured.Selected:=lvCaptured.Items[newSelected];
+
+     lvCaptured.EndUpdate;
+  finally
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveCapturedFile(AItem: TFileListItem);
+begin
+  try
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(ConfigDir+Config_XMLWork);
+
+     XMLWork.SetValue(XMLWork_Captured+'Count', lvCaptured.Items.Count);
+     if lvCaptured.Selected=nil
+     then XMLWork.DeleteValue(XMLWork_Captured+'Selected')
+     else XMLWork.SetValue(XMLWork_Captured+'Selected', lvCaptured.Selected.Index);
+     XMLWork.SetValue(XMLWork_Captured+'Item'+IntToStr(AItem.Index)+'/FileName', AItem.FileName);
   finally
   end;
 end;
@@ -1346,7 +1475,15 @@ begin
 end;
 
 procedure TDigIt_Main.TestClick(Sender: TObject);
+var
+   tt:TFileListItem;
+
 begin
+  tt :=TFileListItem(lvCaptured.Items.Add);
+  tt.FileName:='c:\Users\Biblioteca Sortino\Downloads\tmp\dest\test0'+IntToStr(testI)+'.jpg';
+  inc(testI);
+  if (testI=7) then testI:=0;
+  tt.MakeVisible(False);
 end;
 
 procedure TDigIt_Main.TestRClick(Sender: TObject);

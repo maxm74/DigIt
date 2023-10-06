@@ -120,7 +120,7 @@ begin
 end;
 
 initialization
-  theBridge.Takers.Register(TDigIt_Taker_Twain.RegisterName, TDigIt_Taker_Twain);
+  //theBridge.Takers.Register(TDigIt_Taker_Twain.RegisterName, TDigIt_Taker_Twain);
 
 end.
 

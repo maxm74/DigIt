@@ -288,8 +288,12 @@ var
    rW, rH:Single;
 
 begin
-  rW := imgWidth / thumbWidth;
-  rH := imgHeight / thumbHeight;
+  if (thumbWidth=0)
+  then rW:=1
+  else rW := imgWidth / thumbWidth;
+  if (thumbHeight=0)
+  then rH:=1
+  else rH := imgHeight / thumbHeight;
 
   if (rW > rH)
   then begin

@@ -160,7 +160,7 @@ object DigIt_Main: TDigIt_Main
       ImageIndex = 9
       Style = tbsDropDown
     end
-    object ToolButton7: TToolButton
+    object tbPreview: TToolButton
       Left = 142
       Top = 2
       Action = actPreview
@@ -168,22 +168,22 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCrops: TMyRollOut
     Left = 0
-    Height = 513
+    Height = 493
     Top = 56
     Width = 230
     Align = alLeft
-    ClientHeight = 513
+    ClientHeight = 493
     ClientWidth = 230
     Enabled = True
     TabOrder = 1
     CollapseKind = akLeft
     ExpandedSize = 230
     ButtonPosition = akLeft
-    ButtonSize = 27
+    ButtonSize = 20
     Button.Left = 0
-    Button.Height = 513
+    Button.Height = 493
     Button.Top = 0
-    Button.Width = 27
+    Button.Width = 20
     Button.Caption = 'Crop Areas'
     Button.Color = clSkyBlue
     Button.ColorExpanded = 16287767
@@ -1152,7 +1152,6 @@ object DigIt_Main: TDigIt_Main
         AllowAllUp = True
         Flat = True
         GroupIndex = 1
-        Images = imgListMenu
         ImageIndex = 6
         ShowCaption = False
         ShowHint = True
@@ -1166,7 +1165,6 @@ object DigIt_Main: TDigIt_Main
       Top = 123
       Width = 23
       Flat = True
-      Images = imgListMenu
       ImageIndex = 6
       OnClick = btCropDuplicateClick
       ShowCaption = False
@@ -1360,20 +1358,20 @@ object DigIt_Main: TDigIt_Main
   end
   object rollPages: TMyRollOut
     Left = 0
-    Height = 180
-    Top = 569
+    Height = 200
+    Top = 549
     Width = 1024
     Align = alBottom
-    ClientHeight = 180
+    ClientHeight = 200
     ClientWidth = 1024
     Enabled = True
     TabOrder = 2
     CollapseKind = akBottom
-    ExpandedSize = 180
+    ExpandedSize = 200
     ButtonPosition = akTop
-    ButtonSize = 27
+    ButtonSize = 20
     Button.Left = 0
-    Button.Height = 27
+    Button.Height = 20
     Button.Top = 0
     Button.Width = 1024
     Button.Caption = 'Captured Pages'
@@ -1384,9 +1382,11 @@ object DigIt_Main: TDigIt_Main
     Animated = False
     object tbCaptured: TToolBar
       Left = 1
-      Height = 26
-      Top = 28
-      Width = 1022
+      Height = 178
+      Top = 21
+      Width = 24
+      Align = alLeft
+      AutoSize = True
       Caption = 'tbCaptured'
       Images = imgListCaptured
       ParentShowHint = False
@@ -1399,31 +1399,23 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
       end
       object ToolButton1: TToolButton
-        Left = 24
-        Top = 2
+        Left = 1
+        Top = 24
         Action = actRotateRight
       end
       object ToolButton2: TToolButton
-        Left = 47
-        Top = 2
+        Left = 1
+        Top = 46
         Caption = 'Test'
         ImageIndex = 2
         OnClick = ToolButton2Click
       end
-      object panelCaptured: TPanel
-        Left = 70
-        Height = 22
-        Top = 2
-        Width = 300
-        BevelOuter = bvSpace
-        TabOrder = 0
-      end
     end
     object lvCaptured: TListView
-      Left = 1
-      Height = 125
-      Top = 54
-      Width = 1022
+      Left = 25
+      Height = 178
+      Top = 21
+      Width = 998
       Align = alClient
       AutoSort = False
       Columns = <>
@@ -1439,12 +1431,13 @@ object DigIt_Main: TDigIt_Main
       ViewStyle = vsIcon
       OnCreateItemClass = lvCapturedCreateItemClass
       OnCustomDrawItem = lvCapturedCustomDrawItem
+      OnDblClick = lvCapturedDblClick
       OnShowHint = lvCapturedShowHint
     end
   end
   object imgManipulation: TBGRAImageManipulation
     Left = 230
-    Height = 513
+    Height = 493
     Top = 56
     Width = 594
     Align = alClient
@@ -1464,22 +1457,22 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCounters: TMyRollOut
     Left = 824
-    Height = 513
+    Height = 493
     Top = 56
     Width = 200
     Align = alRight
-    ClientHeight = 513
+    ClientHeight = 493
     ClientWidth = 200
     Enabled = True
     TabOrder = 3
     CollapseKind = akRight
     ExpandedSize = 200
     ButtonPosition = akLeft
-    ButtonSize = 27
+    ButtonSize = 20
     Button.Left = 0
-    Button.Height = 513
+    Button.Height = 493
     Button.Top = 0
-    Button.Width = 27
+    Button.Width = 20
     Button.Caption = 'Page Counters'
     Button.Color = clSkyBlue
     Button.ColorExpanded = 16287767
@@ -2395,11 +2388,27 @@ object DigIt_Main: TDigIt_Main
     end
   end
   object menuPaperSizes: TPopupMenu
-    Images = imgListMenu
     Left = 424
     Top = 256
   end
-  object imgListMenu: TBGRAImageList
+  object menuTakers: TPopupMenu
+    Images = imgListMenu
+    Left = 424
+    Top = 392
+  end
+  object OpenProject: TOpenDialog
+    DefaultExt = '.dpf'
+    Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
+    Left = 341
+    Top = 86
+  end
+  object SaveProject: TSaveDialog
+    DefaultExt = '.dpf'
+    Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
+    Left = 341
+    Top = 142
+  end
+  object imgListMenu: TImageList
     Height = 22
     Width = 22
     Left = 616
@@ -2613,26 +2622,9 @@ object DigIt_Main: TDigIt_Main
       93
     }
   end
-  object menuTakers: TPopupMenu
-    Images = imgListMenu
-    Left = 424
-    Top = 392
-  end
-  object OpenProject: TOpenDialog
-    DefaultExt = '.dpf'
-    Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
-    Left = 341
-    Top = 86
-  end
-  object SaveProject: TSaveDialog
-    DefaultExt = '.dpf'
-    Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
-    Left = 341
-    Top = 142
-  end
-  object imgListThumb: TImageList
-    Height = 80
-    Width = 80
+  object imgListThumb: TBGRAImageList
+    Height = 132
+    Width = 132
     Left = 960
     Top = 600
   end

@@ -51,7 +51,8 @@ type
     BCLabel8: TBCLabel;
     BCLabel9: TBCLabel;
     btPageSizesToCrops: TSpeedButton;
-    imgListThumb: TImageList;
+    imgListMenu: TImageList;
+    imgListThumb: TBGRAImageList;
     lvCaptured: TListView;
     panelPageSize: TBCPanel;
     btBox_Add: TBGRASpeedButton;
@@ -93,7 +94,6 @@ type
     edPageWidth: TFloatSpinEdit;
     edPage_UnitType: TComboBox;
     edCropWidth: TFloatSpinEdit;
-    imgListMenu: TBGRAImageList;
     imgListCaptured: TImageList;
     imgManipulation: TBGRAImageManipulation;
     imgListMain: TImageList;
@@ -110,7 +110,6 @@ type
     lbCounterExample: TLabel;
     menuOptions: TMenuItem;
     OpenProject: TOpenDialog;
-    panelCaptured: TPanel;
     panelCounter: TBCPanel;
     panelCropArea: TBCPanel;
     panelMainToolbar: TPanel;
@@ -144,7 +143,7 @@ type
     ToolButton5: TToolButton;
     tbMenu: TToolButton;
     ToolButton6: TToolButton;
-    ToolButton7: TToolButton;
+    tbPreview: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
@@ -184,6 +183,7 @@ type
     procedure lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
     procedure lvCapturedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
       var DefaultDraw: Boolean);
+    procedure lvCapturedDblClick(Sender: TObject);
     procedure lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure TakerMenuClick(Sender: TObject);
     procedure edCounterNameEditingDone(Sender: TObject);
@@ -272,7 +272,11 @@ implementation
 
 {$R *.lfm}
 
-uses DigIt_Form_Templates;
+uses
+  {$ifopt D+}
+  lazlogger,
+  {$endif}
+  LCLIntf, DigIt_Form_Templates;
 
 
 { TDigIt_Main }
@@ -409,15 +413,22 @@ var
    i:Integer;
 
 begin
-  rollCrops.Collapsed:=True;
-  rollPages.Collapsed:=True;
-  rollCounters.Collapsed:=True;
-
   for i:=0 to tbCaptured.ButtonCount-1 do
      tbCaptured.Buttons[i].Hint:=tbCaptured.Buttons[i].Caption;
 
-  if FileExists(ConfigDir+Config_XMLWork) //{ #todo -oMaxM : and User Confirm }
-  then XML_LoadWork;
+  if FileExists(ConfigDir+Config_XMLWork)
+     {$ifopt D-}
+      and (MessageDlg('DigIt', 'Continue from last Session?', mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+     {$endif}
+  then begin
+         XML_LoadWork;
+         actPreview.Execute;
+       end
+  else begin
+         //rollCrops.Collapsed:=True;
+         rollPages.Collapsed:=True;
+         //rollCounters.Collapsed:=True;
+       end;
 end;
 
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
@@ -431,9 +442,9 @@ begin
       curImageFile :=takerInst.Take;
       LoadImage(curImageFile);
       Counters.CopyValuesToPrevious;
-      lvCaptured.BeginUpdate;
+      //lvCaptured.BeginUpdate;
       imgManipulation.getAllBitmaps(@SaveCallBack);
-      lvCaptured.EndUpdate;
+      //lvCaptured.EndUpdate;
       XML_SaveWork;
 
       lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary;
@@ -453,9 +464,9 @@ begin
       curImageFile :=takerInst.ReTake;
       LoadImage(curImageFile);
       Counters.CopyPreviousToValues;
-      lvCaptured.BeginUpdate;
+      //lvCaptured.BeginUpdate;
       imgManipulation.getAllBitmaps(@SaveCallBack, 1);
-      lvCaptured.EndUpdate;
+      //lvCaptured.EndUpdate;
       XML_SaveWork;
     end;
   finally
@@ -851,33 +862,40 @@ procedure TDigIt_Main.lvCapturedCustomDrawItem(Sender: TCustomListView; Item: TL
   var DefaultDraw: Boolean);
 var
    itemRect, destRect:TRect;
-   Bitmap :TBGRABitmap;
+   Bitmap, BitmapR :TBGRABitmap;
    newWidth, newHeight:Integer;
 
 begin
   try
-  itemRect :=Item.DisplayRect(drBounds);
- // iRect :=Item.DisplayRect(drIcon);
- // iRect :=Item.DisplayRect(drLabel);
- // iRect :=Item.DisplayRect(drSelectBounds);
-
-  //lvCaptured.Canvas.Brush.Color:=clLime;
-  //lvCaptured.Canvas.FillRect(itemRect);
-
-  Bitmap := TBGRABitmap.Create;
-  //DetectFileFormat(AImageFile);
-  Bitmap.LoadFromFile(TFileListItem(Item).FileName);
-
-  GetThumnailSize(itemRect.Width, itemRect.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
-  destRect.Left:=itemRect.Left+((itemRect.Width-newWidth) div 2);
-  destRect.Top:=itemRect.Top+((itemRect.Height-newHeight) div 2);
-  destRect.Width:=newWidth;
-  destRect.Height:=newHeight;
-  Bitmap.Draw(lvCaptured.Canvas, destRect, True);
-  DefaultDraw:=True;
+    //Stage=prePaint
+    itemRect :=Item.DisplayRect(drBounds);
+    Bitmap := TBGRABitmap.Create;
+    Bitmap.LoadFromFile(TFileListItem(Item).FileName);
+    GetThumnailSize(itemRect.Width, itemRect.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
+    destRect.Left:=itemRect.Left+((itemRect.Width-newWidth) div 2);
+    destRect.Top:=itemRect.Top+((itemRect.Height-newHeight) div 2);
+    destRect.Width:=newWidth;
+    destRect.Height:=newHeight;
+    BitmapR :=Bitmap.Resample(newWidth, newHeight);
+    BitmapR.Draw(lvCaptured.Canvas, destRect, True);
+    DefaultDraw:=True;
+    {$ifopt D+}
+      DebugLn('draw='+IntToStr(Item.Index));
+    {$endif}
   finally
     Bitmap.Free;
+    BitmapR.Free;
   end;
+end;
+
+procedure TDigIt_Main.lvCapturedDblClick(Sender: TObject);
+var
+   tt:TFileListItem;
+
+begin
+  tt:=TFileListItem(lvCaptured.Selected);
+  if (tt<>nil)
+  then OpenDocument(tt.FileName);
 end;
 
 procedure TDigIt_Main.lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
@@ -1126,10 +1144,16 @@ begin
     end;
     Counters.Load(XMLWork, True);
     imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
-    //XML_LoadCapturedFiles;     { #todo 10 -oMaxM : Move All XML_Load to OnShow (divide by Zero) }
+    XML_LoadCapturedFiles;
     UI_Load;
     cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
+
+    //User Interface
+    rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', True);
+    rollPages.Collapsed:=XMLWork.GetValue('UI/rollPages_Collapsed', True);
+    rollCounters.Collapsed:=XMLWork.GetValue('UI/rollCounters_Collapsed', True);
+
   finally
   end;
 end;
@@ -1147,6 +1171,12 @@ begin
      Counters.Save(XMLWork, True);
      XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
      imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
+
+     //User Interface
+     XMLWork.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
+     XMLWork.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
+     XMLWork.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
+
      XMLWork.Flush;
   finally
   end;
@@ -1418,17 +1448,21 @@ begin
    if (CropArea.Name='')
    then CropArea.Name:='Name '+IntToStr(curIndex);
 
+   CropArea.Icons:=[cIcoIndex];
+
    cbBoxList.AddItem(CropArea.Name, CropArea);
    cbBoxList.ItemIndex:=cbBoxList.Items.IndexOfObject(CropArea);
 
-   //If there is only one CropArea assign a Counter by Default
+   //If there is only one CropArea add a Counter by Default
    if (imgManipulation.CropAreas.Count=1) then
    begin
      if (Counters.Count=0)
-     then btCropCounter_AddClick(nil)
-     else if (Counters.Count=1)
-          then CropArea.UserData:=0;
+     then btCropCounter_AddClick(nil);
    end;
+
+   //If there is only one Counter then the new Area have it by Default
+   if (Counters.Count=1)
+   then CropArea.UserData:=0;
 
    UI_FillBox(CropArea);
 end;
@@ -1477,13 +1511,38 @@ end;
 procedure TDigIt_Main.TestClick(Sender: TObject);
 var
    tt:TFileListItem;
+   itemRect, destRect:TRect;
+   Bitmap, BitmapR :TBGRABitmap;
+   newBitmap:TBitmap;
+   newWidth, newHeight:Integer;
 
 begin
+  try
   tt :=TFileListItem(lvCaptured.Items.Add);
   tt.FileName:='c:\Users\Biblioteca Sortino\Downloads\tmp\dest\test0'+IntToStr(testI)+'.jpg';
+(*  Bitmap := TBGRABitmap.Create;
+  Bitmap.LoadFromFile(tt.FileName);
+  GetThumnailSize(imgListThumb.Width, imgListThumb.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
+  destRect.Left:=((imgListThumb.Width-newWidth) div 2);
+  destRect.Top:=((imgListThumb.Height-newHeight) div 2);
+  destRect.Width:=newWidth;
+  destRect.Height:=newHeight;
+  BitmapR :=Bitmap.Resample(newWidth, newHeight);
+  newBitmap:=TBitmap.Create;
+  newBitmap.Width:=newWidth;
+  newBitmap.Height:=newHeight;
+  newBitmap.Masked:=True;
+  BitmapR.Draw(newBitmap.Canvas, destRect, True);
+  tt.ImageIndex :=imgListThumb.Add(newBitmap,nil);
+  *)
   inc(testI);
   if (testI=7) then testI:=0;
   tt.MakeVisible(False);
+  finally
+    //Bitmap.Free;
+    //BitmapR.Free;
+    //newBitmap.Free;
+  end;
 end;
 
 procedure TDigIt_Main.TestRClick(Sender: TObject);

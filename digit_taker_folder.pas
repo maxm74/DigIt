@@ -148,10 +148,6 @@ begin
 end;
 
 function TDigIt_Taker_Folder.Preview: String;
-var
-   xTaked:String;
-   xlastFile:Integer;
-
 begin
   //Result :='c:\Users\Biblioteca Sortino\Downloads\tmp\doc01198620221124104620_1000001a_1_Pagina_01_Immagine_0001.tif'
   with TDigIt_Taker_FolderParams(rParams) do
@@ -163,14 +159,13 @@ begin
     then begin
            SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
            lastFolder :=Folder;
-           xlastFile :=xFiles.IndexOf(LastTaked);
-           if (xlastFile=-1)
-           then xlastFile:=0;
+           lastFile :=xFiles.IndexOf(LastTaked);
+           //if (lastFile=-1) then lastFile:=0;
          end;
 
-    if (xFiles.Count=0) or (xlastFile>=xFiles.Count)
+    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
     then Result :=''
-    else Result :=Folder+DirectorySeparator+xFiles[xlastFile];
+    else Result :=Folder+DirectorySeparator+xFiles[lastFile+1];
   end;
 end;
 

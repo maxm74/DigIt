@@ -17,7 +17,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs, ExtCtrls, Menus, ComCtrls,
   ActnList, Spin, ShellCtrls, EditBtn, ExpandPanels, Digit_Bridge, Digit_Taker_Folder,
   FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
-  BGRAImageList, Laz2_XMLCfg, laz.VirtualTrees, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters;
+  BGRAImageList, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters;
 
 type
 
@@ -139,7 +139,6 @@ type
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
-    ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     tbMenu: TToolButton;
     ToolButton6: TToolButton;
@@ -213,6 +212,8 @@ type
     procedure DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
+
+    procedure TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap; var Cancel: Boolean);
     procedure TestClick(Sender: TObject);
     procedure TestRClick(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
@@ -276,7 +277,7 @@ uses
   {$ifopt D+}
   lazlogger,
   {$endif}
-  LCLIntf, DigIt_Form_Templates;
+  LCLIntf, DigIt_Form_Templates, DelphiTwain, DelphiTwain_VCL;
 
 
 { TDigIt_Main }
@@ -437,7 +438,7 @@ var
 
 begin
   try
-    if (takerInst<>nil) then
+    if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
       curImageFile :=takerInst.Take;
       LoadImage(curImageFile);
@@ -446,8 +447,7 @@ begin
       imgManipulation.getAllBitmaps(@SaveCallBack);
       //lvCaptured.EndUpdate;
       XML_SaveWork;
-
-      lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary;
+      UI_FillTaker;
     end;
   finally
   end;
@@ -459,7 +459,7 @@ var
 
 begin
   try
-    if (takerInst<>nil) then
+    if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
       curImageFile :=takerInst.ReTake;
       LoadImage(curImageFile);
@@ -468,6 +468,7 @@ begin
       imgManipulation.getAllBitmaps(@SaveCallBack, 1);
       //lvCaptured.EndUpdate;
       XML_SaveWork;
+      UI_FillTaker;
     end;
   finally
   end;
@@ -937,6 +938,7 @@ begin
     begin
       curImageFile :=takerInst.Preview;
       LoadImage(curImageFile);
+      UI_FillTaker;
     end;
   finally
   end;
@@ -1508,40 +1510,57 @@ begin
    UI_FillBox(imgManipulation.SelectedCropArea);
 end;
 
+procedure TDigIt_Main.TwainTwainAcquire(Sender: TObject; const Index: Integer;
+  Image: TBitmap; var Cancel: Boolean);
+begin
+//  ImageHolder.Picture.Bitmap.Assign(Image);
+  Cancel := True;//Only want one image
+end;
+
 procedure TDigIt_Main.TestClick(Sender: TObject);
 var
-   tt:TFileListItem;
-   itemRect, destRect:TRect;
-   Bitmap, BitmapR :TBGRABitmap;
-   newBitmap:TBitmap;
-   newWidth, newHeight:Integer;
+   Twain: TDelphiTwain=nil;
+   Twain_Source:TTwainSource;
+   Twain_SourceI:Integer;
 
 begin
   try
-  tt :=TFileListItem(lvCaptured.Items.Add);
-  tt.FileName:='c:\Users\Biblioteca Sortino\Downloads\tmp\dest\test0'+IntToStr(testI)+'.jpg';
-(*  Bitmap := TBGRABitmap.Create;
-  Bitmap.LoadFromFile(tt.FileName);
-  GetThumnailSize(imgListThumb.Width, imgListThumb.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
-  destRect.Left:=((imgListThumb.Width-newWidth) div 2);
-  destRect.Top:=((imgListThumb.Height-newHeight) div 2);
-  destRect.Width:=newWidth;
-  destRect.Height:=newHeight;
-  BitmapR :=Bitmap.Resample(newWidth, newHeight);
-  newBitmap:=TBitmap.Create;
-  newBitmap.Width:=newWidth;
-  newBitmap.Height:=newHeight;
-  newBitmap.Masked:=True;
-  BitmapR.Draw(newBitmap.Canvas, destRect, True);
-  tt.ImageIndex :=imgListThumb.Add(newBitmap,nil);
-  *)
-  inc(testI);
-  if (testI=7) then testI:=0;
-  tt.MakeVisible(False);
+    //Create Twain
+    if Twain = nil then
+    begin
+      Twain := TDelphiTwain.Create;
+      Twain.OnTwainAcquire := @TwainTwainAcquire;
+    end;
+
+    //Load Twain Library dynamically
+    if Twain.LoadLibrary then
+    begin
+      //Load source manager
+      Twain.SourceManagerLoaded := TRUE;
+
+      Twain_Source:=TTwainSource.Create(Twain);
+      ReadPersistentFromXMLConfig(XMLWork, 'ScanTest', '', Twain_Source);
+      Twain_SourceI:=Twain.FindSource(Twain_Source);
+      Twain.SelectedSourceIndex:=Twain_SourceI;
+
+      //Allow user to select source -> only the first time
+      if not Assigned(Twain.SelectedSource) then
+        Twain.SelectSource;
+
+      if Assigned(Twain.SelectedSource) then
+      begin
+        //Load source, select transference method and enable (display interface)}
+        Twain.SelectedSource.Loaded := TRUE;
+        //Twain.SelectedSource.ShowUI := TRUE;//display interface
+        Twain.SelectedSource.Enabled := True;
+
+        //s WritePersistentToXMLConfig(XMLWork, 'ScanTest', '', Twain.SelectedSource);
+      end;
+
+    end else begin
+      ShowMessage('Twain is not installed.');
+    end;
   finally
-    //Bitmap.Free;
-    //BitmapR.Free;
-    //newBitmap.Free;
   end;
 end;
 
@@ -1587,7 +1606,7 @@ end;
 procedure TDigIt_Main.UI_FillTaker;
 begin
   actPreview.Enabled:=(takerInst<>nil);
-  actTake.Enabled:=(takerInst<>nil) and DirectoryExists(SavePath);
+  actTake.Enabled:=(takerInst<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
   actReTake.Enabled:=actTake.Enabled;
   if (takerInst<>nil)
   then lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary

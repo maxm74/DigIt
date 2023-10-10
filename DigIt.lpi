@@ -26,6 +26,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../../Packages/DelphiTwain/units"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
           </SearchPaths>
           <BuildMacros>
@@ -84,7 +85,7 @@
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="7">
       <Item1>
         <PackageName Value="DelphiTwain"/>
       </Item1>
@@ -95,22 +96,19 @@
         <PackageName Value="LazControlDsgn"/>
       </Item3>
       <Item4>
-        <PackageName Value="laz.virtualtreeview_package"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item4>
       <Item5>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="bgracontrols"/>
       </Item5>
       <Item6>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="Pexpandpanels"/>
       </Item6>
       <Item7>
-        <PackageName Value="Pexpandpanels"/>
-      </Item7>
-      <Item8>
         <PackageName Value="LCL"/>
-      </Item8>
+      </Item7>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -163,6 +161,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_Form_Templates"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="../../Packages/DelphiTwain/units/DelphiTwain_VCL.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -172,7 +174,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="/home/maxm/Programming/Lazarus/Common"/>
+      <OtherUnitFiles Value="/home/maxm/Programming/Lazarus/Common;../../Packages/DelphiTwain/units"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
     </SearchPaths>
     <Parsing>

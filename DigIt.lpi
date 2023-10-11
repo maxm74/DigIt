@@ -26,7 +26,6 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../Packages/DelphiTwain/units"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
           </SearchPaths>
           <BuildMacros>
@@ -87,7 +86,7 @@
     </RunParams>
     <RequiredPackages Count="7">
       <Item1>
-        <PackageName Value="DelphiTwain"/>
+        <PackageName Value="DelphiTwain_pkg"/>
       </Item1>
       <Item2>
         <PackageName Value="LazControls"/>
@@ -108,7 +107,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="10">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -161,10 +160,6 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_Form_Templates"/>
       </Unit9>
-      <Unit10>
-        <Filename Value="../../Packages/DelphiTwain/units/DelphiTwain_VCL.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -174,7 +169,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="/home/maxm/Programming/Lazarus/Common;../../Packages/DelphiTwain/units"/>
+      <OtherUnitFiles Value="/home/maxm/Programming/Lazarus/Common"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
     </SearchPaths>
     <Parsing>

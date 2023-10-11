@@ -14,17 +14,24 @@ unit Digit_Taker_Twain;
 interface
 
 uses
-  Classes, SysUtils, Digit_Bridge, Twain;
+  Classes, SysUtils, Digit_Bridge, Twain, DelphiTwain, DelphiTwain_VCL;
 
 type
 
   { TDigIt_Taker_Twain }
   TDigIt_Taker_Twain = class(TDigIt_Taker)
+  private
+    rTwain:TDelphiTwain;
+    rTwain_SourceI:Integer;
+    i:Integer;
   protected
-    xFiles :TStringList; //A Citation
-    lastFile :Integer;
-    lastFolder:String;
 
+    function getTwain: TDelphiTwain;
+    procedure FreeTwain;
+    procedure SetTwainTranferMode;
+   // procedure TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap; var Cancel: Boolean);
+
+    property Twain: TDelphiTwain read getTwain;
   public
     constructor Create(aParams :TPersistent); override;
     destructor Destroy; override;
@@ -42,26 +49,64 @@ type
     function ReTake: String; override;
   end;
 
-  TDigIt_Taker_TwainParams = class(TPersistent)
-  protected
-    rLastSource :TW_IDENTITY;
-
-  published
+  { #todo 10 -oMaxM : Use a clean class not derived to store only necessary info for search scanner }
+  TDigIt_Taker_TwainParams = class(TTwainSource)
   end;
 
 implementation
 
-uses Dialogs, DelphiTwain, BGRABitmapTypes;
+uses Digit_Types, Dialogs, BGRABitmapTypes;
 
 { TDigIt_Taker_Twain }
+
+function TDigIt_Taker_Twain.getTwain: TDelphiTwain;
+begin
+  //Create Twain
+  if (rTwain = nil) then
+  begin
+    rTwain := TDelphiTwain.Create;
+   // rTwain.OnTwainAcquire := @TwainTwainAcquire;
+
+    //Load Twain Library dynamically
+    rTwain.LoadLibrary;
+  end;
+
+  Result :=rTwain;
+end;
+
+procedure TDigIt_Taker_Twain.FreeTwain;
+begin
+  if (rTwain<>nil)
+  then rTwain.Free;
+end;
+
+procedure TDigIt_Taker_Twain.SetTwainTranferMode;
+begin
+end;
+
+(*
+procedure TDigIt_Taker_Twain.TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap;
+  var Cancel: Boolean);
+begin
+  //  ImageHolder.Picture.Bitmap.Assign(Image);
+    Cancel := True;//Only want one image
+end;
+*)
 
 constructor TDigIt_Taker_Twain.Create(aParams: TPersistent);
 begin
   inherited Create(aParams);
+  rTwain:=nil;
 end;
 
 destructor TDigIt_Taker_Twain.Destroy;
 begin
+  FreeTwain;
+
+  //Delete previous scanned file
+  if FileExists(TempDir+'twain_'+IntToStr(i-1)+'.bmp')
+  then DeleteFile(TempDir+'twain_'+IntToStr(i-1)+'.bmp');
+
   inherited Destroy;
 end;
 
@@ -92,14 +137,39 @@ end;
 
 function TDigIt_Taker_Twain.Preview: String;
 begin
+  try
+     Result :=Take;
+  finally
+  end;
 end;
 
 function TDigIt_Taker_Twain.Take: String;
 begin
+  try
+     Result :='';
+
+     //Delete previous scanned file
+     if FileExists(TempDir+'twain_'+IntToStr(i-1)+'.bmp')
+     then DeleteFile(TempDir+'twain_'+IntToStr(i-1)+'.bmp');
+
+     if Assigned(Twain.SelectedSource) then
+     begin
+       Twain.SelectedSource.Loaded := TRUE;
+       Twain.SelectedSource.ShowUI := False;//display interface
+       Twain.SelectedSource.Modal:=False;
+       Twain.SelectedSource.TransferMode:=ttmFile;
+       Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(i)+'.bmp', tfBMP);
+       Twain.SelectedSource.EnableSource(False, True);
+       Result :=TempDir+'twain_'+IntToStr(i)+'.bmp';
+       Inc(i);
+     end;
+  finally
+  end;
 end;
 
 function TDigIt_Taker_Twain.ReTake: String;
 begin
+  Result :=Take;
 end;
 
 function TDigIt_Taker_Twain.Params_GetFromUser: Boolean;
@@ -107,9 +177,12 @@ begin
   Result :=False;
   if (rParams=nil) then exit;
   try
-     with TDigIt_Taker_TwainParams(rParams) do
-     begin
-     end;
+     //Load source manager
+     Twain.SourceManagerLoaded :=True;
+     Twain.SelectSource;
+     Result :=Assigned(Twain.SelectedSource);
+     if Result
+     then rParams :=Twain.SelectedSource;
   finally
   end;
 end;
@@ -117,10 +190,21 @@ end;
 procedure TDigIt_Taker_Twain.Params_Set(newParams: TPersistent);
 begin
   rParams :=newParams;
+  Twain.SourceManagerLoaded :=True;
+  rTwain_SourceI:=Twain.FindSource(TDigIt_Taker_TwainParams(rParams));
+  if (rTwain_SourceI=-1)
+  then begin
+         { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
+         Twain.SelectSource;
+       end
+  else Twain.SelectedSourceIndex:=rTwain_SourceI;
+
+  if Assigned(Twain.SelectedSource)
+  then rParams :=Twain.SelectedSource;
 end;
 
 initialization
-  //theBridge.Takers.Register(TDigIt_Taker_Twain.RegisterName, TDigIt_Taker_Twain);
+  theBridge.Takers.Register(TDigIt_Taker_Twain.RegisterName, TDigIt_Taker_Twain);
 
 end.
 

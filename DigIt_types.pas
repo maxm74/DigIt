@@ -37,7 +37,8 @@ const
   XMLWork_Captured='CapturedFile/';
 
 var
-   ConfigDir:String;
+   ConfigDir,
+   TempDir:String;
 
 implementation
 
@@ -58,8 +59,9 @@ end;
 
 initialization
    ConfigDir :=GetAppConfigDir(False);
+   TempDir :=GetTempDir(False)+'DigIt'+DirectorySeparator;
    ForceDirectories(ConfigDir);
-
+   ForceDirectories(TempDir);
 
 end.
 

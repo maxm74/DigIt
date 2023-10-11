@@ -144,13 +144,13 @@ type
     ToolButton6: TToolButton;
     tbPreview: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
-    procedure actPreviewExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
     procedure actProjectSaveAsExecute(Sender: TObject);
     procedure actProjectSaveExecute(Sender: TObject);
     procedure actRotateLeftExecute(Sender: TObject);
     procedure actRotateRightExecute(Sender: TObject);
+    procedure actPreviewExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
     procedure actReTakeExecute(Sender: TObject);
     procedure btCFlipHLeftClick(Sender: TObject);
@@ -259,6 +259,8 @@ type
     procedure Taker_SelectUserParams(curClass :TDigIt_TakerClasses);
     procedure Taker_SelectWithParams(curClass :TDigIt_TakerClasses; curParams:TPersistent);
     procedure setProject_File(AValue: String);
+
+    procedure WaitForAFile(AFileName: String; ATimeOut: Integer);
 
     property Project_File:String read rProject_File write setProject_File;
   public
@@ -432,6 +434,26 @@ begin
        end;
 end;
 
+procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
+var
+  curImageFile:String;
+
+begin
+  try
+    if (takerInst<>nil) then
+    begin
+      curImageFile :=takerInst.Preview;
+      if (curImageFile<>'') then
+      begin
+        WaitForAFile(curImageFile, 30000);
+        LoadImage(curImageFile);
+      end;
+      UI_FillTaker;
+    end;
+  finally
+  end;
+end;
+
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
   curImageFile:String;
@@ -441,12 +463,16 @@ begin
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
       curImageFile :=takerInst.Take;
-      LoadImage(curImageFile);
-      Counters.CopyValuesToPrevious;
-      //lvCaptured.BeginUpdate;
-      imgManipulation.getAllBitmaps(@SaveCallBack);
-      //lvCaptured.EndUpdate;
-      XML_SaveWork;
+      if (curImageFile<>'') then
+      begin
+        WaitForAFile(curImageFile, 30000);
+        LoadImage(curImageFile);
+        Counters.CopyValuesToPrevious;
+        //lvCaptured.BeginUpdate;
+        imgManipulation.getAllBitmaps(@SaveCallBack);
+        //lvCaptured.EndUpdate;
+        XML_SaveWork;
+      end;
       UI_FillTaker;
     end;
   finally
@@ -462,12 +488,16 @@ begin
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
       curImageFile :=takerInst.ReTake;
-      LoadImage(curImageFile);
-      Counters.CopyPreviousToValues;
-      //lvCaptured.BeginUpdate;
-      imgManipulation.getAllBitmaps(@SaveCallBack, 1);
-      //lvCaptured.EndUpdate;
-      XML_SaveWork;
+      if (curImageFile<>'') then
+      begin
+        WaitForAFile(curImageFile, 30000);
+        LoadImage(curImageFile);
+        Counters.CopyPreviousToValues;
+        //lvCaptured.BeginUpdate;
+        imgManipulation.getAllBitmaps(@SaveCallBack, 1);
+        //lvCaptured.EndUpdate;
+        XML_SaveWork;
+      end;
       UI_FillTaker;
     end;
   finally
@@ -928,22 +958,6 @@ begin
   //
 end;
 
-procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
-var
-  curImageFile:String;
-
-begin
-  try
-    if (takerInst<>nil) then
-    begin
-      curImageFile :=takerInst.Preview;
-      LoadImage(curImageFile);
-      UI_FillTaker;
-    end;
-  finally
-  end;
-end;
-
 procedure TDigIt_Main.actProjectNewExecute(Sender: TObject);
 begin
   try
@@ -1170,6 +1184,7 @@ begin
      XMLWork.SetValue('Format', SaveExt);
      XMLWork.SetValue('Destination', SavePath);
      WritePersistentToXMLConfig(XMLWork, 'Params', '', takerInst.Params_Get);
+
      Counters.Save(XMLWork, True);
      XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
      imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
@@ -1538,10 +1553,10 @@ begin
       //Load source manager
       Twain.SourceManagerLoaded := TRUE;
 
-      Twain_Source:=TTwainSource.Create(Twain);
+    (*  Twain_Source:=TTwainSource.Create(Twain);
       ReadPersistentFromXMLConfig(XMLWork, 'ScanTest', '', Twain_Source);
       Twain_SourceI:=Twain.FindSource(Twain_Source);
-      Twain.SelectedSourceIndex:=Twain_SourceI;
+      Twain.SelectedSourceIndex:=Twain_SourceI;  *)
 
       //Allow user to select source -> only the first time
       if not Assigned(Twain.SelectedSource) then
@@ -1554,7 +1569,7 @@ begin
         //Twain.SelectedSource.ShowUI := TRUE;//display interface
         Twain.SelectedSource.Enabled := True;
 
-        //s WritePersistentToXMLConfig(XMLWork, 'ScanTest', '', Twain.SelectedSource);
+        WritePersistentToXMLConfig(XMLWork, 'ScanTest', '', Twain.SelectedSource);
       end;
 
     end else begin
@@ -1587,6 +1602,20 @@ begin
   if (rProject_File='')
   then Caption :='DigIt'
   else Caption :='DigIt'+' - '+ExtractFileName(rProject_File);
+end;
+
+procedure TDigIt_Main.WaitForAFile(AFileName:String; ATimeOut: Integer);
+var
+   timeStart, timeCur:DWord;
+
+begin
+  if (AFileName='') then exit;
+
+  timeStart :=GetTickCount;
+  repeat
+    Application.ProcessMessages;
+    timeCur :=GetTickCount;
+  until FileExists(AFileName) or ((timeCur-timeStart)>=ATimeOut);
 end;
 
 function TDigIt_Main.GetCurrentCropArea: TCropArea;

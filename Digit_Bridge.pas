@@ -89,11 +89,10 @@ constructor TDigIt_Taker.Create(aParams: TPersistent);
 begin
   inherited Create;
   if (aParams=nil)
-  then begin
-         if assigned(Self.Params_GetClass)
-         then rParams :=Self.Params_GetClass.Create;
-       end
+  then rParams :=Self.Params_GetClass.Create
   else rParams :=aParams;
+
+  Self.Params_Set(rParams);
 end;
 
 destructor TDigIt_Taker.Destroy;

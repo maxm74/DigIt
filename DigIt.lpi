@@ -59,6 +59,11 @@
               </Win32>
             </Options>
           </Linking>
+          <Other>
+            <ConfigFile>
+              <WriteConfigFilePath Value="$(ProjOutDir)/fpclaz.cfg"/>
+            </ConfigFile>
+          </Other>
         </CompilerOptions>
       </Item2>
     </BuildModes>
@@ -107,7 +112,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -160,6 +165,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_Form_Templates"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="digit_taker_twain_types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Taker_Twain_Types"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -197,6 +207,11 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <ConfigFile>
+        <WriteConfigFilePath Value="$(ProjOutDir)/fpclaz.cfg"/>
+      </ConfigFile>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="5">

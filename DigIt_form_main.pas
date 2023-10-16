@@ -1569,7 +1569,7 @@ begin
         //Twain.SelectedSource.ShowUI := TRUE;//display interface
         Twain.SelectedSource.Enabled := True;
 
-        WritePersistentToXMLConfig(XMLWork, 'ScanTest', '', Twain.SelectedSource);
+//        WritePersistentToXMLConfig(XMLWork, 'ScanTest', '', Twain.SelectedSource);
       end;
 
     end else begin

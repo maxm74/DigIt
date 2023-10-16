@@ -6,13 +6,13 @@ object DigIt_Main: TDigIt_Main
   Caption = 'DigIt'
   ClientHeight = 749
   ClientWidth = 1024
+  LCLVersion = '3.99.0.0'
+  WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  LCLVersion = '3.99.0.0'
-  WindowState = wsMaximized
   object tbMain: TToolBar
     Left = 0
     Height = 48
@@ -140,9 +140,9 @@ object DigIt_Main: TDigIt_Main
         Width = 180
         Anchors = [akTop, akRight]
         ItemHeight = 15
-        OnChange = cbSaveFormatChange
         Style = csDropDownList
         TabOrder = 1
+        OnChange = cbSaveFormatChange
       end
     end
     object ToolButton6: TToolButton
@@ -189,9 +189,9 @@ object DigIt_Main: TDigIt_Main
       Top = 123
       Width = 125
       ItemHeight = 15
-      OnChange = cbBoxListChange
       Style = csDropDownList
       TabOrder = 0
+      OnChange = cbBoxListChange
     end
     object btBox_Add: TBGRASpeedButton
       Left = 159
@@ -201,9 +201,9 @@ object DigIt_Main: TDigIt_Main
       Width = 23
       Caption = '+'
       Flat = True
-      OnClick = btBox_AddClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = btBox_AddClick
     end
     object btBox_Del: TBGRASpeedButton
       Left = 182
@@ -213,9 +213,9 @@ object DigIt_Main: TDigIt_Main
       Width = 23
       Caption = '-'
       Flat = True
-      OnClick = btBox_DelClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = btBox_DelClick
     end
     object panelCropArea: TBCPanel
       Left = 28
@@ -400,10 +400,10 @@ object DigIt_Main: TDigIt_Main
           'inchs'
           'cm'
         )
-        OnChange = edCropUnit_TypeChange
         Style = csDropDownList
         TabOrder = 0
         Text = 'pixels'
+        OnChange = edCropUnit_TypeChange
       end
       object BCLabel5: TBCLabel
         Left = 14
@@ -478,8 +478,8 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         AutoSize = False
         AutoSelect = False
-        OnEditingDone = edCropNameEditingDone
         TabOrder = 1
+        OnEditingDone = edCropNameEditingDone
       end
       object rgCropAspect: TRadioGroup
         Left = 28
@@ -503,8 +503,8 @@ object DigIt_Main: TDigIt_Main
           'Free'
           'Personal'
         )
-        OnSelectionChanged = rgCropAspectSelectionChanged
         TabOrder = 2
+        OnSelectionChanged = rgCropAspectSelectionChanged
       end
       object edCropLeft: TFloatSpinEdit
         Left = 45
@@ -513,10 +513,10 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         Font.Color = clWindowText
         Font.Name = 'Arial'
-        OnChange = edCropLeftChange
         ParentFont = False
         TabOrder = 3
         Value = 50
+        OnChange = edCropLeftChange
       end
       object edCropTop: TFloatSpinEdit
         Left = 45
@@ -525,10 +525,10 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         Font.Color = clWindowText
         Font.Name = 'Arial'
-        OnChange = edCropTopChange
         ParentFont = False
         TabOrder = 4
         Value = 50
+        OnChange = edCropTopChange
       end
       object edCropWidth: TFloatSpinEdit
         Left = 45
@@ -537,10 +537,10 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         Font.Color = clWindowText
         Font.Name = 'Arial'
-        OnChange = edCropWidthChange
         ParentFont = False
         TabOrder = 5
         Value = 50
+        OnChange = edCropWidthChange
       end
       object edCropHeight: TFloatSpinEdit
         Left = 45
@@ -549,10 +549,10 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         Font.Color = clWindowText
         Font.Name = 'Arial'
-        OnChange = edCropHeightChange
         ParentFont = False
         TabOrder = 6
         Value = 50
+        OnChange = edCropHeightChange
       end
       object Label2: TLabel
         Left = 7
@@ -603,9 +603,9 @@ object DigIt_Main: TDigIt_Main
           001B0000000000000000008C001D028E037B0B950FC109920AF0069108EE0491
           07BD018D0180008C002500000000000000000000000000000000
         }
-        OnClick = btCRotateLeftClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCRotateLeftClick
       end
       object btCRotateRight: TSpeedButton
         Left = 75
@@ -649,9 +649,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00008C0025018D0180049107BD069108EE09920AF00B95
           0FC1028E037B008C001DFFFFFF00FFFFFF00008C001B008C0019
         }
-        OnClick = btCRotateRightClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCRotateRightClick
       end
       object Label3: TLabel
         Left = 21
@@ -702,9 +702,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btCFlipVUpClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCFlipVUpClick
       end
       object btCFlipVDown: TSpeedButton
         Left = 75
@@ -748,9 +748,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btCFlipVDownClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCFlipVDownClick
       end
       object btCFlipHLeft: TSpeedButton
         Left = 98
@@ -794,9 +794,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btCFlipHLeftClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCFlipHLeftClick
       end
       object btCFlipHRight: TSpeedButton
         Left = 122
@@ -840,9 +840,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btCFlipHRightClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCFlipHRightClick
       end
       object Label1: TLabel
         Left = 0
@@ -893,9 +893,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btZFrontClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btZFrontClick
       end
       object btZBack: TSpeedButton
         Left = 74
@@ -939,9 +939,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btZBackClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btZBackClick
       end
       object btZUp: TSpeedButton
         Left = 98
@@ -985,9 +985,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btZUpClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btZUpClick
       end
       object btZDown: TSpeedButton
         Left = 122
@@ -1031,9 +1031,9 @@ object DigIt_Main: TDigIt_Main
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        OnClick = btZDownClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btZDownClick
       end
       object cbCropCounterList: TComboBox
         Left = 3
@@ -1041,9 +1041,9 @@ object DigIt_Main: TDigIt_Main
         Top = 333
         Width = 125
         ItemHeight = 15
-        OnChange = cbCropCounterListChange
         Style = csDropDownList
         TabOrder = 7
+        OnChange = cbCropCounterListChange
       end
       object btCropCounter_Add: TBGRASpeedButton
         Left = 127
@@ -1053,9 +1053,9 @@ object DigIt_Main: TDigIt_Main
         Width = 20
         Caption = '+'
         Flat = True
-        OnClick = btCropCounter_AddClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCropCounter_AddClick
       end
       object btCropCounter_Del: TBGRASpeedButton
         Left = 151
@@ -1065,9 +1065,9 @@ object DigIt_Main: TDigIt_Main
         Width = 20
         Caption = '-'
         Flat = True
-        OnClick = btCropCounter_DelClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = btCropCounter_DelClick
       end
       object Label5: TLabel
         Left = 6
@@ -1123,9 +1123,9 @@ object DigIt_Main: TDigIt_Main
         }
         MaxLength = 0
         NumGlyphs = 1
-        OnButtonClick = btCropApplyAspectRatioClick
         PasswordChar = #0
         TabOrder = 8
+        OnButtonClick = btCropApplyAspectRatioClick
       end
       object btPaperSizes: TSpeedButton
         Left = 148
@@ -1159,10 +1159,10 @@ object DigIt_Main: TDigIt_Main
       Width = 23
       Flat = True
       ImageIndex = 6
-      OnClick = btCropDuplicateClick
       ShowCaption = False
       ShowHint = True
       ParentShowHint = False
+      OnClick = btCropDuplicateClick
     end
     object Label7: TLabel
       Left = 29
@@ -1196,10 +1196,10 @@ object DigIt_Main: TDigIt_Main
         'inchs'
         'cm'
       )
-      OnChange = edPage_UnitTypeChange
       Style = csDropDownList
       TabOrder = 2
       Text = 'not defined'
+      OnChange = edPage_UnitTypeChange
     end
     object panelPageSize: TBCPanel
       Left = 29
@@ -1279,10 +1279,10 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         Font.Color = clWindowText
         Font.Name = 'Arial'
-        OnChange = edPageWidthChange
         ParentFont = False
         TabOrder = 0
         Value = 21
+        OnChange = edPageWidthChange
       end
       object btPageSizes: TSpeedButton
         Left = 147
@@ -1300,10 +1300,10 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         Font.Color = clWindowText
         Font.Name = 'Arial'
-        OnChange = edPageHeightChange
         ParentFont = False
         TabOrder = 1
         Value = 29.7
+        OnChange = edPageHeightChange
       end
       object BCLabel11: TBCLabel
         Left = 0
@@ -1478,9 +1478,9 @@ object DigIt_Main: TDigIt_Main
       Top = 0
       Width = 125
       ItemHeight = 15
-      OnChange = cbCounterListChange
       Style = csDropDownList
       TabOrder = 0
+      OnChange = cbCounterListChange
     end
     object btCounter_Add: TBGRASpeedButton
       Left = 158
@@ -1490,9 +1490,9 @@ object DigIt_Main: TDigIt_Main
       Width = 23
       Caption = '+'
       Flat = True
-      OnClick = btCounter_AddClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = btCounter_AddClick
     end
     object btCounter_Del: TBGRASpeedButton
       Left = 177
@@ -1502,9 +1502,9 @@ object DigIt_Main: TDigIt_Main
       Width = 23
       Caption = '-'
       Flat = True
-      OnClick = btCounter_DelClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = btCounter_DelClick
     end
     object panelCounter: TBCPanel
       Left = 27
@@ -1617,8 +1617,8 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         AutoSize = False
         AutoSelect = False
-        OnEditingDone = edCounterNameEditingDone
         TabOrder = 0
+        OnEditingDone = edCounterNameEditingDone
       end
       object BCLabel13: TBCLabel
         Left = 2
@@ -1660,8 +1660,8 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         AutoSize = False
         AutoSelect = False
-        OnEditingDone = edCounterValueStringPreEditingDone
         TabOrder = 1
+        OnEditingDone = edCounterValueStringPreEditingDone
       end
       object BCLabel14: TBCLabel
         Left = 10
@@ -1703,8 +1703,8 @@ object DigIt_Main: TDigIt_Main
         Width = 103
         AutoSize = False
         AutoSelect = False
-        OnEditingDone = edCounterValueStringPostEditingDone
         TabOrder = 2
+        OnEditingDone = edCounterValueStringPostEditingDone
       end
       object Label4: TLabel
         Left = 8
@@ -1762,10 +1762,10 @@ object DigIt_Main: TDigIt_Main
         Font.Name = 'Arial'
         MaxValue = 255
         MinValue = 2
-        OnChange = edCounterValueStringDigitsChange
         ParentFont = False
         TabOrder = 3
         Value = 4
+        OnChange = edCounterValueStringDigitsChange
       end
       object edCounterValue: TSpinEdit
         Left = 45
@@ -1776,10 +1776,10 @@ object DigIt_Main: TDigIt_Main
         Font.Name = 'Arial'
         MaxValue = -1
         MinValue = -1
-        OnChange = edCounterValueChange
         ParentFont = False
         TabOrder = 4
         Value = -1
+        OnChange = edCounterValueChange
       end
       object lbPrevious: TLabel
         Left = 7
@@ -2271,22 +2271,22 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Preview (&F2)'
       Enabled = False
       ImageIndex = 8
-      OnExecute = actPreviewExecute
       ShortCut = 113
+      OnExecute = actPreviewExecute
     end
     object actTake: TAction
       Caption = 'Take (&F4)'
       Enabled = False
       ImageIndex = 0
-      OnExecute = actTakeExecute
       ShortCut = 115
+      OnExecute = actTakeExecute
     end
     object actReTake: TAction
       Caption = 'Re-Take (&F5)'
       Enabled = False
       ImageIndex = 1
-      OnExecute = actReTakeExecute
       ShortCut = 116
+      OnExecute = actReTakeExecute
     end
     object actProjectNew: TAction
       Caption = 'New Project ...'

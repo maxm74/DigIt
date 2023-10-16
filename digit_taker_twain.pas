@@ -4,7 +4,7 @@
 **          (s) 2023 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Folder Taker                                                             **
+**   Twain Taker                                                             **
 *******************************************************************************)
 
 unit Digit_Taker_Twain;
@@ -14,10 +14,10 @@ unit Digit_Taker_Twain;
 interface
 
 uses
-  Classes, SysUtils, Digit_Bridge, Twain, DelphiTwain, DelphiTwain_VCL;
+  Classes, SysUtils, Digit_Bridge, Digit_Taker_Twain_Types,
+  Twain, DelphiTwain, DelphiTwain_VCL;
 
 type
-
   { TDigIt_Taker_Twain }
   TDigIt_Taker_Twain = class(TDigIt_Taker)
   private
@@ -47,10 +47,6 @@ type
     function Preview: String; override;
     function Take: String; override;
     function ReTake: String; override;
-  end;
-
-  { #todo 10 -oMaxM : Use a clean class not derived to store only necessary info for search scanner }
-  TDigIt_Taker_TwainParams = class(TTwainSource)
   end;
 
 implementation
@@ -95,8 +91,8 @@ end;
 
 constructor TDigIt_Taker_Twain.Create(aParams: TPersistent);
 begin
-  inherited Create(aParams);
   rTwain:=nil;
+  inherited Create(aParams);
 end;
 
 destructor TDigIt_Taker_Twain.Destroy;
@@ -179,10 +175,17 @@ begin
   try
      //Load source manager
      Twain.SourceManagerLoaded :=True;
-     Twain.SelectSource;
+     Twain.SelectSource;  { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
      Result :=Assigned(Twain.SelectedSource);
-     if Result
-     then rParams :=Twain.SelectedSource;
+
+     if Result then
+     with TDigIt_Taker_TwainParams(rParams) do
+     begin
+       IPC_Scanner:=False;
+       Manufacturer :=Twain.SelectedSource.Manufacturer;
+       ProductFamily :=Twain.SelectedSource.ProductFamily;
+       ProductName :=Twain.SelectedSource.ProductName;
+     end;
   finally
   end;
 end;
@@ -191,16 +194,25 @@ procedure TDigIt_Taker_Twain.Params_Set(newParams: TPersistent);
 begin
   rParams :=newParams;
   Twain.SourceManagerLoaded :=True;
-  rTwain_SourceI:=Twain.FindSource(TDigIt_Taker_TwainParams(rParams));
-  if (rTwain_SourceI=-1)
-  then begin
-         { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
-         Twain.SelectSource;
-       end
-  else Twain.SelectedSourceIndex:=rTwain_SourceI;
+  with TDigIt_Taker_TwainParams(rParams) do
+  begin
+    { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
+    rTwain_SourceI:=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
 
-  if Assigned(Twain.SelectedSource)
-  then rParams :=Twain.SelectedSource;
+    if (rTwain_SourceI=-1)
+    then begin
+           { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
+           Twain.SelectSource;
+         end
+    else Twain.SelectedSourceIndex:=rTwain_SourceI;
+
+    if Assigned(Twain.SelectedSource) then
+    begin
+      Manufacturer :=Twain.SelectedSource.Manufacturer;
+      ProductFamily :=Twain.SelectedSource.ProductFamily;
+      ProductName :=Twain.SelectedSource.ProductName;
+    end;
+  end;
 end;
 
 initialization

@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, simpleipc;
 
 const
-  mtSync_ResultServerID = 2;  // {GUID}AMsgID
+  //mtSync_ResultServerID = 2;  // {GUID}AMsgID
   mtSync_Integer = 3;
   mtSync_Stream = 4;
   mtSync_String = 5;
@@ -21,7 +21,6 @@ type
   TSyncIPCServer = class(TSimpleIPCServer)
   private
     resultClient:TSimpleIPCClient;
-    curMsgID:Integer;
 
   protected
     procedure InternalMessageRecevied(Sender: TObject);
@@ -31,6 +30,8 @@ type
     function MessageResult(const ResultString:String):Boolean; overload;
     function MessageResult(const Buffer; Count: LongInt):Boolean; overload;
 
+    //Derived Classes must implement this methods using MessageResult to send back the Result
+    function MessageReceived(AMsgID:Integer; AInteger:Integer):Boolean; virtual; overload;
     function MessageReceived(AMsgID:Integer; AStream:TStream):Boolean; virtual; overload;
     function MessageReceived(AMsgID:Integer; const Msg: String):Boolean; virtual; overload;
     function MessageReceived(AMsgID:Integer; const Buffer; Count: LongInt):Boolean; virtual; overload;
@@ -45,55 +46,49 @@ type
   protected
     resultServer:TSimpleIPCServer;
 
-    function preSendSyncMessage(AMsgID:Integer): Boolean;
+    function preSendSyncMessage(var MsgStream: TMemoryStream; AMsgID:Integer): Boolean;
     procedure postSendSyncMessage;
-
-  public
     function SendSyncMessage(ATimeOut:Integer; AMsgID:Integer;
                              AStream:TStream; ResultStream:TStream;
                              MsgType: TMessageType=mtSync_Stream):TMessageType; overload;
-    function SendSyncMessage(ATimeOut:Integer; AMsgID:Integer;
-                             const Msg: String; var ResultString:String):Boolean; overload;
-    function SendSyncMessage(ATimeOut:Integer; AMsgID:Integer;
-                             const Buffer; Count: LongInt;
-                             var ADataPointer:Pointer; var ADataSize:Longint):Boolean; overload;
 
+  public
+    function SendSyncMessage(ATimeOut:Integer; AMsgID:Integer;
+                             const Msg: String; var ResultString:String):TMessageType; overload;
+
+// AData depends on the type of Result:
+//        mtSync_Integer -> An Integer
+//        mtSync_Stream  -> A Stream, if AData initially is nil then a new TMemoryStream is returned (user must free it)
+//                                    else the result is appended in AData Stream.
+//        mtSync_String  -> A String
+//        mtSync_Buffer  -> A Pointer, if AData initially is nil then a new Pointer with Size=Result Size is allocated
+//                                     else the Data is copied in user AData (there must be sufficient space)
+    function SendSyncMessage(ATimeOut:Integer; AMsgID:Integer; MsgDataType:TMessageType;
+                             const Buffer; Count: LongInt;
+                             var AData; var ADataSize:Longint):TMessageType; overload;
   end;
 
-function DataPointerToStream(const Buffer; Count: LongInt):TMemoryStream;
-procedure StreamToDataPointer(AStream:TMemoryStream; var Buffer:Pointer; var ADataSize:Longint);
-
 implementation
-
-function DataPointerToStream(const Buffer; Count: LongInt): TMemoryStream;
-begin
-  Result:=TMemoryStream.Create;
-  Result.Write(Buffer, Count);
-end;
-
-procedure StreamToDataPointer(AStream: TMemoryStream; var Buffer:Pointer; var ADataSize: Longint);
-begin
-  AStream.Position:=0;
-  ADataSize:=AStream.Size;
-  Buffer:=AStream.Memory;
-end;
 
 { TSyncIPCServer }
 
 procedure TSyncIPCServer.InternalMessageRecevied(Sender: TObject);
 var
-  posGraf :Integer;
+  posGraf, curMsgID, msgInteger:Integer;
   curMsgType:TMessageType;
   resultServerID, strMsg:String;
-  curBuffer:TMemoryStream;
+  msgStream:TMemoryStream;
   AResult:Boolean;
 
 begin
   ReadMessage;
   curMsgType :=Self.MsgType;
-  if (curMsgType=mtSync_ResultServerID) then
+  if (curMsgType in [mtSync_Integer..mtSync_Buffer]) then
   begin
-    strMsg:=Self.StringMessage;
+    msgStream:=TMemoryStream(Self.MsgData);
+    msgStream.Position:=0;
+    strMsg:=msgStream.ReadAnsiString;
+    msgStream.ReadData(curMsgID);
 
     FreeAndNil(resultClient);
 
@@ -105,50 +100,50 @@ begin
         resultServerID :=Copy(strMsg, 1, posGraf);
         if (resultServerID<>'') then
         try
-          curMsgID :=StrToInt(Copy(strMsg, posGraf+1, 255));
-
-          curBuffer:=nil;
           resultClient:=TSimpleIPCClient.Create(Nil);
           resultClient.ServerID:=resultServerID;
           resultClient.Connect;
-        except
+
+          if resultClient.ServerRunning then
+          begin
+             Case curMsgType of
+             mtSync_Integer: begin
+               msgStream.ReadData(msgInteger);
+               AResult :=MessageReceived(curMsgID, msgInteger);
+             end;
+             mtSync_Stream: AResult :=MessageReceived(curMsgID, msgStream);
+             mtSync_String: AResult :=MessageReceived(curMsgID, msgStream.ReadAnsiString);
+             mtSync_Buffer: AResult :=MessageReceived(curMsgID, msgStream.Memory, msgStream.Size-msgStream.Position);
+             end;
+
+             //Send something to avoid TimeOut
+             if not(AResult) then MessageResult(0);
+           end;
+
+        finally
+          //if (msgStream<>nil) then msgStream.Free;
           FreeAndNil(resultClient);
         end;
       end;
      end;
-   end
-   else if (resultClient<>nil) and resultClient.ServerRunning then
-        try
-            Case curMsgType of
-            mtSync_Stream: begin
-                             curBuffer:=TMemoryStream.Create;
-                             Self.GetMessageData(curBuffer);
-                             curBuffer.Position:=0;
-                             AResult :=MessageReceived(curMsgID, curBuffer);
-                           end;
-            mtSync_String: AResult :=MessageReceived(curMsgID, Self.StringMessage);
-            mtSync_Buffer: begin
-                             curBuffer:=TMemoryStream.Create;
-                             Self.GetMessageData(curBuffer);
-                             curBuffer.Position:=0;
-                             AResult :=MessageReceived(curMsgID, curBuffer.Memory, curBuffer.Size);
-                           end;
-            end;
-
-            if not(AResult)
-            then resultClient.SendStringMessage(mtSync_Integer, '0');
-
-          finally
-            if (curBuffer<>nil) then curBuffer.Free;
-            FreeAndNil(resultClient);
-          end;
+   end;
 end;
 
 function TSyncIPCServer.MessageResult(ResultInteger: Integer): Boolean;
+var
+   curResBuffer:TMemoryStream;
+
 begin
-  Result:=False;
-  resultClient.SendStringMessage(mtSync_Integer, IntToStr(ResultInteger));
-  Result:=True;
+  try
+     Result:=False;
+     curResBuffer:=TMemoryStream.Create;
+     curResBuffer.WriteData(ResultInteger);
+     resultClient.SendMessage(mtSync_Integer, curResBuffer);
+     Result:=True;
+
+  finally
+    curResBuffer.Free;  //Client Free the Stream ??
+  end;
 end;
 
 function TSyncIPCServer.MessageResult(ResultStream: TStream): Boolean;
@@ -159,10 +154,20 @@ begin
 end;
 
 function TSyncIPCServer.MessageResult(const ResultString: String): Boolean;
+var
+   curResBuffer:TMemoryStream;
+
 begin
-  Result:=False;
-  resultClient.SendStringMessage(mtSync_String, ResultString);
-  Result:=True;
+  try
+     Result:=False;
+     curResBuffer:=TMemoryStream.Create;
+     curResBuffer.WriteAnsiString(ResultString);
+     resultClient.SendMessage(mtSync_String, curResBuffer);
+     Result:=True;
+
+  finally
+    curResBuffer.Free;  //Client Free the Stream ??
+  end;
 end;
 
 function TSyncIPCServer.MessageResult(const Buffer; Count: LongInt): Boolean;
@@ -172,12 +177,32 @@ var
 begin
   try
      Result:=False;
-     curResBuffer:=DataPointerToStream(Buffer, Count);
+     curResBuffer:=TMemoryStream.Create;
+     curResBuffer.Write(Buffer, Count);
      resultClient.SendMessage(mtSync_Buffer, curResBuffer);
      Result:=True;
 
   finally
-    curResBuffer.Free;
+    curResBuffer.Free;  //Client Free the Stream ??
+  end;
+end;
+
+function TSyncIPCServer.MessageReceived(AMsgID: Integer; AInteger: Integer): Boolean;
+var
+   resRect:TRect;
+
+begin
+  { #todo 10 -oMaxM : Tests...delete it }
+  Case AMsgID of
+  10: Result :=MessageResult($ABCDEF0);
+  11: begin
+      resRect.Top:=AInteger;
+      resRect.Left:=AInteger+33;
+      resRect.Bottom:=AInteger+66;
+      resRect.Right:=AInteger+99;
+      Result :=MessageResult(resRect, sizeof(TRect));
+  end;
+
   end;
 end;
 
@@ -188,6 +213,7 @@ end;
 
 function TSyncIPCServer.MessageReceived(AMsgID: Integer; const Msg: String): Boolean;
 begin
+  { #todo 10 -oMaxM : Tests...delete it }
   Case AMsgID of
   12: Result :=MessageResult('Ciao son Sync Result for '+IntToStr(AMsgID));
   end;
@@ -195,7 +221,7 @@ end;
 
 function TSyncIPCServer.MessageReceived(AMsgID: Integer; const Buffer; Count: LongInt): Boolean;
 begin
-
+  { #todo 10 -oMaxM : Test THIS }
 end;
 
 constructor TSyncIPCServer.Create(AOwner: TComponent);
@@ -203,15 +229,27 @@ begin
   inherited Create(AOwner);
   resultClient:=nil;
   Global:=True;
-  Self.MaxQueue:=2;
   Self.OnMessageQueued:=@InternalMessageRecevied;
 end;
 
 { TSyncIPCClient }
 
-function TSyncIPCClient.preSendSyncMessage(AMsgID: Integer): Boolean;
+function TSyncIPCClient.preSendSyncMessage(var MsgStream: TMemoryStream; AMsgID: Integer): Boolean;
 var
    myID:TGUID;
+
+   function randCreateGuid:TGUID;
+   var
+      i:Integer;
+      P : PByte;
+
+   begin
+     Randomize;
+     P:=@Result;
+     for i:=0 to SizeOf(TGuid)-1 do P[i]:=Random(256);
+     Result.clock_seq_hi_and_reserved:=(Result.clock_seq_hi_and_reserved and $3F) + 64;
+     Result.time_hi_and_version      :=(Result.time_hi_and_version and $0FFF)+ $4000;
+   end;
 
 begin
   Result :=False;
@@ -219,14 +257,19 @@ begin
   resultServer  :=TSimpleIPCServer.Create(Nil);
   if (CreateGUID(myID)=0)
   then resultServer.ServerID:=GUIDToString(myID)
-  else resultServer.ServerID:='{'+IntToStr(AMsgID)+IntToStr(GetTickCount64)+'}';
+  else resultServer.ServerID:=GUIDToString(randCreateGuid);
   resultServer.Global:=True;
   resultServer.StartServer(False);
   if resultServer.Active then
   begin
     Connect;
-    Result :=ServerRunning;
-    if Result then SendStringMessage(mtSync_ResultServerID, resultServer.ServerID+IntToStr(AMsgID));
+    if ServerRunning then
+    begin
+      MsgStream:=TMemoryStream.Create;
+      MsgStream.WriteAnsiString(resultServer.ServerID);
+      MsgStream.WriteBufferData(AMsgID);
+      Result:=True;
+    end;
   end;
 end;
 
@@ -240,13 +283,15 @@ function TSyncIPCClient.SendSyncMessage(ATimeOut: Integer; AMsgID: Integer;
                                         MsgType: TMessageType): TMessageType;
 var
    myTickStart, curTick:QWord;
+   MsgStream:TMemoryStream=nil;
 
 begin
   try
      Result :=mtUnknown;
-     if preSendSyncMessage(AMsgID) then
+     if preSendSyncMessage(MsgStream, AMsgID) then
      begin
-       SendMessage(MsgType, AStream);
+       MsgStream.CopyFrom(AStream, 0);
+       SendMessage(MsgType, MsgStream);
 
        myTickStart :=GetTickCount64;
        repeat
@@ -271,27 +316,103 @@ end;
 
 
 function TSyncIPCClient.SendSyncMessage(ATimeOut: Integer; AMsgID: Integer;
-                                        const Msg: String; var ResultString: String): Boolean;
+                                        const Msg: String; var ResultString: String): TMessageType;
 var
-   S:TStringStream;
+   msgStr, resStr:TMemoryStream;
 
 begin
   try
-     Result :=False;
-     S:=TStringStream.Create(Msg);
-     SendSyncMessage(ATimeOut, AMsgID, S, S, mtSync_String);
-     ResultString:=S.DataString;
-     Result :=True;
+     Result :=mtUnknown;
+     resStr:=TMemoryStream.Create;
+     msgStr:=TMemoryStream.Create;
+     msgStr.WriteAnsiString(Msg);
+     Result :=SendSyncMessage(ATimeOut, AMsgID, msgStr, resStr, mtSync_String);
+
+     if (Result=mtSync_String)
+     then begin
+            resStr.Position:=0;
+            ResultString :=resStr.ReadAnsiString;
+          end
+     else ResultString:='';
+
   finally
-    S.Free;
+    msgStr.Free;
+    resStr.Free;
   end;
 end;
 
-function TSyncIPCClient.SendSyncMessage(ATimeOut: Integer; AMsgID: Integer;
+function TSyncIPCClient.SendSyncMessage(ATimeOut: Integer; AMsgID: Integer; MsgDataType: TMessageType;
                                         const Buffer; Count: LongInt;
-                                        var ADataPointer: Pointer; var ADataSize: Longint): Boolean;
-begin
+                                        var AData; var ADataSize: Longint): TMessageType;
+var
+   msgStr, resStr:TMemoryStream;
+   resInt:Integer;
 
+begin
+  try
+     msgStr:=nil;
+     Result :=mtUnknown;
+     resStr:=TMemoryStream.Create;
+
+     Case MsgDataType of
+     mtSync_Integer: begin
+        msgStr:=TMemoryStream.Create;
+        msgStr.WriteData(Integer(Buffer));
+        Result :=SendSyncMessage(ATimeOut, AMsgID, msgStr, resStr, MsgDataType);
+     end;
+     mtSync_Stream : Result :=SendSyncMessage(ATimeOut, AMsgID, TStream(Buffer), resStr, MsgDataType);
+     mtSync_String : begin
+        msgStr:=TMemoryStream.Create;
+        msgStr.WriteAnsiString(String(Buffer));
+        Result :=SendSyncMessage(ATimeOut, AMsgID, msgStr, resStr, MsgDataType);
+     end;
+     mtSync_Buffer : begin
+        msgStr:=TMemoryStream.Create;
+        msgStr.Write(Buffer, Count);
+        Result :=SendSyncMessage(ATimeOut, AMsgID, msgStr, resStr, MsgDataType);
+     end;
+     { #todo -oMaxM : User defined Type with callback(Buffer, Count, msgStr) }
+     end;
+
+     resStr.Position:=0;
+
+     Case Result of
+     mtSync_Integer: begin
+        resStr.ReadData(resInt);
+        Integer(AData) :=resInt;
+        ADataSize:=sizeof(resInt);
+        resStr.Free;
+     end;
+     mtSync_Stream : begin
+        if (TStream(AData)=nil)
+        then begin
+               TStream(AData) :=resStr;
+               ADataSize :=resStr.Size;
+             end
+        else begin
+               ADataSize :=TStream(AData).CopyFrom(resStr, 0);
+               resStr.Free;
+             end;
+     end;
+     mtSync_String : begin
+        String(AData) :=resStr.ReadAnsiString;
+        resStr.Free;
+     end;
+     mtSync_Buffer : begin
+        ADataSize:=resStr.Size;
+
+        if (Pointer(AData)=nil)
+        then GetMem(Pointer(AData), ADataSize);
+
+        ADataSize :=resStr.Read(Pointer(AData)^, ADataSize);
+        resStr.Free;
+     end;
+     { #todo -oMaxM : User defined Type with callback(resStr, AData, ADataSize) }
+     end;
+
+  finally
+     if (msgStr<>nil) then msgStr.Free;
+  end;
 end;
 
 end.

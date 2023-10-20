@@ -112,7 +112,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="11">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -170,11 +170,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Taker_Twain_Types"/>
       </Unit10>
-      <Unit11>
-        <Filename Value="digit_ipc.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_IPC"/>
-      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

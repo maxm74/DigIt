@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, lazcontrols, pexpandpanels,
   DigIt_form_main, Digit_Bridge, Digit_Taker_Twain, DigIt_Utils, DigIt_Counters, DigIt_types, Digit_Taker_Folder, 
-  DigIt_Form_Templates, Digit_Taker_Twain_Types, Digit_IPC;
+  DigIt_Form_Templates, Digit_Taker_Twain_Types;
 
 {$R *.res}
 

@@ -7,7 +7,7 @@
 **   Main Form                                                                **
 *******************************************************************************)
 
-unit DigIt_form_main;
+unit DigIt_Form_Main;
 
 {$mode ObjFPC}{$H+}
 

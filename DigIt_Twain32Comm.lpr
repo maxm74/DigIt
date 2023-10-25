@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Classes, SysUtils, CustApp,
-  syncipc, DigIt_Twain32Comm_Types;
+  Classes, SysUtils, Digit_Taker_Twain_Types, CustApp,
+  syncipc;
 
 type
 

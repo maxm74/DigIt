@@ -12,14 +12,21 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  **********************************************************************}
+{$IFNDEF FPC_DOTTEDUNITS}
 unit syncipc;
+{$ENDIF FPC_DOTTEDUNITS}
 
 {$mode ObjFPC}{$H+}
 
 interface
 
+{$IFDEF FPC_DOTTEDUNITS}
+uses
+  System.Classes, System.SysUtils, System.SimpleIpc;
+{$ELSE FPC_DOTTEDUNITS}
 uses
   Classes, SysUtils, simpleipc;
+{$ENDIF FPC_DOTTEDUNITS}
 
 const
   mtSync_Null = 2;

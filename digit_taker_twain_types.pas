@@ -15,6 +15,15 @@ interface
 uses
   Classes, SysUtils;
 
+const
+  MSG_TWAIN32_STOP = 101;
+  MSG_TWAIN32_LIST = 102;
+  MSG_TWAIN32_FIND = 103;
+  MSG_TWAIN32_OPEN = 104;
+  MSG_TWAIN32_TAKE = 105;
+
+  RES_TWAIN32_STOPPED = $0CACA; //:-( A message for you...
+
 type
   TDigIt_Taker_TwainParams = class(TPersistent)
   protected

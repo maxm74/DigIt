@@ -143,7 +143,7 @@
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="digit_counters.pas"/>
+        <Filename Value="DigIt_Counters.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DigIt_Counters"/>
       </Unit6>
@@ -153,12 +153,12 @@
         <UnitName Value="DigIt_Types"/>
       </Unit7>
       <Unit8>
-        <Filename Value="digit_taker_folder.pas"/>
+        <Filename Value="Digit_Taker_Folder.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Taker_Folder"/>
       </Unit8>
       <Unit9>
-        <Filename Value="digit_form_templates.pas"/>
+        <Filename Value="DigIt_Form_Templates.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Templates"/>
         <HasResources Value="True"/>
@@ -166,7 +166,7 @@
         <UnitName Value="DigIt_Form_Templates"/>
       </Unit9>
       <Unit10>
-        <Filename Value="digit_taker_twain_types.pas"/>
+        <Filename Value="Digit_Taker_Twain_Types.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Taker_Twain_Types"/>
       </Unit10>

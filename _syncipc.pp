@@ -19,14 +19,15 @@ unit syncipc;
 interface
 
 uses
-  Classes, SysUtils, simpleipc, Forms;
+  Classes, SysUtils, simpleipc;
 
 const
-  mtSync_Integer = 2;
-  mtSync_Stream = 3;
-  mtSync_String = 4;
-  mtSync_Var = 5;
-  mtSync_Pointer = 6;
+  mtSync_Null = 2;
+  mtSync_Integer = 3;
+  mtSync_Stream = 4;
+  mtSync_String = 5;
+  mtSync_Var = 6;
+  mtSync_Pointer = 7;
 
 type
 
@@ -41,6 +42,7 @@ type
 
     //Derived Classes must implement this methods using MessageResult to send back the Result and return True
     //or return False for no Result
+    function MessageReceived(AMsgID:Integer):Boolean; virtual; overload;
     function MessageReceived(AMsgID:Integer; AInteger:Integer; IntegerSize:Byte):Boolean; virtual; overload;
     function MessageReceived(AMsgID:Integer; AStream:TStream):Boolean; virtual; overload;
     function MessageReceived(AMsgID:Integer; const Msg: String):Boolean; virtual; overload;
@@ -48,6 +50,7 @@ type
     function MessageReceived(AMsgID:Integer; const APointer:Pointer; Count: LongInt):Boolean; virtual; overload;
 
     //Send back Result to Client
+    function MessageResult:Boolean; overload;
     function MessageResult(ResultInteger:Integer; IntegerSize:Byte=sizeof(Integer)):Boolean; overload;
     function MessageResult(ResultStream:TStream):Boolean; overload;
     function MessageResult(const ResultString:String):Boolean; overload;
@@ -80,6 +83,7 @@ type
     constructor Create(AOwner : TComponent); override;
 
 // Buffer/AData depends on the type of MsgDataType/ResultType:
+//        mtSync_Null    -> No Input/Result Params
 //        mtSync_Integer -> An Integer, Count MUST contain the size of Integer or 0 for System size
 //        mtSync_Stream  -> A Stream, if AData initially is nil then a new TMemoryStream is returned (user must free it)
 //                                    else the result is appended in AData Stream.
@@ -130,7 +134,7 @@ var
   msgIDSize:Byte;
   curMsgType:TMessageType;
   resultServerID:String;
-  msgStream:TMemoryStream;
+  msgStream, resStream:TMemoryStream;
   AResult:Boolean;
 
 begin
@@ -138,7 +142,7 @@ begin
   curMsgType :=Self.MsgType;
 
   //Is it our message?
-  if (curMsgType in [mtSync_Integer..mtSync_Pointer]) then
+  if (curMsgType in [mtSync_Null..mtSync_Pointer]) then
   begin
     msgStream:=TMemoryStream(Self.MsgData);
     msgStream.Position:=0;
@@ -161,11 +165,20 @@ begin
        begin
          //Processes the Received message based on its type
          Case curMsgType of
+         mtSync_Null: AResult :=MessageReceived(curMsgID);
          mtSync_Integer: begin
             msgInteger :=ReadInt(msgStream, msgIDSize);
             AResult :=MessageReceived(curMsgID, msgInteger, msgIDSize);
          end;
-         mtSync_Stream: AResult :=MessageReceived(curMsgID, msgStream);
+         mtSync_Stream: try
+            //Copy the Message to a new Stream, so there won't be the initial part with the serverid
+            resStream :=TMemoryStream.Create;
+            resStream.CopyFrom(msgStream, msgStream.Size-msgStream.Position);
+            AResult :=MessageReceived(curMsgID, resStream);
+         finally
+           resStream.Free;
+         end;
+
          mtSync_String: AResult :=MessageReceived(curMsgID, msgStream.ReadAnsiString);
          mtSync_Var: AResult :=MessageReceived(curMsgID, Pointer(msgStream.Memory+msgStream.Position)^, msgStream.Size-msgStream.Position);
          mtSync_Pointer: AResult :=MessageReceived(curMsgID, Pointer(msgStream.Memory+msgStream.Position), msgStream.Size-msgStream.Position);
@@ -179,6 +192,11 @@ begin
        FreeAndNil(resultClient);
     end;
   end;
+end;
+
+function TSyncIPCServer.MessageResult: Boolean;
+begin
+  Result:=False;
 end;
 
 function TSyncIPCServer.MessageResult(ResultInteger: Integer; IntegerSize:Byte): Boolean;
@@ -204,10 +222,13 @@ end;
 
 function TSyncIPCServer.MessageResult(ResultStream: TStream): Boolean;
 begin
-  Result:=False;
-  //Send ResultStream back to client
-  resultClient.SendMessage(mtSync_Stream, ResultStream);
-  Result:=True;
+  try
+     Result:=False;
+     //Send back ResultStream
+     resultClient.SendMessage(mtSync_Stream, ResultStream);
+     Result:=True;
+  finally
+  end;
 end;
 
 function TSyncIPCServer.MessageResult(const ResultString: String): Boolean;
@@ -269,6 +290,11 @@ begin
   finally
     curResBuffer.Free;
   end;
+end;
+
+function TSyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
+begin
+  Result :=False;
 end;
 
 function TSyncIPCServer.MessageReceived(AMsgID: Integer; AInteger: Integer; IntegerSize:Byte): Boolean;
@@ -381,7 +407,7 @@ begin
        //Wait (Max for ATimeOut ms) for an Answer in resultServer
        myTickStart :=GetTickCount64;
        repeat
-         Application.ProcessMessages; { #todo 9 -oMaxM : Is there a way to not depend on unit forms? }
+         CheckSynchronize;          //Application.ProcessMessages;
 
          if resultServer.PeekMessage(0, True) then
          begin
@@ -396,6 +422,7 @@ begin
      end;
 
   finally
+    MsgStream.Free;
     postSendSyncMessage;
   end;
 end;
@@ -423,6 +450,10 @@ begin
      resStream:=TMemoryStream.Create;
 
      Case MsgDataType of
+     mtSync_Null:begin
+        msgStream:=TMemoryStream.Create;
+        Result :=SendSyncMessage(ATimeOut, AMsgID, msgStream, resStream, MsgDataType);
+     end;
      mtSync_Integer: begin
         msgStream:=TMemoryStream.Create;
         WriteInt(msgStream, Integer(Buffer), Count);
@@ -446,13 +477,16 @@ begin
         msgStream.Write(Pointer(Buffer)^, Count);
         Result :=SendSyncMessage(ATimeOut, AMsgID, msgStream, resStream, MsgDataType);
      end;
-     { #todo -oMaxM : User defined Type with callback(Buffer, Count, msgStream)? }
      end;
 
      resStream.Position:=0;
 
      //Depending on the type of result fill AData
      Case Result of
+     mtSync_Null:begin
+        ADataSize:=0;
+        resStream.Free;
+     end;
      mtSync_Integer: begin
         Integer(AData) :=ReadInt(resStream, resIntSize);
         ADataSize:=resIntSize;
@@ -461,11 +495,17 @@ begin
      mtSync_Stream : begin
         if (TStream(AData)=nil)
         then begin
+               //Return resStream directly and do not free it
                TStream(AData) :=resStream;
                ADataSize :=resStream.Size;
              end
-        else begin
+        else try
                ADataSize :=TStream(AData).CopyFrom(resStream, 0);
+
+               //if Buffer and AData are the same stream reposition to the beginning of the result
+               if (TStream(AData)=TStream(Buffer))
+               then TStream(AData).Position:=TStream(AData).Size-resStream.Size;
+             finally
                resStream.Free;
              end;
      end;
@@ -487,7 +527,6 @@ begin
         ADataSize :=resStream.Read(Pointer(AData)^, ADataSize);
         resStream.Free;
      end;
-     { #todo -oMaxM : User defined Type with callback(resStream, AData, ADataSize)? }
      end;
 
   finally

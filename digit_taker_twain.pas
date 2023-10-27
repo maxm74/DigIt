@@ -169,12 +169,16 @@ begin
 end;
 
 function TDigIt_Taker_Twain.Params_GetFromUser: Boolean;
+var
+  count:Integer;
+
 begin
   Result :=False;
   if (rParams=nil) then exit;
   try
      //Load source manager
      Twain.SourceManagerLoaded :=True;
+     count:=Twain.SourceCount;
      Twain.SelectSource;  { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
      Result :=Assigned(Twain.SelectedSource);
 

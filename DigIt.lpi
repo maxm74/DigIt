@@ -22,10 +22,11 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="bin/$(TargetCPU)-$(TargetOS)-$(FPCVer)/DigIt-dbg"/>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/DigIt-dbg"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../../Packages/DelphiTwain/units"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
           </SearchPaths>
           <BuildMacros>
@@ -72,6 +73,7 @@
     </PublishOptions>
     <RunParams>
       <local>
+        <CommandLineParams Value="--debug-log=digit.log"/>
         <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
       <FormatVersion Value="2"/>
@@ -118,18 +120,19 @@
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="DigIt_form_main.pas"/>
+        <Filename Value="DigIt_Form_Main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Main"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit1>
       <Unit2>
-        <Filename Value="Digit_Bridge.pas"/>
+        <Filename Value="DigIt_Bridge.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge"/>
       </Unit2>
       <Unit3>
-        <Filename Value="digit_taker_twain.pas"/>
+        <Filename Value="DigIt_Taker_Twain.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Taker_Twain"/>
       </Unit3>
@@ -145,7 +148,6 @@
       <Unit6>
         <Filename Value="DigIt_Counters.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DigIt_Counters"/>
       </Unit6>
       <Unit7>
         <Filename Value="DigIt_types.pas"/>
@@ -155,7 +157,6 @@
       <Unit8>
         <Filename Value="Digit_Taker_Folder.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Taker_Folder"/>
       </Unit8>
       <Unit9>
         <Filename Value="DigIt_Form_Templates.pas"/>
@@ -163,23 +164,20 @@
         <ComponentName Value="DigIt_Templates"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="DigIt_Form_Templates"/>
       </Unit9>
       <Unit10>
         <Filename Value="Digit_Taker_Twain_Types.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Taker_Twain_Types"/>
       </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="bin/$(TargetCPU)-$(TargetOS)-$(FPCVer)/DigIt"/>
+      <Filename Value="bin/$(TargetCPU)-$(TargetOS)/DigIt"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="/home/maxm/Programming/Lazarus/Common"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
     </SearchPaths>
     <Parsing>
@@ -200,6 +198,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf3"/>
       </Debugging>
       <Options>
         <Win32>

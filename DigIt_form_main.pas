@@ -1536,11 +1536,26 @@ procedure TDigIt_Main.TestClick(Sender: TObject);
 var
    Twain: TDelphiTwain=nil;
    Twain_Source:TTwainSource;
-   Twain_SourceI:Integer;
+   Twain_SourceI, i:Integer;
+   astr:String;
 
 begin
   try
     //Create Twain
+
+   Twain := TDelphiTwain.Create;
+   if Twain.LoadLibrary then
+   begin
+     Twain.SourceManagerLoaded := TRUE;
+     for i:=0 to Twain.SourceCount-1 do
+     begin
+       aStr:=Twain.Source[i].ProductName;
+     end;
+   end;
+  finally
+     Twain.Free
+  end;
+(*
     if Twain = nil then
     begin
       Twain := TDelphiTwain.Create;
@@ -1577,6 +1592,7 @@ begin
     end;
   finally
   end;
+  *)
 end;
 
 procedure TDigIt_Main.TestRClick(Sender: TObject);

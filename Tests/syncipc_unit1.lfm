@@ -1,0 +1,138 @@
+object Form1: TForm1
+  Left = 249
+  Height = 304
+  Top = 122
+  Width = 483
+  Caption = 'Form1'
+  ClientHeight = 304
+  ClientWidth = 483
+  LCLVersion = '3.99.0.0'
+  OnShow = FormShow
+  object SpeedButton1: TSpeedButton
+    Left = 16
+    Height = 38
+    Top = 10
+    Width = 103
+    AllowAllUp = True
+    Caption = 'Server'
+    Enabled = False
+    GroupIndex = 1
+    OnClick = SpeedButton1Click
+  end
+  object SpeedButton2: TSpeedButton
+    Left = 144
+    Height = 38
+    Top = 10
+    Width = 103
+    AllowAllUp = True
+    Caption = 'Client'
+    GroupIndex = 1
+    OnClick = SpeedButton2Click
+  end
+  object Memo2: TMemo
+    Left = 8
+    Height = 192
+    Top = 104
+    Width = 328
+    TabOrder = 0
+  end
+  object Edit1: TEdit
+    Left = 150
+    Height = 23
+    Top = 59
+    Width = 106
+    TabOrder = 1
+    Text = 'DigIt_Twain32CommServer'
+  end
+  object Edit2: TEdit
+    Left = 16
+    Height = 23
+    Top = 56
+    Width = 106
+    Enabled = False
+    TabOrder = 2
+    Text = 'DigIt_Twain32CommServer'
+  end
+  object btString: TButton
+    Left = 344
+    Height = 25
+    Top = 104
+    Width = 123
+    Caption = 'Send 1 (String)'
+    Enabled = False
+    TabOrder = 3
+    OnClick = btStringClick
+  end
+  object btRectVar: TButton
+    Left = 344
+    Height = 25
+    Top = 129
+    Width = 123
+    Caption = 'Send 2 (TRect)'
+    TabOrder = 4
+    OnClick = btRectVarClick
+  end
+  object btInt: TButton
+    Left = 344
+    Height = 25
+    Top = 154
+    Width = 123
+    Caption = 'Send 3 (Int)'
+    TabOrder = 5
+    OnClick = btIntClick
+  end
+  object btStream: TButton
+    Left = 344
+    Height = 25
+    Top = 180
+    Width = 123
+    Caption = 'Send 4 (Stream)'
+    TabOrder = 6
+    OnClick = btStreamClick
+  end
+  object btPRect: TButton
+    Left = 344
+    Height = 25
+    Top = 206
+    Width = 123
+    Caption = 'Send 5 (PRect)'
+    Enabled = False
+    TabOrder = 7
+    OnClick = btPRectClick
+  end
+  object lbServer: TLabel
+    Left = 18
+    Height = 15
+    Top = 82
+    Width = 95
+    Caption = 'SERVER RUNNING'
+    Enabled = False
+    Visible = False
+  end
+  object lbClient: TLabel
+    Left = 152
+    Height = 15
+    Top = 82
+    Width = 94
+    Caption = 'CLIENT RUNNING'
+    Visible = False
+  end
+  object btInt1: TButton
+    Left = 344
+    Height = 25
+    Top = 264
+    Width = 123
+    Caption = 'Send STOP (null)'
+    TabOrder = 8
+    OnClick = btInt1Click
+  end
+  object Button1: TButton
+    Left = 344
+    Height = 25
+    Top = 54
+    Width = 123
+    Caption = 'List Twain'
+    TabOrder = 9
+    OnClick = Button1Click
+  end
+end

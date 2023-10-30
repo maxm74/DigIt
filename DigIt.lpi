@@ -114,7 +114,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -137,9 +137,8 @@
         <UnitName Value="Digit_Taker_Twain"/>
       </Unit3>
       <Unit4>
-        <Filename Value="digit_utils.pas"/>
+        <Filename Value="DigIt_Utils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DigIt_Utils"/>
       </Unit4>
       <Unit5>
         <Filename Value="_appunti.txt"/>
@@ -166,9 +165,17 @@
         <ResourceBaseClass Value="Form"/>
       </Unit9>
       <Unit10>
-        <Filename Value="Digit_Taker_Twain_Types.pas"/>
+        <Filename Value="DigIt_Taker_Twain_Types.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Taker_Twain_Types"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="DigIt_Taker_Twain_SelectForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="TwainSelectSource"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Digit_Taker_Twain_SelectForm"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

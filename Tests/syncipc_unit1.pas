@@ -57,6 +57,7 @@ type
     procedure btStreamClick(Sender: TObject);
     procedure btPRectClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
@@ -393,6 +394,12 @@ begin
     end;
   end;
   FreeMem(recBuf, recSize);
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  if CommsClient<>nil then CommsClient.Free;
+  if CommsServer<>nil then CommsServer.Free;
 end;
 
 procedure TForm1.FormShow(Sender: TObject);

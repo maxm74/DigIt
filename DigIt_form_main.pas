@@ -213,7 +213,6 @@ type
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
 
-    procedure TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap; var Cancel: Boolean);
     procedure TestClick(Sender: TObject);
     procedure TestRClick(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
@@ -1301,6 +1300,7 @@ begin
            //GetParams from User only
            if (takerInst=nil) { #todo 2 -oMaxM : anomaly }
            then takerInst :=takerClass.Create(nil);
+
            takerInst.Params_GetFromUser; { #todo 2 -oMaxM : if False? }
          end;
   end;
@@ -1315,7 +1315,7 @@ begin
   begin
     if (curClass<>takerClass)
     then begin
-           //New Taker is different from actual, Create a new Instance and Set Params
+           //New Taker is different from actual, Create a new Instance
            newInst :=curClass.Create(curParams);
 
            if (takerInst<>nil) then takerInst.Free;
@@ -1323,11 +1323,12 @@ begin
            takerInst :=newInst;
          end
     else begin
-           //Set Params only
-           if (takerInst=nil) { #todo 2 -oMaxM : anomaly }
-           then takerInst :=takerClass.Create(curParams)
-           else takerInst.Params_Set(curParams);
+           { #todo 2 -oMaxM : anomaly }
+           if (takerInst=nil)
+           then takerInst :=takerClass.Create(curParams);
          end;
+
+    takerInst.Params_Set(curParams);
   end;
 end;
 
@@ -1525,13 +1526,6 @@ begin
    UI_FillBox(imgManipulation.SelectedCropArea);
 end;
 
-procedure TDigIt_Main.TwainTwainAcquire(Sender: TObject; const Index: Integer;
-  Image: TBitmap; var Cancel: Boolean);
-begin
-//  ImageHolder.Picture.Bitmap.Assign(Image);
-  Cancel := True;//Only want one image
-end;
-
 procedure TDigIt_Main.TestClick(Sender: TObject);
 var
    Twain: TDelphiTwain=nil;
@@ -1542,7 +1536,6 @@ var
 begin
   try
     //Create Twain
-
    Twain := TDelphiTwain.Create;
    if Twain.LoadLibrary then
    begin

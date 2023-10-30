@@ -7,6 +7,7 @@ object Form1: TForm1
   ClientHeight = 304
   ClientWidth = 483
   LCLVersion = '3.99.0.0'
+  OnDestroy = FormDestroy
   OnShow = FormShow
   object SpeedButton1: TSpeedButton
     Left = 16
@@ -69,6 +70,7 @@ object Form1: TForm1
     Top = 129
     Width = 123
     Caption = 'Send 2 (TRect)'
+    Enabled = False
     TabOrder = 4
     OnClick = btRectVarClick
   end
@@ -78,6 +80,7 @@ object Form1: TForm1
     Top = 154
     Width = 123
     Caption = 'Send 3 (Int)'
+    Enabled = False
     TabOrder = 5
     OnClick = btIntClick
   end
@@ -87,6 +90,7 @@ object Form1: TForm1
     Top = 180
     Width = 123
     Caption = 'Send 4 (Stream)'
+    Enabled = False
     TabOrder = 6
     OnClick = btStreamClick
   end

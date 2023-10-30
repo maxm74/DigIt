@@ -43,6 +43,7 @@ implementation
 uses Digit_Bridge;
 
 type
+    //Workaround class so we can write a TPersistent using TWriter.WriteRootComponent
     TPersistentComponent = class(TComponent)
     protected
        rData:TPersistent;

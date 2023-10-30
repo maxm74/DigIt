@@ -1,0 +1,82 @@
+object TwainSelectSource: TTwainSelectSource
+  Left = 451
+  Height = 317
+  Top = 220
+  Width = 458
+  ActiveControl = lvSources
+  BorderStyle = bsSizeToolWin
+  Caption = 'Select Twain Source'
+  ClientHeight = 317
+  ClientWidth = 458
+  Position = poScreenCenter
+  LCLVersion = '3.99.0.0'
+  object panelButtons: TPanel
+    Left = 0
+    Height = 40
+    Top = 277
+    Width = 458
+    Align = alBottom
+    BevelOuter = bvSpace
+    ClientHeight = 40
+    ClientWidth = 458
+    TabOrder = 0
+    object btCancel: TBitBtn
+      Left = 298
+      Height = 30
+      Top = 4
+      Width = 75
+      Anchors = [akRight, akBottom]
+      Cancel = True
+      DefaultCaption = True
+      Kind = bkCancel
+      ModalResult = 2
+      TabOrder = 0
+    end
+    object btOk: TBitBtn
+      Left = 377
+      Height = 30
+      Top = 4
+      Width = 75
+      Anchors = [akRight, akBottom]
+      Default = True
+      DefaultCaption = True
+      Kind = bkOK
+      ModalResult = 1
+      TabOrder = 1
+    end
+  end
+  object lvSources: TListView
+    Left = 0
+    Height = 277
+    Top = 0
+    Width = 458
+    Align = alClient
+    AutoWidthLastColumn = True
+    Columns = <    
+      item
+        AutoSize = True
+        Caption = 'Name'
+        Width = 47
+      end    
+      item
+        AutoSize = True
+        Caption = 'Family'
+      end    
+      item
+        AutoSize = True
+        Caption = 'Manufacturer'
+        Width = 87
+      end    
+      item
+        AutoSize = True
+        Width = 0
+      end>
+    ColumnClick = False
+    HideSelection = False
+    ReadOnly = True
+    RowSelect = True
+    ScrollBars = ssAutoBoth
+    TabOrder = 1
+    ViewStyle = vsReport
+  end
+end

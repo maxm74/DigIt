@@ -92,7 +92,7 @@ begin
   then rParams :=Self.Params_GetClass.Create
   else rParams :=aParams;
 
-  Self.Params_Set(rParams);
+  //Self.Params_Set(rParams);
 end;
 
 destructor TDigIt_Taker.Destroy;

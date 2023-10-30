@@ -102,21 +102,6 @@ var
   theList:array of TW_IDENTITY;
 
 begin
-(*
-Twain := TDelphiTwain.Create;
-if Twain.LoadLibrary then
-begin
-  Twain.SourceManagerLoaded := TRUE;
-  for i:=0 to Twain.SourceCount-1 do
-  begin
-    aStr:=Twain.Source[i].ProductName;
-  end;
-end;
-finally
-  Twain.Free
-end;
-
-*)
   Twain.SourceManagerLoaded :=True;
   listCount :=Twain.SourceCount;
   Result :=(listCount>0);
@@ -127,7 +112,6 @@ end;
        theList[i] :=Twain.Source[i].SourceIdentity^;
 
     //Copy theList on result Stream
-    { #todo 10 : Test if Work, else write directly to ResultStream }
     Result:=MessageResult(Pointer(theList), listCount*Sizeof(TW_IDENTITY));
     SetLength(theList, 0); //we can free it, is already on the ResultStream
   end;

@@ -21,17 +21,19 @@ type
   { TDigIt_Taker_Twain }
   TDigIt_Taker_Twain = class(TDigIt_Taker)
   private
-    rTwain:TDelphiTwain;
-    rTwain_SourceI:Integer;
+    rTwain:TCustomDelphiTwain;
+    ipcSourceList:array of TW_IDENTITY;
+    SelectedSourceIPC:Boolean;
+    SelectedSourceIndex:Integer;
     i:Integer;
-  protected
 
-    function getTwain: TDelphiTwain;
+    function getTwain: TCustomDelphiTwain;
     procedure FreeTwain;
     procedure SetTwainTranferMode;
    // procedure TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap; var Cancel: Boolean);
 
-    property Twain: TDelphiTwain read getTwain;
+    property Twain: TCustomDelphiTwain read getTwain;
+
   public
     constructor Create(aParams :TPersistent); override;
     destructor Destroy; override;
@@ -51,11 +53,11 @@ type
 
 implementation
 
-uses Digit_Types, Dialogs, BGRABitmapTypes;
+uses Digit_Types, Digit_Taker_Twain_SelectForm, BGRABitmapTypes;
 
 { TDigIt_Taker_Twain }
 
-function TDigIt_Taker_Twain.getTwain: TDelphiTwain;
+function TDigIt_Taker_Twain.getTwain: TCustomDelphiTwain;
 begin
   //Create Twain
   if (rTwain = nil) then
@@ -92,6 +94,9 @@ end;
 constructor TDigIt_Taker_Twain.Create(aParams: TPersistent);
 begin
   rTwain:=nil;
+  SelectedSourceIPC:=False;
+  SelectedSourceIndex:=-1;
+
   inherited Create(aParams);
 end;
 
@@ -148,17 +153,20 @@ begin
      if FileExists(TempDir+'twain_'+IntToStr(i-1)+'.bmp')
      then DeleteFile(TempDir+'twain_'+IntToStr(i-1)+'.bmp');
 
-     if Assigned(Twain.SelectedSource) then
-     begin
-       Twain.SelectedSource.Loaded := TRUE;
-       Twain.SelectedSource.ShowUI := False;//display interface
-       Twain.SelectedSource.Modal:=False;
-       Twain.SelectedSource.TransferMode:=ttmFile;
-       Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(i)+'.bmp', tfBMP);
-       Twain.SelectedSource.EnableSource(False, True);
-       Result :=TempDir+'twain_'+IntToStr(i)+'.bmp';
-       Inc(i);
-     end;
+     if SelectedSourceIPC
+     then begin
+          end
+     else if Assigned(Twain.SelectedSource) then
+          begin
+            Twain.SelectedSource.Loaded := TRUE;
+            Twain.SelectedSource.ShowUI := False;//display interface
+            Twain.SelectedSource.Modal:=False;
+            Twain.SelectedSource.TransferMode:=ttmFile;
+            Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(i)+'.bmp', tfBMP);
+            Twain.SelectedSource.EnableSource(False, True);
+            Result :=TempDir+'twain_'+IntToStr(i)+'.bmp';
+            Inc(i);
+          end;
   finally
   end;
 end;
@@ -170,7 +178,7 @@ end;
 
 function TDigIt_Taker_Twain.Params_GetFromUser: Boolean;
 var
-  count:Integer;
+  countTwain_Source, selectedSource:Integer;
 
 begin
   Result :=False;
@@ -178,19 +186,45 @@ begin
   try
      //Load source manager
      Twain.SourceManagerLoaded :=True;
-     count:=Twain.SourceCount;
-     Twain.SelectSource;  { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
-     Result :=Assigned(Twain.SelectedSource);
+     countTwain_Source:=Twain.SourceCount;
+   //  Twain.SelectSource;  { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
 
-     if Result then
-     with TDigIt_Taker_TwainParams(rParams) do
+     selectedSource :=TTwainSelectSource.Execute(Twain, ipcSourceList, False, -1);
+     if (selectedSource>-1) then
      begin
-       IPC_Scanner:=False;
-       Manufacturer :=Twain.SelectedSource.Manufacturer;
-       ProductFamily :=Twain.SelectedSource.ProductFamily;
-       ProductName :=Twain.SelectedSource.ProductName;
+          //Result :=Assigned(Twain.SelectedSource);
+
+       SelectedSourceIPC :=(selectedSource>=countTwain_Source);
+       if SelectedSourceIPC
+       then begin
+              SelectedSourceIndex :=selectedSource-countTwain_Source;
+            end
+       else begin
+              SelectedSourceIndex :=selectedSource;
+              Twain.SelectedSourceIndex :=selectedSource;
+            end;
+
+       Result :=True;
+
+       with TDigIt_Taker_TwainParams(rParams) do
+       begin
+         IPC_Scanner:=SelectedSourceIPC;
+         if SelectedSourceIPC
+         then begin
+                Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
+                ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
+                ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
+              end
+         else begin
+                Manufacturer :=Twain.SelectedSource.Manufacturer;
+                ProductFamily :=Twain.SelectedSource.ProductFamily;
+                ProductName :=Twain.SelectedSource.ProductName;
+              end;
+       end;
      end;
+
   finally
+    FreeAndNil(TwainSelectSource);
   end;
 end;
 
@@ -201,14 +235,17 @@ begin
   with TDigIt_Taker_TwainParams(rParams) do
   begin
     { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
-    rTwain_SourceI:=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
 
-    if (rTwain_SourceI=-1)
+    if IPC_Scanner
+    then SelectedSourceIndex :=-1
+    else SelectedSourceIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
+
+    if (SelectedSourceIndex=-1)
     then begin
            { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
-           Twain.SelectSource;
+           Params_GetFromUser;
          end
-    else Twain.SelectedSourceIndex:=rTwain_SourceI;
+    else Twain.SelectedSourceIndex:=SelectedSourceIndex;
 
     if Assigned(Twain.SelectedSource) then
     begin

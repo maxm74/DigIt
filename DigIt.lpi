@@ -149,9 +149,8 @@
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="DigIt_types.pas"/>
+        <Filename Value="DigIt_Types.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DigIt_Types"/>
       </Unit7>
       <Unit8>
         <Filename Value="Digit_Taker_Folder.pas"/>
@@ -173,6 +172,7 @@
         <Filename Value="DigIt_Taker_Twain_SelectForm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="TwainSelectSource"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Digit_Taker_Twain_SelectForm"/>
       </Unit11>

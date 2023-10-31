@@ -1123,10 +1123,15 @@ var
 
 begin
   try
-     Bitmap := TBGRABitmap.Create;
-     //DetectFileFormat(AImageFile);
-     Bitmap.LoadFromFile(AImageFile);
-     imgManipulation.Bitmap := Bitmap;
+     if FileExists(AImageFile)
+     then begin
+            Bitmap := TBGRABitmap.Create;
+            //DetectFileFormat(AImageFile);
+            Bitmap.LoadFromFile(AImageFile);
+            imgManipulation.Bitmap := Bitmap;
+          end
+     else raise Exception.Create('LoadImage Failed');
+
   finally
      Bitmap.Free;
   end;

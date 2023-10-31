@@ -16,7 +16,6 @@ type
   TTwain32SyncIPCServer=class(TSyncIPCServer)
   private
     rTwain:TCustomDelphiTwain;
-    rTwain_SourceI:Integer;
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -26,7 +25,10 @@ type
     function MessageReceived(AMsgID:Integer; const Buffer; Count: LongInt):Boolean; override; overload;
     function MessageReceived(AMsgID:Integer; const APointer:Pointer; Count: LongInt):Boolean; override; overload;
 
-    function TWAIN32_LIST:Boolean;
+    function TWAIN32_LIST:Boolean; //Input=mtSync_Null Output=mtSync_Pointer (array of TW_IDENTITY)
+    function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer
+    function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
+    function TWAIN32_TAKE(APath:String):Boolean; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
 
     function getTwain: TCustomDelphiTwain;
     procedure FreeTwain;
@@ -53,47 +55,84 @@ type
 
 var
   DoStop : Boolean=False;
+  Application: TDigIt_Twain32Comm;
 
 
 { TTwain32SyncIPCServer }
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
 begin
-  {$ifopt D+}
-    Writeln('Message Received :'+IntToStr(AMsgID));
-  {$endif}
   Case AMsgID of
   MSG_TWAIN32_STOP : begin
-      Result:=MessageResult(RES_TWAIN32_STOPPED);
-      DoStop:=True;
-  end;
+                       {$ifopt D+}
+                       Writeln('MSG_TWAIN32_STOP:'+IntToStr(AMsgID));
+                       {$endif}
+                       Result:=MessageResult(RES_TWAIN32_STOPPED);
+                       DoStop:=True;
+                     end;
   MSG_TWAIN32_LIST : Result:=TWAIN32_LIST;
+  else begin
+         {$ifopt D+}
+         Writeln('MSG_Unknown:'+IntToStr(AMsgID));
+         {$endif}
+         Result :=False;
+       end;
   end;
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; AInteger: Integer; IntegerSize: Byte): Boolean;
 begin
-    Result:=inherited MessageReceived(AMsgID, AInteger, IntegerSize);
+  Case AMsgID of
+  MSG_TWAIN32_OPEN : Result:=TWAIN32_OPEN(AInteger);
+  else begin
+         {$ifopt D+}
+         Writeln('MSG_Unknown:'+IntToStr(AMsgID));
+         {$endif}
+         Result :=False;
+       end;
+  end;
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; AStream: TStream): Boolean;
 begin
-    Result:=inherited MessageReceived(AMsgID, AStream);
+  {$ifopt D+}
+  Writeln('MSG_Unknown:'+IntToStr(AMsgID));
+  {$endif}
+  Result :=False;
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; const Msg: String): Boolean;
 begin
-  Result:=inherited MessageReceived(AMsgID, Msg);
+  Case AMsgID of
+  MSG_TWAIN32_TAKE : Result:=TWAIN32_TAKE(Msg);
+  else begin
+         {$ifopt D+}
+         Writeln('MSG_Unknown:'+IntToStr(AMsgID));
+         {$endif}
+         Result :=False;
+       end;
+  end;
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; const Buffer; Count: LongInt): Boolean;
 begin
-  Result:=inherited MessageReceived(AMsgID, Buffer, Count);
+  Case AMsgID of
+  MSG_TWAIN32_FIND : Result:=TWAIN32_FIND(TW_IDENTITY(Buffer));
+  else begin
+         {$ifopt D+}
+         Writeln('MSG_Unknown:'+IntToStr(AMsgID));
+         {$endif}
+         Result :=False;
+       end;
+  end;
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; const APointer: Pointer; Count: LongInt): Boolean;
 begin
-  Result:=inherited MessageReceived(AMsgID, APointer, Count);
+  {$ifopt D+}
+  Writeln('MSG_Unknown:'+IntToStr(AMsgID));
+  {$endif}
+  Result :=False;
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_LIST: Boolean;
@@ -102,18 +141,118 @@ var
   theList:array of TW_IDENTITY;
 
 begin
-  Twain.SourceManagerLoaded :=True;
-  listCount :=Twain.SourceCount;
-  Result :=(listCount>0);
-  if Result then
-  begin
-    SetLength(theList, listCount);
-    for i:=0 to listCount-1 do
-       theList[i] :=Twain.Source[i].SourceIdentity^;
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_LIST:');
+     {$endif}
 
-    //Copy theList on result Stream
-    Result:=MessageResult(Pointer(theList), listCount*Sizeof(TW_IDENTITY));
-    SetLength(theList, 0); //we can free it, is already on the ResultStream
+     Twain.SourceManagerLoaded :=True;
+     listCount :=Twain.SourceCount;
+     Result :=(listCount>0);
+     if Result then
+     begin
+       SetLength(theList, listCount);
+       for i:=0 to listCount-1 do
+          theList[i] :=Twain.Source[i].SourceIdentity^;
+
+       //Copy theList on result Stream
+       Result:=MessageResult(Pointer(theList), listCount*Sizeof(TW_IDENTITY));
+       SetLength(theList, 0); //we can free it, is already on the ResultStream
+     end;
+
+     {$ifopt D+}
+      Writeln(' TWAIN32_LIST Result: '+IntToStr(listCount));
+     {$endif}
+
+  except
+   On E:Exception do
+   begin
+     SetLength(theList, 0);
+     Result :=False;
+     {$ifopt D+}
+     Application.ShowException(E);
+     {$endif}
+   end;
+  end;
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_FIND(AIdentity: TW_IDENTITY): Boolean;
+begin
+
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_OPEN(AIndex:Integer): Boolean;
+var
+   listCount: Integer;
+
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_OPEN: '+IntToStr(AIndex));
+     {$endif}
+
+     Twain.SourceManagerLoaded :=True;
+     listCount :=Twain.SourceCount;
+     Result :=(listCount>0) and (AIndex>=0) and (AIndex<listCount);
+     if Result then
+     begin
+       Twain.SelectedSourceIndex:=AIndex;
+       Result :=(Twain.SelectedSource<>nil);
+       if Result then MessageResult(1);
+     end;
+
+     {$ifopt D+}
+      Writeln(' TWAIN32_OPEN Result: '+BoolToStr(Result));
+     {$endif}
+
+  except
+    On E:Exception do
+    begin
+      Result :=False;
+      {$ifopt D+}
+      Application.ShowException(E);
+      {$endif}
+    end;
+  end;
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_TAKE(APath: String): Boolean;
+var
+   listCount: Integer;
+
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_TAKE: '+APath);
+     {$endif}
+
+     Result :=Assigned(Twain.SelectedSource);
+     if Result then
+     begin
+       Twain.SelectedSource.Loaded := TRUE;
+       Twain.SelectedSource.ShowUI := False;//display interface
+       Twain.SelectedSource.Modal:=False;
+       Twain.SelectedSource.TransferMode:=ttmFile;
+       Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
+       Twain.SelectedSource.EnableSource(False, False);  //True
+       MessageResult(1);
+     end;
+
+     {$ifopt D+}
+      Writeln(' TWAIN32_TAKE Result: '+BoolToStr(Result));
+     {$endif}
+
+  except
+    On E:Exception do
+    begin
+      Result :=False;
+      {$ifopt D+}
+      Application.ShowException(E);
+      {$endif}
+    end;
   end;
 end;
 
@@ -235,8 +374,6 @@ begin
   writeln('         -s [--stop] ', 'Stop Server');
 end;
 
-var
-  Application: TDigIt_Twain32Comm;
 begin
   Application:=TDigIt_Twain32Comm.Create(nil);
   Application.Title:='DigIt_Twain32Comm';

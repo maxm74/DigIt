@@ -16,6 +16,7 @@ type
     btCancel: TBitBtn;
     btOk: TBitBtn;
     lvSources: TListView;
+    Panel1: TPanel;
     panelButtons: TPanel;
   private
 

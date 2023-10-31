@@ -3,7 +3,6 @@ object TwainSelectSource: TTwainSelectSource
   Height = 317
   Top = 220
   Width = 458
-  ActiveControl = lvSources
   BorderStyle = bsSizeToolWin
   Caption = 'Select Twain Source'
   ClientHeight = 317
@@ -45,38 +44,48 @@ object TwainSelectSource: TTwainSelectSource
       TabOrder = 1
     end
   end
-  object lvSources: TListView
+  object Panel1: TPanel
     Left = 0
     Height = 277
     Top = 0
     Width = 458
     Align = alClient
-    AutoWidthLastColumn = True
-    Columns = <    
-      item
-        AutoSize = True
-        Caption = 'Name'
-        Width = 47
-      end    
-      item
-        AutoSize = True
-        Caption = 'Family'
-      end    
-      item
-        AutoSize = True
-        Caption = 'Manufacturer'
-        Width = 87
-      end    
-      item
-        AutoSize = True
-        Width = 0
-      end>
-    ColumnClick = False
-    HideSelection = False
-    ReadOnly = True
-    RowSelect = True
-    ScrollBars = ssAutoBoth
+    BevelInner = bvRaised
+    ClientHeight = 277
+    ClientWidth = 458
     TabOrder = 1
-    ViewStyle = vsReport
+    object lvSources: TListView
+      Left = 2
+      Height = 273
+      Top = 2
+      Width = 454
+      Align = alClient
+      AutoWidthLastColumn = True
+      Columns = <      
+        item
+          AutoSize = True
+          Caption = 'Name'
+          Width = 47
+        end      
+        item
+          AutoSize = True
+          Caption = 'Family'
+        end      
+        item
+          AutoSize = True
+          Caption = 'Manufacturer'
+          Width = 87
+        end      
+        item
+          Width = 266
+        end>
+      ColumnClick = False
+      HideSelection = False
+      ReadOnly = True
+      RowSelect = True
+      ScrollBars = ssAutoBoth
+      TabOrder = 0
+      ViewStyle = vsReport
+    end
   end
 end

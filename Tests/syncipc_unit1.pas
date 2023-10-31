@@ -382,7 +382,7 @@ Var
 begin
   Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_LIST :');
   resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_LIST, mtSync_Null, recBuf, 0, recBuf, recSize);
-  if (resType=mtSync_Pointer) then
+  if (resType=mtSync_Pointer) and (recBuf<>nil) then
   begin
     count :=SizeOf(TW_IDENTITY);
     count :=Trunc(recSize/SizeOf(TW_IDENTITY));

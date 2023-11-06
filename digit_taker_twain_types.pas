@@ -19,6 +19,7 @@ const
   TWAIN32_SERVER_EXE = 'DigIt_Twain32Comm.exe';
   TWAIN32_SERVER_NAME = 'DigIt_Twain32CommServer';
 
+  MSG_TWAIN32_TIMEOUT = 100; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
   MSG_TWAIN32_STOP = 101; //Input=mtSync_Null Output=mtSync_Integer (Magic Mess)
   MSG_TWAIN32_LIST = 102; //Input=mtSync_Null Output=mtSync_Pointer (array of TW_IDENTITY)
   MSG_TWAIN32_FIND = 103; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer

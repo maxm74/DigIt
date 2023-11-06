@@ -69,10 +69,6 @@ object TwainSelectSource: TTwainSelectSource
         end      
         item
           AutoSize = True
-          Caption = 'Family'
-        end      
-        item
-          AutoSize = True
           Caption = 'Manufacturer'
           Width = 87
         end      

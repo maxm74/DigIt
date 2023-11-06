@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Classes, SysUtils, Digit_Taker_Twain_Types, CustApp,
+  Windows, Classes, SysUtils, Digit_Taker_Twain_Types, CustApp,
   syncipc, Twain, DelphiTwain;
 
 type
@@ -25,6 +25,7 @@ type
     function MessageReceived(AMsgID:Integer; const Buffer; Count: LongInt):Boolean; override; overload;
     function MessageReceived(AMsgID:Integer; const APointer:Pointer; Count: LongInt):Boolean; override; overload;
 
+    function TWAIN32_TIMEOUT(ATimeout:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
     function TWAIN32_LIST:Boolean; //Input=mtSync_Null Output=mtSync_Pointer (array of TW_IDENTITY)
     function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer
     function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
@@ -32,6 +33,8 @@ type
 
     function getTwain: TCustomDelphiTwain;
     procedure FreeTwain;
+
+    procedure Test(AIndex:Integer);
 
     property Twain: TCustomDelphiTwain read getTwain;
 
@@ -47,6 +50,7 @@ type
     CommServer : TTwain32SyncIPCServer;
 
     procedure DoRun; override;
+    procedure MsgRunLoop;
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
@@ -54,6 +58,7 @@ type
   end;
 
 var
+  Timeout:Integer=3000;
   DoStop : Boolean=False;
   Application: TDigIt_Twain32Comm;
 
@@ -83,6 +88,7 @@ end;
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; AInteger: Integer; IntegerSize: Byte): Boolean;
 begin
   Case AMsgID of
+  MSG_TWAIN32_TIMEOUT : Result:=TWAIN32_TIMEOUT(AInteger);
   MSG_TWAIN32_OPEN : Result:=TWAIN32_OPEN(AInteger);
   else begin
          {$ifopt D+}
@@ -133,6 +139,34 @@ begin
   Writeln('MSG_Unknown:'+IntToStr(AMsgID));
   {$endif}
   Result :=False;
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_TIMEOUT(ATimeout: Integer): Boolean;
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_TIMEOUT: '+IntToStr(ATimeout));
+     {$endif}
+
+     Result :=(ATimeout>0);
+     if Result then Timeout:=ATimeout;
+
+     MessageResult(Integer(Result));
+
+     {$ifopt D+}
+      Writeln(' TWAIN32_TIMEOUT Result: '+BoolToStr(Result, True));
+     {$endif}
+
+  except
+    On E:Exception do
+    begin
+      Result :=False;
+      {$ifopt D+}
+      Application.ShowException(E);
+      {$endif}
+    end;
+  end;
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_LIST: Boolean;
@@ -204,7 +238,7 @@ begin
      end;
 
      {$ifopt D+}
-      Writeln(' TWAIN32_OPEN Result: '+BoolToStr(Result));
+      Writeln(' TWAIN32_OPEN Result: '+BoolToStr(Result, True));
      {$endif}
 
   except
@@ -220,7 +254,7 @@ end;
 
 function TTwain32SyncIPCServer.TWAIN32_TAKE(APath: String): Boolean;
 var
-   listCount: Integer;
+   i:Integer;
 
 begin
   Result :=False;
@@ -229,20 +263,28 @@ begin
       Writeln(' TWAIN32_TAKE: '+APath);
      {$endif}
 
-     Result :=Assigned(Twain.SelectedSource);
-     if Result then
+     if Assigned(Twain.SelectedSource) then
      begin
        Twain.SelectedSource.Loaded := TRUE;
        Twain.SelectedSource.ShowUI := False;//display interface
        Twain.SelectedSource.Modal:=False;
        Twain.SelectedSource.TransferMode:=ttmFile;
        Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
-       Twain.SelectedSource.EnableSource(False, False);  //True
-       MessageResult(1);
+       Twain.SelectedSource.EnableSource(False, True);
+
+       i:=0;
+       repeat
+         CheckSynchronize(10);
+         Application.MsgRunLoop;
+         inc(i);
+         Result :=FileExists(APath);
+       until Result or DoStop or (i>Timeout);
+
+       MessageResult(Integer(Result));
      end;
 
      {$ifopt D+}
-      Writeln(' TWAIN32_TAKE Result: '+BoolToStr(Result));
+      Writeln(' TWAIN32_TAKE Result: '+BoolToStr(Result, True));
      {$endif}
 
   except
@@ -262,7 +304,6 @@ begin
   if (rTwain = nil) then
   begin
     rTwain := TCustomDelphiTwain.Create;
-   // rTwain.OnTwainAcquire := @TwainTwainAcquire;
 
     //Load Twain Library dynamically
     rTwain.LoadLibrary;
@@ -275,6 +316,51 @@ procedure TTwain32SyncIPCServer.FreeTwain;
 begin
   if (rTwain<>nil)
   then rTwain.Free;
+end;
+
+procedure TTwain32SyncIPCServer.Test(AIndex: Integer);
+var
+   listCount, i: Integer;
+   aPath:String;
+
+begin
+  Writeln(' Test Twain on Device '+IntToStr(AIndex));
+  Twain.SourceManagerLoaded :=True;
+  Writeln('    Twain.SourceManagerLoaded='+BoolToStr(Twain.SourceManagerLoaded));
+  listCount :=Twain.SourceCount;
+  Writeln('    Twain.SourceCount='+IntToStr(listCount));
+  if (listCount>0) and (AIndex>=0) and (AIndex<listCount) then
+  begin
+    Twain.SelectedSourceIndex:=AIndex;
+    if Assigned(Twain.SelectedSource) then
+    begin
+      Writeln(' Take from '+Twain.SelectedSource.ProductName);
+      aPath:=ExtractFilePath(ParamStr(0))+'test_0.bmp';
+      Writeln(' Path='+aPath);
+
+      if FileExists(aPath)
+      then DeleteFile(aPath);
+
+      Twain.SelectedSource.Loaded := TRUE;
+      Twain.SelectedSource.ShowUI := False;//display interface
+      Twain.SelectedSource.Modal:=False;
+      Twain.SelectedSource.TransferMode:=ttmFile;
+      Twain.SelectedSource.SetupFileTransfer(aPath, tfBMP);
+      Twain.SelectedSource.EnableSource(False, True);
+
+      i:=0;
+      repeat
+        CheckSynchronize(10);
+        Application.MsgRunLoop;
+        inc(i);
+      until FileExists(aPath) or DoStop or (i>Timeout);
+
+      if FileExists(aPath)
+      then Writeln(' Take DONE ')
+      else Writeln(' Take NOT DONE ');
+    end;
+  end
+  else Writeln('    AIndex out of Bounds');
 end;
 
 constructor TTwain32SyncIPCServer.Create(AOwner: TComponent);
@@ -301,14 +387,13 @@ var
 
 begin
   // quick check parameters
-  ErrorMsg:=CheckOptions('h s', 'help stop');
+  ErrorMsg:=CheckOptions('h s t', 'help stop test');
   if ErrorMsg<>'' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
     Exit;
   end;
 
-  // parse parameters
   if HasOption('h', 'help') then
   begin
     WriteHelp;
@@ -316,27 +401,43 @@ begin
     Exit;
   end;
 
-  // parse parameters
   if HasOption('s', 'stop') then
-    try
-       stopClient :=TSyncIPCClient.Create(nil);
-       stopClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
-       stopClient.Connect;
-       if stopClient.ServerRunning
-       then stopClient.SendSyncMessage(10000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
-       //    else ShowException(Exception.Create('Server '+stopClient.ServerID+' NOT Running'));
+  try
+     stopClient :=TSyncIPCClient.Create(nil);
+     stopClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
+     stopClient.Connect;
+     if stopClient.ServerRunning
+     then stopClient.SendSyncMessage(10000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
+     //    else ShowException(Exception.Create('Server '+stopClient.ServerID+' NOT Running'));
 
-       stopClient.Free;
-       Terminate;
-       Exit;
-    except
-      On E:Exception do begin
+     stopClient.Free;
+     Terminate;
+     Exit;
+  except
+     On E:Exception do begin
         ShowException(E);
         stopClient.Free;
         Terminate;
         Exit;
-      end;
-    end;
+     end;
+  end;
+
+  if HasOption('t', 'test') then
+  try
+     CommServer  := TTwain32SyncIPCServer.Create(Nil);
+     CommServer.Test(StrToInt(GetOptionValue('t')));
+     CommServer.Free;
+     Terminate;
+     Exit;
+  except
+     On E:Exception do begin
+        ShowException(E);
+        CommServer.Free;
+        Terminate;
+        Exit;
+     end;
+  end;
+
 
   try
      CommServer  := TTwain32SyncIPCServer.Create(Nil);
@@ -345,14 +446,34 @@ begin
 
      if CommServer.Active then
      repeat
-        Sleep(10);
-        CheckSynchronize;
+        CheckSynchronize(10);
+        MsgRunLoop;
      until DoStop;
 
   finally
      CommServer.Free;
      Terminate;
   end;
+end;
+
+procedure TDigIt_Twain32Comm.MsgRunLoop;
+var
+  AMessage: TMsg;
+
+begin
+    while PeekMessage(AMessage, HWnd(nil), 0, 0, PM_REMOVE) do
+    begin
+      if AMessage.message = WM_QUIT then
+      begin
+        PostQuitMessage(AMessage.wParam);
+        DoStop :=True;
+      end;
+
+      TranslateMessage(@AMessage);
+      DispatchMessageW(@AMessage);
+
+      CheckSynchronize;
+    end;
 end;
 
 constructor TDigIt_Twain32Comm.Create(TheOwner: TComponent);
@@ -377,7 +498,8 @@ end;
 begin
   Application:=TDigIt_Twain32Comm.Create(nil);
   Application.Title:='DigIt_Twain32Comm';
-  Application.Run;
+  Application.Initialize;
+  Application.DoRun;
   Application.Free;
 end.
 

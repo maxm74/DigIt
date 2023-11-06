@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  simpleipc, syncipc, Twain, DelphiTwain_VCL, Digit_Taker_Twain_Types;
+  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_Types;
 
 type
   { TTestSyncIPCServer }
@@ -43,8 +43,11 @@ type
     btStream: TButton;
     btPRect: TButton;
     Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
     Edit1: TEdit;
     Edit2: TEdit;
+    edDevTest: TEdit;
     lbServer: TLabel;
     lbClient: TLabel;
     Memo2: TMemo;
@@ -57,13 +60,21 @@ type
     procedure btStreamClick(Sender: TObject);
     procedure btPRectClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
   private
+    rTwain:TDelphiTwain;
+
+    function getTwain: TDelphiTwain;
+  private
     CommsServer:TTestSyncIPCServer;
     CommsClient:TSyncIPCClient;
+
+    property Twain: TDelphiTwain read getTwain;
 
   public
   end;
@@ -396,6 +407,80 @@ begin
   FreeMem(recBuf, recSize);
 end;
 
+procedure TForm1.Button2Click(Sender: TObject);
+var
+   listCount, i, AIndex: Integer;
+   aPath:String;
+
+begin
+  AIndex:=StrToInt(edDevTest.Text);
+  Memo2.Lines.Add(' Test Twain on Device '+IntToStr(AIndex));
+  Twain.SourceManagerLoaded :=True;
+  Memo2.Lines.Add('    Twain.SourceManagerLoaded='+BoolToStr(Twain.SourceManagerLoaded));
+  listCount :=Twain.SourceCount;
+  Memo2.Lines.Add('    Twain.SourceCount='+IntToStr(listCount));
+  if (listCount>0) and (AIndex>=0) and (AIndex<listCount) then
+  begin
+    Twain.SelectedSourceIndex:=AIndex;
+    if Assigned(Twain.SelectedSource) then
+    begin
+      Memo2.Lines.Add(' Take from '+Twain.SelectedSource.ProductName);
+      aPath:=ExtractFilePath(ParamStr(0))+'test_0.bmp';
+      Memo2.Lines.Add(' Path='+aPath);
+
+      if FileExists(aPath)
+      then DeleteFile(aPath);
+
+      Twain.SelectedSource.Loaded := TRUE;
+      Twain.SelectedSource.ShowUI := False;//display interface
+      Twain.SelectedSource.Modal:=False;
+      Twain.SelectedSource.TransferMode:=ttmFile;
+      Twain.SelectedSource.SetupFileTransfer(aPath, tfBMP);
+      Twain.SelectedSource.EnableSource(False, True);
+
+      i:=0;
+      while (i<300) and not(FileExists(aPath)) do
+      begin
+        CheckSynchronize(100);
+        Application.ProcessMessages;
+        inc(i);
+      end;
+
+      if FileExists(aPath)
+      then Memo2.Lines.Add(' Take DONE ')
+      else Memo2.Lines.Add(' Take NOT DONE ');
+    end;
+  end
+  else Memo2.Lines.Add('    AIndex out of Bounds');
+
+  if rTwain<>nil then FreeAndNil(rTwain);
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+Var
+     recBuf:pTW_IDENTITY=nil;
+     curBuf:pTW_IDENTITY;
+     recSize, i, count:Integer;
+     resType:TMessageType;
+     aPath:String;
+     res:Boolean;
+
+begin
+    i:=StrToInt(edDevTest.Text);
+    Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_OPEN : '+IntToStr(i));
+    resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtSync_Integer, i, 0, res, recSize);
+    if (resType=mtSync_Integer) and (res=True) then
+    begin
+      aPath:=ExtractFilePath(ParamStr(0))+'test_take.bmp';
+      Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_TAKE : '+aPath);
+      resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_TAKE, mtSync_String, aPath, 0, res, recSize);
+      if (resType=mtSync_Integer) and (res=True)
+      then Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_TAKE : DONE')
+      else Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_TAKE : FAIL');
+    end
+    else Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_OPEN : FAIL')
+end;
+
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   if CommsClient<>nil then CommsClient.Free;
@@ -420,6 +505,21 @@ begin
 
     lbClient.Visible:=CommsClient.ServerRunning;
   end;
+end;
+
+function TForm1.getTwain: TDelphiTwain;
+begin
+  //Create Twain
+  if (rTwain = nil) then
+  begin
+    rTwain := TDelphiTwain.Create;
+   // rTwain.OnTwainAcquire := @TwainTwainAcquire;
+
+    //Load Twain Library dynamically
+    rTwain.LoadLibrary;
+  end;
+
+  Result :=rTwain;
 end;
 
 end.

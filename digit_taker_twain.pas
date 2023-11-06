@@ -21,7 +21,6 @@ type
   { TDigIt_Taker_Twain }
   TDigIt_Taker_Twain = class(TDigIt_Taker)
   private
-  private
     rTwain:TCustomDelphiTwain;
     rCommsClient:TSyncIPCClient;
     ipcProcess:TProcess;
@@ -79,10 +78,10 @@ begin
     ipcProcess :=TProcess.Create(nil);
     ipcProcess.CurrentDirectory :=ApplicationDir;
     ipcProcess.Executable :=ApplicationDir+TWAIN32_SERVER_EXE;
-    Process.Options := Process.Options + [poNoConsole];
+    ipcProcess.Options := ipcProcess.Options + [poNoConsole];
     ipcProcess.Execute;
     i:=0;
-    while (i<100) and not(ipcProcess.Running) do
+    while (i<300) and not(ipcProcess.Running) do
     begin
       CheckSynchronize(100);
       inc(i);
@@ -95,7 +94,7 @@ begin
     rCommsClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
     rCommsClient.Connect;
     i:=0;
-    while (i<100) and not(rCommsClient.ServerRunning) do
+    while (i<300) and not(rCommsClient.ServerRunning) do
     begin
       CheckSynchronize(100);
       rCommsClient.Connect;
@@ -163,7 +162,8 @@ end;
 
 function TDigIt_Taker_Twain.IPC_OpenDevice(AIndex: Integer): Boolean;
 var
-   recSize, recBuf:Longint;
+   recSize:Longint;
+   recBuf:Boolean;
    resType:TMessageType;
 
 begin
@@ -171,7 +171,7 @@ begin
   try
      resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtSync_Integer, AIndex, 0, recBuf, recSize);
      if (resType=mtSync_Integer)
-     then Result:=Boolean(recBuf);
+     then Result:=recBuf;
 
   except
   end;
@@ -179,7 +179,8 @@ end;
 
 function TDigIt_Taker_Twain.IPC_Take(AFileName: String): Boolean;
 var
-   recSize, recBuf:Longint;
+   recSize:Longint;
+   recBuf:Boolean;
    resType:TMessageType;
 
 begin
@@ -187,7 +188,7 @@ begin
   try
      resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_TAKE, mtSync_String, AFileName, 0, recBuf, recSize);
      if (resType=mtSync_Integer)
-     then Result:=Boolean(recBuf);
+     then Result:=recBuf;
 
   except
   end;
@@ -203,9 +204,9 @@ begin
   begin
     resType :=rCommsClient.SendSyncMessage(30000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
     //No need to test RES_TWAIN32_STOPPED
-    ipcProcess.Free;
     rCommsClient.Free;
   end;
+  FreeAndNil(ipcProcess);
 end;
 
 (*

@@ -51,7 +51,7 @@ begin
     begin
       curItem :=lvSources.Items.Add;
       curItem.Caption:=Twain.Source[i].ProductName;
-      curItem.SubItems.Add(Twain.Source[i].ProductFamily);
+      //curItem.SubItems.Add(Twain.Source[i].ProductFamily);
       curItem.SubItems.Add(Twain.Source[i].Manufacturer);
     end;
 
@@ -59,7 +59,7 @@ begin
     begin
       curItem :=lvSources.Items.Add;
       curItem.Caption:=ipcList[i].ProductName;
-      curItem.SubItems.Add(ipcList[i].ProductFamily);
+      //curItem.SubItems.Add(ipcList[i].ProductFamily);
       curItem.SubItems.Add(ipcList[i].Manufacturer);
       curItem.SubItems.Add('(32bit)');
     end;

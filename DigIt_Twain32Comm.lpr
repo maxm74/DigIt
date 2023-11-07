@@ -212,8 +212,35 @@ begin
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_FIND(AIdentity: TW_IDENTITY): Boolean;
-begin
+var
+  res: Integer;
 
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_FIND: '+AIdentity.Manufacturer);
+      Writeln('               '+AIdentity.ProductFamily);
+      Writeln('               '+AIdentity.ProductName);
+     {$endif}
+
+     Twain.SourceManagerLoaded :=True;
+     res :=Twain.FindSource(AIdentity.Manufacturer, AIdentity.ProductFamily, AIdentity.ProductName);
+     Result:=MessageResult(res);
+
+     {$ifopt D+}
+      Writeln(' TWAIN32_FIND Result: '+IntToStr(res));
+     {$endif}
+
+  except
+   On E:Exception do
+   begin
+     Result :=MessageResult(-1);
+     {$ifopt D+}
+     Application.ShowException(E);
+     {$endif}
+   end;
+  end;
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_OPEN(AIndex:Integer): Boolean;

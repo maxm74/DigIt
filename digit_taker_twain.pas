@@ -35,6 +35,7 @@ type
    // procedure TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap; var Cancel: Boolean);
 
     function IPC_GetDevicesList:Integer;
+    function IPC_FindSource(AManufacturer, AProductFamily, AProductName:String):Integer;
     function IPC_OpenDevice(AIndex:Integer):Boolean;
     function IPC_Take(AFileName:String):Boolean;
     procedure FreeCommsClient;
@@ -160,6 +161,26 @@ begin
   end;
 end;
 
+function TDigIt_Taker_Twain.IPC_FindSource(AManufacturer, AProductFamily, AProductName: String): Integer;
+var
+   recSize, recBuf:Longint;
+   AIdentity:TW_IDENTITY;
+   resType:TMessageType;
+
+begin
+  Result :=-1;
+  try
+     AIdentity.Manufacturer:=AManufacturer;
+     AIdentity.ProductFamily:=AProductFamily;
+     AIdentity.ProductName:=AProductName;
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_FIND, mtSync_Var, AIdentity, sizeof(TW_IDENTITY), recBuf, recSize);
+     if (resType=mtSync_Integer)
+     then Result:=recBuf;
+
+  except
+  end;
+end;
+
 function TDigIt_Taker_Twain.IPC_OpenDevice(AIndex: Integer): Boolean;
 var
    recSize:Longint;
@@ -202,7 +223,10 @@ var
 begin
   if (rCommsClient<>nil) then
   begin
+    //In Debug Stop the Process Manually
+    {$ifopt D-}
     resType :=rCommsClient.SendSyncMessage(30000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
+    {$endif}
     //No need to test RES_TWAIN32_STOPPED
     rCommsClient.Free;
   end;
@@ -337,8 +361,6 @@ begin
      selectedSource :=TTwainSelectSource.Execute(Twain, ipcSourceList, False, -1);
      if (selectedSource>-1) then
      begin
-          //Result :=Assigned(Twain.SelectedSource);
-
        SelectedSourceIPC :=(selectedSource>=countTwain_Source);
        if SelectedSourceIPC
        then begin
@@ -377,28 +399,40 @@ end;
 procedure TDigIt_Taker_Twain.Params_Set(newParams: TPersistent);
 begin
   rParams :=newParams;
-  Twain.SourceManagerLoaded :=True;
   with TDigIt_Taker_TwainParams(rParams) do
   begin
-    { #todo 10 -oMaxM : Use an internal Method so we can select 32bit Scanners via IPC }
-
     if IPC_Scanner
-    then SelectedSourceIndex :=-1
-    else SelectedSourceIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
+    then SelectedSourceIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
+    else begin
+           Twain.SourceManagerLoaded :=True;
+           SelectedSourceIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
+         end;
 
     if (SelectedSourceIndex=-1)
     then begin
            { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
            Params_GetFromUser;
          end
-    else Twain.SelectedSourceIndex:=SelectedSourceIndex;
-
-    if Assigned(Twain.SelectedSource) then
-    begin
-      Manufacturer :=Twain.SelectedSource.Manufacturer;
-      ProductFamily :=Twain.SelectedSource.ProductFamily;
-      ProductName :=Twain.SelectedSource.ProductName;
-    end;
+    else begin
+           SelectedSourceIPC :=IPC_Scanner;
+           if IPC_Scanner
+           then begin
+                  if IPC_OpenDevice(SelectedSourceIndex) then
+                  begin
+                  end;
+                  { #todo 1 -oMaxM : else ? }
+                end
+           else begin
+                  Twain.SelectedSourceIndex:=SelectedSourceIndex;
+                  if Assigned(Twain.SelectedSource) then
+                  begin
+                    Manufacturer :=Twain.SelectedSource.Manufacturer;
+                    ProductFamily :=Twain.SelectedSource.ProductFamily;
+                    ProductName :=Twain.SelectedSource.ProductName;
+                  end;
+                  { #todo 1 -oMaxM : else ? }
+                end;
+         end;
   end;
 end;
 

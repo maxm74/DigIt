@@ -1,0 +1,14 @@
+10/10/2023 First Test Twain source load/save; some UI adjust
+11/10/2023 First write of Twain Taker; use WaitForAFile in main Window
+16/10/2023 TDigIt_Taker.Create always call Params_Set; Twain params store only Scanner name
+17/10/2023 First Implementation of Sync IPC
+18/10/2023 Complete rewrite of IPC with formal Parameters
+20/10/2023 moved SyncIPC to syncipc.pp file (maybe tomorrow in fcl-process)
+25/10/2023 First Twain32 Communication Server App; Twain32Comm first Message (Stop); Folder reorganization
+27/10/2023 Twain32 bit Communication Server and Test Client
+30/10/2023 corrected Taker Params Load; First write of Twain Select Form with IPC List
+31/10/2023 first write of IPC_OPEN and IPC_TAKE in Client and Server
+06/11/2023 MessageLoop in 32bitServer; MSG_TWAIN32_TIMEOUT;SelectForm show only ProductName/Manufacturer
+07/11/2023 TWAIN32_FIND implementation in 32bitServer; IPC_FindSource in Twain Taker
+
+

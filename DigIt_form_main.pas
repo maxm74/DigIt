@@ -137,11 +137,12 @@ type
     tbTake: TToolButton;
     tbReTake: TToolButton;
     ToolButton1: TToolButton;
-    ToolButton2: TToolButton;
-    ToolButton3: TToolButton;
-    ToolButton5: TToolButton;
+    tbTest2: TToolButton;
+    tbTest1: TToolButton;
+    tbWorkSave: TToolButton;
+    tbSep1: TToolButton;
     tbMenu: TToolButton;
-    ToolButton6: TToolButton;
+    tbSource: TToolButton;
     tbPreview: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
@@ -212,10 +213,11 @@ type
     procedure DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
+    procedure tbWorkSaveClick(Sender: TObject);
 
     procedure TestClick(Sender: TObject);
     procedure TestRClick(Sender: TObject);
-    procedure ToolButton2Click(Sender: TObject);
+    procedure tbTest2Click(Sender: TObject);
   private
     { private declarations }
     lastNewBoxNum: Word;
@@ -399,6 +401,11 @@ begin
   BuildTakersMenu(Self, menuTakers, @TakerMenuClick);
   lbTakerSummary.Caption:='';
   BuildSaveFormats;
+  {$ifopt D+}
+  tbTest1.Visible:=True;
+  tbWorkSave.Visible:=True;
+  tbTest2.Visible:=True;
+  {$endif}
 end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
@@ -899,23 +906,28 @@ begin
   try
     //Stage=prePaint
     itemRect :=Item.DisplayRect(drBounds);
-    Bitmap := TBGRABitmap.Create;
-    Bitmap.LoadFromFile(TFileListItem(Item).FileName);
-    GetThumnailSize(itemRect.Width, itemRect.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
-    destRect.Left:=itemRect.Left+((itemRect.Width-newWidth) div 2);
-    destRect.Top:=itemRect.Top+((itemRect.Height-newHeight) div 2);
-    destRect.Width:=newWidth;
-    destRect.Height:=newHeight;
-    BitmapR :=Bitmap.Resample(newWidth, newHeight);
-    BitmapR.Draw(lvCaptured.Canvas, destRect, True);
-    DefaultDraw:=True;
-    {$ifopt D+}
-      DebugLn('draw='+IntToStr(Item.Index));
-    {$endif}
-  finally
-    Bitmap.Free;
-    BitmapR.Free;
+    if FileExists(TFileListItem(Item).FileName)
+    then begin
+           Bitmap := TBGRABitmap.Create;
+           Bitmap.LoadFromFile(TFileListItem(Item).FileName);
+           GetThumnailSize(itemRect.Width, itemRect.Height, Bitmap.Width, Bitmap.Height, newWidth, newHeight);
+           destRect.Left:=itemRect.Left+((itemRect.Width-newWidth) div 2);
+           destRect.Top:=itemRect.Top+((itemRect.Height-newHeight) div 2);
+           destRect.Width:=newWidth;
+           destRect.Height:=newHeight;
+           BitmapR :=Bitmap.Resample(newWidth, newHeight);
+           BitmapR.Draw(lvCaptured.Canvas, destRect, True);
+           Bitmap.Free;
+           BitmapR.Free;
+           {$ifopt D+}
+             DebugLn('draw='+IntToStr(Item.Index));
+           {$endif}
+         end
+    else Item.ImageIndex:=0;
+  except
+    Item.ImageIndex:=0;
   end;
+  DefaultDraw:=True;
 end;
 
 procedure TDigIt_Main.lvCapturedDblClick(Sender: TObject);
@@ -1531,6 +1543,11 @@ begin
    UI_FillBox(imgManipulation.SelectedCropArea);
 end;
 
+procedure TDigIt_Main.tbWorkSaveClick(Sender: TObject);
+begin
+  Self.XML_SaveWork;
+end;
+
 procedure TDigIt_Main.TestClick(Sender: TObject);
 var
    Twain: TDelphiTwain=nil;
@@ -1600,7 +1617,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.ToolButton2Click(Sender: TObject);
+procedure TDigIt_Main.tbTest2Click(Sender: TObject);
 var
    tt:TListItem;
 

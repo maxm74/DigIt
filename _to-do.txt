@@ -1,0 +1,9 @@
+Main:
+  Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
+  Animazione durante la scansione
+
+Twain:
+  In Realease non avvia subito il 32bit e non lo chiude in uscita (singola istanza?)
+  Inviare Dimensioni  Pagina / DPI allo Scanner
+  DPI Minori (100?) nel preview
+

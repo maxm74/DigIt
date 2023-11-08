@@ -114,7 +114,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="13">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -176,6 +176,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Digit_Taker_Twain_SelectForm"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="_to-do.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit12>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

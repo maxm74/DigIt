@@ -10,5 +10,6 @@
 31/10/2023 first write of IPC_OPEN and IPC_TAKE in Client and Server
 06/11/2023 MessageLoop in 32bitServer; MSG_TWAIN32_TIMEOUT;SelectForm show only ProductName/Manufacturer
 07/11/2023 TWAIN32_FIND implementation in 32bitServer; IPC_FindSource in Twain Taker
+08/11/2023 Captured Images Icon of Image not Found; First Release Full Test
 
 

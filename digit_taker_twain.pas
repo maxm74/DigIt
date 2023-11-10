@@ -15,18 +15,20 @@ interface
 
 uses
   simpleipc, syncipc, Process, Classes, SysUtils, Digit_Bridge, Digit_Taker_Twain_Types,
-  Twain, DelphiTwain;
+  Twain, DelphiTwain, Digit_Taker_Twain_SelectForm;
 
 type
   { TDigIt_Taker_Twain }
   TDigIt_Taker_Twain = class(TDigIt_Taker)
   private
     rTwain:TCustomDelphiTwain;
-    rCommsClient:TSyncIPCClient;
     ipcProcess:TProcess;
+    rCommsClient:TSyncIPCClient;
     ipcSourceList:array of TW_IDENTITY;
     SelectedSourceIPC:Boolean;
-    SelectedSourceIndex:Integer;
+    SelectedSourceIndex,
+    countTwain_Source,
+    countIPC_Source,
     iTempFile:Integer;
 
     function getCommsClient: TSyncIPCClient;
@@ -39,6 +41,8 @@ type
     function IPC_OpenDevice(AIndex:Integer):Boolean;
     function IPC_Take(AFileName:String):Boolean;
     procedure FreeCommsClient;
+
+    procedure RefreshList(ASender:TTwainSelectSource);
 
     property Twain: TCustomDelphiTwain read getTwain;
     property CommsClient:TSyncIPCClient read getCommsClient;
@@ -62,7 +66,7 @@ type
 
 implementation
 
-uses Digit_Types, Digit_Taker_Twain_SelectForm, BGRABitmapTypes;
+uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes;
 
 { TDigIt_Taker_Twain }
 
@@ -70,39 +74,63 @@ function TDigIt_Taker_Twain.getCommsClient: TSyncIPCClient;
 var
    i:Integer;
 
-begin
-  //Create Twain
-  if (rCommsClient = nil) then
-  try
-    //In Debug Start the Process Manually
-    {$ifopt D-}
-    ipcProcess :=TProcess.Create(nil);
-    ipcProcess.CurrentDirectory :=ApplicationDir;
-    ipcProcess.Executable :=ApplicationDir+TWAIN32_SERVER_EXE;
-    ipcProcess.Options := ipcProcess.Options + [poNoConsole];
-    ipcProcess.Execute;
-    i:=0;
-    while (i<300) and not(ipcProcess.Running) do
-    begin
-      CheckSynchronize(100);
-      inc(i);
-    end;
-    if not(ipcProcess.Running)
-    then raise Exception.Create(TWAIN32_SERVER_EXE+' not Running...');
-    {$endif}
+   function isServerRunning(waitToStart:Boolean):Boolean;
+   begin
+     Result :=False;
+     try
+        if (rCommsClient = nil) then
+        begin
+          rCommsClient := TSyncIPCClient.Create(nil);
+          rCommsClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
+        end;
 
-    rCommsClient := TSyncIPCClient.Create(nil);
-    rCommsClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
-    rCommsClient.Connect;
-    i:=0;
-    while (i<300) and not(rCommsClient.ServerRunning) do
+        if waitToStart
+        then begin
+               i:=0;
+               repeat
+                 sleep(100);
+                 try
+                    rCommsClient.Connect;
+                    inc(i);
+                    Result :=rCommsClient.ServerRunning;
+                 except
+                   Result :=False;
+                 end;
+               until (i>666) or Result;
+             end
+        else begin
+               rCommsClient.Connect;
+               Result :=rCommsClient.ServerRunning;
+             end;
+
+     except
+       FreeAndNil(rCommsClient);
+     end;
+   end;
+
+begin
+  try
+    //if server is running do not start again
+    if not(isServerRunning(false)) then
     begin
-      CheckSynchronize(100);
-      rCommsClient.Connect;
-      inc(i);
+      if (ipcProcess = nil) then
+      begin
+        ipcProcess :=TProcess.Create(nil);
+        ipcProcess.CurrentDirectory :=ApplicationDir;
+        ipcProcess.Executable :=ApplicationDir+TWAIN32_SERVER_EXE;
+        ipcProcess.StartupOptions:=[suoUseShowWindow];
+        {$ifopt D+}
+        ipcProcess.ShowWindow := swoShow;
+        {$else}
+        ipcProcess.Options:=[poDetached];
+        ipcProcess.ShowWindow := swoHIDE;
+        {$endif}
+        ipcProcess.Execute;
+
+        if not(isServerRunning(true))
+        then raise Exception.Create(TWAIN32_SERVER_NAME+' not Running...');
+      end;
     end;
-    if not(rCommsClient.ServerRunning)
-    then raise Exception.Create(TWAIN32_SERVER_NAME+' not Running...');
 
   except
     FreeAndNil(rCommsClient);
@@ -154,6 +182,7 @@ begin
          Inc(curBuf);
        end;
        FreeMem(recBuf, recSize);
+       Result:=count;
      end;
 
   except
@@ -228,7 +257,7 @@ begin
     resType :=rCommsClient.SendSyncMessage(30000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
     {$endif}
     //No need to test RES_TWAIN32_STOPPED
-    rCommsClient.Free;
+    FreeAndNil(rCommsClient);
   end;
   FreeAndNil(ipcProcess);
 end;
@@ -245,7 +274,6 @@ end;
 constructor TDigIt_Taker_Twain.Create(aParams: TPersistent);
 begin
   rTwain:=nil;
-  ipcProcess:=nil;
   rCommsClient:=nil;
   SelectedSourceIPC:=False;
   SelectedSourceIndex:=-1;
@@ -342,10 +370,19 @@ begin
   Result :=Take;
 end;
 
+procedure TDigIt_Taker_Twain.RefreshList(ASender:TTwainSelectSource);
+begin
+  //Load source manager and Enumerate Internal Devices
+  Twain.SourceManagerLoaded :=False;
+  Application.ProcessMessages; { #todo -oMaxM : Is really necessary? }
+  Twain.SourceManagerLoaded :=True;
+  countTwain_Source:=Twain.SourceCount;
+  countIPC_Source :=IPC_GetDevicesList;
+  ASender.FillList(ipcSourceList);
+end;
+
 function TDigIt_Taker_Twain.Params_GetFromUser: Boolean;
 var
-  countTwain_Source,
-  countIPC_Source,
   selectedSource:Integer;
 
 begin
@@ -358,7 +395,7 @@ begin
 
      countIPC_Source :=IPC_GetDevicesList;
 
-     selectedSource :=TTwainSelectSource.Execute(Twain, ipcSourceList, False, -1);
+     selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, False, -1);
      if (selectedSource>-1) then
      begin
        SelectedSourceIPC :=(selectedSource>=countTwain_Source);
@@ -397,22 +434,35 @@ begin
 end;
 
 procedure TDigIt_Taker_Twain.Params_Set(newParams: TPersistent);
+var
+   dlgRes:TModalResult;
+
 begin
   rParams :=newParams;
   with TDigIt_Taker_TwainParams(rParams) do
   begin
-    if IPC_Scanner
-    then SelectedSourceIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
-    else begin
-           Twain.SourceManagerLoaded :=True;
-           SelectedSourceIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
-         end;
+    SelectedSourceIndex :=-1;
+    repeat
+      if IPC_Scanner
+      then SelectedSourceIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
+      else begin
+             Twain.SourceManagerLoaded :=False;
+             Application.ProcessMessages; { #todo -oMaxM : Is really necessary? }
+             Twain.SourceManagerLoaded :=True;
+             SelectedSourceIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
+           end;
+
+      if (SelectedSourceIndex=-1)
+      then begin
+             { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
+             if (MessageDlg('DigIt Twain', 'Device not found...'#13#10+
+                            ProductName+#13#10+Manufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
+             then break;
+           end;
+    until (SelectedSourceIndex>-1);
 
     if (SelectedSourceIndex=-1)
-    then begin
-           { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
-           Params_GetFromUser;
-         end
+    then Params_GetFromUser
     else begin
            SelectedSourceIPC :=IPC_Scanner;
            if IPC_Scanner

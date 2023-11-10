@@ -181,6 +181,8 @@ begin
       Writeln(' TWAIN32_LIST:');
      {$endif}
 
+     Twain.SourceManagerLoaded :=False; //So we Refresh Devices List
+     Application.MsgRunLoop;
      Twain.SourceManagerLoaded :=True;
      listCount :=Twain.SourceCount;
      Result :=(listCount>0);
@@ -224,6 +226,8 @@ begin
       Writeln('               '+AIdentity.ProductName);
      {$endif}
 
+     Twain.SourceManagerLoaded :=False; //So we Refresh Devices List
+     Application.MsgRunLoop;
      Twain.SourceManagerLoaded :=True;
      res :=Twain.FindSource(AIdentity.Manufacturer, AIdentity.ProductFamily, AIdentity.ProductName);
      Result:=MessageResult(res);
@@ -292,6 +296,10 @@ begin
 
      if Assigned(Twain.SelectedSource) then
      begin
+       {$ifopt D+}
+        Writeln('               ['+IntToStr(Twain.SelectedSource.Index)+'] '+Twain.SelectedSource.ProductName);
+       {$endif}
+
        Twain.SelectedSource.Loaded := TRUE;
        Twain.SelectedSource.ShowUI := False;//display interface
        Twain.SelectedSource.Modal:=False;

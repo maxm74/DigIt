@@ -1,11 +1,11 @@
-unit syncipc_unit1;
+unit DigIt_tests_main;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
+  Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_Types;
 
 type
@@ -36,38 +36,38 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    btInt1: TButton;
-    btString: TButton;
-    btRectVar: TButton;
-    btInt: TButton;
-    btStream: TButton;
-    btPRect: TButton;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
+    btStop: TButton;
+    btList: TButton;
+    btIntCapture: TButton;
+    btCapture: TButton;
+    btIntCap: TButton;
+    btIntList: TButton;
+    cbModalCapture: TCheckBox;
+    cbShowUI: TCheckBox;
     Edit1: TEdit;
     Edit2: TEdit;
     edDevTest: TEdit;
+    Label1: TLabel;
     lbServer: TLabel;
     lbClient: TLabel;
     Memo2: TMemo;
-    SpeedButton1: TSpeedButton;
-    SpeedButton2: TSpeedButton;
-    procedure btInt1Click(Sender: TObject);
-    procedure btStringClick(Sender: TObject);
-    procedure btRectVarClick(Sender: TObject);
-    procedure btIntClick(Sender: TObject);
-    procedure btStreamClick(Sender: TObject);
-    procedure btPRectClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    btServer: TSpeedButton;
+    btClient: TSpeedButton;
+    procedure btStopClick(Sender: TObject);
+    procedure btListClick(Sender: TObject);
+    procedure btIntCaptureClick(Sender: TObject);
+    procedure btCaptureClick(Sender: TObject);
+    procedure btIntCapClick(Sender: TObject);
+    procedure btIntListClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
-    procedure SpeedButton2Click(Sender: TObject);
+    procedure btServerClick(Sender: TObject);
+    procedure btClientClick(Sender: TObject);
   private
-    rTwain:TDelphiTwain;
+     rTwain:TDelphiTwain;
+     Twain_Source:TTwainSource;
+     Twain_SourceI:Integer;
+     astr:String;
 
     function getTwain: TDelphiTwain;
   private
@@ -98,22 +98,7 @@ begin
     Form1.Memo2.Lines.Add('MessageReceived (mtSync_Null) : '+IntToStr(AMsgID));
 
     Case AMsgID of
-      7: begin
-            SetLength(resBuf, 2);
-            resBuf[0].Left:=1;
-            resBuf[0].Top:=100;
-            resBuf[0].Right:=1000;
-            resBuf[0].Bottom:=10000;
-            resBuf[1].Left:=2;
-            resBuf[1].Top:=200;
-            resBuf[1].Right:=2000;
-            resBuf[1].Bottom:=20000;
-            Result :=MessageResult(Pointer(resBuf), 2*sizeof(TRect));
-            SetLength(resBuf, 0);
-    end;
-
     MSG_TWAIN32_LIST : Result:=TWAIN32_LIST;
-
     end;
 end;
 
@@ -182,30 +167,24 @@ var
 begin
   Form1.Memo2.Lines.Add('MessageReceived (mtSync_Integer) : '+IntToStr(AMsgID)+'-'+IntToHex(AInteger)+' ('+IntToStr(IntegerSize)+')');
 
-  Case AMsgID of
-  3: Result :=MessageResult($ABCDEF0);
-  end;
+(*  Case AMsgID of
+  end; *)
 end;
 
 function TTestSyncIPCServer.MessageReceived(AMsgID: Integer; AStream: TStream): Boolean;
 begin
   Form1.Memo2.Lines.Add('MessageReceived (mtSync_Stream) : '+IntToStr(AMsgID)+' ('+IntToStr(AStream.Size)+')');
 
-  Case AMsgID of
-  4: begin
-        AStream.WriteAnsiString('Reply to SyncMessage 4 as Stream');
-        Result :=MessageResult(AStream);
-  end;
-  end;
+  (*  Case AMsgID of
+    end; *)
 end;
 
 function TTestSyncIPCServer.MessageReceived(AMsgID: Integer; const Msg: String): Boolean;
 begin
   Form1.Memo2.Lines.Add('MessageReceived (mtSync_String) : '+IntToStr(AMsgID)+'-'+Msg);
 
-  Case AMsgID of
-  1: Result :=MessageResult('Ciao son Sync Result for '+IntToStr(AMsgID));
-  end;
+  (*  Case AMsgID of
+    end; *)
 end;
 
 function TTestSyncIPCServer.MessageReceived(AMsgID: Integer; const Buffer; Count: LongInt): Boolean;
@@ -215,16 +194,8 @@ var
 begin
   Form1.Memo2.Lines.Add('MessageReceived (mtSync_Var) : '+IntToStr(AMsgID)+' ('+IntToStr(Count)+')');
 
-  Case AMsgID of
-    2: begin
-      resRect.Top:=TRect(Buffer).Top+33;
-      resRect.Left:=TRect(Buffer).Left+66;
-      resRect.Bottom:=TRect(Buffer).Bottom+100;
-      resRect.Right:=TRect(Buffer).Right+200;
-      Result :=MessageResult(resRect, sizeof(TRect));
-  end;
-
-  end;
+  (*  Case AMsgID of
+    end; *)
 end;
 
 function TTestSyncIPCServer.MessageReceived(AMsgID: Integer; const APointer: Pointer; Count: LongInt): Boolean;
@@ -232,23 +203,15 @@ type PRect=^TRect;
 begin
   Form1.Memo2.Lines.Add('MessageReceived (mtSync_Pointer) : '+IntToStr(AMsgID)+' ('+IntToStr(Count)+')');
 
-  Case AMsgID of
-    5: begin
-      PRect(APointer)^.Top:=PRect(APointer)^.Top+33;
-      PRect(APointer)^.Left:=PRect(APointer)^.Left+66;
-      PRect(APointer)^.Bottom:=PRect(APointer)^.Bottom+100;
-      PRect(APointer)^.Right:=PRect(APointer)^.Right+200;
-      Result :=MessageResult(APointer, sizeof(TRect));
-  end;
-
-  end;
+  (*  Case AMsgID of
+    end; *)
 end;
 
 
 { TForm1 }
 
 
-procedure TForm1.SpeedButton1Click(Sender: TObject);
+procedure TForm1.btServerClick(Sender: TObject);
 begin
   if CommsServer=nil then
   begin
@@ -263,18 +226,7 @@ begin
   end;
 end;
 
-procedure TForm1.btStringClick(Sender: TObject);
-Var
-   recStr:String;
-   resType:TMessageType;
-
-begin
-  Memo2.Lines.Add('SendSyncMessage 1 (mtSync_String):');
-  resType :=CommsClient.SendSyncMessage(30000, 1, 'Ciao SyncMsg1', recStr);
-  Memo2.Lines.Add('SendSyncMessage 1 Return ('+IntToStr(resType)+'):'+recStr);
-end;
-
-procedure TForm1.btInt1Click(Sender: TObject);
+procedure TForm1.btStopClick(Sender: TObject);
 Var
    recSize, recBuf:Longint;
    resType:TMessageType;
@@ -288,106 +240,11 @@ begin
   end;
 end;
 
-procedure TForm1.btRectVarClick(Sender: TObject);
-Var
-   recBuf:TRect;
-   recSize:Integer;
-   resType:TMessageType;
-
-begin
-  recBuf.Top:=666;
-  recBuf.Left:=999;
-  recBuf.Bottom:=789;
-  recBuf.Right:=456;
-  recSize:=sizeof(TRect);
-  Memo2.Lines.Add('SendSyncMessage 2 (mtSync_Var):'+#13#10+
-        IntToStr(recBuf.Top)+'-'+IntToStr(recBuf.Left)+'-'+IntToStr(recBuf.Bottom)+'-'+IntToStr(recBuf.Right));
-  resType :=CommsClient.SendSyncMessage(30000, 2, mtSync_Var, recBuf, recSize, recBuf, recSize);
-  if (resType=mtSync_Var) then
-  begin
-    Memo2.Lines.Add('SendSyncMessage 2 Return ('+IntToStr(resType)+'):'+#13#10+
-          IntToStr(recBuf.Top)+'-'+IntToStr(recBuf.Left)+'-'+IntToStr(recBuf.Bottom)+'-'+IntToStr(recBuf.Right));
-  end;
-end;
-
-procedure TForm1.btIntClick(Sender: TObject);
-Var
-   recSize, recBuf, msg:Longint;
-   resType:TMessageType;
-
-begin
-  msg:=$1BCDEF23;
-  Memo2.Lines.Add('SendSyncMessage 3 (mtSync_Integer):'+IntToHex(msg));
-  resType :=CommsClient.SendSyncMessage(30000, 3, mtSync_Integer, msg, 0, recBuf, recSize);
-  if (resType=mtSync_Integer) then
-  begin
-    Memo2.Lines.Add('SendSyncMessage 3 Return ('+IntToStr(resType)+'):'+IntToHex(recBuf)+'-'+IntToStr(recSize));
-  end;
-end;
-
-procedure TForm1.btStreamClick(Sender: TObject);
-Var
-   recSize:Integer;
-   recBuf:TMemoryStream;
-   res:TMemoryStream=nil;
-   resType:TMessageType;
-   retStr:String;
-
-begin
-  recBuf:=TMemoryStream.Create;
-  recBuf.WriteAnsiString('SyncMessage 4 as Stream25');
-  Memo2.Lines.Add('SendSyncMessage 4 (mtSync_Stream): "SyncMessage 4 as Stream25"');
-  recSize:=recBuf.Size;
-  (*  //Test with Result on a new Stream
-  resType :=CommsClient.SendSyncMessage(30000, 4, mtSync_Stream, recBuf, 0, res, recSize);
-  if (resType=mtSync_Stream) then
-  begin
-    res.Position:=0;
-    retStr:=res.ReadAnsiString;
-    Memo2.Lines.Add('SendSyncMessage 4 Return ('+IntToStr(resType)+' - '+IntToStr(recSize)+'):'+retStr+' - '+IntToStr(Integer(res.Size)));
-  end;
-  *)
-  //Test with Result on the same stream
-  resType :=CommsClient.SendSyncMessage(30000, 4, mtSync_Stream, recBuf, 0, recBuf, recSize);
-  if (resType=mtSync_Stream) then
-  begin
-    retStr:=recBuf.ReadAnsiString;
-    retStr:=recBuf.ReadAnsiString;
-    Memo2.Lines.Add('SendSyncMessage 4 Return ('+IntToStr(resType)+' - '+IntToStr(recSize)+'):'+retStr+' - '+IntToStr(Integer(recBuf.Size)));
-  end;
-  recBuf.Free;
-  if res<>nil then res.Free;
-end;
-
-procedure TForm1.btPRectClick(Sender: TObject);
-Var
-   recBuf:^TRect;
-   recSize, msg:Integer;
-   resType:TMessageType;
-
-begin
-  GetMem(recBuf, SizeOf(TRect));
-  recBuf^.Top:=666;
-  recBuf^.Left:=999;
-  recBuf^.Bottom:=789;
-  recBuf^.Right:=456;
-  recSize:=sizeof(TRect);
-  Memo2.Lines.Add('SendSyncMessage 5 (mtSync_Pointer):'+#13#10+
-        IntToStr(recBuf^.Top)+'-'+IntToStr(recBuf^.Left)+'-'+IntToStr(recBuf^.Bottom)+'-'+IntToStr(recBuf^.Right));
-  resType :=CommsClient.SendSyncMessage(30000, 5, mtSync_Pointer, recBuf, recSize, recBuf, recSize);
-  if (resType=mtSync_Pointer) then
-  begin
-    Memo2.Lines.Add('SendSyncMessage 5 Return ('+IntToStr(resType)+'):'+#13#10+
-          IntToStr(recBuf^.Top)+'-'+IntToStr(recBuf^.Left)+'-'+IntToStr(recBuf^.Bottom)+'-'+IntToStr(recBuf^.Right));
-  end;
-  FreeMem(recBuf, recSize);
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.btListClick(Sender: TObject);
 Var
    recBuf:pTW_IDENTITY=nil;
    curBuf:pTW_IDENTITY;
-   recSize, i, count:Integer;
+   recSize, count, i:Integer;
    resType:TMessageType;
 
 begin
@@ -407,16 +264,16 @@ begin
   FreeMem(recBuf, recSize);
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.btIntCaptureClick(Sender: TObject);
 var
-   listCount, i, AIndex: Integer;
+   listCount,  AIndex, i: Integer;
    aPath:String;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
   Memo2.Lines.Add(' Test Twain on Device '+IntToStr(AIndex));
   Twain.SourceManagerLoaded :=True;
-  Memo2.Lines.Add('    Twain.SourceManagerLoaded='+BoolToStr(Twain.SourceManagerLoaded));
+  Memo2.Lines.Add('    Twain.SourceManagerLoaded='+BoolToStr(Twain.SourceManagerLoaded, true));
   listCount :=Twain.SourceCount;
   Memo2.Lines.Add('    Twain.SourceCount='+IntToStr(listCount));
   if (listCount>0) and (AIndex>=0) and (AIndex<listCount) then
@@ -432,19 +289,20 @@ begin
       then DeleteFile(aPath);
 
       Twain.SelectedSource.Loaded := TRUE;
-      Twain.SelectedSource.ShowUI := False;//display interface
-      Twain.SelectedSource.Modal:=False;
+     // Twain.SelectedSource.ShowUI := False;//display interface
+     // Twain.SelectedSource.Modal:=False;
       Twain.SelectedSource.TransferMode:=ttmFile;
       Twain.SelectedSource.SetupFileTransfer(aPath, tfBMP);
-      Twain.SelectedSource.EnableSource(False, True);
+      Memo2.Lines.Add('  ActiveFormHandle='+Screen.ActiveCustomForm.name);
+      Twain.SelectedSource.EnableSource(cbShowUI.Checked, cbModalCapture.Checked, Application.ActiveFormHandle);
 
       i:=0;
-      while (i<300) and not(FileExists(aPath)) do
-      begin
-        CheckSynchronize(100);
+      repeat
+        Memo2.Lines.Add('.');
+        CheckSynchronize(10);
         Application.ProcessMessages;
         inc(i);
-      end;
+      until FileExists(APath) or (i>500);
 
       if FileExists(aPath)
       then Memo2.Lines.Add(' Take DONE ')
@@ -456,7 +314,7 @@ begin
   if rTwain<>nil then FreeAndNil(rTwain);
 end;
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TForm1.btCaptureClick(Sender: TObject);
 Var
      recBuf:pTW_IDENTITY=nil;
      curBuf:pTW_IDENTITY;
@@ -481,6 +339,65 @@ begin
     else Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_OPEN : FAIL')
 end;
 
+procedure TForm1.btIntCapClick(Sender: TObject);
+var
+   listCount,  AIndex, i: Integer;
+   aPath:String;
+   capHandle: HGLOBAL;
+   capContainer: TW_UINT16;
+   capRet: TCapabilityRet;
+   ArrayV:pTW_ENUMERATION;
+
+   ItemType: TW_UINT16;
+   List: TGetCapabilityList;
+   Current, Default: Integer;
+   capOps:TCapabilityOperations;
+
+begin
+  AIndex:=StrToInt(edDevTest.Text);
+  Memo2.Lines.Add(' Test Twain on Device '+IntToStr(AIndex));
+  Twain.SourceManagerLoaded :=True;
+  Memo2.Lines.Add('    Twain.SourceManagerLoaded='+BoolToStr(Twain.SourceManagerLoaded, true));
+  listCount :=Twain.SourceCount;
+  Memo2.Lines.Add('    Twain.SourceCount='+IntToStr(listCount));
+  if (listCount>0) and (AIndex>=0) and (AIndex<listCount) then
+  begin
+    Twain.SelectedSourceIndex:=AIndex;
+    if Assigned(Twain.SelectedSource) then
+    begin
+     // capRet :=Twain.SelectedSource.GetCapabilityRec(ICAP_SUPPORTEDSIZES, capHandle, rcGet, capContainer);
+      Twain.SelectedSource.Loaded:=True;
+      //ItemType:=TWTY_UINT16;
+      capRet :=Twain.SelectedSource.GetEnumerationValue(ICAP_SUPPORTEDSIZES, ItemType, List, Current, Default, rcGet, 0);
+ //     ArrayV := GlobalLock(capHandle);
+
+      {Unlock memory and unallocate}
+ //     GlobalUnlock(capHandle);
+ //     GlobalFree(capHandle);
+       Memo2.Lines.Add('ICAP_SUPPORTEDSIZES Current='+IntToStr(Current)+' Default='+IntToStr(Default));
+       for i:=Low(List) to High(List) do
+         Memo2.Lines.Add(' ['+IntToStr(i)+']='+List[i]);
+
+       capOps :=Twain.SelectedSource.GetCapabilitySupportedOp(ICAP_SUPPORTEDSIZES);
+
+       Twain.SelectedSource.Loaded:=False;
+    end;
+  end;
+end;
+
+procedure TForm1.btIntListClick(Sender: TObject);
+var
+   i:Integer;
+
+begin
+  Twain.SourceManagerLoaded := TRUE;
+  for i:=0 to Twain.SourceCount-1 do
+  begin
+    aStr:=Twain.Source[i].ProductName;
+    Memo2.Lines.Add('['+IntToStr(i)+']: '+aStr);
+  end;
+end;
+
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   if CommsClient<>nil then CommsClient.Free;
@@ -492,7 +409,7 @@ begin
   Caption:=ExtractFileName(ParamStr(0))+' - '+IntToStr(Sizeof(Integer));
 end;
 
-procedure TForm1.SpeedButton2Click(Sender: TObject);
+procedure TForm1.btClientClick(Sender: TObject);
 begin
   if CommsClient=nil then
   begin

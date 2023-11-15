@@ -1,4 +1,4 @@
-program syncipctest;
+program DigIt_tests;
 
 {$mode objfpc}{$H+}
 
@@ -10,7 +10,7 @@ uses
   athreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, syncipc_unit1, Digit_Taker_Twain_Types;
+  Forms, DigIt_tests_main;
 
 {$R *.res}
 

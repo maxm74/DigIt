@@ -1,0 +1,161 @@
+object Form1: TForm1
+  Left = 249
+  Height = 304
+  Top = 122
+  Width = 555
+  Caption = 'Form1'
+  ClientHeight = 304
+  ClientWidth = 555
+  LCLVersion = '3.99.0.0'
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  object btServer: TSpeedButton
+    Left = 16
+    Height = 38
+    Top = 10
+    Width = 103
+    AllowAllUp = True
+    Caption = 'Server'
+    Enabled = False
+    GroupIndex = 1
+    OnClick = btServerClick
+  end
+  object btClient: TSpeedButton
+    Left = 144
+    Height = 38
+    Top = 10
+    Width = 103
+    AllowAllUp = True
+    Caption = 'Client'
+    GroupIndex = 1
+    OnClick = btClientClick
+  end
+  object Memo2: TMemo
+    Left = 8
+    Height = 192
+    Top = 104
+    Width = 328
+    TabOrder = 0
+  end
+  object Edit1: TEdit
+    Left = 150
+    Height = 23
+    Top = 59
+    Width = 106
+    TabOrder = 1
+    Text = 'DigIt_Twain32CommServer'
+  end
+  object Edit2: TEdit
+    Left = 16
+    Height = 23
+    Top = 56
+    Width = 106
+    Enabled = False
+    TabOrder = 2
+    Text = 'DigIt_Twain32CommServer'
+  end
+  object lbServer: TLabel
+    Left = 18
+    Height = 15
+    Top = 82
+    Width = 95
+    Caption = 'SERVER RUNNING'
+    Enabled = False
+    Visible = False
+  end
+  object lbClient: TLabel
+    Left = 152
+    Height = 15
+    Top = 82
+    Width = 94
+    Caption = 'CLIENT RUNNING'
+    Visible = False
+  end
+  object btStop: TButton
+    Left = 344
+    Height = 25
+    Top = 152
+    Width = 123
+    Caption = 'Send STOP (IPC)'
+    TabOrder = 3
+    OnClick = btStopClick
+  end
+  object btList: TButton
+    Left = 344
+    Height = 25
+    Top = 88
+    Width = 123
+    Caption = 'List Twain (IPC)'
+    TabOrder = 4
+    OnClick = btListClick
+  end
+  object btIntCapture: TButton
+    Left = 344
+    Height = 25
+    Top = 271
+    Width = 123
+    Caption = 'Capture'
+    TabOrder = 5
+    OnClick = btIntCaptureClick
+  end
+  object edDevTest: TEdit
+    Left = 427
+    Height = 23
+    Top = 56
+    Width = 40
+    TabOrder = 6
+    Text = '2'
+  end
+  object btCapture: TButton
+    Left = 344
+    Height = 25
+    Top = 120
+    Width = 123
+    Caption = 'Capture (IPC)'
+    TabOrder = 7
+    OnClick = btCaptureClick
+  end
+  object btIntCap: TButton
+    Left = 344
+    Height = 25
+    Top = 247
+    Width = 123
+    Caption = 'List Capabilities'
+    TabOrder = 8
+    OnClick = btIntCapClick
+  end
+  object btIntList: TButton
+    Left = 344
+    Height = 25
+    Top = 223
+    Width = 123
+    Caption = 'List Twain'
+    TabOrder = 9
+    OnClick = btIntListClick
+  end
+  object Label1: TLabel
+    Left = 347
+    Height = 15
+    Top = 59
+    Width = 74
+    Caption = 'Device to Use:'
+  end
+  object cbModalCapture: TCheckBox
+    Left = 472
+    Height = 19
+    Top = 280
+    Width = 52
+    Caption = 'Modal'
+    Checked = True
+    State = cbChecked
+    TabOrder = 10
+  end
+  object cbShowUI: TCheckBox
+    Left = 472
+    Height = 19
+    Top = 263
+    Width = 58
+    Caption = 'ShowUI'
+    TabOrder = 11
+  end
+end

@@ -1570,44 +1570,6 @@ begin
   finally
      Twain.Free
   end;
-(*
-    if Twain = nil then
-    begin
-      Twain := TDelphiTwain.Create;
-      Twain.OnTwainAcquire := @TwainTwainAcquire;
-    end;
-
-    //Load Twain Library dynamically
-    if Twain.LoadLibrary then
-    begin
-      //Load source manager
-      Twain.SourceManagerLoaded := TRUE;
-
-    (*  Twain_Source:=TTwainSource.Create(Twain);
-      ReadPersistentFromXMLConfig(XMLWork, 'ScanTest', '', Twain_Source);
-      Twain_SourceI:=Twain.FindSource(Twain_Source);
-      Twain.SelectedSourceIndex:=Twain_SourceI;  *)
-
-      //Allow user to select source -> only the first time
-      if not Assigned(Twain.SelectedSource) then
-        Twain.SelectSource;
-
-      if Assigned(Twain.SelectedSource) then
-      begin
-        //Load source, select transference method and enable (display interface)}
-        Twain.SelectedSource.Loaded := TRUE;
-        //Twain.SelectedSource.ShowUI := TRUE;//display interface
-        Twain.SelectedSource.Enabled := True;
-
-//        WritePersistentToXMLConfig(XMLWork, 'ScanTest', '', Twain.SelectedSource);
-      end;
-
-    end else begin
-      ShowMessage('Twain is not installed.');
-    end;
-  finally
-  end;
-  *)
 end;
 
 procedure TDigIt_Main.TestRClick(Sender: TObject);

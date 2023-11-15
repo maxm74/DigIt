@@ -16,6 +16,7 @@ type
   TTwain32SyncIPCServer=class(TSyncIPCServer)
   private
     rTwain:TCustomDelphiTwain;
+    rUserInterface:TW_USERINTERFACE;
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -29,6 +30,7 @@ type
     function TWAIN32_LIST:Boolean; //Input=mtSync_Null Output=mtSync_Pointer (array of TW_IDENTITY)
     function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer
     function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
+    function TWAIN32_USERINTERFACE(AUserInterface:TW_USERINTERFACE):Boolean; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
     function TWAIN32_TAKE(APath:String):Boolean; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
 
     function getTwain: TCustomDelphiTwain;
@@ -124,6 +126,7 @@ function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; const Buffer; Co
 begin
   Case AMsgID of
   MSG_TWAIN32_FIND : Result:=TWAIN32_FIND(TW_IDENTITY(Buffer));
+  MSG_TWAIN32_USERINTERFACE : Result:=TWAIN32_USERINTERFACE(TW_USERINTERFACE(Buffer));
   else begin
          {$ifopt D+}
          Writeln('MSG_Unknown:'+IntToStr(AMsgID));
@@ -283,6 +286,32 @@ begin
   end;
 end;
 
+function TTwain32SyncIPCServer.TWAIN32_USERINTERFACE(AUserInterface: TW_USERINTERFACE): Boolean;
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_USERINTERFACE: ShowUI='+BoolToStr(AUserInterface.ShowUI, True));
+      Writeln('                        ModalUI='+BoolToStr(AUserInterface.ModalUI, True));
+      Writeln('                        hParent='+IntToStr(AUserInterface.hParent));
+     {$endif}
+
+     rUserInterface:=AUserInterface;
+     {$ifopt D+}
+      Writeln(' TWAIN32_USERINTERFACE Result: '+BoolToStr(Result, True));
+     {$endif}
+
+  except
+    On E:Exception do
+    begin
+      Result :=False;
+      {$ifopt D+}
+      Application.ShowException(E);
+      {$endif}
+    end;
+  end;
+end;
+
 function TTwain32SyncIPCServer.TWAIN32_TAKE(APath: String): Boolean;
 var
    i:Integer;
@@ -301,14 +330,17 @@ begin
        {$endif}
 
        Twain.SelectedSource.Loaded := TRUE;
-       Twain.SelectedSource.ShowUI := False;//display interface
-       Twain.SelectedSource.Modal:=False;
+       //Twain.SelectedSource.ShowUI := False;//display interface
+       //Twain.SelectedSource.Modal:=False;
        Twain.SelectedSource.TransferMode:=ttmFile;
        Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
-       Twain.SelectedSource.EnableSource(False, True);
+       Twain.SelectedSource.EnableSource(rUserInterface); //False, True);
 
        i:=0;
        repeat
+          {$ifopt D+}
+           Write('.');
+          {$endif}
          CheckSynchronize(10);
          Application.MsgRunLoop;
          inc(i);
@@ -319,6 +351,7 @@ begin
      end;
 
      {$ifopt D+}
+      Writeln;
       Writeln(' TWAIN32_TAKE Result: '+BoolToStr(Result, True));
      {$endif}
 
@@ -401,6 +434,10 @@ end;
 constructor TTwain32SyncIPCServer.Create(AOwner: TComponent);
 begin
   rTwain:=nil;
+  rUserInterface.ShowUI:=False;
+  rUserInterface.ModalUI:=True;
+  rUserInterface.hParent:=0;
+
   inherited Create(AOwner);
 end;
 

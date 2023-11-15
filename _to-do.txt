@@ -2,11 +2,14 @@ Main:
   Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
   Animazione durante la scansione
   Take attivo con nessuna Crop Area?
+riprendi sessione : barra di captured alla fine
+pagina in orrizzontale
 
 
 Twain:
   avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??
 xTestare di più(Risolto?)  In Realease non avvia subito il 32bit e non lo chiude in uscita (singola istanza?)
   Inviare Dimensioni  Pagina / DPI allo Scanner
-  DPI Minori (100?) nel preview
+  DPI Minori 75 nel preview
+capabilities per negativi, etc... b/n luminosità
 

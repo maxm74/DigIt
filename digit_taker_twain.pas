@@ -34,8 +34,8 @@ type
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
     procedure SetTwainTranferMode;
-   // procedure TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap; var Cancel: Boolean);
 
+    function IPC_Callback(AElapsedTime:DWord; AMsgID:Integer):Boolean;
     function IPC_GetDevicesList:Integer;
     function IPC_FindSource(AManufacturer, AProductFamily, AProductName:String):Integer;
     function IPC_OpenDevice(AIndex:Integer):Boolean;
@@ -66,7 +66,9 @@ type
 
 implementation
 
-uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes;
+uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes
+ // ,DigIt_Form_AnimAcquiring
+  ;
 
 { TDigIt_Taker_Twain }
 
@@ -82,6 +84,7 @@ var
         begin
           rCommsClient := TSyncIPCClient.Create(nil);
           rCommsClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
+          //rCommsClient.MsgCallback:=@IPC_Callback;    { #note 5 -oMaxM : ?? don't work }
         end;
 
         if waitToStart
@@ -159,6 +162,18 @@ procedure TDigIt_Taker_Twain.SetTwainTranferMode;
 begin
 end;
 
+function TDigIt_Taker_Twain.IPC_Callback(AElapsedTime: DWord; AMsgID: Integer): Boolean;
+begin
+(*  if (FormAnimAcquiring<>nil)
+  then begin
+         Result:=FormAnimAcquiring.Aborted;
+         FormAnimAcquiring.Repaint;
+  end
+  else Result :=False;
+
+  Application.ProcessMessages; *)
+end;
+
 function TDigIt_Taker_Twain.IPC_GetDevicesList: Integer;
 var
    recBuf:pTW_IDENTITY=nil;
@@ -215,10 +230,20 @@ var
    recSize:Longint;
    recBuf:Boolean;
    resType:TMessageType;
+   aUserInterface:TW_USERINTERFACE;
 
 begin
   Result :=False;
   try
+     aUserInterface.ShowUI:=False;
+     aUserInterface.ModalUI:=True;
+     aUserInterface.hParent:=Application.ActiveFormHandle;
+
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_USERINTERFACE, mtSync_Var,
+                                                  aUserInterface, SizeOf(TW_USERINTERFACE), recBuf, recSize);
+     if (resType=mtSync_Integer)
+     then Result:=recBuf;
+
      resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtSync_Integer, AIndex, 0, recBuf, recSize);
      if (resType=mtSync_Integer)
      then Result:=recBuf;
@@ -331,6 +356,8 @@ function TDigIt_Taker_Twain.Take: String;
 begin
   try
      Result :='';
+   //  TFormAnimAcquiring.Execute;
+    Application.ProcessMessages;
 
      //Delete previous scanned file
      if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
@@ -338,30 +365,34 @@ begin
 
      if SelectedSourceIPC
      then begin
+            Application.ProcessMessages;
             if IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')
             then begin
                    Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
                    Inc(iTempFile);
                  end
             else Result:='';
+            Application.ProcessMessages;
           end
      else begin
             if Assigned(Twain.SelectedSource)
             then begin
+                   Application.ProcessMessages;
                    Twain.SelectedSource.Loaded := TRUE;
-                   Twain.SelectedSource.ShowUI := False;//display interface
-                   Twain.SelectedSource.Modal:=False;
+                   //Twain.SelectedSource.ShowUI := False;//display interface
+                   //Twain.SelectedSource.Modal:=False;
                    Twain.SelectedSource.TransferMode:=ttmFile;
                    Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
-                   Twain.SelectedSource.EnableSource(False, True);
+                   Twain.SelectedSource.EnableSource(False, True, Application.ActiveFormHandle);
                    Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
                    Inc(iTempFile);
+                   Application.ProcessMessages;
                  end
             else Result:='';
           end;
 
-
   finally
+   // FreeAndNil(FormAnimAcquiring);
   end;
 end;
 

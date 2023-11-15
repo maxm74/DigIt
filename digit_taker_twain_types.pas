@@ -24,7 +24,8 @@ const
   MSG_TWAIN32_LIST = 102; //Input=mtSync_Null Output=mtSync_Pointer (array of TW_IDENTITY)
   MSG_TWAIN32_FIND = 103; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer
   MSG_TWAIN32_OPEN = 104; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
-  MSG_TWAIN32_TAKE = 105; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
+  MSG_TWAIN32_USERINTERFACE = 105; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
+  MSG_TWAIN32_TAKE = 106; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
 
   RES_TWAIN32_STOPPED = $0CACA; //:-( A message for you in Italian...
 

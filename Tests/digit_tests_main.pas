@@ -355,6 +355,7 @@ var
    ItemType: TW_UINT16;
    List: TGetCapabilityList;
    Current, Default: Integer;
+   tCurrent, tDefault, tList: TTwainPaperSize;
    capOps:TCapabilityOperationSet;
 
 begin
@@ -369,18 +370,20 @@ begin
     Twain.SelectedSourceIndex:=AIndex;
     if Assigned(Twain.SelectedSource) then
     begin
-     // capRet :=Twain.SelectedSource.GetCapabilityRec(ICAP_SUPPORTEDSIZES, capHandle, rcGet, capContainer);
       Twain.SelectedSource.Loaded:=True;
-      //ItemType:=TWTY_UINT16;
       capRet :=Twain.SelectedSource.GetEnumerationValue(ICAP_SUPPORTEDSIZES, ItemType, List, Current, Default, rcGet, 0);
- //     ArrayV := GlobalLock(capHandle);
 
-      {Unlock memory and unallocate}
- //     GlobalUnlock(capHandle);
- //     GlobalFree(capHandle);
-       Memo2.Lines.Add('ICAP_SUPPORTEDSIZES Current='+IntToStr(Current)+' Default='+IntToStr(Default));
+      tCurrent :=TWSS_ToTwainPaperSize(Current);
+      tDefault :=TWSS_ToTwainPaperSize(Default);
+      Memo2.Lines.Add('ICAP_SUPPORTEDSIZES'+#13#10+
+         'Default='+IntToStr(Default)+' ->'+PaperSizesTwain[tDefault].name+'('+FloatToStr(PaperSizesTwain[tDefault].w)+' x '+FloatToStr(PaperSizesTwain[tDefault].h)+')'+#13#10+
+         'Current='+IntToStr(Current)+' ->'+PaperSizesTwain[tCurrent].name+'('+FloatToStr(PaperSizesTwain[tCurrent].w)+' x '+FloatToStr(PaperSizesTwain[tCurrent].h)+')'+#13#10+'List:');
+
        for i:=Low(List) to High(List) do
-         Memo2.Lines.Add(' ['+IntToStr(i)+']='+List[i]);
+       begin
+         tList :=TWSS_ToTwainPaperSize(StrToInt(List[i]));
+         Memo2.Lines.Add(' ['+IntToStr(i)+']='+List[i]+' ->'+PaperSizesTwain[tList].name+'('+FloatToStr(PaperSizesTwain[tList].w)+' x '+FloatToStr(PaperSizesTwain[tList].h)+')')
+       end;
 
        capOps :=Twain.SelectedSource.GetCapabilitySupportedOp(ICAP_SUPPORTEDSIZES);
 

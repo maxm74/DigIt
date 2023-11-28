@@ -35,6 +35,7 @@ object Form1: TForm1
     Height = 192
     Top = 104
     Width = 328
+    ScrollBars = ssAutoBoth
     TabOrder = 0
   end
   object Edit1: TEdit

@@ -92,7 +92,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\..\Packages\DelphiTwain\units"/>
+      <OtherUnitFiles Value="..\..\..\Packages\DelphiTwain\units;.."/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

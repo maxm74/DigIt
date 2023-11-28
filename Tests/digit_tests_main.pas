@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_Types;
+  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL;
 
 type
   { TTestSyncIPCServer }
@@ -42,11 +42,14 @@ type
     btCapture: TButton;
     btIntCap: TButton;
     btIntList: TButton;
+    Button1: TButton;
     cbModalCapture: TCheckBox;
     cbShowUI: TCheckBox;
     Edit1: TEdit;
     Edit2: TEdit;
     edDevTest: TEdit;
+    edOth1: TEdit;
+    edOth2: TEdit;
     Label1: TLabel;
     lbServer: TLabel;
     lbClient: TLabel;
@@ -59,6 +62,7 @@ type
     procedure btCaptureClick(Sender: TObject);
     procedure btIntCapClick(Sender: TObject);
     procedure btIntListClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btServerClick(Sender: TObject);
@@ -84,9 +88,9 @@ var
 
 implementation
 
+uses Digit_Taker_Twain_Types;
 
 {$R *.lfm}
-
 
 { TTestSyncIPCServer }
 
@@ -351,7 +355,7 @@ var
    ItemType: TW_UINT16;
    List: TGetCapabilityList;
    Current, Default: Integer;
-   capOps:TCapabilityOperations;
+   capOps:TCapabilityOperationSet;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -396,6 +400,16 @@ begin
     aStr:=Twain.Source[i].ProductName;
     Memo2.Lines.Add('['+IntToStr(i)+']: '+aStr);
   end;
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+var
+   r:TTwainPaperSize;
+
+begin
+  r :=GetTwainPaperSize(StrToFloat(edOth1.Text), StrToFloat(edOth2.Text));
+  Memo2.Lines.Add('Paper closest to '+edOth1.Text+' x '+edOth2.Text+' is :'+
+     PaperSizesTwain[r].name+'('+FloatToStr(PaperSizesTwain[r].w)+' x '+FloatToStr(PaperSizesTwain[r].h)+')');
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);

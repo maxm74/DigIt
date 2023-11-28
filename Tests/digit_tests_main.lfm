@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 249
+  Left = 382
   Height = 304
-  Top = 122
+  Top = 204
   Width = 555
   Caption = 'Form1'
   ClientHeight = 304
@@ -157,5 +157,30 @@ object Form1: TForm1
     Width = 58
     Caption = 'ShowUI'
     TabOrder = 11
+  end
+  object Button1: TButton
+    Left = 343
+    Height = 25
+    Top = 8
+    Width = 75
+    Caption = 'Other Tests'
+    TabOrder = 12
+    OnClick = Button1Click
+  end
+  object edOth1: TEdit
+    Left = 424
+    Height = 23
+    Top = 12
+    Width = 43
+    TabOrder = 13
+    Text = '21'
+  end
+  object edOth2: TEdit
+    Left = 472
+    Height = 23
+    Top = 12
+    Width = 43
+    TabOrder = 14
+    Text = '29'
   end
 end

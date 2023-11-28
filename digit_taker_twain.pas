@@ -33,9 +33,7 @@ type
 
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
-    procedure SetTwainTranferMode;
 
-    function IPC_Callback(AElapsedTime:DWord; AMsgID:Integer):Boolean;
     function IPC_GetDevicesList:Integer;
     function IPC_FindSource(AManufacturer, AProductFamily, AProductName:String):Integer;
     function IPC_OpenDevice(AIndex:Integer):Boolean;
@@ -84,7 +82,6 @@ var
         begin
           rCommsClient := TSyncIPCClient.Create(nil);
           rCommsClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
-          //rCommsClient.MsgCallback:=@IPC_Callback;    { #note 5 -oMaxM : ?? don't work }
         end;
 
         if waitToStart
@@ -149,29 +146,12 @@ begin
   if (rTwain = nil) then
   begin
     rTwain := TCustomDelphiTwain.Create;
-   // rTwain.OnTwainAcquire := @TwainTwainAcquire;
 
     //Load Twain Library dynamically
     rTwain.LoadLibrary;
   end;
 
   Result :=rTwain;
-end;
-
-procedure TDigIt_Taker_Twain.SetTwainTranferMode;
-begin
-end;
-
-function TDigIt_Taker_Twain.IPC_Callback(AElapsedTime: DWord; AMsgID: Integer): Boolean;
-begin
-(*  if (FormAnimAcquiring<>nil)
-  then begin
-         Result:=FormAnimAcquiring.Aborted;
-         FormAnimAcquiring.Repaint;
-  end
-  else Result :=False;
-
-  Application.ProcessMessages; *)
 end;
 
 function TDigIt_Taker_Twain.IPC_GetDevicesList: Integer;
@@ -286,15 +266,6 @@ begin
   end;
   FreeAndNil(ipcProcess);
 end;
-
-(*
-procedure TDigIt_Taker_Twain.TwainTwainAcquire(Sender: TObject; const Index: Integer; Image: TBitmap;
-  var Cancel: Boolean);
-begin
-  //  ImageHolder.Picture.Bitmap.Assign(Image);
-    Cancel := True;//Only want one image
-end;
-*)
 
 constructor TDigIt_Taker_Twain.Create(aParams: TPersistent);
 begin
@@ -485,7 +456,6 @@ begin
 
       if (SelectedSourceIndex=-1)
       then begin
-             { #todo 1 -oMaxM : Scanner not find, A Message to User with Retry }
              if (MessageDlg('DigIt Twain', 'Device not found...'#13#10+
                             ProductName+#13#10+Manufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
              then break;

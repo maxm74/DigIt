@@ -664,7 +664,7 @@ end;
 procedure TDigIt_Main.ItemSizesClick(Sender: TObject);
 var
    ResUnit: TResolutionUnit;
-   Paper: TPaperSize;
+   Paper: BGRAPapers.TPaperSize;
    CropArea :TCropArea;
 
 begin
@@ -683,7 +683,7 @@ end;
 procedure TDigIt_Main.PageSizesClick(Sender: TObject);
 var
    ResUnit: TResolutionUnit;
-   Paper: TPaperSize;
+   Paper: BGRAPapers.TPaperSize;
 
 begin
   if (Sender<>nil) then

@@ -91,7 +91,7 @@
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="7">
+    <RequiredPackages Count="6">
       <Item1>
         <PackageName Value="DelphiTwain_pkg"/>
       </Item1>
@@ -99,22 +99,19 @@
         <PackageName Value="LazControls"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControlDsgn"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item3>
       <Item4>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="bgracontrols"/>
       </Item4>
       <Item5>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="Pexpandpanels"/>
       </Item5>
       <Item6>
-        <PackageName Value="Pexpandpanels"/>
-      </Item6>
-      <Item7>
         <PackageName Value="LCL"/>
-      </Item7>
+      </Item6>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="14">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -188,10 +185,6 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_Form_AnimAcquiring"/>
       </Unit13>
-      <Unit14>
-        <Filename Value="syncipc.pp"/>
-        <IsPartOfProject Value="True"/>
-      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

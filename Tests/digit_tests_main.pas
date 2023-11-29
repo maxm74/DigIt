@@ -293,6 +293,12 @@ begin
       then DeleteFile(aPath);
 
       Twain.SelectedSource.Loaded := TRUE;
+
+      Twain.SelectedSource.SetPaperSize(TTwainPaperSize(StrToInt(edOth1.Text)));
+      Twain.SelectedSource.SetIXResolution(StrToFloat(edOth2.Text));
+      Twain.SelectedSource.SetIYResolution(StrToFloat(edOth2.Text));
+
+
      // Twain.SelectedSource.ShowUI := False;//display interface
      // Twain.SelectedSource.Modal:=False;
       Twain.SelectedSource.TransferMode:=ttmFile;
@@ -357,6 +363,9 @@ var
    Current, Default: Integer;
    tCurrent, tDefault, tList: TTwainPaperSize;
    capOps:TCapabilityOperationSet;
+   paperList:TTwainPaperSizeSet;
+   resolutionList:TTwainResolution;
+   resolutionCurrent:Extended;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -371,10 +380,11 @@ begin
     if Assigned(Twain.SelectedSource) then
     begin
       Twain.SelectedSource.Loaded:=True;
+      (*
       capRet :=Twain.SelectedSource.GetEnumerationValue(ICAP_SUPPORTEDSIZES, ItemType, List, Current, Default, rcGet, 0);
 
-      tCurrent :=TWSS_ToTwainPaperSize(Current);
-      tDefault :=TWSS_ToTwainPaperSize(Default);
+      tCurrent :=TWSS_ToTwainPaperSize(StrToInt(List[Current]));
+      tDefault :=TWSS_ToTwainPaperSize(StrToInt(List[Default]));
       Memo2.Lines.Add('ICAP_SUPPORTEDSIZES'+#13#10+
          'Default='+IntToStr(Default)+' ->'+PaperSizesTwain[tDefault].name+'('+FloatToStr(PaperSizesTwain[tDefault].w)+' x '+FloatToStr(PaperSizesTwain[tDefault].h)+')'+#13#10+
          'Current='+IntToStr(Current)+' ->'+PaperSizesTwain[tCurrent].name+'('+FloatToStr(PaperSizesTwain[tCurrent].w)+' x '+FloatToStr(PaperSizesTwain[tCurrent].h)+')'+#13#10+'List:');
@@ -385,9 +395,33 @@ begin
          Memo2.Lines.Add(' ['+IntToStr(i)+']='+List[i]+' ->'+PaperSizesTwain[tList].name+'('+FloatToStr(PaperSizesTwain[tList].w)+' x '+FloatToStr(PaperSizesTwain[tList].h)+')')
        end;
 
-       capOps :=Twain.SelectedSource.GetCapabilitySupportedOp(ICAP_SUPPORTEDSIZES);
+       //capOps :=Twain.SelectedSource.GetCapabilitySupportedOp(ICAP_SUPPORTEDSIZES);
+       *)
 
-       Twain.SelectedSource.Loaded:=False;
+       Twain.SelectedSource.GetPaperSizeSet(tCurrent, tDefault, paperList);
+       Memo2.Lines.Add(#13#10+'SUPPORTED SIZES:'+#13#10+
+          'Default='+PaperSizesTwain[tDefault].name+'('+FloatToStr(PaperSizesTwain[tDefault].w)+' x '+FloatToStr(PaperSizesTwain[tDefault].h)+')'+#13#10+
+          'Current='+PaperSizesTwain[tCurrent].name+'('+FloatToStr(PaperSizesTwain[tCurrent].w)+' x '+FloatToStr(PaperSizesTwain[tCurrent].h)+')'+#13#10+'List:');
+
+        for tList in paperList do
+        begin
+          Memo2.Lines.Add(IntToStr(Integer(tList))+'='+PaperSizesTwain[tList].name+'('+FloatToStr(PaperSizesTwain[tList].w)+' x '+FloatToStr(PaperSizesTwain[tList].h)+')')
+        end;
+
+        tCurrent :=GetTwainPaperSize(StrToFloat(edOth1.Text), StrToFloat(edOth2.Text), paperList);
+        Memo2.Lines.Add('--- '+edOth1.Text+' x '+edOth2.Text+' closest to : '+PaperSizesTwain[tCurrent].name);
+
+        capRet :=Twain.SelectedSource.GetIXResolution(resolutionCurrent, resolutionList);
+        Memo2.Lines.Add(#13#10+'Resolutions X:');
+        for i:=Low(resolutionList) to High(resolutionList) do
+         Memo2.Lines.Add('['+IntToStr(i)+'] = '+FloatToStr(resolutionList[i]));
+
+        capRet :=Twain.SelectedSource.GetIYResolution(resolutionCurrent, resolutionList);
+        Memo2.Lines.Add(#13#10+'Resolutions Y:');
+        for i:=Low(resolutionList) to High(resolutionList) do
+         Memo2.Lines.Add('['+IntToStr(i)+'] = '+FloatToStr(resolutionList[i]));
+
+       //Twain.SelectedSource.Loaded:=False;
     end;
   end;
 end;

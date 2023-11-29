@@ -2,10 +2,10 @@ object Form1: TForm1
   Left = 382
   Height = 304
   Top = 204
-  Width = 555
+  Width = 657
   Caption = 'Form1'
   ClientHeight = 304
-  ClientWidth = 555
+  ClientWidth = 657
   LCLVersion = '3.99.0.0'
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -152,9 +152,9 @@ object Form1: TForm1
     TabOrder = 10
   end
   object cbShowUI: TCheckBox
-    Left = 472
+    Left = 528
     Height = 19
-    Top = 263
+    Top = 280
     Width = 58
     Caption = 'ShowUI'
     TabOrder = 11
@@ -169,17 +169,17 @@ object Form1: TForm1
     OnClick = Button1Click
   end
   object edOth1: TEdit
-    Left = 424
+    Left = 472
     Height = 23
-    Top = 12
+    Top = 192
     Width = 43
     TabOrder = 13
     Text = '21'
   end
   object edOth2: TEdit
-    Left = 472
+    Left = 520
     Height = 23
-    Top = 12
+    Top = 192
     Width = 43
     TabOrder = 14
     Text = '29'

@@ -24,6 +24,7 @@ type
   { TDigIt_Main }
 
   TDigIt_Main = class(TForm)
+    actSourceOpt: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
     actRotateRight: TAction;
@@ -144,6 +145,8 @@ type
     tbMenu: TToolButton;
     tbSource: TToolButton;
     tbPreview: TToolButton;
+    tbSourceOpt: TToolButton;
+    ToolButton3: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
@@ -213,6 +216,7 @@ type
     procedure DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
+    procedure tbSourceClick(Sender: TObject);
     procedure tbWorkSaveClick(Sender: TObject);
 
     procedure TestClick(Sender: TObject);
@@ -1541,6 +1545,15 @@ begin
 
    cbBoxList.ItemIndex:=newIndex;
    UI_FillBox(imgManipulation.SelectedCropArea);
+end;
+
+procedure TDigIt_Main.tbSourceClick(Sender: TObject);
+var
+   coo:TPoint;
+
+begin
+  coo :=tbSource.ClientToScreen(Point(0, tbSource.ClientHeight));
+  tbSource.DropdownMenu.PopUp(coo.X, coo.Y);
 end;
 
 procedure TDigIt_Main.tbWorkSaveClick(Sender: TObject);

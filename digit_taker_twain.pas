@@ -15,7 +15,7 @@ interface
 
 uses
   simpleipc, syncipc, Process, Classes, SysUtils, Digit_Bridge, Digit_Taker_Twain_Types,
-  Twain, DelphiTwain, Digit_Taker_Twain_SelectForm;
+  Twain, DelphiTwain, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
 
 type
   { TDigIt_Taker_Twain }
@@ -428,6 +428,8 @@ begin
                 ProductName :=Twain.SelectedSource.ProductName;
               end;
        end;
+
+
      end;
 
   finally

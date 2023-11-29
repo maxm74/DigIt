@@ -166,12 +166,12 @@
         <UnitName Value="Digit_Taker_Twain_Types"/>
       </Unit10>
       <Unit11>
-        <Filename Value="DigIt_Taker_Twain_SelectForm.pas"/>
+        <Filename Value="digit_taker_twain_settingsform.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="TwainSelectSource"/>
+        <ComponentName Value="TwainSettingsSource"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Digit_Taker_Twain_SelectForm"/>
+        <UnitName Value="Digit_Taker_Twain_SettingsForm"/>
       </Unit11>
       <Unit12>
         <Filename Value="_to-do.txt"/>

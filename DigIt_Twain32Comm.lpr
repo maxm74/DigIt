@@ -268,7 +268,11 @@ begin
      begin
        Twain.SelectedSourceIndex:=AIndex;
        Result :=(Twain.SelectedSource<>nil);
-       if Result then MessageResult(1);
+       if Result then
+       begin
+         Twain.SelectedSource.Loaded:=True;
+         MessageResult(Twain.SelectedSource.Loaded);
+       end;
      end;
 
      {$ifopt D+}

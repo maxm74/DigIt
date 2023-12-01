@@ -13,7 +13,7 @@ unit Digit_Taker_Twain_Types;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, DelphiTwain;
 
 const
   TWAIN32_SERVER_EXE = 'DigIt_Twain32Comm.exe';
@@ -36,11 +36,19 @@ type
     rManufacturer,
     rProductFamily,
     rProductName: String;
+
+    rPaperFeed:TTwainPaperFeeding;
+    rPaperSize:TTwainPaperSize;
+    rResolution:Extended;
+
   published
     property IPC_Scanner:Boolean read rIPC_Scanner write rIPC_Scanner;
     property Manufacturer: String read rManufacturer write rManufacturer;
     property ProductFamily: String read rProductFamily write rProductFamily;
     property ProductName: String read rProductName write rProductName;
+    property PaperFeed:TTwainPaperFeeding read rPaperFeed write rPaperFeed;
+    property PaperSize:TTwainPaperSize read rPaperSize write rPaperSize;
+    property Resolution:Extended read rResolution write rResolution;
 end;
 
 

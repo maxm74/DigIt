@@ -38,6 +38,9 @@ type
     function IPC_FindSource(AManufacturer, AProductFamily, AProductName:String):Integer;
     function IPC_OpenDevice(AIndex:Integer):Boolean;
     function IPC_Take(AFileName:String):Boolean;
+
+    function internalTake(AResolution:Extended): String;
+
     procedure FreeCommsClient;
 
     procedure RefreshList(ASender:TTwainSelectSource);
@@ -249,6 +252,61 @@ begin
   end;
 end;
 
+function TDigIt_Taker_Twain.internalTake(AResolution: Extended): String;
+begin
+  try
+     Result :='';
+   //  TFormAnimAcquiring.Execute;
+    Application.ProcessMessages;
+
+     //Delete previous scanned file
+     if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
+     then DeleteFile(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp');
+
+     if SelectedSourceIPC
+     then begin
+            Application.ProcessMessages;
+            if IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')  { #todo 4 -oMaxM : Resolution for Preview }
+            then begin
+                   Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
+                   Inc(iTempFile);
+                 end
+            else Result:='';
+            Application.ProcessMessages;
+          end
+     else begin
+            if Assigned(Twain.SelectedSource)
+            then begin
+                   Twain.SelectedSource.Loaded :=True;
+
+                   Application.ProcessMessages;
+
+                   with TDigIt_Taker_TwainParams(rParams) do
+                   begin
+                     //Set Parameters, (after a capture the scanner reset it to default???)
+                     Twain.SelectedSource.SetPaperFeeding(PaperFeed);
+                     Twain.SelectedSource.SetPaperSize(PaperSize);
+                   end;
+                   Twain.SelectedSource.SetIXResolution(AResolution);
+                   Twain.SelectedSource.SetIYResolution(AResolution);
+
+                   //Twain.SelectedSource.ShowUI := False;//display interface
+                   //Twain.SelectedSource.Modal:=False;
+                   Twain.SelectedSource.TransferMode:=ttmFile;
+                   Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
+                   Twain.SelectedSource.EnableSource(False, True, Application.ActiveFormHandle);
+                   Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
+                   Inc(iTempFile);
+                   Application.ProcessMessages;
+                 end
+            else Result:='';
+          end;
+
+  finally
+   // FreeAndNil(FormAnimAcquiring);
+  end;
+end;
+
 procedure TDigIt_Taker_Twain.FreeCommsClient;
 var
    recSize, recBuf:Longint;
@@ -317,59 +375,17 @@ end;
 
 function TDigIt_Taker_Twain.Preview: String;
 begin
-  try
-     Result :=Take;
-  finally
-  end;
+  Result :=internalTake(75);
 end;
 
 function TDigIt_Taker_Twain.Take: String;
 begin
-  try
-     Result :='';
-   //  TFormAnimAcquiring.Execute;
-    Application.ProcessMessages;
-
-     //Delete previous scanned file
-     if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
-     then DeleteFile(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp');
-
-     if SelectedSourceIPC
-     then begin
-            Application.ProcessMessages;
-            if IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')
-            then begin
-                   Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
-                   Inc(iTempFile);
-                 end
-            else Result:='';
-            Application.ProcessMessages;
-          end
-     else begin
-            if Assigned(Twain.SelectedSource)
-            then begin
-                   Application.ProcessMessages;
-                   Twain.SelectedSource.Loaded := TRUE;
-                   //Twain.SelectedSource.ShowUI := False;//display interface
-                   //Twain.SelectedSource.Modal:=False;
-                   Twain.SelectedSource.TransferMode:=ttmFile;
-                   Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
-                   Twain.SelectedSource.EnableSource(False, True, Application.ActiveFormHandle);
-                   Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
-                   Inc(iTempFile);
-                   Application.ProcessMessages;
-                 end
-            else Result:='';
-          end;
-
-  finally
-   // FreeAndNil(FormAnimAcquiring);
-  end;
+  Result :=internalTake(TDigIt_Taker_TwainParams(rParams).Resolution);
 end;
 
 function TDigIt_Taker_Twain.ReTake: String;
 begin
-  Result :=Take;
+  Result :=internalTake(TDigIt_Taker_TwainParams(rParams).Resolution);
 end;
 
 procedure TDigIt_Taker_Twain.RefreshList(ASender:TTwainSelectSource);
@@ -391,49 +407,62 @@ begin
   Result :=False;
   if (rParams=nil) then exit;
   try
+     if Twain.SourceManagerLoaded then
+     begin
+       //Close Current Scanner
+       if Assigned(Twain.SelectedSource) then Twain.SelectedSource.Loaded:=False;
+       Twain.SourceManagerLoaded:=False;
+     end;
+
      //Load source manager and Enumerate Internal Devices
      Twain.SourceManagerLoaded :=True;
      countTwain_Source:=Twain.SourceCount;
 
+     //Get 32bit Devices
      countIPC_Source :=IPC_GetDevicesList;
 
      selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, False, -1);
      if (selectedSource>-1) then
      begin
+       //if the index of selected device is greater than countTwain_Source then is a 32bit scanner
        SelectedSourceIPC :=(selectedSource>=countTwain_Source);
        if SelectedSourceIPC
        then begin
               SelectedSourceIndex :=selectedSource-countTwain_Source;
-              IPC_OpenDevice(SelectedSourceIndex);
+              Result :=IPC_OpenDevice(SelectedSourceIndex);
             end
        else begin
               SelectedSourceIndex :=selectedSource;
               Twain.SelectedSourceIndex :=SelectedSourceIndex;
+              Result :=(Twain.SelectedSource<>nil);
+              if Result then Twain.SelectedSource.Loaded:=True;
             end;
 
-       Result :=True;
-
-       with TDigIt_Taker_TwainParams(rParams) do
+       if Result then
        begin
-         IPC_Scanner:=SelectedSourceIPC;
-         if SelectedSourceIPC
-         then begin
-                Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
-                ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
-                ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
-              end
-         else begin
-                Manufacturer :=Twain.SelectedSource.Manufacturer;
-                ProductFamily :=Twain.SelectedSource.ProductFamily;
-                ProductName :=Twain.SelectedSource.ProductName;
-              end;
+         with TDigIt_Taker_TwainParams(rParams) do
+         begin
+           IPC_Scanner:=SelectedSourceIPC;
+           if SelectedSourceIPC
+           then begin
+                  Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
+                  ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
+                  ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
+                end
+           else begin
+                  Manufacturer :=Twain.SelectedSource.Manufacturer;
+                  ProductFamily :=Twain.SelectedSource.ProductFamily;
+                  ProductName :=Twain.SelectedSource.ProductName;
+                end;
+         end;
+
+         TTwainSettingsSource.Execute(Twain, SelectedSourceIndex, TDigIt_Taker_TwainParams(rParams));
        end;
-
-
      end;
 
   finally
     FreeAndNil(TwainSelectSource);
+    FreeAndNil(TwainSettingsSource);
   end;
 end;
 

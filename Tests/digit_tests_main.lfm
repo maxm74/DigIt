@@ -102,7 +102,7 @@ object Form1: TForm1
   object edDevTest: TEdit
     Left = 427
     Height = 23
-    Top = 56
+    Top = 192
     Width = 40
     TabOrder = 6
     Text = '2'
@@ -117,7 +117,7 @@ object Form1: TForm1
     OnClick = btCaptureClick
   end
   object btIntCap: TButton
-    Left = 344
+    Left = 343
     Height = 25
     Top = 247
     Width = 123
@@ -137,7 +137,7 @@ object Form1: TForm1
   object Label1: TLabel
     Left = 347
     Height = 15
-    Top = 59
+    Top = 195
     Width = 74
     Caption = 'Device to Use:'
   end
@@ -169,19 +169,28 @@ object Form1: TForm1
     OnClick = Button1Click
   end
   object edOth1: TEdit
-    Left = 472
+    Left = 473
     Height = 23
-    Top = 192
+    Top = 249
     Width = 43
     TabOrder = 13
     Text = '21'
   end
   object edOth2: TEdit
-    Left = 520
+    Left = 521
     Height = 23
-    Top = 192
+    Top = 249
     Width = 43
     TabOrder = 14
     Text = '29'
+  end
+  object Button2: TButton
+    Left = 473
+    Height = 25
+    Top = 225
+    Width = 75
+    Caption = 'Scan Settings'
+    TabOrder = 15
+    OnClick = Button2Click
   end
 end

@@ -14,6 +14,7 @@
 10/11/2023 Retry for Scanner not Found; Refresh in TwainSelectSource
 15/11/2023 MSG_TWAIN32_USERINTERFACE in 32bit Server; Animation in Acquire; Test cleaned and renamed
 29/11/2023 Twain First Tests with PaperSizes and Resolution
+01/12/2023 Settings on Twain (PaperFeed,Size,Resolution); TWAIN32_OPEN Select the Source
 
 
 

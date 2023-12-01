@@ -155,6 +155,7 @@ type
     procedure actRotateLeftExecute(Sender: TObject);
     procedure actRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
+    procedure actSourceOptExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
     procedure actReTakeExecute(Sender: TObject);
     procedure btCFlipHLeftClick(Sender: TObject);
@@ -459,6 +460,17 @@ begin
         LoadImage(curImageFile);
       end;
       UI_FillTaker;
+    end;
+  finally
+  end;
+end;
+
+procedure TDigIt_Main.actSourceOptExecute(Sender: TObject);
+begin
+  try
+    if (takerInst<>nil) then
+    begin
+      takerInst.Params_GetFromUser;
     end;
   finally
   end;
@@ -1643,6 +1655,7 @@ begin
   actPreview.Enabled:=(takerInst<>nil);
   actTake.Enabled:=(takerInst<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
   actReTake.Enabled:=actTake.Enabled;
+  actSourceOpt.Enabled:=(takerInst<>nil);
   if (takerInst<>nil)
   then lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary
   else lbTakerSummary.Caption:='';

@@ -249,7 +249,7 @@ object TwainSettingsSource: TTwainSettingsSource
         Width = 62
         Caption = 'Resolution :'
       end
-      object cbPaperFeeding1: TComboBox
+      object cbResolution: TComboBox
         Left = 10
         Height = 23
         Top = 114

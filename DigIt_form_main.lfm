@@ -2397,6 +2397,7 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Source Settings'
       Enabled = False
       ImageIndex = 10
+      OnExecute = actSourceOptExecute
     end
   end
   object MenuMain: TPopupMenu

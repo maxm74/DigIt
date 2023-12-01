@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL;
+  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_SettingsForm;
 
 type
   { TTestSyncIPCServer }
@@ -43,6 +43,7 @@ type
     btIntCap: TButton;
     btIntList: TButton;
     Button1: TButton;
+    Button2: TButton;
     cbModalCapture: TCheckBox;
     cbShowUI: TCheckBox;
     Edit1: TEdit;
@@ -63,6 +64,7 @@ type
     procedure btIntCapClick(Sender: TObject);
     procedure btIntListClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btServerClick(Sender: TObject);
@@ -294,9 +296,9 @@ begin
 
       Twain.SelectedSource.Loaded := TRUE;
 
-      Twain.SelectedSource.SetPaperSize(TTwainPaperSize(StrToInt(edOth1.Text)));
-      Twain.SelectedSource.SetIXResolution(StrToFloat(edOth2.Text));
-      Twain.SelectedSource.SetIYResolution(StrToFloat(edOth2.Text));
+      //Twain.SelectedSource.SetPaperSize(TTwainPaperSize(StrToInt(edOth1.Text)));
+      //Twain.SelectedSource.SetIXResolution(StrToFloat(edOth2.Text));
+      //Twain.SelectedSource.SetIYResolution(StrToFloat(edOth2.Text));
 
 
      // Twain.SelectedSource.ShowUI := False;//display interface
@@ -447,6 +449,45 @@ begin
   r :=GetTwainPaperSize(StrToFloat(edOth1.Text), StrToFloat(edOth2.Text));
   Memo2.Lines.Add('Paper closest to '+edOth1.Text+' x '+edOth2.Text+' is :'+
      PaperSizesTwain[r].name+'('+FloatToStr(PaperSizesTwain[r].w)+' x '+FloatToStr(PaperSizesTwain[r].h)+')');
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+   listCount,  AIndex, i: Integer;
+   rParams:TDigIt_Taker_TwainParams;
+
+begin
+  AIndex:=StrToInt(edDevTest.Text);
+  Memo2.Lines.Add(' Setting of Twain Device '+IntToStr(AIndex));
+  Twain.SourceManagerLoaded :=True;
+  Memo2.Lines.Add('    Twain.SourceManagerLoaded='+BoolToStr(Twain.SourceManagerLoaded, true));
+  listCount :=Twain.SourceCount;
+  Memo2.Lines.Add('    Twain.SourceCount='+IntToStr(listCount));
+  if (listCount>0) and (AIndex>=0) and (AIndex<listCount) then
+  begin
+    Twain.SelectedSourceIndex:=AIndex;
+    if Assigned(Twain.SelectedSource) then
+    begin
+      Twain.SelectedSource.Loaded:=True;
+
+      rParams:=TDigIt_Taker_TwainParams.Create;
+
+      rParams.IPC_Scanner:=False;
+      rParams.Manufacturer :=Twain.SelectedSource.Manufacturer;
+      rParams.ProductFamily :=Twain.SelectedSource.ProductFamily;
+      rParams.ProductName :=Twain.SelectedSource.ProductName;
+
+      TTwainSettingsSource.Execute(Twain, AIndex, rParams);
+
+      Twain.SelectedSource.SetPaperFeeding(rParams.PaperFeed);
+      Twain.SelectedSource.SetPaperSize(rParams.PaperSize);
+      Twain.SelectedSource.SetIXResolution(rParams.Resolution);
+      Twain.SelectedSource.SetIYResolution(rParams.Resolution);
+
+      FreeAndNil(TwainSettingsSource);
+      rParams.Free;
+    end;
+  end;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);

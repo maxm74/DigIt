@@ -274,6 +274,7 @@ procedure TForm1.btIntCaptureClick(Sender: TObject);
 var
    listCount,  AIndex, i: Integer;
    aPath:String;
+   capRet: TCapabilityRet;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -300,6 +301,7 @@ begin
       //Twain.SelectedSource.SetIXResolution(StrToFloat(edOth2.Text));
       //Twain.SelectedSource.SetIYResolution(StrToFloat(edOth2.Text));
 
+      capRet :=Twain.SelectedSource.SetIndicators(True);
 
      // Twain.SelectedSource.ShowUI := False;//display interface
      // Twain.SelectedSource.Modal:=False;
@@ -455,6 +457,8 @@ procedure TForm1.Button2Click(Sender: TObject);
 var
    listCount,  AIndex, i: Integer;
    rParams:TDigIt_Taker_TwainParams;
+   capRet:TCapabilityRet;
+   capBool:Boolean;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -479,10 +483,18 @@ begin
 
       TTwainSettingsSource.Execute(Twain, AIndex, rParams);
 
-      Twain.SelectedSource.SetPaperFeeding(rParams.PaperFeed);
-      Twain.SelectedSource.SetPaperSize(rParams.PaperSize);
-      Twain.SelectedSource.SetIXResolution(rParams.Resolution);
-      Twain.SelectedSource.SetIYResolution(rParams.Resolution);
+      capRet :=Twain.SelectedSource.GetAutoScan(capBool);
+      Memo2.Lines.Add('Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOSCAN)));
+      capRet :=Twain.SelectedSource.GetAutoFeed(capBool);
+      Memo2.Lines.Add('Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOFEED)));
+
+      capRet :=Twain.SelectedSource.SetPaperFeeding(rParams.PaperFeed);
+      Memo2.Lines.Add('Capability Set (PaperFeeding)='+IntToStr(Integer(capRet)));
+      capRet :=Twain.SelectedSource.SetPaperSize(rParams.PaperSize);
+      Memo2.Lines.Add('Capability Set (PaperSize)='+IntToStr(Integer(capRet)));
+      capRet :=Twain.SelectedSource.SetIXResolution(rParams.Resolution);
+      capRet :=Twain.SelectedSource.SetIYResolution(rParams.Resolution);
+      Memo2.Lines.Add('Capability Set (Resolution)='+IntToStr(Integer(capRet)));
 
       FreeAndNil(TwainSettingsSource);
       rParams.Free;

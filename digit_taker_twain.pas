@@ -266,7 +266,7 @@ begin
      if SelectedSourceIPC
      then begin
             Application.ProcessMessages;
-            if IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')  { #todo 4 -oMaxM : Resolution for Preview }
+            if IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')
             then begin
                    Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
                    Inc(iTempFile);
@@ -289,6 +289,7 @@ begin
                    end;
                    Twain.SelectedSource.SetIXResolution(AResolution);
                    Twain.SelectedSource.SetIYResolution(AResolution);
+                   Twain.SelectedSource.SetIndicators(True);
 
                    //Twain.SelectedSource.ShowUI := False;//display interface
                    //Twain.SelectedSource.Modal:=False;

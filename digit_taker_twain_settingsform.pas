@@ -86,7 +86,7 @@ begin
            //capRet :=Twain.SelectedSource.GetAutofeed(test);
            //capRet :=Twain.SelectedSource.SetAutoFeed(False);
 
-           Twain.SelectedSource.GetOrientation(t);
+           //Twain.SelectedSource.GetOrientation(t);
 
            cbPaperFeeding.Clear;
            paperFeed :=Twain.SelectedSource.GetPaperFeeding;

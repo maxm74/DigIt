@@ -97,7 +97,7 @@ begin
            //Get List of Papers
            cbPaperSize.Clear;
            cbSelected :=0;
-           Twain.SelectedSource.GetPaperSizeSet(tCurrent, tDefault, paperList);
+           Twain.SelectedSource.GetPaperSizeSet(paperList, tCurrent, tDefault);
            cbPaperSize.Items.AddObject('Full Scanner size', TObject(PtrUInt(tpsNONE)));
            for tList in paperList do
            begin

@@ -402,7 +402,7 @@ begin
        //capOps :=Twain.SelectedSource.GetCapabilitySupportedOp(ICAP_SUPPORTEDSIZES);
        *)
 
-       Twain.SelectedSource.GetPaperSizeSet(tCurrent, tDefault, paperList);
+       Twain.SelectedSource.GetPaperSizeSet(paperList, tCurrent, tDefault);
        Memo2.Lines.Add(#13#10+'SUPPORTED SIZES:'+#13#10+
           'Default='+PaperSizesTwain[tDefault].name+'('+FloatToStr(PaperSizesTwain[tDefault].w)+' x '+FloatToStr(PaperSizesTwain[tDefault].h)+')'+#13#10+
           'Current='+PaperSizesTwain[tCurrent].name+'('+FloatToStr(PaperSizesTwain[tCurrent].w)+' x '+FloatToStr(PaperSizesTwain[tCurrent].h)+')'+#13#10+'List:');

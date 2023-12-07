@@ -363,7 +363,7 @@ var
    ArrayV:pTW_ENUMERATION;
 
    ItemType: TW_UINT16;
-   List: TGetCapabilityList;
+   List: TStringArray;
    Current, Default: Integer;
    tCurrent, tDefault, tList: TTwainPaperSize;
    capOps:TCapabilityOperationSet;
@@ -495,6 +495,11 @@ begin
       capRet :=Twain.SelectedSource.SetIXResolution(rParams.Resolution);
       capRet :=Twain.SelectedSource.SetIYResolution(rParams.Resolution);
       Memo2.Lines.Add('Capability Set (Resolution)='+IntToStr(Integer(capRet)));
+      capRet :=Twain.SelectedSource.SetContrast(rParams.Contrast);
+      Memo2.Lines.Add('Capability Set (Contrast)='+IntToStr(Integer(capRet)));
+      capRet :=Twain.SelectedSource.SetBrightness(rParams.Brightness);
+      Memo2.Lines.Add('Capability Set (Brightness)='+IntToStr(Integer(capRet)));
+
 
       FreeAndNil(TwainSettingsSource);
       rParams.Free;

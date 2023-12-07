@@ -205,10 +205,10 @@ object TwainSettingsSource: TTwainSettingsSource
       Left = 8
       Height = 256
       Top = 24
-      Width = 346
+      Width = 450
       BevelOuter = bvNone
       ClientHeight = 256
-      ClientWidth = 346
+      ClientWidth = 450
       TabOrder = 1
       object cbPaperFeeding: TComboBox
         Left = 10
@@ -243,72 +243,76 @@ object TwainSettingsSource: TTwainSettingsSource
         TabOrder = 1
       end
       object Label3: TLabel
-        Left = 11
+        Left = 12
         Height = 15
-        Top = 97
+        Top = 144
         Width = 62
         Caption = 'Resolution :'
       end
       object cbResolution: TComboBox
-        Left = 10
+        Left = 11
         Height = 23
-        Top = 114
+        Top = 161
         Width = 192
         ItemHeight = 15
         Style = csDropDownList
         TabOrder = 2
       end
       object trBrightness: TTrackBar
-        Left = 7
+        Left = 240
         Height = 25
-        Top = 168
+        Top = 16
         Width = 144
         Max = 1000
         Min = -1000
         Position = 0
         ShowSelRange = False
+        OnChange = trBrightnessChange
         TabOrder = 3
       end
       object Label4: TLabel
-        Left = 12
+        Left = 245
         Height = 15
-        Top = 152
+        Top = 0
         Width = 61
         Caption = 'Brightness :'
       end
       object edBrightness: TSpinEdit
-        Left = 152
+        Left = 385
         Height = 23
-        Top = 168
+        Top = 16
         Width = 50
         MaxValue = 1000
         MinValue = -1000
         TabOrder = 4
+        OnChange = edBrightnessChange
       end
       object trContrast: TTrackBar
-        Left = 8
+        Left = 241
         Height = 25
-        Top = 216
+        Top = 64
         Width = 144
         Max = 1000
         Min = -1000
         Position = 0
         ShowSelRange = False
+        OnChange = trContrastChange
         TabOrder = 5
       end
       object edContrast: TSpinEdit
-        Left = 152
+        Left = 385
         Height = 23
-        Top = 218
+        Top = 66
         Width = 50
         MaxValue = 1000
         MinValue = -1000
         TabOrder = 6
+        OnChange = edContrastChange
       end
       object Label5: TLabel
-        Left = 14
+        Left = 247
         Height = 15
-        Top = 201
+        Top = 49
         Width = 51
         Caption = 'Contrast :'
       end
@@ -326,6 +330,22 @@ object TwainSettingsSource: TTwainSettingsSource
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+      end
+      object Label6: TLabel
+        Left = 13
+        Height = 15
+        Top = 96
+        Width = 55
+        Caption = 'Bit Depth :'
+      end
+      object cbBitDepth: TComboBox
+        Left = 12
+        Height = 23
+        Top = 113
+        Width = 192
+        ItemHeight = 15
+        Style = csDropDownList
+        TabOrder = 7
       end
     end
   end

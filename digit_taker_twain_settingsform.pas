@@ -19,6 +19,7 @@ type
     cbPaperFeeding: TComboBox;
     cbResolution: TComboBox;
     cbPaperSize: TComboBox;
+    cbBitDepth: TComboBox;
     cbUseNativeUI: TCheckBox;
     edBrightness: TSpinEdit;
     edContrast: TSpinEdit;
@@ -28,11 +29,16 @@ type
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
+    Label6: TLabel;
     Panel1: TPanel;
     panelUI: TPanel;
     panelButtons: TPanel;
     trBrightness: TTrackBar;
     trContrast: TTrackBar;
+    procedure edBrightnessChange(Sender: TObject);
+    procedure edContrastChange(Sender: TObject);
+    procedure trBrightnessChange(Sender: TObject);
+    procedure trContrastChange(Sender: TObject);
   private
     Twain: TCustomDelphiTwain;
     SelectedSourceIndex:Integer;
@@ -52,12 +58,32 @@ implementation
 
 { TTwainSettingsSource }
 
+procedure TTwainSettingsSource.trBrightnessChange(Sender: TObject);
+begin
+  edBrightness.Value:=trBrightness.Position;
+end;
+
+procedure TTwainSettingsSource.edBrightnessChange(Sender: TObject);
+begin
+  trBrightness.Position:=edBrightness.Value;
+end;
+
+procedure TTwainSettingsSource.edContrastChange(Sender: TObject);
+begin
+  trContrast.Position:=edContrast.Value;
+end;
+
+procedure TTwainSettingsSource.trContrastChange(Sender: TObject);
+begin
+  edContrast.Value:=trContrast.Position;
+end;
+
 class function TTwainSettingsSource.Execute(ATwain: TCustomDelphiTwain;
                                             ASelectedSourceIndex:Integer;
                                             var AParams:TDigIt_Taker_TwainParams): Boolean;
 var
   ItemType: TW_UINT16;
-  List: TGetCapabilityList;
+  List: TStringArray;
   Current, Default: Integer;
   tCurrent, tDefault, tList: TTwainPaperSize;
   capRet:TCapabilityRet;
@@ -68,6 +94,7 @@ var
   i, cbSelected: Integer;
   t:TTwainOrientation;
   test:Boolean;
+  bitArray:TArrayInteger;
 
 begin
   if (TwainSettingsSource=nil)
@@ -112,6 +139,20 @@ begin
            end;
            cbPaperSize.ItemIndex:=cbSelected;
 
+           //Get List of Bit Depth
+           cbBitDepth.Clear;
+           capRet :=Twain.SelectedSource.GetIBitDepth(Current, Default, bitArray);
+           if capRet=crSuccess then
+           begin
+             for i:=Low(bitArray) to High(bitArray) do
+             begin
+               cbBitDepth.Items.AddObject(IntToStr(bitArray[i]), TObject(PtrUInt(i)));
+               //if (bitArray[i]=Current) then cbSelected :=cbBitDepth.Items.Count-1;
+               if (bitArray[i]=AParams.BitDepth) then cbSelected :=cbBitDepth.Items.Count-1;
+             end;
+             cbBitDepth.ItemIndex:=cbSelected;
+           end;
+
            //Get List of Resolution (Y Resolution=X Resolution)
            cbResolution.Clear;
            cbSelected :=0;
@@ -129,6 +170,12 @@ begin
            end;
     end;
 
+    { #todo -oMaxM 2 : is an Extended or an Integer? }
+    trContrast.Position:=Trunc(AParams.Contrast);
+    edContrast.Value:=Trunc(AParams.Contrast);
+    trBrightness.Position:=Trunc(AParams.Brightness);
+    edBrightness.Value:=Trunc(AParams.Brightness);
+
     Result := (ShowModal=mrOk);
 
     if Result then
@@ -141,8 +188,14 @@ begin
       if (cbPaperSize.ItemIndex>-1)
       then AParams.PaperSize:=TTwainPaperSize(PtrUInt(cbPaperSize.Items.Objects[cbPaperSize.ItemIndex]));
 
+      if (cbBitDepth.ItemIndex>-1)
+      then AParams.BitDepth:=bitArray[PtrUInt(cbBitDepth.Items.Objects[cbBitDepth.ItemIndex])];
+
       if (cbResolution.ItemIndex>-1)
       then AParams.Resolution:=resolutionList[PtrUInt(cbResolution.Items.Objects[cbResolution.ItemIndex])];
+
+      AParams.Contrast:=edContrast.Value;
+      AParams.Brightness:=edBrightness.Value;
     end;
   end;
 end;

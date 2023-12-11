@@ -369,7 +369,7 @@ var
    capOps:TCapabilityOperationSet;
    paperList:TTwainPaperSizeSet;
    resolutionList:TTwainResolution;
-   resolutionCurrent:Extended;
+   resolutionCurrent, resolutionDefault:Extended;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -402,7 +402,7 @@ begin
        //capOps :=Twain.SelectedSource.GetCapabilitySupportedOp(ICAP_SUPPORTEDSIZES);
        *)
 
-       Twain.SelectedSource.GetPaperSizeSet(paperList, tCurrent, tDefault);
+       Twain.SelectedSource.GetPaperSizeSet(tCurrent, tDefault, paperList);
        Memo2.Lines.Add(#13#10+'SUPPORTED SIZES:'+#13#10+
           'Default='+PaperSizesTwain[tDefault].name+'('+FloatToStr(PaperSizesTwain[tDefault].w)+' x '+FloatToStr(PaperSizesTwain[tDefault].h)+')'+#13#10+
           'Current='+PaperSizesTwain[tCurrent].name+'('+FloatToStr(PaperSizesTwain[tCurrent].w)+' x '+FloatToStr(PaperSizesTwain[tCurrent].h)+')'+#13#10+'List:');
@@ -415,12 +415,12 @@ begin
         tCurrent :=GetTwainPaperSize(StrToFloat(edOth1.Text), StrToFloat(edOth2.Text), paperList);
         Memo2.Lines.Add('--- '+edOth1.Text+' x '+edOth2.Text+' closest to : '+PaperSizesTwain[tCurrent].name);
 
-        capRet :=Twain.SelectedSource.GetIXResolution(resolutionCurrent, resolutionList);
+        capRet :=Twain.SelectedSource.GetIXResolution(resolutionCurrent, resolutionDefault, resolutionList);
         Memo2.Lines.Add(#13#10+'Resolutions X:');
         for i:=Low(resolutionList) to High(resolutionList) do
          Memo2.Lines.Add('['+IntToStr(i)+'] = '+FloatToStr(resolutionList[i]));
 
-        capRet :=Twain.SelectedSource.GetIYResolution(resolutionCurrent, resolutionList);
+        capRet :=Twain.SelectedSource.GetIYResolution(resolutionCurrent, resolutionDefault, resolutionList);
         Memo2.Lines.Add(#13#10+'Resolutions Y:');
         for i:=Low(resolutionList) to High(resolutionList) do
          Memo2.Lines.Add('['+IntToStr(i)+'] = '+FloatToStr(resolutionList[i]));
@@ -490,8 +490,18 @@ begin
 
       capRet :=Twain.SelectedSource.SetPaperFeeding(rParams.PaperFeed);
       Memo2.Lines.Add('Capability Set (PaperFeeding)='+IntToStr(Integer(capRet)));
+      capRet :=Twain.SelectedSource.SetDuplexEnabled(False);
+      Memo2.Lines.Add('Capability Set (DuplexEnabled)='+IntToStr(Integer(capRet)));
+
+      capRet :=Twain.SelectedSource.GetAutoScan(capBool);
+      Memo2.Lines.Add(' /Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOSCAN)));
+      capRet :=Twain.SelectedSource.GetAutoFeed(capBool);
+      Memo2.Lines.Add(' /Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOFEED)));
+
       capRet :=Twain.SelectedSource.SetPaperSize(rParams.PaperSize);
       Memo2.Lines.Add('Capability Set (PaperSize)='+IntToStr(Integer(capRet)));
+      capRet :=Twain.SelectedSource.SetIPixelType(rParams.PixelType);
+      Memo2.Lines.Add('Capability Set (PixelType)='+IntToStr(Integer(capRet)));
       capRet :=Twain.SelectedSource.SetIXResolution(rParams.Resolution);
       capRet :=Twain.SelectedSource.SetIYResolution(rParams.Resolution);
       Memo2.Lines.Add('Capability Set (Resolution)='+IntToStr(Integer(capRet)));

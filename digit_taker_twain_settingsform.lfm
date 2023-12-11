@@ -243,16 +243,16 @@ object TwainSettingsSource: TTwainSettingsSource
         TabOrder = 1
       end
       object Label3: TLabel
-        Left = 12
+        Left = 11
         Height = 15
-        Top = 144
+        Top = 200
         Width = 62
         Caption = 'Resolution :'
       end
       object cbResolution: TComboBox
-        Left = 11
+        Left = 10
         Height = 23
-        Top = 161
+        Top = 217
         Width = 192
         ItemHeight = 15
         Style = csDropDownList
@@ -346,6 +346,22 @@ object TwainSettingsSource: TTwainSettingsSource
         ItemHeight = 15
         Style = csDropDownList
         TabOrder = 7
+      end
+      object Label7: TLabel
+        Left = 14
+        Height = 15
+        Top = 144
+        Width = 66
+        Caption = 'Image Type :'
+      end
+      object cbPixelType: TComboBox
+        Left = 13
+        Height = 23
+        Top = 161
+        Width = 192
+        ItemHeight = 15
+        Style = csDropDownList
+        TabOrder = 8
       end
     end
   end

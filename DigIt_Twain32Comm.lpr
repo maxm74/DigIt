@@ -17,6 +17,9 @@ type
   private
     rTwain:TCustomDelphiTwain;
     rUserInterface:TW_USERINTERFACE;
+    rParams:TTwainParams;
+
+    function InternalTake(AParams:TTwainParams; APath:String):Boolean;
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -31,6 +34,9 @@ type
     function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer
     function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
     function TWAIN32_USERINTERFACE(AUserInterface:TW_USERINTERFACE):Boolean; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
+    function TWAIN32_PARAMS_SET(AParams:TTwainParams):Boolean; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
+    function TWAIN32_PARAMS_GET:Boolean; //Input=mtSync_Null Output=mtSync_Var (TTwainParamsCapabilities)
+    function TWAIN32_PREVIEW(APath:String):Boolean; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
     function TWAIN32_TAKE(APath:String):Boolean; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
 
     function getTwain: TCustomDelphiTwain;
@@ -67,6 +73,37 @@ var
 
 { TTwain32SyncIPCServer }
 
+function TTwain32SyncIPCServer.InternalTake(AParams: TTwainParams; APath: String): Boolean;
+var
+   i:Integer;
+
+begin
+  if Assigned(Twain.SelectedSource) then
+  begin
+    {$ifopt D+}
+     Writeln('               ['+IntToStr(Twain.SelectedSource.Index)+'] '+Twain.SelectedSource.ProductName);
+    {$endif}
+
+    Twain.SelectedSource.Loaded := True;
+    Twain.SelectedSource.TransferMode:=ttmFile;
+    Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
+    Twain.SelectedSource.EnableSource(rUserInterface);
+
+    i:=0;
+    repeat
+       {$ifopt D+}
+        Write('.');
+       {$endif}
+      CheckSynchronize(10);
+      Application.MsgRunLoop;
+      inc(i);
+      Result :=FileExists(APath);
+    until Result or DoStop or (i>Timeout);
+
+    MessageResult(Integer(Result));
+  end;
+end;
+
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
 begin
   Case AMsgID of
@@ -78,6 +115,7 @@ begin
                        DoStop:=True;
                      end;
   MSG_TWAIN32_LIST : Result:=TWAIN32_LIST;
+  MSG_TWAIN32_PARAMS_GET: Result:=TWAIN32_PARAMS_GET;
   else begin
          {$ifopt D+}
          Writeln('MSG_Unknown:'+IntToStr(AMsgID));
@@ -112,6 +150,7 @@ end;
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; const Msg: String): Boolean;
 begin
   Case AMsgID of
+  MSG_TWAIN32_PREVIEW : Result:=TWAIN32_PREVIEW(Msg);
   MSG_TWAIN32_TAKE : Result:=TWAIN32_TAKE(Msg);
   else begin
          {$ifopt D+}
@@ -127,6 +166,7 @@ begin
   Case AMsgID of
   MSG_TWAIN32_FIND : Result:=TWAIN32_FIND(TW_IDENTITY(Buffer));
   MSG_TWAIN32_USERINTERFACE : Result:=TWAIN32_USERINTERFACE(TW_USERINTERFACE(Buffer));
+  MSG_TWAIN32_PARAMS_SET: Result:=TWAIN32_PARAMS_SET(TTwainParams(Buffer));
   else begin
          {$ifopt D+}
          Writeln('MSG_Unknown:'+IntToStr(AMsgID));
@@ -271,7 +311,7 @@ begin
        if Result then
        begin
          Twain.SelectedSource.Loaded:=True;
-         MessageResult(Twain.SelectedSource.Loaded);
+         MessageResult(Integer(Twain.SelectedSource.Loaded));
        end;
      end;
 
@@ -301,6 +341,7 @@ begin
      {$endif}
 
      rUserInterface:=AUserInterface;
+     Result:=True;
      {$ifopt D+}
       Writeln(' TWAIN32_USERINTERFACE Result: '+BoolToStr(Result, True));
      {$endif}
@@ -316,10 +357,136 @@ begin
   end;
 end;
 
-function TTwain32SyncIPCServer.TWAIN32_TAKE(APath: String): Boolean;
-var
-   i:Integer;
+function TTwain32SyncIPCServer.TWAIN32_PARAMS_SET(AParams: TTwainParams): Boolean;
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_PARAMS_SET: PaperSize='+IntToStr(Integer(AParams.PaperSize)));
+      Writeln('                     Resolution='+FloatToStr(AParams.Resolution));
+      Writeln('                     PixelType='+IntToStr(Integer(AParams.PixelType)));
+     {$endif}
 
+     rParams:=AParams;
+     Result:=True;
+     {$ifopt D+}
+      Writeln(' TWAIN32_PARAMS_SET Result: '+BoolToStr(Result, True));
+     {$endif}
+
+  except
+    On E:Exception do
+    begin
+      Result :=False;
+      {$ifopt D+}
+      Application.ShowException(E);
+      {$endif}
+    end;
+  end;
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_PARAMS_GET: Boolean;
+var
+  ItemType: TW_UINT16;
+  List: TStringArray;
+  Current, Default: Integer;
+  paperCurrent, paperI: TTwainPaperSize;
+  capRet:TCapabilityRet;
+  pixelCurrent, pixelI:TTwainPixelType;
+  resolutionCurrent:Extended;
+  i, cbSelected: Integer;
+
+  TwainSource: TTwainSource;
+  TwainCap:TTwainParamsCapabilities;
+  curResBuffer:TMemoryStream;
+
+
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_PARAMS_GET:');
+     {$endif}
+
+     TwainSource:=Twain.SelectedSource;
+     if Assigned(TwainSource) and TwainSource.Loaded then
+     begin
+       TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
+       capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
+       capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
+       TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
+       capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
+       capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
+       TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
+
+       //Create a MemoryStream to send back result and write the Buffer
+       curResBuffer:=TMemoryStream.Create;
+       curResBuffer.Write(TwainCap,
+                          Sizeof(TwainCap)
+                          -Sizeof(TwainCap.ResolutionArray)
+                          -Sizeof(TwainCap.BitDepthArray));
+
+       //Respect the order in TTwainParamsCapabilities Type
+       curResBuffer.Write(Pointer(TwainCap.ResolutionArray), TwainCap.ResolutionArraySize);
+       curResBuffer.Write(Pointer(TwainCap.BitDepthArray), TwainCap.BitDepthArraySize);
+
+
+       Result:=MessageResult(curResBuffer);
+
+       //we can free it, is already on the ResultStream
+       SetLength(TwainCap.ResolutionArray, 0);
+       SetLength(TwainCap.BitDepthArray, 0);
+     end;
+
+     {$ifopt D+}
+      Writeln(' TWAIN32_PARAMS_GET Result: '+IntToStr(Sizeof(TwainCap)));
+     {$endif}
+
+  except
+   On E:Exception do
+   begin
+     if (curResBuffer<>nil) then curResBuffer.Free;
+     SetLength(TwainCap.ResolutionArray, 0);
+     SetLength(TwainCap.BitDepthArray, 0);
+     Result :=False;
+     {$ifopt D+}
+     Application.ShowException(E);
+     {$endif}
+   end;
+  end;
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_PREVIEW(APath: String): Boolean;
+var
+   aParams:TTwainParams;
+
+begin
+  Result :=False;
+  try
+     {$ifopt D+}
+      Writeln(' TWAIN32_PREVIEW: '+APath);
+     {$endif}
+
+     aParams :=rParams;
+     aParams.Resolution:=75;
+     Result :=InternalTake(aParams, APath);
+
+     {$ifopt D+}
+      Writeln;
+      Writeln(' TWAIN32_PREVIEW Result: '+BoolToStr(Result, True));
+     {$endif}
+
+  except
+    On E:Exception do
+    begin
+      Result :=False;
+      {$ifopt D+}
+      Application.ShowException(E);
+      {$endif}
+    end;
+  end;
+end;
+
+function TTwain32SyncIPCServer.TWAIN32_TAKE(APath: String): Boolean;
 begin
   Result :=False;
   try
@@ -327,32 +494,7 @@ begin
       Writeln(' TWAIN32_TAKE: '+APath);
      {$endif}
 
-     if Assigned(Twain.SelectedSource) then
-     begin
-       {$ifopt D+}
-        Writeln('               ['+IntToStr(Twain.SelectedSource.Index)+'] '+Twain.SelectedSource.ProductName);
-       {$endif}
-
-       Twain.SelectedSource.Loaded := TRUE;
-       //Twain.SelectedSource.ShowUI := False;//display interface
-       //Twain.SelectedSource.Modal:=False;
-       Twain.SelectedSource.TransferMode:=ttmFile;
-       Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
-       Twain.SelectedSource.EnableSource(rUserInterface); //False, True);
-
-       i:=0;
-       repeat
-          {$ifopt D+}
-           Write('.');
-          {$endif}
-         CheckSynchronize(10);
-         Application.MsgRunLoop;
-         inc(i);
-         Result :=FileExists(APath);
-       until Result or DoStop or (i>Timeout);
-
-       MessageResult(Integer(Result));
-     end;
+     Result :=InternalTake(rParams, APath);
 
      {$ifopt D+}
       Writeln;

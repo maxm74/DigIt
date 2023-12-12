@@ -16,6 +16,7 @@
 29/11/2023 Twain First Tests with PaperSizes and Resolution
 01/12/2023 Settings on Twain (PaperFeed,Size,Resolution); TWAIN32_OPEN Select the Source
 06/12/2023 Twain Params use of TTwainParams record; TTwainParamsCapabilities record;
+11/12/2023 TwainSetting PixelType, use of TTwainParamsCapabilities record; First write of TWAIN32_PARAMS_SET/GET TWAIN32_PREVIEW
 
 
 

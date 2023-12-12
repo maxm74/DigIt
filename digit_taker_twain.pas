@@ -37,9 +37,13 @@ type
     function IPC_GetDevicesList:Integer;
     function IPC_FindSource(AManufacturer, AProductFamily, AProductName:String):Integer;
     function IPC_OpenDevice(AIndex:Integer):Boolean;
+    function IPC_ParamsSet:Boolean;
+    function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
+    function IPC_Preview(AFileName:String):Boolean;
     function IPC_Take(AFileName:String):Boolean;
 
-    function internalTake(AResolution:Extended): String;
+    function ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
+    function internalTake(isPreview:Boolean): String;
 
     procedure FreeCommsClient;
 
@@ -235,6 +239,91 @@ begin
   end;
 end;
 
+function TDigIt_Taker_Twain.IPC_ParamsSet: Boolean;
+var
+   recSize:Integer;
+   resType:TMessageType;
+   res:Boolean;
+
+begin
+  Result:=False;
+  recSize :=SizeOf(TDigIt_Taker_TwainParams(rParams).TwainParams);
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_SET, mtSync_Var,
+               TDigIt_Taker_TwainParams(rParams).TwainParams, recSize, res, recSize);
+  Result := (resType=mtSync_Integer) and (res=True);
+end;
+
+function TDigIt_Taker_Twain.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
+var
+   recStream:TMemoryStream=nil;
+   recSize, i:Integer;
+   resType:TMessageType;
+   curBufExtended, recBufExtended:PExtended;
+   curBufInteger, recBufInteger:PInteger;
+
+begin
+  Result:=False;
+  FillChar(TwainCap, Sizeof(TwainCap), 0);
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_GET, mtSync_Null, i, 0, recStream, recSize);
+  if (resType=mtSync_Stream) and (recStream<>nil) then
+  try
+    recStream.Position:=0;
+    recSize :=Sizeof(TwainCap.ResolutionArray);
+    recSize :=Sizeof(TwainCap);
+    recSize :=Sizeof(Extended);  { #todo 10 -oMaxM : Size differences between 32 and 64 Bit (Extended?) }
+    recStream.Read(TwainCap,
+                   Sizeof(TwainCap) -8
+                   //-Sizeof(TwainCap.ResolutionArray)
+                   //-Sizeof(TwainCap.BitDepthArray)
+                   );
+
+    //Respect the order in TTwainParamsCapabilities Type
+    GetMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
+    recStream.Read(recBufExtended^, TwainCap.ResolutionArraySize*Sizeof(Extended));
+
+    SetLength(TwainCap.ResolutionArray, TwainCap.ResolutionArraySize);
+    curBufExtended:=recBufExtended;
+    for i:=0 to  TwainCap.ResolutionArraySize-1 do
+    begin
+      TwainCap.ResolutionArray[i] :=curBufExtended^;
+      Inc(curBufExtended);
+    end;
+    FreeMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
+
+    GetMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
+    recStream.Read(recBufInteger^, TwainCap.BitDepthArraySize*Sizeof(Integer));
+
+    SetLength(TwainCap.BitDepthArray, TwainCap.BitDepthArraySize);
+    curBufInteger:=recBufInteger;
+    for i:=0 to  TwainCap.BitDepthArraySize-1 do
+    begin
+      TwainCap.BitDepthArray[i] :=curBufInteger^;
+      Inc(curBufInteger);
+    end;
+    FreeMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
+    Result:=True;
+  finally
+    recStream.Free;
+  end;
+end;
+
+function TDigIt_Taker_Twain.IPC_Preview(AFileName: String): Boolean;
+var
+   recSize:Longint;
+   recBuf:Boolean;
+   resType:TMessageType;
+
+begin
+  Result :=False;
+  try
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PREVIEW, mtSync_String, AFileName, 0, recBuf, recSize);
+     if (resType=mtSync_Integer)
+     then Result:=recBuf;
+
+  except
+  end;
+end;
+
 function TDigIt_Taker_Twain.IPC_Take(AFileName: String): Boolean;
 var
    recSize:Longint;
@@ -252,12 +341,36 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.internalTake(AResolution: Extended): String;
+function TDigIt_Taker_Twain.ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
+var
+   capRet:TCapabilityRet;
+   TwainSource:TTwainSource;
+   Current: Integer;
+   paperCurrent: TTwainPaperSize;
+   pixelCurrent:TTwainPixelType;
+   resolutionCurrent:Extended;
+
+begin
+  TwainSource:=Twain.SelectedSource;
+  TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
+  capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
+  capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
+  TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
+  capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
+  capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
+  TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
+end;
+
+function TDigIt_Taker_Twain.internalTake(isPreview:Boolean): String;
+var
+   capRet:TCapabilityRet;
+   TwainSource:TTwainSource;
+   resTake:Boolean;
+
 begin
   try
      Result :='';
-   //  TFormAnimAcquiring.Execute;
-    Application.ProcessMessages;
+   //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
      //Delete previous scanned file
      if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
@@ -265,40 +378,52 @@ begin
 
      if SelectedSourceIPC
      then begin
-            Application.ProcessMessages;
-            if IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')
+            resTake :=IPC_ParamsSet;
+
+            if isPreview
+            then resTake :=IPC_Preview(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')
+            else resTake :=IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp');
+
+            if resTake
             then begin
                    Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
                    Inc(iTempFile);
                  end
             else Result:='';
-            Application.ProcessMessages;
           end
      else begin
             if Assigned(Twain.SelectedSource)
             then begin
-                   Twain.SelectedSource.Loaded :=True;
-
-                   Application.ProcessMessages;
+                   TwainSource:=Twain.SelectedSource;
+                   TwainSource.Loaded :=True;
 
                    with TDigIt_Taker_TwainParams(rParams) do
                    begin
-                     //Set Parameters, (after a capture the scanner reset it to default???)
-                     Twain.SelectedSource.SetPaperFeeding(PaperFeed);
-                     Twain.SelectedSource.SetPaperSize(PaperSize);
+                   //Set Parameters, (after a capture the scanner reset it to default???)
+                   capRet :=TwainSource.SetPaperFeeding(PaperFeed);
+                   capRet :=TwainSource.SetDuplexEnabled(False);
+                   capRet :=TwainSource.SetPaperSize(PaperSize);
+                   capRet :=TwainSource.SetIPixelType(PixelType);
+
+                   if isPreview
+                   then begin
+                          capRet :=TwainSource.SetIXResolution(75);
+                          capRet :=TwainSource.SetIYResolution(75);
+                        end
+                   else begin
+                          capRet :=TwainSource.SetIXResolution(Resolution);
+                          capRet :=TwainSource.SetIYResolution(Resolution);
+                        end;
+                   capRet :=TwainSource.SetContrast(Contrast);
+                   capRet :=TwainSource.SetBrightness(Brightness);
                    end;
-                   Twain.SelectedSource.SetIXResolution(AResolution);
-                   Twain.SelectedSource.SetIYResolution(AResolution);
                    Twain.SelectedSource.SetIndicators(True);
 
-                   //Twain.SelectedSource.ShowUI := False;//display interface
-                   //Twain.SelectedSource.Modal:=False;
-                   Twain.SelectedSource.TransferMode:=ttmFile;
-                   Twain.SelectedSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
-                   Twain.SelectedSource.EnableSource(False, True, Application.ActiveFormHandle);
+                   TwainSource.TransferMode:=ttmFile;
+                   TwainSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
+                   TwainSource.EnableSource(False, True, Application.ActiveFormHandle);
                    Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
                    Inc(iTempFile);
-                   Application.ProcessMessages;
                  end
             else Result:='';
           end;
@@ -376,17 +501,17 @@ end;
 
 function TDigIt_Taker_Twain.Preview: String;
 begin
-  Result :=internalTake(75);
+  Result :=internalTake(True);
 end;
 
 function TDigIt_Taker_Twain.Take: String;
 begin
-  Result :=internalTake(TDigIt_Taker_TwainParams(rParams).Resolution);
+  Result :=internalTake(False);
 end;
 
 function TDigIt_Taker_Twain.ReTake: String;
 begin
-  Result :=internalTake(TDigIt_Taker_TwainParams(rParams).Resolution);
+  Result :=internalTake(False);
 end;
 
 procedure TDigIt_Taker_Twain.RefreshList(ASender:TTwainSelectSource);
@@ -403,6 +528,7 @@ end;
 function TDigIt_Taker_Twain.Params_GetFromUser: Boolean;
 var
   selectedSource:Integer;
+  TwainCap:TTwainParamsCapabilities;
 
 begin
   Result :=False;
@@ -449,15 +575,19 @@ begin
                   Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
                   ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
                   ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
+
+                  IPC_ParamsGet(TwainCap);
                 end
            else begin
                   Manufacturer :=Twain.SelectedSource.Manufacturer;
                   ProductFamily :=Twain.SelectedSource.ProductFamily;
                   ProductName :=Twain.SelectedSource.ProductName;
+
+                  ParamsGet(TwainCap);
                 end;
          end;
 
-         TTwainSettingsSource.Execute(Twain, SelectedSourceIndex, TDigIt_Taker_TwainParams(rParams));
+         TTwainSettingsSource.Execute(TwainCap, TDigIt_Taker_TwainParams(rParams));
        end;
      end;
 

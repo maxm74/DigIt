@@ -188,9 +188,18 @@ object Form1: TForm1
     Left = 473
     Height = 25
     Top = 225
-    Width = 75
+    Width = 119
     Caption = 'Scan Settings'
     TabOrder = 15
     OnClick = Button2Click
+  end
+  object btScanSettings1: TButton
+    Left = 473
+    Height = 25
+    Top = 190
+    Width = 123
+    Caption = 'Scan Settings (IPC)'
+    TabOrder = 16
+    OnClick = btScanSettings1Click
   end
 end

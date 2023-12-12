@@ -47,8 +47,7 @@ type
     SelectedSourceIndex:Integer;
 
   public
-     class function Execute(ATwain: TCustomDelphiTwain;
-                            ASelectedSourceIndex:Integer;
+     class function Execute(TwainCap:TTwainParamsCapabilities;
                             var AParams:TDigIt_Taker_TwainParams): Boolean;
   end;
 
@@ -81,21 +80,12 @@ begin
   edContrast.Value:=trContrast.Position;
 end;
 
-class function TTwainSettingsSource.Execute(ATwain: TCustomDelphiTwain;
-                                            ASelectedSourceIndex:Integer;
+class function TTwainSettingsSource.Execute(TwainCap:TTwainParamsCapabilities;
                                             var AParams:TDigIt_Taker_TwainParams): Boolean;
 var
-  ItemType: TW_UINT16;
-  List: TStringArray;
-  Current, Default: Integer;
-  paperCurrent, paperI: TTwainPaperSize;
-  capRet:TCapabilityRet;
-  pixelCurrent, pixelI:TTwainPixelType;
-  resolutionCurrent:Extended;
+  paperI: TTwainPaperSize;
+  pixelI:TTwainPixelType;
   i, cbSelected: Integer;
-  test:Boolean;
-
-  TwainCap:TTwainParamsCapabilities;
 
 begin
   if (TwainSettingsSource=nil)
@@ -103,30 +93,6 @@ begin
 
   with TwainSettingsSource do
   begin
-    Twain :=ATwain;
-
-    //Fill UI getting values from scanner
-    if AParams.IPC_Scanner
-    then begin
-           { #note 10 -oMaxM : Implement the Capabilities in IPC Server or switch the Project to 32bit? }
-           TwainSource:=nil;
-         end
-    else begin
-           //capRet :=Twain.SelectedSource.GetAutofeed(test);
-           //capRet :=Twain.SelectedSource.SetAutoFeed(False);
-
-           //Twain.SelectedSource.GetOrientation(t);
-
-           TwainSource:=Twain.SelectedSource;
-           TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
-           capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
-           capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
-           TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
-           capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
-           capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
-           TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
-         end;
-
     cbPaperFeeding.Clear;
     if (pfFlatbed in TwainCap.PaperFeedingSet) then cbPaperFeeding.Items.AddObject('Flatbed', TObject(PtrUInt(pfFlatbed)));
     if (pfFeeder in TwainCap.PaperFeedingSet) then cbPaperFeeding.Items.AddObject('Feeder', TObject(PtrUInt(pfFeeder)));

@@ -6,7 +6,8 @@ interface
 
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_SettingsForm;
+  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_Types,
+  Digit_Taker_Twain_SettingsForm;
 
 type
   { TTestSyncIPCServer }
@@ -36,6 +37,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    btScanSettings1: TButton;
     btStop: TButton;
     btList: TButton;
     btIntCapture: TButton;
@@ -57,6 +59,7 @@ type
     Memo2: TMemo;
     btServer: TSpeedButton;
     btClient: TSpeedButton;
+    procedure btScanSettings1Click(Sender: TObject);
     procedure btStopClick(Sender: TObject);
     procedure btListClick(Sender: TObject);
     procedure btIntCaptureClick(Sender: TObject);
@@ -76,6 +79,9 @@ type
      astr:String;
 
     function getTwain: TDelphiTwain;
+
+    function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
+
   private
     CommsServer:TTestSyncIPCServer;
     CommsClient:TSyncIPCClient;
@@ -89,8 +95,6 @@ var
   Form1: TForm1;
 
 implementation
-
-uses Digit_Taker_Twain_Types;
 
 {$R *.lfm}
 
@@ -245,6 +249,40 @@ begin
     Memo2.Lines.Add('SendSyncMessage STOP Return ('+IntToStr(resType)+'):'+IntToHex(recBuf)+'-'+IntToStr(recSize));
   end;
 end;
+
+procedure TForm1.btScanSettings1Click(Sender: TObject);
+var
+   rParams:TDigIt_Taker_TwainParams;
+   TwainCap:TTwainParamsCapabilities;
+   recSize, i:Integer;
+   resType:TMessageType;
+   res:Boolean;
+
+begin
+  i:=StrToInt(edDevTest.Text);
+  Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_OPEN : '+IntToStr(i));
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtSync_Integer, i, 0, res, recSize);
+  if (resType=mtSync_Integer) and (res=True) then
+  begin
+    Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_OPEN Return ('+IntToStr(resType)+'):'+BoolToStr(res, True));
+
+    rParams:=TDigIt_Taker_TwainParams.Create;
+    IPC_ParamsGet(TwainCap);
+
+    TTwainSettingsSource.Execute(TwainCap, rParams);
+
+    recSize :=SizeOf(rParams.TwainParams);
+    Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_PARAMS_SET : '+IntToStr(recSize));
+    resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_SET, mtSync_Var, rParams.TwainParams, recSize, res, recSize);
+    if (resType=mtSync_Integer) and (res=True) then
+    begin
+    end;
+    Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_PARAMS_SET Return ('+IntToStr(resType)+'):'+BoolToStr(res, True));
+
+    rParams.Free;
+   end;
+end;
+
 
 procedure TForm1.btListClick(Sender: TObject);
 Var
@@ -459,6 +497,12 @@ var
    rParams:TDigIt_Taker_TwainParams;
    capRet:TCapabilityRet;
    capBool:Boolean;
+   TwainSource:TTwainSource;
+   TwainCap:TTwainParamsCapabilities;
+   Current: Integer;
+   paperCurrent: TTwainPaperSize;
+   pixelCurrent:TTwainPixelType;
+   resolutionCurrent:Extended;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -481,33 +525,56 @@ begin
       rParams.ProductFamily :=Twain.SelectedSource.ProductFamily;
       rParams.ProductName :=Twain.SelectedSource.ProductName;
 
-      TTwainSettingsSource.Execute(Twain, AIndex, rParams);
+      //Fill UI getting values from scanner
+      if rParams.IPC_Scanner
+      then begin
+             IPC_ParamsGet(TwainCap);
+             TwainSource:=nil;
+           end
+      else begin
+             //capRet :=Twain.SelectedSource.GetAutofeed(test);
+             //capRet :=Twain.SelectedSource.SetAutoFeed(False);
 
-      capRet :=Twain.SelectedSource.GetAutoScan(capBool);
-      Memo2.Lines.Add('Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOSCAN)));
-      capRet :=Twain.SelectedSource.GetAutoFeed(capBool);
-      Memo2.Lines.Add('Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOFEED)));
+             //Twain.SelectedSource.GetOrientation(t);
 
-      capRet :=Twain.SelectedSource.SetPaperFeeding(rParams.PaperFeed);
+             TwainSource:=Twain.SelectedSource;
+             TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
+             capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
+             capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
+             TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
+             capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
+             capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
+             TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
+           end;
+
+
+      TTwainSettingsSource.Execute(TwainCap, rParams);
+
+      capRet :=TwainSource.GetAutoScan(capBool);
+      Memo2.Lines.Add('Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOSCAN)));
+      capRet :=TwainSource.GetAutoFeed(capBool);
+      Memo2.Lines.Add('Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOFEED)));
+
+      capRet :=TwainSource.SetPaperFeeding(rParams.PaperFeed);
       Memo2.Lines.Add('Capability Set (PaperFeeding)='+IntToStr(Integer(capRet)));
-      capRet :=Twain.SelectedSource.SetDuplexEnabled(False);
+      capRet :=TwainSource.SetDuplexEnabled(False);
       Memo2.Lines.Add('Capability Set (DuplexEnabled)='+IntToStr(Integer(capRet)));
 
-      capRet :=Twain.SelectedSource.GetAutoScan(capBool);
-      Memo2.Lines.Add(' /Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOSCAN)));
-      capRet :=Twain.SelectedSource.GetAutoFeed(capBool);
-      Memo2.Lines.Add(' /Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(Twain.SelectedSource.CapabilityCanSet(CAP_AUTOFEED)));
+      capRet :=TwainSource.GetAutoScan(capBool);
+      Memo2.Lines.Add(' /Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOSCAN)));
+      capRet :=TwainSource.GetAutoFeed(capBool);
+      Memo2.Lines.Add(' /Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOFEED)));
 
-      capRet :=Twain.SelectedSource.SetPaperSize(rParams.PaperSize);
+      capRet :=TwainSource.SetPaperSize(rParams.PaperSize);
       Memo2.Lines.Add('Capability Set (PaperSize)='+IntToStr(Integer(capRet)));
-      capRet :=Twain.SelectedSource.SetIPixelType(rParams.PixelType);
+      capRet :=TwainSource.SetIPixelType(rParams.PixelType);
       Memo2.Lines.Add('Capability Set (PixelType)='+IntToStr(Integer(capRet)));
-      capRet :=Twain.SelectedSource.SetIXResolution(rParams.Resolution);
-      capRet :=Twain.SelectedSource.SetIYResolution(rParams.Resolution);
+      capRet :=TwainSource.SetIXResolution(rParams.Resolution);
+      capRet :=TwainSource.SetIYResolution(rParams.Resolution);
       Memo2.Lines.Add('Capability Set (Resolution)='+IntToStr(Integer(capRet)));
-      capRet :=Twain.SelectedSource.SetContrast(rParams.Contrast);
+      capRet :=TwainSource.SetContrast(rParams.Contrast);
       Memo2.Lines.Add('Capability Set (Contrast)='+IntToStr(Integer(capRet)));
-      capRet :=Twain.SelectedSource.SetBrightness(rParams.Brightness);
+      capRet :=TwainSource.SetBrightness(rParams.Brightness);
       Memo2.Lines.Add('Capability Set (Brightness)='+IntToStr(Integer(capRet)));
 
 
@@ -556,6 +623,59 @@ begin
   end;
 
   Result :=rTwain;
+end;
+
+function TForm1.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
+Var
+   recStream:TMemoryStream=nil;
+   recSize, i:Integer;
+   resType:TMessageType;
+   curBufExtended, recBufExtended:PExtended;
+   curBufInteger, recBufInteger:PInteger;
+
+begin
+  Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_PARAMS_GET :');
+  FillChar(TwainCap, Sizeof(TwainCap), 0);
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_GET, mtSync_Null, i, 0, recStream, recSize);
+  if (resType=mtSync_Stream) and (recStream<>nil) then
+  try
+    recStream.Position:=0;
+    recStream.Read(TwainCap,
+                   Sizeof(TwainCap)
+                   -Sizeof(TwainCap.ResolutionArray)
+                   -Sizeof(TwainCap.BitDepthArray));
+
+    //Respect the order in TTwainParamsCapabilities Type
+    GetMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
+    recStream.Read(recBufExtended^, TwainCap.ResolutionArraySize*Sizeof(Extended));
+
+    Memo2.Lines.Add('ResolutionArray ('+IntToStr(TwainCap.ResolutionArraySize)+'): ');
+    SetLength(TwainCap.ResolutionArray, TwainCap.ResolutionArraySize);
+    curBufExtended:=recBufExtended;
+    for i:=0 to  TwainCap.ResolutionArraySize-1 do
+    begin
+      TwainCap.ResolutionArray[i] :=curBufExtended^;
+      Memo2.Lines.Add('['+IntToStr(i)+']: '+FloatToStr(TwainCap.ResolutionArray[i]));
+      Inc(curBufExtended);
+    end;
+    FreeMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
+
+    GetMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
+    recStream.Read(recBufInteger^, TwainCap.BitDepthArraySize*Sizeof(Integer));
+
+    Memo2.Lines.Add('BitDepthArray ('+IntToStr(TwainCap.BitDepthArraySize)+'): ');
+    SetLength(TwainCap.BitDepthArray, TwainCap.BitDepthArraySize);
+    curBufInteger:=recBufInteger;
+    for i:=0 to  TwainCap.BitDepthArraySize-1 do
+    begin
+      TwainCap.BitDepthArray[i] :=curBufInteger^;
+      Memo2.Lines.Add('['+IntToStr(i)+']: '+IntToStr(TwainCap.BitDepthArray[i]));
+      Inc(curBufInteger);
+    end;
+    FreeMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
+  finally
+    recStream.Free;
+  end;
 end;
 
 end.

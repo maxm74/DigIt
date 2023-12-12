@@ -19,7 +19,7 @@ type
     rUserInterface:TW_USERINTERFACE;
     rParams:TTwainParams;
 
-    function InternalTake(AParams:TTwainParams; APath:String):Boolean;
+    function InternalTake(AResolution: Extended; APath:String):Boolean;
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -73,18 +73,34 @@ var
 
 { TTwain32SyncIPCServer }
 
-function TTwain32SyncIPCServer.InternalTake(AParams: TTwainParams; APath: String): Boolean;
+function TTwain32SyncIPCServer.InternalTake(AResolution: Extended; APath: String): Boolean;
 var
    i:Integer;
+   capRet:TCapabilityRet;
+   TwainSource:TTwainSource;
 
 begin
   if Assigned(Twain.SelectedSource) then
   begin
+    TwainSource:=Twain.SelectedSource;
+
     {$ifopt D+}
      Writeln('               ['+IntToStr(Twain.SelectedSource.Index)+'] '+Twain.SelectedSource.ProductName);
     {$endif}
 
-    Twain.SelectedSource.Loaded := True;
+    TwainSource.Loaded := True;
+
+    //Set Parameters, (after a capture the scanner reset it to default???)
+    capRet :=TwainSource.SetPaperFeeding(rParams.PaperFeed);
+    capRet :=TwainSource.SetDuplexEnabled(False);
+    capRet :=TwainSource.SetPaperSize(rParams.PaperSize);
+    capRet :=TwainSource.SetIPixelType(rParams.PixelType);
+    capRet :=TwainSource.SetIXResolution(AResolution);
+    capRet :=TwainSource.SetIYResolution(AResolution);
+    capRet :=TwainSource.SetContrast(rParams.Contrast);
+    capRet :=TwainSource.SetBrightness(rParams.Brightness);
+    Twain.SelectedSource.SetIndicators(True);
+
     Twain.SelectedSource.TransferMode:=ttmFile;
     Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
     Twain.SelectedSource.EnableSource(rUserInterface);
@@ -342,6 +358,8 @@ begin
 
      rUserInterface:=AUserInterface;
      Result:=True;
+     MessageResult(Integer(Result));
+
      {$ifopt D+}
       Writeln(' TWAIN32_USERINTERFACE Result: '+BoolToStr(Result, True));
      {$endif}
@@ -369,6 +387,8 @@ begin
 
      rParams:=AParams;
      Result:=True;
+     MessageResult(Integer(Result));
+
      {$ifopt D+}
       Writeln(' TWAIN32_PARAMS_SET Result: '+BoolToStr(Result, True));
      {$endif}
@@ -386,15 +406,11 @@ end;
 
 function TTwain32SyncIPCServer.TWAIN32_PARAMS_GET: Boolean;
 var
-  ItemType: TW_UINT16;
-  List: TStringArray;
-  Current, Default: Integer;
-  paperCurrent, paperI: TTwainPaperSize;
+  Current: Integer;
+  paperCurrent: TTwainPaperSize;
   capRet:TCapabilityRet;
-  pixelCurrent, pixelI:TTwainPixelType;
+  pixelCurrent:TTwainPixelType;
   resolutionCurrent:Extended;
-  i, cbSelected: Integer;
-
   TwainSource: TTwainSource;
   TwainCap:TTwainParamsCapabilities;
   curResBuffer:TMemoryStream;
@@ -418,6 +434,15 @@ begin
        capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
        TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
 
+       {$ifopt D+}
+        Writeln('   Sizeof(TwainCap):'+IntToStr(Sizeof(TwainCap)));
+        Writeln('   Sizeof(Extended):'+IntToStr(Sizeof(Extended)));
+        Writeln('   Sizeof(ResolutionArray):'+IntToStr(Sizeof(TwainCap.ResolutionArray)));
+        Writeln('   Length(ResolutionArray):'+IntToStr(TwainCap.ResolutionArraySize));
+        Writeln('   Sizeof(BitDepthArray):'+IntToStr(Sizeof(TwainCap.BitDepthArray)));
+        Writeln('   Length(BitDepthArray):'+IntToStr(TwainCap.BitDepthArraySize));
+       {$endif}
+
        //Create a MemoryStream to send back result and write the Buffer
        curResBuffer:=TMemoryStream.Create;
        curResBuffer.Write(TwainCap,
@@ -426,19 +451,23 @@ begin
                           -Sizeof(TwainCap.BitDepthArray));
 
        //Respect the order in TTwainParamsCapabilities Type
-       curResBuffer.Write(Pointer(TwainCap.ResolutionArray), TwainCap.ResolutionArraySize);
-       curResBuffer.Write(Pointer(TwainCap.BitDepthArray), TwainCap.BitDepthArraySize);
+       curResBuffer.Write(Pointer(TwainCap.ResolutionArray), TwainCap.ResolutionArraySize*Sizeof(Extended));
+       curResBuffer.Write(Pointer(TwainCap.BitDepthArray), TwainCap.BitDepthArraySize*Sizeof(Integer));
 
+       {$ifopt D+}
+        Writeln('   Result Size:'+IntToStr(curResBuffer.Size));
+       {$endif}
 
        Result:=MessageResult(curResBuffer);
 
        //we can free it, is already on the ResultStream
        SetLength(TwainCap.ResolutionArray, 0);
        SetLength(TwainCap.BitDepthArray, 0);
+       curResBuffer.Free;
      end;
 
      {$ifopt D+}
-      Writeln(' TWAIN32_PARAMS_GET Result: '+IntToStr(Sizeof(TwainCap)));
+      Writeln(' TWAIN32_PARAMS_GET Result: '+BoolToStr(Result, True));
      {$endif}
 
   except
@@ -456,9 +485,6 @@ begin
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_PREVIEW(APath: String): Boolean;
-var
-   aParams:TTwainParams;
-
 begin
   Result :=False;
   try
@@ -466,9 +492,7 @@ begin
       Writeln(' TWAIN32_PREVIEW: '+APath);
      {$endif}
 
-     aParams :=rParams;
-     aParams.Resolution:=75;
-     Result :=InternalTake(aParams, APath);
+     Result :=InternalTake(75, APath);
 
      {$ifopt D+}
       Writeln;
@@ -494,7 +518,7 @@ begin
       Writeln(' TWAIN32_TAKE: '+APath);
      {$endif}
 
-     Result :=InternalTake(rParams, APath);
+     Result :=InternalTake(rParams.Resolution, APath);
 
      {$ifopt D+}
       Writeln;

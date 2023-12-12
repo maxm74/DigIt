@@ -458,6 +458,7 @@ begin
       begin
         WaitForAFile(curImageFile, 30000);
         LoadImage(curImageFile);
+        XML_SaveWork;
       end;
       UI_FillTaker;
     end;
@@ -470,7 +471,8 @@ begin
   try
     if (takerInst<>nil) then
     begin
-      takerInst.Params_GetFromUser;
+      if takerInst.Params_GetFromUser
+      then XML_SaveWork;
     end;
   finally
   end;
@@ -515,7 +517,7 @@ begin
         WaitForAFile(curImageFile, 30000);
         LoadImage(curImageFile);
         Counters.CopyPreviousToValues;
-        //lvCaptured.BeginUpdate;
+        //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
         imgManipulation.getAllBitmaps(@SaveCallBack, 1);
         //lvCaptured.EndUpdate;
         XML_SaveWork;

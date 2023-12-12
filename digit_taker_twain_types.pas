@@ -26,7 +26,7 @@ const
   MSG_TWAIN32_OPEN = 104; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
   MSG_TWAIN32_USERINTERFACE = 105; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
   MSG_TWAIN32_PARAMS_SET = 106; //Input=mtSync_Var (TTwainParams) Output=mtSync_Integer (Boolean)
-  MSG_TWAIN32_PARAMS_GET = 107; //Input=mtSync_Null Output=mtSync_Var (TTwainParamsCapabilities)
+  MSG_TWAIN32_PARAMS_GET = 107; //Input=mtSync_Null Output=mtSync_Stream (TTwainParamsCapabilities)
   MSG_TWAIN32_PREVIEW = 108; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
   MSG_TWAIN32_TAKE = 109; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
 
@@ -67,6 +67,9 @@ type
     rProductFamily,
     rProductName: String;
     rTwainParams: TTwainParams;
+
+  public
+    property TwainParams: TTwainParams read rTwainParams; //Used in IPC to set 32bit Scanner capabilities
 
   published
     property IPC_Scanner:Boolean read rIPC_Scanner write rIPC_Scanner;

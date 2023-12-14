@@ -19,7 +19,7 @@ type
     rUserInterface:TW_USERINTERFACE;
     rParams:TTwainParams;
 
-    function InternalTake(AResolution: Extended; APath:String):Boolean;
+    function InternalTake(AResolution: Single; APath:String):Boolean;
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -73,19 +73,20 @@ var
 
 { TTwain32SyncIPCServer }
 
-function TTwain32SyncIPCServer.InternalTake(AResolution: Extended; APath: String): Boolean;
+function TTwain32SyncIPCServer.InternalTake(AResolution: Single; APath: String): Boolean;
 var
    i:Integer;
    capRet:TCapabilityRet;
    TwainSource:TTwainSource;
 
 begin
+  Result:=False;
   if Assigned(Twain.SelectedSource) then
   begin
     TwainSource:=Twain.SelectedSource;
 
     {$ifopt D+}
-     Writeln('               ['+IntToStr(Twain.SelectedSource.Index)+'] '+Twain.SelectedSource.ProductName);
+     Writeln('  InternalTake['+IntToStr(TwainSource.Index)+'] '+TwainSource.ProductName);
     {$endif}
 
     TwainSource.Loaded := True;
@@ -99,11 +100,12 @@ begin
     capRet :=TwainSource.SetIYResolution(AResolution);
     capRet :=TwainSource.SetContrast(rParams.Contrast);
     capRet :=TwainSource.SetBrightness(rParams.Brightness);
-    Twain.SelectedSource.SetIndicators(True);
+    TwainSource.SetIndicators(True);
 
-    Twain.SelectedSource.TransferMode:=ttmFile;
-    Twain.SelectedSource.SetupFileTransfer(APath, tfBMP);
-    Twain.SelectedSource.EnableSource(rUserInterface);
+    { #todo 10 -oMaxM : Switch to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
+    TwainSource.TransferMode:=ttmFile;
+    TwainSource.SetupFileTransfer(APath, tfBMP);
+    TwainSource.EnableSource(rUserInterface);
 
     i:=0;
     repeat
@@ -115,9 +117,10 @@ begin
       inc(i);
       Result :=FileExists(APath);
     until Result or DoStop or (i>Timeout);
-
-    MessageResult(Integer(Result));
   end;
+  {$ifopt D+}
+   Writeln('  InternalTake Result: '+BoolToStr(Result, True));
+  {$endif}
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
@@ -211,7 +214,7 @@ begin
      Result :=(ATimeout>0);
      if Result then Timeout:=ATimeout;
 
-     MessageResult(Integer(Result));
+     Result:=MessageResult(Integer(Result));
 
      {$ifopt D+}
       Writeln(' TWAIN32_TIMEOUT Result: '+BoolToStr(Result, True));
@@ -327,7 +330,7 @@ begin
        if Result then
        begin
          Twain.SelectedSource.Loaded:=True;
-         MessageResult(Integer(Twain.SelectedSource.Loaded));
+         Result:=MessageResult(Integer(Twain.SelectedSource.Loaded));
        end;
      end;
 
@@ -357,8 +360,7 @@ begin
      {$endif}
 
      rUserInterface:=AUserInterface;
-     Result:=True;
-     MessageResult(Integer(Result));
+     Result:=MessageResult(Integer(True));
 
      {$ifopt D+}
       Writeln(' TWAIN32_USERINTERFACE Result: '+BoolToStr(Result, True));
@@ -410,7 +412,7 @@ var
   paperCurrent: TTwainPaperSize;
   capRet:TCapabilityRet;
   pixelCurrent:TTwainPixelType;
-  resolutionCurrent:Extended;
+  resolutionCurrent:Single;
   TwainSource: TTwainSource;
   TwainCap:TTwainParamsCapabilities;
   curResBuffer:TMemoryStream;
@@ -436,7 +438,7 @@ begin
 
        {$ifopt D+}
         Writeln('   Sizeof(TwainCap):'+IntToStr(Sizeof(TwainCap)));
-        Writeln('   Sizeof(Extended):'+IntToStr(Sizeof(Extended)));
+        Writeln('   Sizeof(Single):'+IntToStr(Sizeof(Single)));
         Writeln('   Sizeof(ResolutionArray):'+IntToStr(Sizeof(TwainCap.ResolutionArray)));
         Writeln('   Length(ResolutionArray):'+IntToStr(TwainCap.ResolutionArraySize));
         Writeln('   Sizeof(BitDepthArray):'+IntToStr(Sizeof(TwainCap.BitDepthArray)));
@@ -451,7 +453,7 @@ begin
                           -Sizeof(TwainCap.BitDepthArray));
 
        //Respect the order in TTwainParamsCapabilities Type
-       curResBuffer.Write(Pointer(TwainCap.ResolutionArray), TwainCap.ResolutionArraySize*Sizeof(Extended));
+       curResBuffer.Write(Pointer(TwainCap.ResolutionArray), TwainCap.ResolutionArraySize*Sizeof(Single));
        curResBuffer.Write(Pointer(TwainCap.BitDepthArray), TwainCap.BitDepthArraySize*Sizeof(Integer));
 
        {$ifopt D+}
@@ -492,10 +494,10 @@ begin
       Writeln(' TWAIN32_PREVIEW: '+APath);
      {$endif}
 
-     Result :=InternalTake(75, APath);
+     Result:=InternalTake(200, APath);
+     Result:=MessageResult(Integer(Result));
 
      {$ifopt D+}
-      Writeln;
       Writeln(' TWAIN32_PREVIEW Result: '+BoolToStr(Result, True));
      {$endif}
 
@@ -518,7 +520,8 @@ begin
       Writeln(' TWAIN32_TAKE: '+APath);
      {$endif}
 
-     Result :=InternalTake(rParams.Resolution, APath);
+     Result:=InternalTake(rParams.Resolution, APath);
+     Result:=MessageResult(Integer(Result));
 
      {$ifopt D+}
       Writeln;

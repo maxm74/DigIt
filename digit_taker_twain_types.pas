@@ -38,7 +38,7 @@ type
     PaperSize: TTwainPaperSize;
     Resolution,
     Contrast,
-    Brightness: Extended;
+    Brightness: Single;
     BitDepth: Integer;
     PixelType:TTwainPixelType;
   end;
@@ -50,7 +50,7 @@ type
     PixelType:TTwainPixelTypeSet;
     PixelTypeDefault:TTwainPixelType;
     PaperSizeDefault: TTwainPaperSize;
-    ResolutionDefault: Extended;
+    ResolutionDefault: Single;
     BitDepthDefault,
     ResolutionArraySize,
     BitDepthArraySize: Integer;
@@ -80,9 +80,9 @@ type
     property PaperFeed:TTwainPaperFeeding read rTwainParams.PaperFeed write rTwainParams.PaperFeed;
     property PaperSize:TTwainPaperSize read rTwainParams.PaperSize write rTwainParams.PaperSize;
     property PixelType:TTwainPixelType read rTwainParams.PixelType write rTwainParams.PixelType;
-    property Resolution:Extended read rTwainParams.Resolution write rTwainParams.Resolution;
-    property Contrast:Extended read rTwainParams.Contrast write rTwainParams.Contrast;
-    property Brightness:Extended read rTwainParams.Brightness write rTwainParams.Brightness;
+    property Resolution:Single read rTwainParams.Resolution write rTwainParams.Resolution;
+    property Contrast:Single read rTwainParams.Contrast write rTwainParams.Contrast;
+    property Brightness:Single read rTwainParams.Brightness write rTwainParams.Brightness;
     property BitDepth: Integer read rTwainParams.BitDepth write rTwainParams.BitDepth;
   end;
 

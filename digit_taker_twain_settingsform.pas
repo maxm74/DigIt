@@ -151,7 +151,7 @@ begin
     end;
     cbResolution.ItemIndex:=cbSelected;
 
-    { #todo -oMaxM 2 : is an Extended or an Integer? }
+    { #todo -oMaxM 2 : is an Single or an Integer? }
     trContrast.Position:=Trunc(AParams.Contrast);
     edContrast.Value:=Trunc(AParams.Contrast);
     trBrightness.Position:=Trunc(AParams.Brightness);

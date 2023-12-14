@@ -7,6 +7,7 @@ object Form1: TForm1
   ClientHeight = 304
   ClientWidth = 657
   LCLVersion = '3.99.0.0'
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   object btServer: TSpeedButton
@@ -91,7 +92,7 @@ object Form1: TForm1
     OnClick = btListClick
   end
   object btIntCapture: TButton
-    Left = 344
+    Left = 343
     Height = 25
     Top = 271
     Width = 123
@@ -147,8 +148,6 @@ object Form1: TForm1
     Top = 280
     Width = 52
     Caption = 'Modal'
-    Checked = True
-    State = cbChecked
     TabOrder = 10
   end
   object cbShowUI: TCheckBox

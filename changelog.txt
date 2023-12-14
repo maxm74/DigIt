@@ -16,7 +16,12 @@
 29/11/2023 Twain First Tests with PaperSizes and Resolution
 01/12/2023 Settings on Twain (PaperFeed,Size,Resolution); TWAIN32_OPEN Select the Source
 06/12/2023 Twain Params use of TTwainParams record; TTwainParamsCapabilities record;
-11/12/2023 TwainSetting PixelType, use of TTwainParamsCapabilities record; First write of TWAIN32_PARAMS_SET/GET TWAIN32_PREVIEW
-
-
+11/12/2023 TwainSetting PixelType, use of TTwainParamsCapabilities record;
+           First write of TWAIN32_PARAMS_SET/GET TWAIN32_PREVIEW
+12/12/2023 Twain SettingForm use only TTwainParamsCapabilities; 32bit server set Capabilities,TWAIN32_PARAMS_GET;
+           TwainTaker use IPC_ParamsSet/Get,IPC_Preview
+14/12/2023 SelectForm Select current Scanner;
+           Changed Extended to Single (for platform compatibility and for my actual state);
+           32bit Server Result for internalTake;
+           Test use ttmNative mode (MUST be used in Main app)
 

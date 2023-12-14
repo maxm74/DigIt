@@ -7,7 +7,7 @@ interface
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_Types,
-  Digit_Taker_Twain_SettingsForm;
+  Digit_Taker_Twain_SettingsForm, FPImage, BGRABitmap;
 
 type
   { TTestSyncIPCServer }
@@ -68,27 +68,28 @@ type
     procedure btIntListClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btServerClick(Sender: TObject);
     procedure btClientClick(Sender: TObject);
   private
-     rTwain:TDelphiTwain;
+     rTwain:TCustomDelphiTwain;
      Twain_Source:TTwainSource;
      Twain_SourceI:Integer;
      astr:String;
+     rParams:TDigIt_Taker_TwainParams;
+     CommsServer:TTestSyncIPCServer;
+     CommsClient:TSyncIPCClient;
 
-    function getTwain: TDelphiTwain;
+     function getTwain: TCustomDelphiTwain;
 
-    function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
+     function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
 
-  private
-    CommsServer:TTestSyncIPCServer;
-    CommsClient:TSyncIPCClient;
+     procedure TwainAcquire(Sender: TObject; const Index: Integer; Image:HBitmap;
+                                 var Cancel: Boolean);
 
-    property Twain: TDelphiTwain read getTwain;
-
-  public
+     property Twain: TCustomDelphiTwain read getTwain;
   end;
 
 var
@@ -252,7 +253,6 @@ end;
 
 procedure TForm1.btScanSettings1Click(Sender: TObject);
 var
-   rParams:TDigIt_Taker_TwainParams;
    TwainCap:TTwainParamsCapabilities;
    recSize, i:Integer;
    resType:TMessageType;
@@ -313,8 +313,10 @@ var
    listCount,  AIndex, i: Integer;
    aPath:String;
    capRet: TCapabilityRet;
+   TwainSource:TTwainSource;
 
 begin
+  try
   AIndex:=StrToInt(edDevTest.Text);
   Memo2.Lines.Add(' Test Twain on Device '+IntToStr(AIndex));
   Twain.SourceManagerLoaded :=True;
@@ -326,27 +328,43 @@ begin
     Twain.SelectedSourceIndex:=AIndex;
     if Assigned(Twain.SelectedSource) then
     begin
-      Memo2.Lines.Add(' Take from '+Twain.SelectedSource.ProductName);
+      TwainSource :=Twain.SelectedSource;
+
+      Memo2.Lines.Add(' Take from '+TwainSource.ProductName);
       aPath:=ExtractFilePath(ParamStr(0))+'test_0.bmp';
       Memo2.Lines.Add(' Path='+aPath);
 
       if FileExists(aPath)
       then DeleteFile(aPath);
 
-      Twain.SelectedSource.Loaded := TRUE;
+      TwainSource.Loaded := True;
 
-      //Twain.SelectedSource.SetPaperSize(TTwainPaperSize(StrToInt(edOth1.Text)));
-      //Twain.SelectedSource.SetIXResolution(StrToFloat(edOth2.Text));
-      //Twain.SelectedSource.SetIYResolution(StrToFloat(edOth2.Text));
+      capRet :=TwainSource.SetPaperFeeding(rParams.PaperFeed);
+      Memo2.Lines.Add('Capability Set (PaperFeeding)='+IntToStr(Integer(capRet)));
+      capRet :=TwainSource.SetDuplexEnabled(False);
+      Memo2.Lines.Add('Capability Set (DuplexEnabled)='+IntToStr(Integer(capRet)));
 
-      capRet :=Twain.SelectedSource.SetIndicators(True);
+//      rParams.Resolution:=300;
+      capRet :=TwainSource.SetPaperSize(rParams.PaperSize);
+      Memo2.Lines.Add('Capability Set (PaperSize)='+IntToStr(Integer(capRet)));
+      capRet :=TwainSource.SetIPixelType(rParams.PixelType);
+      Memo2.Lines.Add('Capability Set (PixelType)='+IntToStr(Integer(capRet)));
+      capRet :=TwainSource.SetIXResolution(rParams.Resolution);
+      capRet :=TwainSource.SetIYResolution(rParams.Resolution);
+      Memo2.Lines.Add('Capability Set (Resolution)='+IntToStr(Integer(capRet)));
+      capRet :=TwainSource.SetContrast(rParams.Contrast);
+      Memo2.Lines.Add('Capability Set (Contrast)='+IntToStr(Integer(capRet)));
+      capRet :=TwainSource.SetBrightness(rParams.Brightness);
+      Memo2.Lines.Add('Capability Set (Brightness)='+IntToStr(Integer(capRet)));
 
-     // Twain.SelectedSource.ShowUI := False;//display interface
-     // Twain.SelectedSource.Modal:=False;
-      Twain.SelectedSource.TransferMode:=ttmFile;
-      Twain.SelectedSource.SetupFileTransfer(aPath, tfBMP);
+      capRet :=TwainSource.SetIndicators(True);
+
+      { #todo 10 -oMaxM : Brother MFC-6490 Exception with tpsNONE and ttmFile}
+      TwainSource.TransferMode:=ttmNative; //ttmFile;
+      Twain.OnTwainAcquire:=@TwainAcquire;
+      //TwainSource.SetupFileTransfer(aPath, tfBMP);
       Memo2.Lines.Add('  ActiveFormHandle='+Screen.ActiveCustomForm.name);
-      Twain.SelectedSource.EnableSource(cbShowUI.Checked, cbModalCapture.Checked, Application.ActiveFormHandle);
+      TwainSource.EnableSource(cbShowUI.Checked, cbModalCapture.Checked, Application.ActiveFormHandle);
 
       i:=0;
       repeat
@@ -362,8 +380,9 @@ begin
     end;
   end
   else Memo2.Lines.Add('    AIndex out of Bounds');
-
-  if rTwain<>nil then FreeAndNil(rTwain);
+  except
+    TwainSource.Loaded := False;
+  end;
 end;
 
 procedure TForm1.btCaptureClick(Sender: TObject);
@@ -407,7 +426,7 @@ var
    capOps:TCapabilityOperationSet;
    paperList:TTwainPaperSizeSet;
    resolutionList:TTwainResolution;
-   resolutionCurrent, resolutionDefault:Extended;
+   resolutionCurrent, resolutionDefault:Single;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -486,15 +505,16 @@ var
    r:TTwainPaperSize;
 
 begin
-  r :=GetTwainPaperSize(StrToFloat(edOth1.Text), StrToFloat(edOth2.Text));
+(*  r :=GetTwainPaperSize(StrToFloat(edOth1.Text), StrToFloat(edOth2.Text));
   Memo2.Lines.Add('Paper closest to '+edOth1.Text+' x '+edOth2.Text+' is :'+
-     PaperSizesTwain[r].name+'('+FloatToStr(PaperSizesTwain[r].w)+' x '+FloatToStr(PaperSizesTwain[r].h)+')');
+     PaperSizesTwain[r].name+'('+FloatToStr(PaperSizesTwain[r].w)+' x '+FloatToStr(PaperSizesTwain[r].h)+')');*)
+  Memo2.Lines.Add('Sizeof(Single)='+IntToStr(Sizeof(Single)));
+  Memo2.Lines.Add('Sizeof(Single)='+IntToStr(Sizeof(Single)));
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
    listCount,  AIndex, i: Integer;
-   rParams:TDigIt_Taker_TwainParams;
    capRet:TCapabilityRet;
    capBool:Boolean;
    TwainSource:TTwainSource;
@@ -502,7 +522,7 @@ var
    Current: Integer;
    paperCurrent: TTwainPaperSize;
    pixelCurrent:TTwainPixelType;
-   resolutionCurrent:Extended;
+   resolutionCurrent:Single;
 
 begin
   AIndex:=StrToInt(edDevTest.Text);
@@ -518,7 +538,6 @@ begin
     begin
       Twain.SelectedSource.Loaded:=True;
 
-      rParams:=TDigIt_Taker_TwainParams.Create;
 
       rParams.IPC_Scanner:=False;
       rParams.Manufacturer :=Twain.SelectedSource.Manufacturer;
@@ -550,44 +569,30 @@ begin
 
       TTwainSettingsSource.Execute(TwainCap, rParams);
 
-      capRet :=TwainSource.GetAutoScan(capBool);
-      Memo2.Lines.Add('Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOSCAN)));
-      capRet :=TwainSource.GetAutoFeed(capBool);
-      Memo2.Lines.Add('Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOFEED)));
+//      capRet :=TwainSource.GetAutoScan(capBool);
+//      Memo2.Lines.Add('Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOSCAN)));
+//      capRet :=TwainSource.GetAutoFeed(capBool);
+//      Memo2.Lines.Add('Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOFEED)));
 
-      capRet :=TwainSource.SetPaperFeeding(rParams.PaperFeed);
-      Memo2.Lines.Add('Capability Set (PaperFeeding)='+IntToStr(Integer(capRet)));
-      capRet :=TwainSource.SetDuplexEnabled(False);
-      Memo2.Lines.Add('Capability Set (DuplexEnabled)='+IntToStr(Integer(capRet)));
-
-      capRet :=TwainSource.GetAutoScan(capBool);
-      Memo2.Lines.Add(' /Capability AutoScan='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOSCAN)));
-      capRet :=TwainSource.GetAutoFeed(capBool);
-      Memo2.Lines.Add(' /Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOFEED)));
-
-      capRet :=TwainSource.SetPaperSize(rParams.PaperSize);
-      Memo2.Lines.Add('Capability Set (PaperSize)='+IntToStr(Integer(capRet)));
-      capRet :=TwainSource.SetIPixelType(rParams.PixelType);
-      Memo2.Lines.Add('Capability Set (PixelType)='+IntToStr(Integer(capRet)));
-      capRet :=TwainSource.SetIXResolution(rParams.Resolution);
-      capRet :=TwainSource.SetIYResolution(rParams.Resolution);
-      Memo2.Lines.Add('Capability Set (Resolution)='+IntToStr(Integer(capRet)));
-      capRet :=TwainSource.SetContrast(rParams.Contrast);
-      Memo2.Lines.Add('Capability Set (Contrast)='+IntToStr(Integer(capRet)));
-      capRet :=TwainSource.SetBrightness(rParams.Brightness);
-      Memo2.Lines.Add('Capability Set (Brightness)='+IntToStr(Integer(capRet)));
-
-
-      FreeAndNil(TwainSettingsSource);
-      rParams.Free;
+       FreeAndNil(TwainSettingsSource);
     end;
   end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  rParams:=TDigIt_Taker_TwainParams.Create;
+  rParams.PaperSize :=tpsNone;
+  rParams.PixelType :=tbdRgb;
+  rParams.Resolution :=300;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   if CommsClient<>nil then CommsClient.Free;
   if CommsServer<>nil then CommsServer.Free;
+  rParams.Free;
+  if rTwain<>nil then rTwain.Free;
 end;
 
 procedure TForm1.FormShow(Sender: TObject);
@@ -610,12 +615,12 @@ begin
   end;
 end;
 
-function TForm1.getTwain: TDelphiTwain;
+function TForm1.getTwain: TCustomDelphiTwain;
 begin
   //Create Twain
   if (rTwain = nil) then
   begin
-    rTwain := TDelphiTwain.Create;
+    rTwain := TCustomDelphiTwain.Create;
    // rTwain.OnTwainAcquire := @TwainTwainAcquire;
 
     //Load Twain Library dynamically
@@ -630,7 +635,7 @@ Var
    recStream:TMemoryStream=nil;
    recSize, i:Integer;
    resType:TMessageType;
-   curBufExtended, recBufExtended:PExtended;
+   curBufSingle, recBufSingle:PSingle;
    curBufInteger, recBufInteger:PInteger;
 
 begin
@@ -646,19 +651,19 @@ begin
                    -Sizeof(TwainCap.BitDepthArray));
 
     //Respect the order in TTwainParamsCapabilities Type
-    GetMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
-    recStream.Read(recBufExtended^, TwainCap.ResolutionArraySize*Sizeof(Extended));
+    GetMem(recBufSingle, TwainCap.ResolutionArraySize*Sizeof(Single));
+    recStream.Read(recBufSingle^, TwainCap.ResolutionArraySize*Sizeof(Single));
 
     Memo2.Lines.Add('ResolutionArray ('+IntToStr(TwainCap.ResolutionArraySize)+'): ');
     SetLength(TwainCap.ResolutionArray, TwainCap.ResolutionArraySize);
-    curBufExtended:=recBufExtended;
+    curBufSingle:=recBufSingle;
     for i:=0 to  TwainCap.ResolutionArraySize-1 do
     begin
-      TwainCap.ResolutionArray[i] :=curBufExtended^;
+      TwainCap.ResolutionArray[i] :=curBufSingle^;
       Memo2.Lines.Add('['+IntToStr(i)+']: '+FloatToStr(TwainCap.ResolutionArray[i]));
-      Inc(curBufExtended);
+      Inc(curBufSingle);
     end;
-    FreeMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
+    FreeMem(recBufSingle, TwainCap.ResolutionArraySize*Sizeof(Single));
 
     GetMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
     recStream.Read(recBufInteger^, TwainCap.BitDepthArraySize*Sizeof(Integer));
@@ -675,6 +680,27 @@ begin
     FreeMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
   finally
     recStream.Free;
+  end;
+end;
+
+procedure TForm1.TwainAcquire(Sender: TObject; const Index: Integer; Image: HBitmap; var Cancel: Boolean);
+var
+   Bitmap :TBGRABitmap;
+   BitmapObj:TBitmap;
+
+begin
+  try
+     BitmapObj := TBitmap.Create;
+     Bitmap := TBGRABitmap.Create;
+     BitmapObj.Handle := Image;
+     Bitmap.Assign(BitmapObj);
+     Bitmap.ResolutionUnit:=ruPixelsPerInch;
+     Bitmap.ResolutionX:=rParams.Resolution;
+     Bitmap.ResolutionY:=rParams.Resolution;
+     Bitmap.SaveToFile('test_0.bmp');
+  finally
+     BitmapObj.Free;
+     Bitmap.Free;
   end;
 end;
 

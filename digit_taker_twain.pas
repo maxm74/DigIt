@@ -64,6 +64,8 @@ type
     class function UI_ImageIndex: Integer; override;
     function UI_Params_Summary: String; override;
 
+    { #todo 10 -oMaxM : Must return the kind of Result: String(Filename) or TBitmap.}
+    { IPC is always a Filename, Internal is a TBitmap (my office Brother Scanner fail if paper=tpsNone and dpi>150) }
     function Preview: String; override;
     function Take: String; override;
     function ReTake: String; override;
@@ -223,7 +225,7 @@ begin
   Result :=False;
   try
      aUserInterface.ShowUI:=False;
-     aUserInterface.ModalUI:=True;
+     aUserInterface.ModalUI:=False;
      aUserInterface.hParent:=Application.ActiveFormHandle;
 
      resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_USERINTERFACE, mtSync_Var,
@@ -258,7 +260,7 @@ var
    recStream:TMemoryStream=nil;
    recSize, i:Integer;
    resType:TMessageType;
-   curBufExtended, recBufExtended:PExtended;
+   curBufExtended, recBufExtended:PSingle;
    curBufInteger, recBufInteger:PInteger;
 
 begin
@@ -270,16 +272,18 @@ begin
     recStream.Position:=0;
     recSize :=Sizeof(TwainCap.ResolutionArray);
     recSize :=Sizeof(TwainCap);
-    recSize :=Sizeof(Extended);  { #todo 10 -oMaxM : Size differences between 32 and 64 Bit (Extended?) }
+    recSize :=Sizeof(Single);  { #todo 10 -oMaxM : Size differences between 32 and 64 Bit (Single?) }
     recStream.Read(TwainCap,
-                   Sizeof(TwainCap) -8
-                   //-Sizeof(TwainCap.ResolutionArray)
-                   //-Sizeof(TwainCap.BitDepthArray)
+                   Sizeof(TwainCap)
+                   -Sizeof(TwainCap.ResolutionArray)
+                   -Sizeof(TwainCap.BitDepthArray)
                    );
 
+    TwainCap.ResolutionArray :=nil;
+    TwainCap.BitDepthArray:=nil;
     //Respect the order in TTwainParamsCapabilities Type
-    GetMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
-    recStream.Read(recBufExtended^, TwainCap.ResolutionArraySize*Sizeof(Extended));
+    GetMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Single));
+    recStream.Read(recBufExtended^, TwainCap.ResolutionArraySize*Sizeof(Single));
 
     SetLength(TwainCap.ResolutionArray, TwainCap.ResolutionArraySize);
     curBufExtended:=recBufExtended;
@@ -288,7 +292,7 @@ begin
       TwainCap.ResolutionArray[i] :=curBufExtended^;
       Inc(curBufExtended);
     end;
-    FreeMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Extended));
+    FreeMem(recBufExtended, TwainCap.ResolutionArraySize*Sizeof(Single));
 
     GetMem(recBufInteger, TwainCap.BitDepthArraySize*Sizeof(Integer));
     recStream.Read(recBufInteger^, TwainCap.BitDepthArraySize*Sizeof(Integer));
@@ -348,7 +352,7 @@ var
    Current: Integer;
    paperCurrent: TTwainPaperSize;
    pixelCurrent:TTwainPixelType;
-   resolutionCurrent:Extended;
+   resolutionCurrent:Single;
 
 begin
   TwainSource:=Twain.SelectedSource;
@@ -419,6 +423,7 @@ begin
                    end;
                    Twain.SelectedSource.SetIndicators(True);
 
+                   { #todo 10 -oMaxM : Switch to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
                    TwainSource.TransferMode:=ttmFile;
                    TwainSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
                    TwainSource.EnableSource(False, True, Application.ActiveFormHandle);
@@ -533,6 +538,7 @@ var
 begin
   Result :=False;
   if (rParams=nil) then exit;
+  with TDigIt_Taker_TwainParams(rParams) do
   try
      if Twain.SourceManagerLoaded then
      begin
@@ -548,7 +554,7 @@ begin
      //Get 32bit Devices
      countIPC_Source :=IPC_GetDevicesList;
 
-     selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, False, -1);
+     selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, TDigIt_Taker_TwainParams(rParams));
      if (selectedSource>-1) then
      begin
        //if the index of selected device is greater than countTwain_Source then is a 32bit scanner
@@ -567,8 +573,6 @@ begin
 
        if Result then
        begin
-         with TDigIt_Taker_TwainParams(rParams) do
-         begin
            IPC_Scanner:=SelectedSourceIPC;
            if SelectedSourceIPC
            then begin
@@ -585,7 +589,6 @@ begin
 
                   ParamsGet(TwainCap);
                 end;
-         end;
 
          TTwainSettingsSource.Execute(TwainCap, TDigIt_Taker_TwainParams(rParams));
        end;

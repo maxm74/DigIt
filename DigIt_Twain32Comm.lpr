@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}
   Windows, Classes, SysUtils, Digit_Taker_Twain_Types, CustApp,
-  syncipc, Twain, DelphiTwain;
+  syncipc, Twain, DelphiTwain, DelphiTwainUtils;
 
 type
 
@@ -18,8 +18,12 @@ type
     rTwain:TCustomDelphiTwain;
     rUserInterface:TW_USERINTERFACE;
     rParams:TTwainParams;
+    AcquireFileName:String;
+    AcquireResolution:Single;
 
     function InternalTake(AResolution: Single; APath:String):Boolean;
+    function TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                nativeHandle: TW_UINT32; var Cancel: Boolean):Boolean;
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -102,9 +106,13 @@ begin
     capRet :=TwainSource.SetBrightness(rParams.Brightness);
     TwainSource.SetIndicators(True);
 
-    { #todo 10 -oMaxM : Switch to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-    TwainSource.TransferMode:=ttmFile;
-    TwainSource.SetupFileTransfer(APath, tfBMP);
+    //MaxM: can not use ttmFile,
+    //Brother MFC-6490 Exception with tpsNONE and dpi>150, don't set Contratst/Brightness
+    TwainSource.TransferMode:=ttmNative; //ttmFile;
+    //TwainSource.SetupFileTransfer(APath, tfBMP);
+    AcquireFileName :=APath;
+    AcquireResolution:=AResolution;
+    Twain.OnTwainAcquireNative:=@TwainAcquireNative;
     TwainSource.EnableSource(rUserInterface);
 
     i:=0;
@@ -121,6 +129,12 @@ begin
   {$ifopt D+}
    Writeln('  InternalTake Result: '+BoolToStr(Result, True));
   {$endif}
+end;
+
+function TTwain32SyncIPCServer.TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                                  nativeHandle: TW_UINT32; var Cancel: Boolean): Boolean;
+begin
+    WriteBitmapToFile(AcquireFileName, nativeHandle);
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
@@ -579,22 +593,10 @@ begin
       aPath:=ExtractFilePath(ParamStr(0))+'test_0.bmp';
       Writeln(' Path='+aPath);
 
-      if FileExists(aPath)
-      then DeleteFile(aPath);
-
-      Twain.SelectedSource.Loaded := TRUE;
-      Twain.SelectedSource.ShowUI := False;//display interface
-      Twain.SelectedSource.Modal:=False;
-      Twain.SelectedSource.TransferMode:=ttmFile;
-      Twain.SelectedSource.SetupFileTransfer(aPath, tfBMP);
-      Twain.SelectedSource.EnableSource(False, True);
-
-      i:=0;
-      repeat
-        CheckSynchronize(10);
-        Application.MsgRunLoop;
-        inc(i);
-      until FileExists(aPath) or DoStop or (i>Timeout);
+      rParams.PaperSize :=tpsNone;
+      rParams.PixelType :=tbdRgb;
+      rParams.Resolution :=200;
+      InternalTake(rParams.Resolution, aPath);
 
       if FileExists(aPath)
       then Writeln(' Take DONE ')

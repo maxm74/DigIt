@@ -24,4 +24,5 @@
            Changed Extended to Single (for platform compatibility and for my actual state);
            32bit Server Result for internalTake;
            Test use ttmNative mode (MUST be used in Main app)
+19/12/2023 32bit Server switched to ttmNative TransferMode; Test added TwainAcquireNative or Acquire with TBitmap
 

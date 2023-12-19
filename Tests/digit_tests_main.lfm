@@ -92,7 +92,7 @@ object Form1: TForm1
     OnClick = btListClick
   end
   object btIntCapture: TButton
-    Left = 343
+    Left = 344
     Height = 25
     Top = 271
     Width = 123
@@ -106,7 +106,7 @@ object Form1: TForm1
     Top = 192
     Width = 40
     TabOrder = 6
-    Text = '2'
+    Text = '0'
   end
   object btCapture: TButton
     Left = 344
@@ -143,17 +143,17 @@ object Form1: TForm1
     Caption = 'Device to Use:'
   end
   object cbModalCapture: TCheckBox
-    Left = 472
+    Left = 536
     Height = 19
-    Top = 280
+    Top = 277
     Width = 52
     Caption = 'Modal'
     TabOrder = 10
   end
   object cbShowUI: TCheckBox
-    Left = 528
+    Left = 592
     Height = 19
-    Top = 280
+    Top = 277
     Width = 58
     Caption = 'ShowUI'
     TabOrder = 11
@@ -170,7 +170,7 @@ object Form1: TForm1
   object edOth1: TEdit
     Left = 473
     Height = 23
-    Top = 249
+    Top = 160
     Width = 43
     TabOrder = 13
     Text = '21'
@@ -178,7 +178,7 @@ object Form1: TForm1
   object edOth2: TEdit
     Left = 521
     Height = 23
-    Top = 249
+    Top = 160
     Width = 43
     TabOrder = 14
     Text = '29'
@@ -186,7 +186,7 @@ object Form1: TForm1
   object Button2: TButton
     Left = 473
     Height = 25
-    Top = 225
+    Top = 223
     Width = 119
     Caption = 'Scan Settings'
     TabOrder = 15
@@ -200,5 +200,13 @@ object Form1: TForm1
     Caption = 'Scan Settings (IPC)'
     TabOrder = 16
     OnClick = btScanSettings1Click
+  end
+  object cbBMPCapture: TCheckBox
+    Left = 472
+    Height = 19
+    Top = 271
+    Width = 62
+    Caption = 'TBitmap'
+    TabOrder = 17
   end
 end

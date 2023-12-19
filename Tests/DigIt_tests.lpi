@@ -85,6 +85,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_tests_main"/>
       </Unit>
+      <Unit>
+        <Filename Value="text.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -95,7 +99,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\..\Packages\DelphiTwain\units;.."/>
+      <OtherUnitFiles Value="..\..\..\Packages\DelphiTwain\units;..;..\..\..\Packages\bgrabitmap\bgrabitmap"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

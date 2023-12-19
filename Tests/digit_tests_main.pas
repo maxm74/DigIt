@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwain_VCL, Digit_Taker_Twain_Types,
+  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwainUtils, DelphiTwain_VCL, Digit_Taker_Twain_Types,
   Digit_Taker_Twain_SettingsForm, FPImage, BGRABitmap;
 
 type
@@ -19,7 +19,6 @@ type
     function TWAIN32_LIST:Boolean;
     function getTwain: TDelphiTwain;
     procedure FreeTwain;
-
 
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
     function MessageReceived(AMsgID:Integer; AInteger:Integer; IntegerSize:Byte):Boolean; override; overload;
@@ -47,6 +46,7 @@ type
     Button1: TButton;
     Button2: TButton;
     cbModalCapture: TCheckBox;
+    cbBMPCapture: TCheckBox;
     cbShowUI: TCheckBox;
     Edit1: TEdit;
     Edit2: TEdit;
@@ -86,8 +86,11 @@ type
 
      function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
 
-     procedure TwainAcquire(Sender: TObject; const Index: Integer; Image:HBitmap;
-                                 var Cancel: Boolean);
+     function TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                 nativeHandle: TW_UINT32; var Cancel: Boolean):Boolean;
+
+     procedure TwainAcquire(Sender: TObject; const Index: Integer;
+                            imageHandle:HBitmap; var Cancel: Boolean);
 
      property Twain: TCustomDelphiTwain read getTwain;
   end;
@@ -266,7 +269,6 @@ begin
   begin
     Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_OPEN Return ('+IntToStr(resType)+'):'+BoolToStr(res, True));
 
-    rParams:=TDigIt_Taker_TwainParams.Create;
     IPC_ParamsGet(TwainCap);
 
     TTwainSettingsSource.Execute(TwainCap, rParams);
@@ -279,7 +281,6 @@ begin
     end;
     Memo2.Lines.Add('SendSyncMessage MSG_TWAIN32_PARAMS_SET Return ('+IntToStr(resType)+'):'+BoolToStr(res, True));
 
-    rParams.Free;
    end;
 end;
 
@@ -359,10 +360,21 @@ begin
 
       capRet :=TwainSource.SetIndicators(True);
 
-      { #todo 10 -oMaxM : Brother MFC-6490 Exception with tpsNONE and ttmFile}
+      //MaxM: can not use ttmFile,
+      //Brother MFC-6490 Exception with tpsNONE and dpi>150, don't set Contratst/Brightness
       TwainSource.TransferMode:=ttmNative; //ttmFile;
-      Twain.OnTwainAcquire:=@TwainAcquire;
       //TwainSource.SetupFileTransfer(aPath, tfBMP);
+
+      if cbBMPCapture.Checked
+      then begin
+             Twain.OnTwainAcquireNative:=nil;
+             Twain.OnTwainAcquire:=@TwainAcquire;
+           end
+      else begin
+             Twain.OnTwainAcquireNative:=@TwainAcquireNative;
+             Twain.OnTwainAcquire:=nil;
+           end;
+
       Memo2.Lines.Add('  ActiveFormHandle='+Screen.ActiveCustomForm.name);
       TwainSource.EnableSource(cbShowUI.Checked, cbModalCapture.Checked, Application.ActiveFormHandle);
 
@@ -683,7 +695,18 @@ begin
   end;
 end;
 
-procedure TForm1.TwainAcquire(Sender: TObject; const Index: Integer; Image: HBitmap; var Cancel: Boolean);
+function TForm1.TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                   nativeHandle: TW_UINT32; var Cancel: Boolean): Boolean;
+begin
+  try
+     Result :=False;
+     WriteBitmapToFile('test_0.bmp', nativeHandle);
+  except
+  end;
+end;
+
+procedure TForm1.TwainAcquire(Sender: TObject; const Index: Integer;
+                              imageHandle: HBitmap; var Cancel: Boolean);
 var
    Bitmap :TBGRABitmap;
    BitmapObj:TBitmap;
@@ -692,12 +715,13 @@ begin
   try
      BitmapObj := TBitmap.Create;
      Bitmap := TBGRABitmap.Create;
-     BitmapObj.Handle := Image;
+     BitmapObj.Handle := imageHandle;
      Bitmap.Assign(BitmapObj);
      Bitmap.ResolutionUnit:=ruPixelsPerInch;
      Bitmap.ResolutionX:=rParams.Resolution;
      Bitmap.ResolutionY:=rParams.Resolution;
      Bitmap.SaveToFile('test_0.bmp');
+
   finally
      BitmapObj.Free;
      Bitmap.Free;

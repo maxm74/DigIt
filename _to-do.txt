@@ -9,9 +9,7 @@ pagina in orrizzontale
 
 Twain:
 
-Usare tipi compatibili fra 32bit e 64bit in TTwainParamsCapabilities
-
   avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??
 xTestare di più(Risolto?)  In Realease non avvia subito il 32bit e non lo chiude in uscita (singola istanza?)
-capabilities per negativi, etc... luminosità/contrasto non funziona in Brother Ufficio
+capabilities per negativi, etc...
 

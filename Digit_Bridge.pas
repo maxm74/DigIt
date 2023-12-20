@@ -18,6 +18,7 @@ uses
 type
 
   { TDigIt_Taker }
+  TDigIt_TakerResultType = (trtNil, trtFilename, trtBitmap);
 
   TDigIt_Taker = class
   protected
@@ -37,10 +38,10 @@ type
     class function UI_ImageIndex: Integer; virtual; abstract;
     function UI_Params_Summary: String; virtual; abstract;
 
-     //Take a Picture and returns Filename
-    function Preview: String; virtual; abstract;
-    function Take: String; virtual; abstract;
-    function ReTake: String; virtual; abstract;
+     //Take a Picture and returns Data Type (FileName, TBitmap or Nil)
+    function Preview(var Data:Variant):TDigIt_TakerResultType; virtual; abstract;
+    function Take(var Data:Variant):TDigIt_TakerResultType; virtual; abstract;
+    function ReTake(var Data:Variant):TDigIt_TakerResultType; virtual; abstract;
   end;
   TDigIt_TakerClasses = class of TDigIt_Taker;
 

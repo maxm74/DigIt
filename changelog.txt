@@ -25,4 +25,6 @@
            32bit Server Result for internalTake;
            Test use ttmNative mode (MUST be used in Main app)
 19/12/2023 32bit Server switched to ttmNative TransferMode; Test added TwainAcquireNative or Acquire with TBitmap
+20/12/2023 Twain switched to ttmNative; TDigIt_Taker use Variant+TDigIt_TakerResultType;
+           32bit Server use new TwainAcquireNative;
 

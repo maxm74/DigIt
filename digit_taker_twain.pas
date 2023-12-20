@@ -14,8 +14,8 @@ unit Digit_Taker_Twain;
 interface
 
 uses
-  simpleipc, syncipc, Process, Classes, SysUtils, Digit_Bridge, Digit_Taker_Twain_Types,
-  Twain, DelphiTwain, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
+  simpleipc, syncipc, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
+  Digit_Bridge, Digit_Taker_Twain_Types, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
 
 type
   { TDigIt_Taker_Twain }
@@ -30,6 +30,7 @@ type
     countTwain_Source,
     countIPC_Source,
     iTempFile:Integer;
+    AcquireFileName:String;
 
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
@@ -43,7 +44,10 @@ type
     function IPC_Take(AFileName:String):Boolean;
 
     function ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
-    function internalTake(isPreview:Boolean): String;
+
+    procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
+    function internalTake(isPreview:Boolean; var Data:Variant):TDigIt_TakerResultType;
 
     procedure FreeCommsClient;
 
@@ -57,18 +61,16 @@ type
     destructor Destroy; override;
 
     class function RegisterName: String; override;
-    class function Params_GetClass : TPersistentClass; override;
+    class function Params_GetClass: TPersistentClass; override;
     function Params_GetFromUser: Boolean; override;
     procedure Params_Set(newParams: TPersistent); override;
     class function UI_Title: String; override;
     class function UI_ImageIndex: Integer; override;
     function UI_Params_Summary: String; override;
 
-    { #todo 10 -oMaxM : Must return the kind of Result: String(Filename) or TBitmap.}
-    { IPC is always a Filename, Internal is a TBitmap (my office Brother Scanner fail if paper=tpsNone and dpi>150) }
-    function Preview: String; override;
-    function Take: String; override;
-    function ReTake: String; override;
+    function Preview(var Data:Variant):TDigIt_TakerResultType; override;
+    function Take(var Data:Variant):TDigIt_TakerResultType; override;
+    function ReTake(var Data:Variant):TDigIt_TakerResultType; override;
   end;
 
 implementation
@@ -365,7 +367,13 @@ begin
   TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
 end;
 
-function TDigIt_Taker_Twain.internalTake(isPreview:Boolean): String;
+procedure TDigIt_Taker_Twain.TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                                nativeHandle: TW_UINT32; var Cancel: Boolean);
+begin
+  WriteBitmapToFile(AcquireFileName, nativeHandle);
+end;
+
+function TDigIt_Taker_Twain.internalTake(isPreview: Boolean; var Data:Variant): TDigIt_TakerResultType;
 var
    capRet:TCapabilityRet;
    TwainSource:TTwainSource;
@@ -373,27 +381,30 @@ var
 
 begin
   try
-     Result :='';
+     Result :=trtFilename;
+     Data :='';
    //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
      //Delete previous scanned file
      if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
      then DeleteFile(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp');
 
+     AcquireFileName :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
+
      if SelectedSourceIPC
      then begin
             resTake :=IPC_ParamsSet;
 
             if isPreview
-            then resTake :=IPC_Preview(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp')
-            else resTake :=IPC_Take(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp');
+            then resTake :=IPC_Preview(AcquireFileName)
+            else resTake :=IPC_Take(AcquireFileName);
 
             if resTake
             then begin
-                   Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
+                   Data :=AcquireFileName;
                    Inc(iTempFile);
                  end
-            else Result:='';
+            else Data :='';
           end
      else begin
             if Assigned(Twain.SelectedSource)
@@ -424,13 +435,16 @@ begin
                    Twain.SelectedSource.SetIndicators(True);
 
                    { #todo 10 -oMaxM : Switch to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-                   TwainSource.TransferMode:=ttmFile;
-                   TwainSource.SetupFileTransfer(TempDir+'twain_'+IntToStr(iTempFile)+'.bmp', tfBMP);
-                   TwainSource.EnableSource(False, True, Application.ActiveFormHandle);
-                   Result :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
+                   TwainSource.TransferMode:=ttmNative; //ttmFile;
+                   //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
+                   Twain.OnTwainAcquireNative:=@TwainAcquireNative;
+                   TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
+                   //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
+
+                   Data :=AcquireFileName;
                    Inc(iTempFile);
                  end
-            else Result:='';
+            else Data :='';
           end;
 
   finally
@@ -504,19 +518,19 @@ begin
   Result :='';
 end;
 
-function TDigIt_Taker_Twain.Preview: String;
+function TDigIt_Taker_Twain.Preview(var Data:Variant):TDigIt_TakerResultType;
 begin
-  Result :=internalTake(True);
+  Result :=internalTake(True, Data);
 end;
 
-function TDigIt_Taker_Twain.Take: String;
+function TDigIt_Taker_Twain.Take(var Data:Variant):TDigIt_TakerResultType;
 begin
-  Result :=internalTake(False);
+  Result :=internalTake(False, Data);
 end;
 
-function TDigIt_Taker_Twain.ReTake: String;
+function TDigIt_Taker_Twain.ReTake(var Data:Variant):TDigIt_TakerResultType;
 begin
-  Result :=internalTake(False);
+  Result :=internalTake(False, Data);
 end;
 
 procedure TDigIt_Taker_Twain.RefreshList(ASender:TTwainSelectSource);

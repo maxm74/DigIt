@@ -8,8 +8,9 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, lazcontrols, pexpandpanels,
-  DigIt_Form_Main, Digit_Bridge, Digit_Taker_Twain, DigIt_Utils, DigIt_Counters, DigIt_Types, Digit_Taker_Folder, 
-  DigIt_Form_Templates, Digit_Taker_Twain_Types, DigIt_Form_AnimAcquiring;
+  DigIt_Types, Digit_Bridge, DigIt_Counters, DigIt_Utils,
+  Digit_Taker_Folder, Digit_Taker_Twain_Types, Digit_Taker_Twain,
+  DigIt_Form_Main, DigIt_Form_Templates, DigIt_Form_AnimAcquiring;
 
 {$R *.res}
 

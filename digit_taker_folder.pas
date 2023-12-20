@@ -37,9 +37,9 @@ type
     class function UI_ImageIndex: Integer; override;
     function UI_Params_Summary: String; override;
 
-    function Preview: String; override;
-    function Take: String; override;
-    function ReTake: String; override;
+    function Preview(var Data:Variant):TDigIt_TakerResultType; override;
+    function Take(var Data:Variant):TDigIt_TakerResultType; override;
+    function ReTake(var Data:Variant):TDigIt_TakerResultType; override;
   end;
 
   TDigIt_Taker_FolderParams = class(TPersistent)
@@ -147,9 +147,9 @@ begin
   else Result :='';
 end;
 
-function TDigIt_Taker_Folder.Preview: String;
+function TDigIt_Taker_Folder.Preview(var Data:Variant):TDigIt_TakerResultType;
 begin
-  //Result :='c:\Users\Biblioteca Sortino\Downloads\tmp\doc01198620221124104620_1000001a_1_Pagina_01_Immagine_0001.tif'
+  Result :=trtFilename;
   with TDigIt_Taker_FolderParams(rParams) do
   begin
     if (lastFolder<>Folder)
@@ -164,14 +164,14 @@ begin
          end;
 
     if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-    then Result :=''
-    else Result :=Folder+DirectorySeparator+xFiles[lastFile+1];
+    then Data :=''
+    else Data :=Folder+DirectorySeparator+xFiles[lastFile+1];
   end;
 end;
 
-function TDigIt_Taker_Folder.Take: String;
+function TDigIt_Taker_Folder.Take(var Data:Variant):TDigIt_TakerResultType;
 begin
-  //Result :='c:\Users\Biblioteca Sortino\Downloads\tmp\doc01198620221124104620_1000001a_1_Pagina_01_Immagine_0001.tif'
+  Result :=trtFilename;
   with TDigIt_Taker_FolderParams(rParams) do
   begin
     if (lastFolder<>Folder)
@@ -186,18 +186,18 @@ begin
          end;
 
     if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-    then Result :=''
+    then Data :=''
     else begin
            Inc(lastFile);
            LastTaked:=xFiles[lastFile];
-           Result :=Folder+DirectorySeparator+LastTaked;
+           Data :=Folder+DirectorySeparator+LastTaked;
          end;
   end;
 end;
 
-function TDigIt_Taker_Folder.ReTake: String;
+function TDigIt_Taker_Folder.ReTake(var Data:Variant):TDigIt_TakerResultType;
 begin
-  //Result :='c:\Users\Biblioteca Sortino\Downloads\tmp\doc01198620221124104620_1000001a_1_Pagina_01_Immagine_0001.tif'
+  Result :=trtFilename;
   with TDigIt_Taker_FolderParams(rParams) do
   begin
     if (lastFolder<>Folder)
@@ -216,8 +216,8 @@ begin
          end;
 
     if (xFiles.Count=0) or (lastFile=xFiles.Count)
-    then Result :=''
-    else Result :=Folder+DirectorySeparator+LastTaked;
+    then Data :=''
+    else Data :=Folder+DirectorySeparator+LastTaked;
   end;
 end;
 

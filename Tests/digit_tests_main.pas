@@ -550,7 +550,6 @@ begin
     begin
       Twain.SelectedSource.Loaded:=True;
 
-
       rParams.IPC_Scanner:=False;
       rParams.Manufacturer :=Twain.SelectedSource.Manufacturer;
       rParams.ProductFamily :=Twain.SelectedSource.ProductFamily;

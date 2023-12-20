@@ -448,18 +448,27 @@ end;
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
 var
   curImageFile:String;
+  resType:TDigIt_TakerResultType;
+  Data:Variant;
 
 begin
   try
     if (takerInst<>nil) then
     begin
-      curImageFile :=takerInst.Preview;
-      if (curImageFile<>'') then
-      begin
-        WaitForAFile(curImageFile, 30000);
-        LoadImage(curImageFile);
-        XML_SaveWork;
+      resType :=takerInst.Preview(Data);
+
+      Case resType of
+      trtFilename: begin
+         curImageFile :=String(Data);
+         if (curImageFile<>'') then
+         begin
+           WaitForAFile(curImageFile, 30000);
+           LoadImage(curImageFile);
+           XML_SaveWork;
+         end;
       end;
+      end;
+
       UI_FillTaker;
     end;
   finally
@@ -481,22 +490,29 @@ end;
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
   curImageFile:String;
+  resType:TDigIt_TakerResultType;
+  Data:Variant;
 
 begin
   try
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
-      curImageFile :=takerInst.Take;
-      if (curImageFile<>'') then
-      begin
-        WaitForAFile(curImageFile, 30000);
-        LoadImage(curImageFile);
-        Counters.CopyValuesToPrevious;
-        //lvCaptured.BeginUpdate;
-        imgManipulation.getAllBitmaps(@SaveCallBack);
-        //lvCaptured.EndUpdate;
-        XML_SaveWork;
+      resType :=takerInst.Take(Data);
+
+      Case resType of
+      trtFilename: begin
+         curImageFile :=String(Data);
+         if (curImageFile<>'') then
+         begin
+           WaitForAFile(curImageFile, 30000);
+           LoadImage(curImageFile);
+           Counters.CopyValuesToPrevious;
+           imgManipulation.getAllBitmaps(@SaveCallBack);
+           XML_SaveWork;
+         end;
       end;
+      end;
+
       UI_FillTaker;
     end;
   finally
@@ -506,22 +522,31 @@ end;
 procedure TDigIt_Main.actReTakeExecute(Sender: TObject);
 var
   curImageFile:String;
+  resType:TDigIt_TakerResultType;
+  Data:Variant;
 
 begin
   try
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
-      curImageFile :=takerInst.ReTake;
-      if (curImageFile<>'') then
-      begin
-        WaitForAFile(curImageFile, 30000);
-        LoadImage(curImageFile);
-        Counters.CopyPreviousToValues;
-        //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
-        imgManipulation.getAllBitmaps(@SaveCallBack, 1);
-        //lvCaptured.EndUpdate;
-        XML_SaveWork;
+      resType :=takerInst.ReTake(Data);
+
+      Case resType of
+      trtFilename: begin
+         curImageFile :=String(Data);
+         if (curImageFile<>'') then
+         begin
+           WaitForAFile(curImageFile, 30000);
+           LoadImage(curImageFile);
+           Counters.CopyPreviousToValues;
+           //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
+           imgManipulation.getAllBitmaps(@SaveCallBack, 1);
+           //lvCaptured.EndUpdate;
+           XML_SaveWork;
+         end;
       end;
+      end;
+
       UI_FillTaker;
     end;
   finally

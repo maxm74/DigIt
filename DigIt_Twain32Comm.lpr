@@ -22,8 +22,8 @@ type
     AcquireResolution:Single;
 
     function InternalTake(AResolution: Single; APath:String):Boolean;
-    function TwainAcquireNative(Sender: TObject; const Index: Integer;
-                                nativeHandle: TW_UINT32; var Cancel: Boolean):Boolean;
+    procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -131,10 +131,10 @@ begin
   {$endif}
 end;
 
-function TTwain32SyncIPCServer.TwainAcquireNative(Sender: TObject; const Index: Integer;
-                                                  nativeHandle: TW_UINT32; var Cancel: Boolean): Boolean;
+procedure TTwain32SyncIPCServer.TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                                   nativeHandle: TW_UINT32; var Cancel: Boolean);
 begin
-    WriteBitmapToFile(AcquireFileName, nativeHandle);
+  WriteBitmapToFile(AcquireFileName, nativeHandle);
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
@@ -508,7 +508,7 @@ begin
       Writeln(' TWAIN32_PREVIEW: '+APath);
      {$endif}
 
-     Result:=InternalTake(200, APath);
+     Result:=InternalTake(75, APath);
      Result:=MessageResult(Integer(Result));
 
      {$ifopt D+}

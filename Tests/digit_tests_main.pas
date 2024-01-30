@@ -86,8 +86,8 @@ type
 
      function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
 
-     function TwainAcquireNative(Sender: TObject; const Index: Integer;
-                                 nativeHandle: TW_UINT32; var Cancel: Boolean):Boolean;
+     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
 
      procedure TwainAcquire(Sender: TObject; const Index: Integer;
                             imageHandle:HBitmap; var Cancel: Boolean);
@@ -368,11 +368,11 @@ begin
       if cbBMPCapture.Checked
       then begin
              Twain.OnTwainAcquireNative:=nil;
-             Twain.OnTwainAcquire:=@TwainAcquire;
+             Twain.OnTwainAcquireBitmap:=@TwainAcquire;
            end
       else begin
              Twain.OnTwainAcquireNative:=@TwainAcquireNative;
-             Twain.OnTwainAcquire:=nil;
+             Twain.OnTwainAcquireBitmap:=nil;
            end;
 
       Memo2.Lines.Add('  ActiveFormHandle='+Screen.ActiveCustomForm.name);
@@ -694,11 +694,10 @@ begin
   end;
 end;
 
-function TForm1.TwainAcquireNative(Sender: TObject; const Index: Integer;
-                                   nativeHandle: TW_UINT32; var Cancel: Boolean): Boolean;
+procedure TForm1.TwainAcquireNative(Sender: TObject; const Index: Integer;
+                                   nativeHandle: TW_UINT32; var Cancel: Boolean);
 begin
   try
-     Result :=False;
      WriteBitmapToFile('test_0.bmp', nativeHandle);
   except
   end;

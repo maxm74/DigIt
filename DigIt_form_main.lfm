@@ -29,17 +29,17 @@ object DigIt_Main: TDigIt_Main
     TabOrder = 0
     Transparent = True
     object tbTake: TToolButton
-      Left = 303
-      Top = 2
+      Left = 1
+      Top = 50
       Action = actTake
     end
     object tbReTake: TToolButton
-      Left = 358
-      Top = 2
+      Left = 56
+      Top = 50
       Action = actReTake
     end
     object tbTest1: TToolButton
-      Left = 1
+      Left = 189
       Top = 50
       Caption = 'TEST'
       ImageIndex = 7
@@ -156,13 +156,13 @@ object DigIt_Main: TDigIt_Main
       OnClick = tbSourceClick
     end
     object tbPreview: TToolButton
-      Left = 231
+      Left = 420
       Top = 2
       Action = actPreview
     end
     object tbWorkSave: TToolButton
-      Left = 431
-      Top = 2
+      Left = 129
+      Top = 50
       Caption = 'WorkSave'
       ImageIndex = 7
       Visible = False
@@ -173,11 +173,28 @@ object DigIt_Main: TDigIt_Main
       Top = 2
       Action = actSourceOpt
     end
-    object ToolButton3: TToolButton
+    object tbSep2: TToolButton
       Left = 223
       Height = 48
       Top = 2
-      Caption = 'ToolButton3'
+      Caption = 'tbSep2'
+      Style = tbsSeparator
+    end
+    object tbDest: TToolButton
+      Left = 231
+      Top = 2
+      Caption = 'Destination'
+    end
+    object tbDestOpt: TToolButton
+      Left = 299
+      Top = 2
+      Caption = 'Destination Settings'
+    end
+    object tbSep3: TToolButton
+      Left = 412
+      Height = 48
+      Top = 2
+      Caption = 'tbSep3'
       Style = tbsSeparator
     end
   end

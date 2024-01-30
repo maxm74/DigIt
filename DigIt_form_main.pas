@@ -146,7 +146,10 @@ type
     tbSource: TToolButton;
     tbPreview: TToolButton;
     tbSourceOpt: TToolButton;
-    ToolButton3: TToolButton;
+    tbDest: TToolButton;
+    tbSep2: TToolButton;
+    tbDestOpt: TToolButton;
+    tbSep3: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);

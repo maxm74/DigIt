@@ -60,11 +60,6 @@
               </Win32>
             </Options>
           </Linking>
-          <Other>
-            <ConfigFile>
-              <WriteConfigFilePath Value="$(ProjOutDir)/fpclaz.cfg"/>
-            </ConfigFile>
-          </Other>
         </CompilerOptions>
       </Item2>
     </BuildModes>
@@ -223,11 +218,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <ConfigFile>
-        <WriteConfigFilePath Value="$(ProjOutDir)/fpclaz.cfg"/>
-      </ConfigFile>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="5">

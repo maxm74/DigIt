@@ -1,4 +1,5 @@
 Main:
+  CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
   Salvare la sessione più spesso
   Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
   Animazione durante la scansione

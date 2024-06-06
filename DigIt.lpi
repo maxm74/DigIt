@@ -88,19 +88,19 @@
     </RunParams>
     <RequiredPackages Count="6">
       <Item1>
-        <PackageName Value="DelphiTwain_pkg"/>
+        <PackageName Value="MaxM_Commons"/>
       </Item1>
       <Item2>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="DelphiTwain_pkg"/>
       </Item2>
       <Item3>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="LazControls"/>
       </Item3>
       <Item4>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item4>
       <Item5>
-        <PackageName Value="Pexpandpanels"/>
+        <PackageName Value="bgracontrols"/>
       </Item5>
       <Item6>
         <PackageName Value="LCL"/>

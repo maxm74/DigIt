@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}
   Windows, Classes, SysUtils, Digit_Taker_Twain_Types, CustApp,
-  syncipc, Twain, DelphiTwain, DelphiTwainUtils;
+  MM_SyncIPC, Twain, DelphiTwain, DelphiTwainUtils;
 
 type
 

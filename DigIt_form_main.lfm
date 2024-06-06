@@ -29,17 +29,17 @@ object DigIt_Main: TDigIt_Main
     TabOrder = 0
     Transparent = True
     object tbTake: TToolButton
-      Left = 1
-      Top = 50
+      Left = 303
+      Top = 2
       Action = actTake
     end
     object tbReTake: TToolButton
-      Left = 56
-      Top = 50
+      Left = 358
+      Top = 2
       Action = actReTake
     end
     object tbTest1: TToolButton
-      Left = 189
+      Left = 1
       Top = 50
       Caption = 'TEST'
       ImageIndex = 7
@@ -75,7 +75,7 @@ object DigIt_Main: TDigIt_Main
       object dirDestination: TDirectoryEdit
         Left = 303
         Height = 23
-        Top = 18
+        Top = 22
         Width = 190
         ShowHidden = False
         ButtonWidth = 23
@@ -88,22 +88,15 @@ object DigIt_Main: TDigIt_Main
       object Label6: TLabel
         Left = 303
         Height = 15
-        Top = 0
+        Top = 6
         Width = 102
         Anchors = [akTop, akRight]
         Caption = 'Destination Folder :'
       end
-      object lbTakerSummary: TLabel
-        Left = 8
-        Height = 15
-        Top = 0
-        Width = 81
-        Caption = 'Taker Summary'
-      end
       object BCLabel9: TBCLabel
         Left = 120
         Height = 15
-        Top = 0
+        Top = 6
         Width = 44
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
@@ -137,13 +130,47 @@ object DigIt_Main: TDigIt_Main
       object cbSaveFormat: TComboBox
         Left = 120
         Height = 23
-        Top = 18
+        Top = 22
         Width = 180
         Anchors = [akTop, akRight]
         ItemHeight = 15
         Style = csDropDownList
         TabOrder = 1
         OnChange = cbSaveFormatChange
+      end
+      object BCLabel15: TBCLabel
+        Left = 53
+        Height = 15
+        Top = 0
+        Width = 63
+        Anchors = [akTop, akRight]
+        Background.Gradient1.StartColor = clWhite
+        Background.Gradient1.EndColor = clBlack
+        Background.Gradient1.GradientType = gtLinear
+        Background.Gradient1.Point1XPercent = 0
+        Background.Gradient1.Point1YPercent = 0
+        Background.Gradient1.Point2XPercent = 0
+        Background.Gradient1.Point2YPercent = 100
+        Background.Gradient2.StartColor = clWhite
+        Background.Gradient2.EndColor = clBlack
+        Background.Gradient2.GradientType = gtLinear
+        Background.Gradient2.Point1XPercent = 0
+        Background.Gradient2.Point1YPercent = 0
+        Background.Gradient2.Point2XPercent = 0
+        Background.Gradient2.Point2YPercent = 100
+        Background.Gradient1EndPercent = 35
+        Background.Style = bbsClear
+        Border.Style = bboNone
+        Caption = 'Destination:'
+        FontEx.Color = clDefault
+        FontEx.FontQuality = fqSystemClearType
+        FontEx.Shadow = False
+        FontEx.ShadowRadius = 5
+        FontEx.ShadowOffsetX = 5
+        FontEx.ShadowOffsetY = 5
+        FontEx.Style = []
+        Rounding.RoundX = 1
+        Rounding.RoundY = 1
       end
     end
     object tbSource: TToolButton
@@ -156,13 +183,13 @@ object DigIt_Main: TDigIt_Main
       OnClick = tbSourceClick
     end
     object tbPreview: TToolButton
-      Left = 420
+      Left = 231
       Top = 2
       Action = actPreview
     end
     object tbWorkSave: TToolButton
-      Left = 129
-      Top = 50
+      Left = 431
+      Top = 2
       Caption = 'WorkSave'
       ImageIndex = 7
       Visible = False
@@ -180,34 +207,67 @@ object DigIt_Main: TDigIt_Main
       Caption = 'tbSep2'
       Style = tbsSeparator
     end
-    object tbDest: TToolButton
-      Left = 231
-      Top = 2
-      Caption = 'Destination'
-    end
-    object tbDestOpt: TToolButton
-      Left = 299
-      Top = 2
-      Caption = 'Destination Settings'
-    end
-    object tbSep3: TToolButton
-      Left = 412
-      Height = 48
-      Top = 2
-      Caption = 'tbSep3'
-      Style = tbsSeparator
-    end
   end
-  object rollCrops: TMyRollOut
+  object imgManipulation: TBGRAImageManipulation
+    Left = 230
+    Height = 493
+    Top = 56
+    Width = 594
+    Align = alClient
+    AnchorSize = 9
+    AspectRatio = '3:4'
+    KeepAspectRatio = False
+    MinHeight = 53
+    MinWidth = 40
+    EmptyImage.Allow = True
+    EmptyImage.ResolutionUnit = ruPixelsPerInch
+    EmptyImage.ShowBorder = True
+    NewCropAreaDefault.AspectRatio = '3:4'
+    OnCropAreaAdded = AddedCrop
+    OnCropAreaDeleted = DeletedCrop
+    OnCropAreaChanged = ChangedCrop
+    OnSelectedCropAreaChanged = SelectedChangedCrop
+  end
+  object rollCrops: TBCExpandPanel
     Left = 0
     Height = 493
     Top = 56
     Width = 230
     Align = alLeft
-    ClientHeight = 493
-    ClientWidth = 230
+    Background.Color = clBtnFace
+    Background.Gradient1.StartColor = clWhite
+    Background.Gradient1.EndColor = clBlack
+    Background.Gradient1.GradientType = gtLinear
+    Background.Gradient1.Point1XPercent = 0
+    Background.Gradient1.Point1YPercent = 0
+    Background.Gradient1.Point2XPercent = 0
+    Background.Gradient1.Point2YPercent = 100
+    Background.Gradient2.StartColor = clWhite
+    Background.Gradient2.EndColor = clBlack
+    Background.Gradient2.GradientType = gtLinear
+    Background.Gradient2.Point1XPercent = 0
+    Background.Gradient2.Point1YPercent = 0
+    Background.Gradient2.Point2XPercent = 0
+    Background.Gradient2.Point2YPercent = 100
+    Background.Gradient1EndPercent = 35
+    Background.Style = bbsColor
+    BevelInner = bvNone
+    BevelOuter = bvRaised
+    BevelWidth = 1
+    Border.Style = bboNone
     Enabled = True
+    FontEx.Color = clDefault
+    FontEx.FontQuality = fqSystemClearType
+    FontEx.Shadow = False
+    FontEx.ShadowRadius = 5
+    FontEx.ShadowOffsetX = 5
+    FontEx.ShadowOffsetY = 5
+    FontEx.Style = []
+    ParentBackground = False
+    Rounding.RoundX = 1
+    Rounding.RoundY = 1
     TabOrder = 1
+    TextAlignment = taLeftJustify
     CollapseKind = akLeft
     ExpandedSize = 230
     ButtonPosition = akLeft
@@ -1390,16 +1450,46 @@ object DigIt_Main: TDigIt_Main
       OnClick = btPageSizesToCropsClick
     end
   end
-  object rollPages: TMyRollOut
+  object rollPages: TBCExpandPanel
     Left = 0
     Height = 200
     Top = 549
     Width = 1024
     Align = alBottom
-    ClientHeight = 200
-    ClientWidth = 1024
+    Background.Color = clBtnFace
+    Background.Gradient1.StartColor = clWhite
+    Background.Gradient1.EndColor = clBlack
+    Background.Gradient1.GradientType = gtLinear
+    Background.Gradient1.Point1XPercent = 0
+    Background.Gradient1.Point1YPercent = 0
+    Background.Gradient1.Point2XPercent = 0
+    Background.Gradient1.Point2YPercent = 100
+    Background.Gradient2.StartColor = clWhite
+    Background.Gradient2.EndColor = clBlack
+    Background.Gradient2.GradientType = gtLinear
+    Background.Gradient2.Point1XPercent = 0
+    Background.Gradient2.Point1YPercent = 0
+    Background.Gradient2.Point2XPercent = 0
+    Background.Gradient2.Point2YPercent = 100
+    Background.Gradient1EndPercent = 35
+    Background.Style = bbsColor
+    BevelInner = bvNone
+    BevelOuter = bvRaised
+    BevelWidth = 1
+    Border.Style = bboNone
     Enabled = True
+    FontEx.Color = clDefault
+    FontEx.FontQuality = fqSystemClearType
+    FontEx.Shadow = False
+    FontEx.ShadowRadius = 5
+    FontEx.ShadowOffsetX = 5
+    FontEx.ShadowOffsetY = 5
+    FontEx.Style = []
+    ParentBackground = False
+    Rounding.RoundX = 1
+    Rounding.RoundY = 1
     TabOrder = 2
+    TextAlignment = taLeftJustify
     CollapseKind = akBottom
     ExpandedSize = 200
     ButtonPosition = akTop
@@ -1470,36 +1560,46 @@ object DigIt_Main: TDigIt_Main
       OnShowHint = lvCapturedShowHint
     end
   end
-  object imgManipulation: TBGRAImageManipulation
-    Left = 230
-    Height = 493
-    Top = 56
-    Width = 594
-    Align = alClient
-    AnchorSize = 9
-    AspectRatio = '3:4'
-    KeepAspectRatio = False
-    MinHeight = 53
-    MinWidth = 40
-    EmptyImage.Allow = True
-    EmptyImage.ResolutionUnit = ruPixelsPerInch
-    EmptyImage.ShowBorder = True
-    NewCropAreaDefault.AspectRatio = '3:4'
-    OnCropAreaAdded = AddedCrop
-    OnCropAreaDeleted = DeletedCrop
-    OnCropAreaChanged = ChangedCrop
-    OnSelectedCropAreaChanged = SelectedChangedCrop
-  end
-  object rollCounters: TMyRollOut
+  object rollCounters: TBCExpandPanel
     Left = 824
     Height = 493
     Top = 56
     Width = 200
     Align = alRight
-    ClientHeight = 493
-    ClientWidth = 200
+    Background.Color = clBtnFace
+    Background.Gradient1.StartColor = clWhite
+    Background.Gradient1.EndColor = clBlack
+    Background.Gradient1.GradientType = gtLinear
+    Background.Gradient1.Point1XPercent = 0
+    Background.Gradient1.Point1YPercent = 0
+    Background.Gradient1.Point2XPercent = 0
+    Background.Gradient1.Point2YPercent = 100
+    Background.Gradient2.StartColor = clWhite
+    Background.Gradient2.EndColor = clBlack
+    Background.Gradient2.GradientType = gtLinear
+    Background.Gradient2.Point1XPercent = 0
+    Background.Gradient2.Point1YPercent = 0
+    Background.Gradient2.Point2XPercent = 0
+    Background.Gradient2.Point2YPercent = 100
+    Background.Gradient1EndPercent = 35
+    Background.Style = bbsColor
+    BevelInner = bvNone
+    BevelOuter = bvRaised
+    BevelWidth = 1
+    Border.Style = bboNone
     Enabled = True
+    FontEx.Color = clDefault
+    FontEx.FontQuality = fqSystemClearType
+    FontEx.Shadow = False
+    FontEx.ShadowRadius = 5
+    FontEx.ShadowOffsetX = 5
+    FontEx.ShadowOffsetY = 5
+    FontEx.Style = []
+    ParentBackground = False
+    Rounding.RoundX = 1
+    Rounding.RoundY = 1
     TabOrder = 3
+    TextAlignment = taLeftJustify
     CollapseKind = akRight
     ExpandedSize = 200
     ButtonPosition = akLeft

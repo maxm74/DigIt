@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  simpleipc, syncipc, Twain, DelphiTwain, DelphiTwainUtils, DelphiTwain_VCL, Digit_Taker_Twain_Types,
+  simpleipc, MM_SyncIPC, Twain, DelphiTwain, DelphiTwainUtils, DelphiTwain_VCL, Digit_Taker_Twain_Types,
   Digit_Taker_Twain_SettingsForm, FPImage, BGRABitmap;
 
 type

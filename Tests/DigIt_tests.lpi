@@ -46,11 +46,6 @@
               </Win32>
             </Options>
           </Linking>
-          <Other>
-            <ConfigFile>
-              <WriteConfigFilePath Value=""/>
-            </ConfigFile>
-          </Other>
         </CompilerOptions>
       </Item>
     </BuildModes>
@@ -62,6 +57,9 @@
       <FormatVersion Value="2"/>
     </RunParams>
     <RequiredPackages>
+      <Item>
+        <PackageName Value="MaxM_Commons"/>
+      </Item>
       <Item>
         <PackageName Value="BGRABitmapPack"/>
       </Item>
@@ -84,10 +82,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_tests_main"/>
-      </Unit>
-      <Unit>
-        <Filename Value="text.txt"/>
-        <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
   </ProjectOptions>
@@ -129,11 +123,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <ConfigFile>
-        <WriteConfigFilePath Value=""/>
-      </ConfigFile>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>

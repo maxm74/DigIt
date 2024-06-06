@@ -40,11 +40,6 @@
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
-          <Other>
-            <ConfigFile>
-              <WriteConfigFilePath Value=""/>
-            </ConfigFile>
-          </Other>
         </CompilerOptions>
       </Item>
     </BuildModes>
@@ -56,6 +51,9 @@
       <FormatVersion Value="2"/>
     </RunParams>
     <RequiredPackages>
+      <Item>
+        <PackageName Value="MaxM_Commons"/>
+      </Item>
       <Item>
         <PackageName Value="DelphiTwain_pkg"/>
       </Item>
@@ -105,11 +103,6 @@
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
     </Linking>
-    <Other>
-      <ConfigFile>
-        <WriteConfigFilePath Value=""/>
-      </ConfigFile>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>

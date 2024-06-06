@@ -15,9 +15,9 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs, ExtCtrls, Menus, ComCtrls,
-  ActnList, Spin, ShellCtrls, EditBtn, ExpandPanels, Digit_Bridge, Digit_Taker_Folder,
+  ActnList, Spin, ShellCtrls, EditBtn, Digit_Bridge, Digit_Taker_Folder,
   FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
-  BGRAImageList, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters;
+  BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters;
 
 type
 
@@ -43,6 +43,7 @@ type
     BCLabel12: TBCLabel;
     BCLabel13: TBCLabel;
     BCLabel14: TBCLabel;
+    BCLabel15: TBCLabel;
     BCLabel2: TBCLabel;
     BCLabel3: TBCLabel;
     BCLabel4: TBCLabel;
@@ -51,18 +52,13 @@ type
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
     BCLabel9: TBCLabel;
-    btPageSizesToCrops: TSpeedButton;
-    imgListMenu: TImageList;
-    imgListThumb: TBGRAImageList;
-    lvCaptured: TListView;
-    panelPageSize: TBCPanel;
     btBox_Add: TBGRASpeedButton;
+    btBox_Del: TBGRASpeedButton;
     btCFlipHLeft: TSpeedButton;
     btCFlipHRight: TSpeedButton;
     btCFlipVDown: TSpeedButton;
     btCFlipVUp: TSpeedButton;
     btCounter_Add: TBGRASpeedButton;
-    btBox_Del: TBGRASpeedButton;
     btCounter_Del: TBGRASpeedButton;
     btCropCounter_Add: TBGRASpeedButton;
     btCropCounter_Del: TBGRASpeedButton;
@@ -71,6 +67,8 @@ type
     btCRotateLeft: TSpeedButton;
     btCRotateRight: TSpeedButton;
     btPageSizes: TSpeedButton;
+    btPageSizesToCrops: TSpeedButton;
+    btPaperSizes: TSpeedButton;
     btZBack: TSpeedButton;
     btZDown: TSpeedButton;
     btZFront: TSpeedButton;
@@ -78,8 +76,6 @@ type
     cbBoxList: TComboBox;
     cbCounterList: TComboBox;
     cbCropCounterList: TComboBox;
-    cbSaveFormat: TComboBox;
-    dirDestination: TDirectoryEdit;
     edCounterName: TEdit;
     edCounterValue: TSpinEdit;
     edCounterValueStringDigits: TSpinEdit;
@@ -91,24 +87,28 @@ type
     edCropName: TEdit;
     edCropTop: TFloatSpinEdit;
     edCropUnit_Type: TComboBox;
+    edCropWidth: TFloatSpinEdit;
     edPageHeight: TFloatSpinEdit;
     edPageWidth: TFloatSpinEdit;
     edPage_UnitType: TComboBox;
-    edCropWidth: TFloatSpinEdit;
-    imgListCaptured: TImageList;
-    imgManipulation: TBGRAImageManipulation;
-    imgListMain: TImageList;
+    imgListMenu: TImageList;
+    imgListThumb: TBGRAImageList;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
-    Label6: TLabel;
     Label7: TLabel;
     Label8: TLabel;
-    lbPrevious: TLabel;
-    lbTakerSummary: TLabel;
+    cbSaveFormat: TComboBox;
+    dirDestination: TDirectoryEdit;
+    imgListCaptured: TImageList;
+    imgManipulation: TBGRAImageManipulation;
+    imgListMain: TImageList;
+    Label6: TLabel;
     lbCounterExample: TLabel;
+    lbPrevious: TLabel;
+    lvCaptured: TListView;
     menuOptions: TMenuItem;
     OpenProject: TOpenDialog;
     panelCounter: TBCPanel;
@@ -116,40 +116,37 @@ type
     panelMainToolbar: TPanel;
     menuPaperSizes: TPopupMenu;
     menuTakers: TPopupMenu;
+    panelPageSize: TBCPanel;
     rgCropAspect: TRadioGroup;
-    rollCounters: TMyRollOut;
+    rollCounters: TBCExpandPanel;
+    rollCrops: TBCExpandPanel;
+    rollPages: TBCExpandPanel;
     SaveProject: TSaveDialog;
     Separator1: TMenuItem;
     menuProjectOpen: TMenuItem;
     menuProjectSave: TMenuItem;
     menuProjectNew: TMenuItem;
-    rollCrops: TMyRollOut;
-    rollPages: TMyRollOut;
     OpenCropList: TOpenDialog;
     OpenPicture: TOpenPictureDialog;
     MenuMain: TPopupMenu;
     SaveCropList: TSaveDialog;
     SavePicture: TSavePictureDialog;
     SelectDirectory: TSelectDirectoryDialog;
-    btPaperSizes: TSpeedButton;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
     tbMain: TToolBar;
     tbTake: TToolButton;
     tbReTake: TToolButton;
-    ToolButton1: TToolButton;
-    tbTest2: TToolButton;
     tbTest1: TToolButton;
+    tbTest2: TToolButton;
     tbWorkSave: TToolButton;
     tbSep1: TToolButton;
     tbMenu: TToolButton;
     tbSource: TToolButton;
     tbPreview: TToolButton;
     tbSourceOpt: TToolButton;
-    tbDest: TToolButton;
     tbSep2: TToolButton;
-    tbDestOpt: TToolButton;
-    tbSep3: TToolButton;
+    ToolButton1: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
@@ -407,7 +404,6 @@ begin
   takerInst:=nil;
   takerParams:=nil;
   BuildTakersMenu(Self, menuTakers, @TakerMenuClick);
-  lbTakerSummary.Caption:='';
   BuildSaveFormats;
   {$ifopt D+}
   tbTest1.Visible:=True;
@@ -544,6 +540,7 @@ begin
            Counters.CopyPreviousToValues;
            //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
            imgManipulation.getAllBitmaps(@SaveCallBack, 1);
+           lvCaptured.Refresh;
            //lvCaptured.EndUpdate;
            XML_SaveWork;
          end;
@@ -1686,9 +1683,9 @@ begin
   actTake.Enabled:=(takerInst<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
   actReTake.Enabled:=actTake.Enabled;
   actSourceOpt.Enabled:=(takerInst<>nil);
-  if (takerInst<>nil)
+(*  if (takerInst<>nil)
   then lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary
-  else lbTakerSummary.Caption:='';
+  else lbTakerSummary.Caption:='';  *)
 end;
 
 procedure TDigIt_Main.UI_Load;

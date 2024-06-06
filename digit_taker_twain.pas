@@ -14,7 +14,7 @@ unit Digit_Taker_Twain;
 interface
 
 uses
-  simpleipc, syncipc, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
+  simpleipc, MM_SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
   Digit_Bridge, Digit_Taker_Twain_Types, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
 
 type

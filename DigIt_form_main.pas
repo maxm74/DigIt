@@ -24,6 +24,7 @@ type
   { TDigIt_Main }
 
   TDigIt_Main = class(TForm)
+    actTimerTake: TAction;
     actSourceOpt: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
@@ -109,6 +110,8 @@ type
     lbCounterExample: TLabel;
     lbPrevious: TLabel;
     lvCaptured: TListView;
+    menuTimerTakeConfig: TMenuItem;
+    menuTimerTakeStop: TMenuItem;
     menuOptions: TMenuItem;
     OpenProject: TOpenDialog;
     panelCounter: TBCPanel;
@@ -117,6 +120,7 @@ type
     menuPaperSizes: TPopupMenu;
     menuTakers: TPopupMenu;
     panelPageSize: TBCPanel;
+    menuTimerTake: TPopupMenu;
     rgCropAspect: TRadioGroup;
     rollCounters: TBCExpandPanel;
     rollCrops: TBCExpandPanel;
@@ -147,6 +151,7 @@ type
     tbSourceOpt: TToolButton;
     tbSep2: TToolButton;
     ToolButton1: TToolButton;
+    tbTimerTake: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
@@ -158,6 +163,7 @@ type
     procedure actSourceOptExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
     procedure actReTakeExecute(Sender: TObject);
+    procedure actTimerTakeExecute(Sender: TObject);
     procedure btCFlipHLeftClick(Sender: TObject);
     procedure btCFlipHRightClick(Sender: TObject);
     procedure btCFlipVDownClick(Sender: TObject);
@@ -551,6 +557,11 @@ begin
     end;
   finally
   end;
+end;
+
+procedure TDigIt_Main.actTimerTakeExecute(Sender: TObject);
+begin
+  //
 end;
 
 procedure TDigIt_Main.btCRotateLeftClick(Sender: TObject);
@@ -1682,6 +1693,7 @@ begin
   actPreview.Enabled:=(takerInst<>nil);
   actTake.Enabled:=(takerInst<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
   actReTake.Enabled:=actTake.Enabled;
+  actTimerTake.Enabled:=actTake.Enabled;
   actSourceOpt.Enabled:=(takerInst<>nil);
 (*  if (takerInst<>nil)
   then lbTakerSummary.Caption:=takerInst.UI_Title+':'+#13#10+takerInst.UI_Params_Summary

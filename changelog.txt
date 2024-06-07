@@ -28,3 +28,6 @@
 20/12/2023 Twain switched to ttmNative; TDigIt_Taker use Variant+TDigIt_TakerResultType;
            32bit Server use new TwainAcquireNative;
 
+06/06/2024 Added Use of MaxM_Commons Package and MM_SyncIPC in it; 
+           Changed Use of Package ExpandPanels with BCExpandPanelses
+07/06/2024 Added Button TimerTake to MainForm

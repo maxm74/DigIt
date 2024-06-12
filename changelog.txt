@@ -31,3 +31,5 @@
 06/06/2024 Added Use of MaxM_Commons Package and MM_SyncIPC in it; 
            Changed Use of Package ExpandPanels with BCExpandPanelses
 07/06/2024 Added Button TimerTake to MainForm
+
+12/06/2024 First Tests to Switch Bridge to Interfaces

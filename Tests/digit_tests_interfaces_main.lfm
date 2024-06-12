@@ -1,0 +1,70 @@
+object Form1: TForm1
+  Left = 280
+  Height = 240
+  Top = 122
+  Width = 320
+  Caption = 'Form1'
+  ClientHeight = 240
+  ClientWidth = 320
+  LCLVersion = '3.99.0.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object btReg: TButton
+    Left = 8
+    Height = 25
+    Top = 0
+    Width = 75
+    Caption = 'Register'
+    TabOrder = 0
+    OnClick = btRegClick
+  end
+  object btUnreg: TButton
+    Left = 88
+    Height = 25
+    Top = 0
+    Width = 75
+    Caption = 'UnRegister'
+    TabOrder = 1
+    OnClick = btUnregClick
+  end
+  object btLoad: TButton
+    Left = 8
+    Height = 25
+    Top = 24
+    Width = 75
+    Caption = 'Load Params'
+    TabOrder = 2
+  end
+  object btSave: TButton
+    Left = 88
+    Height = 25
+    Top = 24
+    Width = 75
+    Caption = 'Save Params'
+    TabOrder = 3
+  end
+  object Button1: TButton
+    Left = 168
+    Height = 25
+    Top = 24
+    Width = 112
+    Caption = 'Test Takers'
+    TabOrder = 4
+    OnClick = Button1Click
+  end
+  object Button3: TButton
+    Left = 168
+    Height = 25
+    Top = 0
+    Width = 80
+    Caption = 'Register Lib'
+    TabOrder = 5
+  end
+  object Memo1: TMemo
+    Left = 8
+    Height = 175
+    Top = 57
+    Width = 304
+    TabOrder = 6
+  end
+end

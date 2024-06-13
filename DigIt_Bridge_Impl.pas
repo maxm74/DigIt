@@ -63,20 +63,22 @@ type
     function Find(const aName:String): Integer; overload;
     function Find(const aClass : IDigIt_Taker): Integer; overload;
 
+    function GetTaker(const aName:String) : IDigIt_Taker;
+    function GetTaker(index : Integer) : IDigIt_Taker;
+    function GetCount : Integer;
+
   public
     constructor Create;
     destructor Destroy; override;
 
     function Register(const aName :PChar; const aClass : IDigIt_Taker) :Boolean; stdcall;
-    function UnRegister(const aName :PChar) :Boolean; stdcall;
-    function UnRegister(const aClass : IDigIt_Taker) :Boolean; stdcall;
-
-    function GetTaker(const aName:PChar) : IDigIt_Taker; stdcall;
-    function GetTaker(index : integer) : IDigIt_Taker; stdcall;
-    function GetCount : Integer; stdcall;
+    function UnRegister(const aName :String) :Boolean;
+    function UnRegister(const aClass : IDigIt_Taker) :Boolean;
 
     property Count : integer read GetCount;
-    property Taker [const aName:PChar] : IDigIt_Taker read GetTaker;
+
+    property TakerByName [const aName:String] : IDigIt_Taker read GetTaker;
+    property Taker [const aIndex:Integer] : IDigIt_Taker read GetTaker;
   end;
 
   { TDigIt_Bridge }
@@ -175,7 +177,7 @@ begin
     end;
 end;
 
-function TDigIt_Bridge_Takers.GetTaker(const aName: PChar): IDigIt_Taker; stdcall;
+function TDigIt_Bridge_Takers.GetTaker(const aName: String): IDigIt_Taker;
 var
   i : integer;
 
@@ -188,14 +190,14 @@ begin
     end;
 end;
 
-function TDigIt_Bridge_Takers.GetTaker(index: integer): IDigIt_Taker; stdcall;
+function TDigIt_Bridge_Takers.GetTaker(Index: integer): IDigIt_Taker;
 begin
   if (index >= 0) and (index < Length(rTakersList))
   then Result := rTakersList[index].Inst
   else Result := nil;
 end;
 
-function TDigIt_Bridge_Takers.GetCount: Integer; stdcall;
+function TDigIt_Bridge_Takers.GetCount: Integer;
 begin
   Result := Length(rTakersList);
 end;
@@ -214,11 +216,16 @@ var
 begin
   { #todo 10 -oMaxM : Free the Instances?  }
   for i:=0 to Length(rTakersList)-1 do
+    try
     if Assigned(rTakersList[i].Inst)
-    then if rTakersList[i].Inst.Release
-         then rTakersList[i].Inst :=nil;
+    then rTakersList[i].Inst.Release;
+    except
+    end;
 
-  SetLength(rTakersList, 0);
+  try
+     SetLength(rTakersList, 0);
+  except
+  end;
 
   inherited Destroy;
 end;
@@ -243,7 +250,7 @@ begin
   result :=True;
 end;
 
-function TDigIt_Bridge_Takers.UnRegister(const aName: PChar): Boolean; stdcall;
+function TDigIt_Bridge_Takers.UnRegister(const aName: String): Boolean;
 var
    r  :integer;
 
@@ -255,8 +262,7 @@ begin
   begin
     { #todo 10 -oMaxM : Free the Instances?  }
     if Assigned(rTakersList[r].Inst)
-    then if rTakersList[r].Inst.Release
-         then rTakersList[r].Inst :=nil;
+    then rTakersList[r].Inst.Release;
 
     Delete(rTakersList, r, 1);
   end;
@@ -264,7 +270,7 @@ begin
   result :=true;
 end;
 
-function TDigIt_Bridge_Takers.UnRegister(const aClass: IDigIt_Taker): Boolean; stdcall;
+function TDigIt_Bridge_Takers.UnRegister(const aClass: IDigIt_Taker): Boolean;
 var
    r  :integer;
 
@@ -276,7 +282,7 @@ begin
   begin
     { #todo 10 -oMaxM : Free the Instances?  }
     if Assigned(rTakersList[r].Inst)
-    then rTakersList[r].Inst :=nil;
+    then rTakersList[r].Inst.Release;
 
     Delete(rTakersList, r, 1);
   end;

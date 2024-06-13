@@ -24,6 +24,7 @@ type
 
   TTestTaker = class(TNoRefCountObject, IDigIt_Taker)
     function Init: Boolean; stdcall;
+    function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
 
     function RegisterName: PChar; stdcall;
@@ -103,6 +104,11 @@ begin
   Result :=True;
 end;
 
+function TTestTaker.Enabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+
+end;
+
 function TTestTaker.Release: Boolean; stdcall;
 begin
   Result :=False;
@@ -178,7 +184,7 @@ var
    rf:longint;
 
 begin
-  theBridge.Takers.UnRegister(test);
+  //theBridge.Takers.UnRegister(test);
 
   //rf :=test.RefCount;
 end;
@@ -186,15 +192,19 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 var
    i:Integer;
+   objTakers: TDigIt_Bridge_Takers;
    curTaker: IDigIt_Taker;
 
 begin
-  for i:=0 to theBridge.Takers.GetCount-1 do
-  begin
-    curTaker :=theBridge.Takers.GetTaker(i);
-    if Assigned(curTaker)
-    then Memo1.Lines.Add(Concat(curTaker.RegisterName, ' ', curTaker.Take));
-  end;
+  objTakers := theBridge.Takers as TDigIt_Bridge_Takers;
+
+  if Assigned(objTakers)
+  then for i:=0 to objTakers.Count-1 do
+       begin
+         curTaker :=objTakers.Taker[i];
+         if Assigned(curTaker)
+         then Memo1.Lines.Add(Concat(curTaker.RegisterName, ' ', curTaker.Take));
+       end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);

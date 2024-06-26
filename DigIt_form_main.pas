@@ -15,7 +15,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs, ExtCtrls, Menus, ComCtrls,
-  ActnList, Spin, ShellCtrls, EditBtn, Digit_Bridge, Digit_Taker_Folder,
+  ActnList, Spin, ShellCtrls, EditBtn,
+  Digit_Bridge_Intf, Digit_Bridge_Impl, //Digit_Taker_Folder,
   FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
   BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters;
 
@@ -239,9 +240,10 @@ type
     Counters: TDigIt_CounterList;
     XMLWork,
     XMLProject: TXMLConfig;
-    takerClass: TDigIt_TakerClasses;
-    takerInst:TDigIt_Taker;
-    takerParams: TPersistent;
+    //takerClass: TDigIt_TakerClasses;
+    takerInst:IDigIt_Taker;
+    takerParams: IDigIt_Params;
+    takerName,
     SaveExt,
     SavePath,
     rProject_File: String;
@@ -268,8 +270,8 @@ type
     procedure XML_SaveCapturedFile(AItem:TFileListItem);
     procedure XML_LoadProject(AFileName:String);
     procedure XML_SaveProject(AFileName:String);
-    procedure Taker_SelectUserParams(curClass :TDigIt_TakerClasses);
-    procedure Taker_SelectWithParams(curClass :TDigIt_TakerClasses; curParams:TPersistent);
+    procedure Taker_SelectUserParams(ATakerName:String; curClass :IDigIt_Taker);
+    procedure Taker_SelectWithParams(ATakerName:String; curClass :IDigIt_Taker; curParams:IDigIt_Params);
     procedure setProject_File(AValue: String);
 
     procedure WaitForAFile(AFileName: String; ATimeOut: Integer);
@@ -406,9 +408,10 @@ begin
   TStringList(cbBoxList.Items).OwnsObjects:=False;
   TStringList(cbCounterList.Items).OwnsObjects:=False;
 
-  takerClass:=nil;
+  //takerClass:=nil;
   takerInst:=nil;
   takerParams:=nil;
+  takerName:='';
   BuildTakersMenu(Self, menuTakers, @TakerMenuClick);
   BuildSaveFormats;
   {$ifopt D+}
@@ -422,7 +425,7 @@ procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
   Counters.Free;
 
-  if (takerInst<>nil) then takerInst.Free;
+//  if (takerInst<>nil) then takerInst.Free;
   if (XMLWork<>nil) then XMLWork.Free;
   if (XMLProject<>nil) then XMLProject.Free;
 end;
@@ -435,7 +438,7 @@ begin
   for i:=0 to tbCaptured.ButtonCount-1 do
      tbCaptured.Buttons[i].Hint:=tbCaptured.Buttons[i].Caption;
 
-  if FileExists(ConfigDir+Config_XMLWork)
+  if FileExists(Path_Config+Config_XMLWork)
      {$ifopt D-}
       and (MessageDlg('DigIt', 'Continue from last Session?', mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      {$endif}
@@ -452,27 +455,24 @@ end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
 var
-  curImageFile:String;
-  resType:TDigIt_TakerResultType;
-  Data:Variant;
+  curImageFile: PChar;
+  res: Integer;
 
 begin
   try
     if (takerInst<>nil) then
     begin
-      resType :=takerInst.Preview(Data);
+      curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
 
-      Case resType of
-      trtFilename: begin
-         curImageFile :=String(Data);
-         if (curImageFile<>'') then
-         begin
+      res:= takerInst.Preview(curImageFile);
+      if (res>0) and (curImageFile<>'') then
+      begin
            WaitForAFile(curImageFile, 30000);
            LoadImage(curImageFile);
            XML_SaveWork;
-         end;
-      end;
-      end;
+       end;
+
+      StrDispose(curImageFile);
 
       UI_FillTaker;
     end;
@@ -485,7 +485,7 @@ begin
   try
     if (takerInst<>nil) then
     begin
-      if takerInst.Params_GetFromUser
+      if takerInst.Params.GetFromUser
       then XML_SaveWork;
     end;
   finally
@@ -494,29 +494,26 @@ end;
 
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
-  curImageFile:String;
-  resType:TDigIt_TakerResultType;
-  Data:Variant;
+  curImageFile: PChar;
+  res: Integer;
 
 begin
   try
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
-      resType :=takerInst.Take(Data);
+      curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
 
-      Case resType of
-      trtFilename: begin
-         curImageFile :=String(Data);
-         if (curImageFile<>'') then
-         begin
+      res:= takerInst.Take(curImageFile);
+      if (res>0) and (curImageFile<>'') then
+      begin
            WaitForAFile(curImageFile, 30000);
            LoadImage(curImageFile);
            Counters.CopyValuesToPrevious;
            imgManipulation.getAllBitmaps(@SaveCallBack);
            XML_SaveWork;
-         end;
-      end;
-      end;
+       end;
+
+      StrDispose(curImageFile);
 
       UI_FillTaker;
     end;
@@ -526,21 +523,19 @@ end;
 
 procedure TDigIt_Main.actReTakeExecute(Sender: TObject);
 var
-  curImageFile:String;
-  resType:TDigIt_TakerResultType;
-  Data:Variant;
+  curImageFile: PChar;
+  res: Integer;
 
 begin
   try
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
-      resType :=takerInst.ReTake(Data);
+      curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
 
-      Case resType of
-      trtFilename: begin
-         curImageFile :=String(Data);
-         if (curImageFile<>'') then
-         begin
+      res:= takerInst.ReTake(curImageFile);
+
+      if (res>0) and (curImageFile<>'') then
+      begin
            WaitForAFile(curImageFile, 30000);
            LoadImage(curImageFile);
            Counters.CopyPreviousToValues;
@@ -549,9 +544,9 @@ begin
            lvCaptured.Refresh;
            //lvCaptured.EndUpdate;
            XML_SaveWork;
-         end;
       end;
-      end;
+
+      StrDispose(curImageFile);
 
       UI_FillTaker;
     end;
@@ -1006,14 +1001,15 @@ end;
 
 procedure TDigIt_Main.TakerMenuClick(Sender: TObject);
 var
-   curClass :TDigIt_TakerClasses;
-   newInst :TDigIt_Taker;
+   curClass: IDigIt_Taker;
+   curName: String;
 
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
-    curClass :=TDigIt_TakerClasses(theBridge.Takers.GetTaker(TMenuItem(Sender).Tag));
-    Taker_SelectUserParams(curClass);
+    curClass :=theBridge.TakersImpl.Taker[TMenuItem(Sender).Tag];
+    curName:= theBridge.TakersImpl.Name[TMenuItem(Sender).Tag];
+    Taker_SelectUserParams(curName, curClass);
     UI_FillTaker;
   end;
 end;
@@ -1205,27 +1201,28 @@ end;
 
 procedure TDigIt_Main.XML_LoadWork;
 var
-   takerName:String;
-   aClass:TDigIt_TakerClasses;
-   aClassInstParams:TPersistent;
+   curTakerName:String;
+   aClass: IDigIt_Taker;
+   aClassInstParams: IDigIt_Params;
 
 begin
   try
-    if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(ConfigDir+Config_XMLWork);
+    if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-    takerName :=XMLWork.GetValue('Taker', '');
+    curTakerName :=XMLWork.GetValue('Taker', '');
     SaveExt :=XMLWork.GetValue('Format', 'jpg');
     SavePath :=XMLWork.GetValue('Destination', '');
-    if (takerName<>'') then
+    if (curTakerName<>'') then
     begin
-      aClass :=theBridge.Takers.Taker[takerName];
-      if assigned(aClass) then
+      aClass :=theBridge.TakersImpl.TakerByName[curTakerName];
+      if (aClass <> nil) then
       begin
         //Read Params
-        aClassInstParams :=aClass.Params_GetClass.Create;
-        ReadPersistentFromXMLConfig(XMLWork, 'Params', '', aClassInstParams);
+        aClassInstParams :=aClass.Params;
+      //  ReadPersistentFromXMLConfig(XMLWork, 'Params', '', aClassInstParams);
+        aClassInstParams.Load(PChar(Path_Config+Config_XMLWork), 'Params');
 
-        Taker_SelectWithParams(aClass, aClassInstParams);
+        Taker_SelectWithParams(curTakerName, aClass, aClassInstParams);
       end;
     end;
     Counters.Load(XMLWork, True);
@@ -1236,7 +1233,7 @@ begin
     UI_FillCounter(GetCurrentCounter);
 
     //User Interface
-    rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', True);
+    rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', False);
     rollPages.Collapsed:=XMLWork.GetValue('UI/rollPages_Collapsed', True);
     rollCounters.Collapsed:=XMLWork.GetValue('UI/rollCounters_Collapsed', True);
 
@@ -1248,12 +1245,7 @@ procedure TDigIt_Main.XML_SaveWork;
 begin
   if (takerInst<>nil) then
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(ConfigDir+Config_XMLWork);
-
-     XMLWork.SetValue('Taker', takerInst.RegisterName);
-     XMLWork.SetValue('Format', SaveExt);
-     XMLWork.SetValue('Destination', SavePath);
-     WritePersistentToXMLConfig(XMLWork, 'Params', '', takerInst.Params_Get);
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
      Counters.Save(XMLWork, True);
      XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
@@ -1265,6 +1257,15 @@ begin
      XMLWork.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
 
      XMLWork.Flush;
+
+     //Save Taker and its Params
+     XMLWork.SetValue('Taker', takerName);
+     XMLWork.SetValue('Format', SaveExt);
+     XMLWork.SetValue('Destination', SavePath);
+     takerInst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Params');
+
+     XMLWork.Flush;
+
   finally
   end;
 end;
@@ -1276,11 +1277,9 @@ var
 
 begin
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(ConfigDir+Config_XMLWork);
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-     newCount := XMLWork.GetValue(XMLWork_Captured+'Count', -1);
-     if (newCount=-1)
-     then raise Exception.Create('XML Path not Found - '+XMLWork_Captured+'Count');
+     newCount := XMLWork.GetValue(XMLWork_Captured+'Count', 0);
 
      lvCaptured.BeginUpdate;
 
@@ -1305,7 +1304,7 @@ end;
 procedure TDigIt_Main.XML_SaveCapturedFile(AItem: TFileListItem);
 begin
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(ConfigDir+Config_XMLWork);
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
      XMLWork.SetValue(XMLWork_Captured+'Count', lvCaptured.Items.Count);
      if lvCaptured.Selected=nil
@@ -1347,14 +1346,16 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.Taker_SelectUserParams(curClass :TDigIt_TakerClasses);
+procedure TDigIt_Main.Taker_SelectUserParams(ATakerName:String; curClass: IDigIt_Taker);
 var
-   newInst:TDigIt_Taker;
+   newInst: IDigIt_Taker;
+   curParams: IDigIt_Params;
 
 begin
-  if assigned(curClass) then
+  if (curClass <> nil) then
   begin
-    if (curClass<>takerClass)
+    (*
+    if (curClass <> takerClass)
     then begin
            //New Taker is different from actual, Create a new Instance and GetParams from User
            newInst :=curClass.Create(nil);
@@ -1374,16 +1375,28 @@ begin
 
            takerInst.Params_GetFromUser; { #todo 2 -oMaxM : if False? }
          end;
+         *)
+    if (curClass <> takerInst) then
+    begin
+         { #note -oMaxM : Taker Switched...Do something? }
+    end;
+
+    takerInst:= curClass;
+    takerName:= ATakerName;
+    curParams:= takerInst.Params;
+    if (curParams <> nil)
+    then curParams.GetFromUser; { #todo 2 -oMaxM : if False? }
   end;
 end;
 
-procedure TDigIt_Main.Taker_SelectWithParams(curClass :TDigIt_TakerClasses; curParams:TPersistent);
+procedure TDigIt_Main.Taker_SelectWithParams(ATakerName:String; curClass: IDigIt_Taker; curParams: IDigIt_Params);
 var
-   newInst:TDigIt_Taker;
+   newInst:IDigIt_Taker;
 
 begin
-  if assigned(curClass) then
+  if (curClass <> nil) then
   begin
+    (*
     if (curClass<>takerClass)
     then begin
            //New Taker is different from actual, Create a new Instance
@@ -1400,6 +1413,17 @@ begin
          end;
 
     takerInst.Params_Set(curParams);
+    *)
+    if (curClass <> takerInst) then
+    begin
+         { #note -oMaxM : Taker Switched...Do something? }
+    end;
+
+    takerInst:= curClass;
+    takerName:= ATakerName;
+//    if (takerParams <> nil)
+//    then takerParams.Assign(curParams); { #todo 10 -oMaxM : ? }
+
   end;
 end;
 
@@ -1613,25 +1637,13 @@ end;
 
 procedure TDigIt_Main.TestClick(Sender: TObject);
 var
-   Twain: TDelphiTwain=nil;
-   Twain_Source:TTwainSource;
-   Twain_SourceI, i:Integer;
    astr:String;
 
 begin
   try
-    //Create Twain
-   Twain := TDelphiTwain.Create;
-   if Twain.LoadLibrary then
-   begin
-     Twain.SourceManagerLoaded := TRUE;
-     for i:=0 to Twain.SourceCount-1 do
-     begin
-       aStr:=Twain.Source[i].ProductName;
-     end;
-   end;
+     astr :=theBridge.Settings.Path_Config;
+     MessageDlg(astr, mtInformation, [mbOk], 0);
   finally
-     Twain.Free
   end;
 end;
 

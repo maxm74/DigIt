@@ -37,9 +37,9 @@ const
   XMLWork_Captured='CapturedFile/';
 
 var
-   ApplicationDir,
-   ConfigDir,
-   TempDir:String;
+   Path_Application,
+   Path_Config,
+   Path_Temp:String;
 
 implementation
 
@@ -59,11 +59,11 @@ begin
 end;
 
 initialization
-   ApplicationDir :=ExtractFilePath(ParamStr(0));
-   ConfigDir :=GetAppConfigDir(False);
-   TempDir :=GetTempDir(False)+'DigIt'+DirectorySeparator;
-   ForceDirectories(ConfigDir);
-   ForceDirectories(TempDir);
+   Path_Application :=ExtractFilePath(ParamStr(0));
+   Path_Config :=GetAppConfigDir(False);
+   Path_Temp :=GetTempDir(False)+'DigIt'+DirectorySeparator;
+   ForceDirectories(Path_Config);
+   ForceDirectories(Path_Temp);
 
 end.
 

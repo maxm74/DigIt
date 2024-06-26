@@ -33,3 +33,6 @@
 07/06/2024 Added Button TimerTake to MainForm
 
 12/06/2024 First Tests to Switch Bridge to Interfaces
+26/06/2024 Switch to Interface use in Bridge, Taker, etc;
+           Temporarily removed Taker Twain until it is converted to interfaces;
+           First test of Load Plugins from Library;

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 280
+  Left = 786
   Height = 240
-  Top = 122
+  Top = 144
   Width = 320
   Caption = 'Form1'
   ClientHeight = 240
@@ -43,22 +43,23 @@ object Form1: TForm1
     Caption = 'Save Params'
     TabOrder = 3
   end
-  object Button1: TButton
+  object btTest: TButton
     Left = 168
     Height = 25
     Top = 24
     Width = 112
     Caption = 'Test Takers'
     TabOrder = 4
-    OnClick = Button1Click
+    OnClick = btTestClick
   end
-  object Button3: TButton
+  object btRegisterLibs: TButton
     Left = 168
     Height = 25
     Top = 0
     Width = 80
-    Caption = 'Register Lib'
+    Caption = 'Register Libs'
     TabOrder = 5
+    OnClick = btRegisterLibsClick
   end
   object Memo1: TMemo
     Left = 8
@@ -66,5 +67,9 @@ object Form1: TForm1
     Top = 57
     Width = 304
     TabOrder = 6
+  end
+  object selDirDialog: TSelectDirectoryDialog
+    Left = 286
+    Top = 3
   end
 end

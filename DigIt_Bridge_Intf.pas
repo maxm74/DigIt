@@ -14,60 +14,94 @@ unit Digit_Bridge_Intf;
 
 interface
 
+const
+  //Default Max PChar Size when passing/receiving parameters to the interface
+  //use SetMaxPCharSize to increase the value
+  DigIt_MaxPCharSize = 512;
+
+  DigIt_PluginInfoProcName = 'DigIt_Plugin_Info';
+  DigIt_PluginInitProcName = 'DigIt_Plugin_Init';
+  DigIt_PluginReleaseProcName = 'DigIt_Plugin_Release';
+
 type
   IDigIt_Bridge =interface;
 
-  // Library in plugins subdirectory must export this procedures
-  //   "DigIt_Init" when the plugin is initialized
-  //   "DigIt_Release" when the plugin is released
-  TDigIt_PluginInitProc = function (const digitBridge: IDigIt_Bridge): Boolean; stdcall;
+  TDigIt_PluginInfo = packed record
+    BridgeMinVer: Byte;
+    Name: String[32];
+    Ver: String[5];
+  end;
+
+  // Library in plugins subdirectory must export this procedures:
+
+    //   "DigIt_Plugin_Info" when get the plugin Info
+    TDigIt_PluginInfoProc = function (var PluginInfo: TDigIt_PluginInfo): Boolean; stdcall;
+
+    //   "DigIt_Plugin_Init" when the plugin is initialized
+    //   "DigIt_Plugin_Release" when the plugin is released
+    TDigIt_PluginInitProc = function (const digitBridge: IDigIt_Bridge): Boolean; stdcall;
+
+
 
   // ans this to "GetDisplayName"
   TDigIt_PluginNameProc = function :PChar; stdcall;
 
   IDigIt_Params = Interface
-  ['{D101FEDE-C69C-473C-9C36-4E30A587BCB3}']
+  ['{D101CADE-C69C-4929-A8DF-4E30A587BCB3}']
     function GetFromUser: Boolean; stdcall;
     function Duplicate: IDigIt_Params; stdcall;
-    function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
-    function Save(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
+    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Summary: PChar; stdcall;
   end;
 
   IDigIt_Taker = Interface
-  ['{D101FEDE-C69C-4595-8676-699AC76DEE84}']
+  ['{D101CADE-C69C-4929-A8DF-699AC76DEE84}']
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
 
-    function RegisterName: PChar; stdcall;
     function Params: IDigIt_Params; stdcall;
-    function UI_Title: PChar; stdcall;
+    function UI_Title(const AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileName
-    function Preview: PChar; stdcall;
-    function Take: PChar; stdcall;
-    function ReTake: PChar; stdcall;
+    function Preview(const AFileName: PChar): Integer; stdcall;
+    function Take(const AFileName: PChar): Integer; stdcall;
+    function ReTake(const AFileName: PChar): Integer; stdcall;
   end;
 
   IDigIt_Takers = Interface
-  ['{D101FEDE-C69C-4929-A8DF-8344B540E2A2}']
-    function Register(const aName :PChar; const aClass : IDigIt_Taker) :Boolean; stdcall;
+  ['{D101CADE-C69C-4929-A8DF-8344B540E2A2}']
+    function Register(const aName: PChar; const aClass: IDigIt_Taker) :Boolean; stdcall;
     //function UnRegister(const aClass : IDigIt_Taker) :Boolean; stdcall; { #note 5 -oMaxM : Implementer unregist the Class}
   end;
 
+  IDigIt_Settings = Interface
+  ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
+    //Buffers Limits Variables
+    function GetMaxPCharSize: DWord; stdcall;
+    function SetMaxPCharSize(NewSize: DWord): DWord; stdcall;
+
+    //Path consts
+    function Path_Temp: PChar; stdcall;
+    function Path_Config: PChar; stdcall;
+    function Path_Application: PChar; stdcall;
+  end;
+
   IDigIt_Bridge = Interface
-  ['{D101FEDE-C69C-4CD6-BD14-C779BE1D5762}']
-    function Takers :IDigIt_Takers; stdcall;
+  ['{D101CADE-C69C-4929-A8DF-C779BE1D5762}']
+    function Takers: IDigIt_Takers; stdcall;
+    function Settings: IDigIt_Settings; stdcall;
     //ToolBar, Menù, PostProcessing Image, Export Image format, etc... { #todo -oMaxM : Maybe Tomorrow }
 
-
+    (*
     //General Register/Unregister, inside the InitProc/ReleaseProc you can Register/UnRegister in Takers, etc...
-    function Register(const aDisplayName :PChar;
+    function Register(const aDisplayName: PChar;
                       const InitProc: TDigIt_PluginInitProc;
                       const ReleaseProc: TDigIt_PluginInitProc) :Boolean; stdcall;
     //function UnRegister(const aDisplayName :PChar) :Boolean; stdcall; { #note 5 -oMaxM : This way each library can uninstall  the others ???? }
+    *)
   end;
 
 implementation

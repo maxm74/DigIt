@@ -40,7 +40,7 @@ function FindFileListItem(AList:TListItems; AFileName:String):TFileListItem;
 
 implementation
 
-uses Digit_Bridge;
+uses Digit_Bridge_Intf, Digit_Bridge_Impl;
 
 type
     //Workaround class so we can write a TPersistent using TWriter.WriteRootComponent
@@ -263,24 +263,34 @@ end;
 
 procedure BuildTakersMenu(AOwner: TComponent; menuTakers: TMenu; menuOnClick: TNotifyEvent);
 var
-   i :Integer;
+   i, res  :Integer;
    newItem :TMenuItem;
-   curClass :TDigIt_TakerClasses;
+   curIntf :IDigIt_Taker;
+   curTitle:PChar;
 
 begin
-  for i:=0 to theBridge.Takers.Count-1 do
+  curTitle:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+
+  for i:=0 to theBridge.TakersImpl.Count-1 do
   begin
-    curClass :=theBridge.Takers.GetTaker(i);
-    if (curClass<>nil) then
+    curIntf :=theBridge.TakersImpl.Taker[i];
+    if (curIntf<>nil) then
     begin
       newItem :=TMenuItem.Create(AOwner);
-      newItem.Caption:=curClass.UI_Title;
-      newItem.ImageIndex:=curClass.UI_ImageIndex;
+
+      res :=curIntf.UI_Title(curTitle);
+      if (res >0 ) and (curTitle <> '')
+      then newItem.Caption:= curTitle
+      else newItem.Caption:= theBridge.TakersImpl.Name[i];
+
+      newItem.ImageIndex:=curIntf.UI_ImageIndex;
       newItem.Tag:=i;
       newItem.OnClick:=menuOnClick;
       menuTakers.Items.Add(newItem);
     end;
   end;
+
+  StrDispose(curTitle);
 end;
 
 procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;

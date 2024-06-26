@@ -106,7 +106,7 @@
         <PackageName Value="LCL"/>
       </Item6>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="12">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -119,68 +119,55 @@
         <ResourceBaseClass Value="Form"/>
       </Unit1>
       <Unit2>
-        <Filename Value="DigIt_Bridge.pas"/>
+        <Filename Value="DigIt_Utils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Bridge"/>
       </Unit2>
       <Unit3>
-        <Filename Value="DigIt_Taker_Twain.pas"/>
+        <Filename Value="_appunti.txt"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Taker_Twain"/>
       </Unit3>
       <Unit4>
-        <Filename Value="DigIt_Utils.pas"/>
+        <Filename Value="DigIt_Counters.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="_appunti.txt"/>
+        <Filename Value="DigIt_Types.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="DigIt_Counters.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="DigIt_Types.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
         <Filename Value="DigIt_Taker_Folder.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Taker_Folder"/>
-      </Unit8>
-      <Unit9>
+      </Unit6>
+      <Unit7>
         <Filename Value="DigIt_Form_Templates.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Templates"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="DigIt_Taker_Twain_Types.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Taker_Twain_Types"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="digit_taker_twain_settingsform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="TwainSettingsSource"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Digit_Taker_Twain_SettingsForm"/>
-      </Unit11>
-      <Unit12>
+      </Unit7>
+      <Unit8>
         <Filename Value="_to-do.txt"/>
         <IsPartOfProject Value="True"/>
-      </Unit12>
-      <Unit13>
+      </Unit8>
+      <Unit9>
         <Filename Value="digit_form_animacquiring.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormAnimAcquiring"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="DigIt_Form_AnimAcquiring"/>
-      </Unit13>
+      </Unit9>
+      <Unit10>
+        <Filename Value="DigIt_Bridge_Intf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge_Intf"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="DigIt_Bridge_Impl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge_Impl"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

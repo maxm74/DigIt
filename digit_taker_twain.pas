@@ -15,7 +15,7 @@ interface
 
 uses
   simpleipc, MM_SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
-  Digit_Bridge, Digit_Taker_Twain_Types, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
+  Digit_Bridge_Intf, Digit_Taker_Twain_Types, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
 
 type
   { TDigIt_Taker_Twain }

@@ -14,7 +14,7 @@ type
 
   { TTestTakerParams }
 
-  TTestTakerParams = class(TNoRefCountObject, IDigIt_Params)
+  TTestTakerParams = class(TInterfacedObject, IDigIt_Params)
     function GetFromUser: Boolean; stdcall;
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
@@ -22,20 +22,19 @@ type
     function Summary: PChar; stdcall;
   end;
 
-  TTestTaker = class(TNoRefCountObject, IDigIt_Taker)
+  TTestTaker = class(TInterfacedObject, IDigIt_Taker)
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
 
-    function RegisterName: PChar; stdcall;
     function Params: IDigIt_Params; stdcall;
-    function UI_Title: PChar; stdcall;
+    function UI_Title(const AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileName
-    function Preview: PChar; stdcall;
-    function Take: PChar; stdcall;
-    function ReTake: PChar; stdcall;
+    function Preview(const AFileName: PChar): Integer; stdcall;
+    function Take(const AFileName: PChar): Integer; stdcall;
+    function ReTake(const AFileName: PChar): Integer; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -48,16 +47,18 @@ type
     btUnreg: TButton;
     btLoad: TButton;
     btSave: TButton;
-    Button1: TButton;
-    Button3: TButton;
+    btTest: TButton;
+    btRegisterLibs: TButton;
     Memo1: TMemo;
+    selDirDialog: TSelectDirectoryDialog;
     procedure btRegClick(Sender: TObject);
     procedure btUnregClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure btTestClick(Sender: TObject);
+    procedure btRegisterLibsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
-    test:TTestTaker;
+
 
   public
 
@@ -65,6 +66,8 @@ type
 
 var
   Form1: TForm1;
+  test:TTestTaker;
+
 
 implementation
 
@@ -114,7 +117,7 @@ begin
   Result :=False;
 
   try
-     Free;
+     //Free;
 
      Result :=True;
   except
@@ -122,19 +125,15 @@ begin
   end;
 end;
 
-function TTestTaker.RegisterName: PChar; stdcall;
-begin
-  Result :=TestTakerName;
-end;
-
 function TTestTaker.Params: IDigIt_Params; stdcall;
 begin
   Result:=nil;
 end;
 
-function TTestTaker.UI_Title: PChar; stdcall;
+function TTestTaker.UI_Title(const AUI_Title: PChar): Integer; stdcall;
 begin
-  Result:=nil;
+  StrPCopy(AUI_Title, 'Test Internal Plugin Menu');
+  Result:= Length(AUI_Title);
 end;
 
 function TTestTaker.UI_ImageIndex: Integer; stdcall;
@@ -142,19 +141,22 @@ begin
   Result:=-1;
 end;
 
-function TTestTaker.Preview: PChar; stdcall;
+function TTestTaker.Preview(const AFileName: PChar): Integer; stdcall;
 begin
-  Result :='C:\ReTake\AFilePath\'+TestTakerName;
+  StrPCopy(AFileName, 'C:\Preview\AFilePath\'+TestTakerName);
+  Result:= Length(AFileName);
 end;
 
-function TTestTaker.Take: PChar; stdcall;
+function TTestTaker.Take(const AFileName: PChar): Integer; stdcall;
 begin
-  Result :='C:\ReTake\AFilePath\'+TestTakerName;
+  StrPCopy(AFileName, 'C:\Take\AFilePath\'+TestTakerName);
+  Result:= Length(AFileName);
 end;
 
-function TTestTaker.ReTake: PChar; stdcall;
+function TTestTaker.ReTake(const AFileName: PChar): Integer; stdcall;
 begin
-  Result :='C:\ReTake\AFilePath\'+TestTakerName;
+  StrPCopy(AFileName, 'C:\ReTake\AFilePath\'+TestTakerName);
+  Result:= Length(AFileName);
 end;
 
 constructor TTestTaker.Create;
@@ -174,6 +176,7 @@ var
    rf:longint;
 
 begin
+  test :=TTestTaker.Create;
   theBridge.Takers.Register(TestTakerName, test);
 
   //rf :=test.RefCount;
@@ -189,32 +192,49 @@ begin
   //rf :=test.RefCount;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.btTestClick(Sender: TObject);
 var
    i:Integer;
-   objTakers: TDigIt_Bridge_Takers;
+   objTakers: TDigIt_Takers;
    curTaker: IDigIt_Taker;
+   curImageFile: PChar;
+   res: Integer;
 
 begin
-  objTakers := theBridge.Takers as TDigIt_Bridge_Takers;
+  objTakers := theBridge.Takers as TDigIt_Takers;
 
   if Assigned(objTakers)
   then for i:=0 to objTakers.Count-1 do
        begin
          curTaker :=objTakers.Taker[i];
-         if Assigned(curTaker)
-         then Memo1.Lines.Add(Concat(curTaker.RegisterName, ' ', curTaker.Take));
+         if Assigned(curTaker) then
+         begin
+           curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+           res :=curTaker.Take(curImageFile);
+           Memo1.Lines.Add(objTakers.Name[i]+' '+curImageFile);
+           StrDispose(curImageFile);
+         end;
        end;
+end;
+
+procedure TForm1.btRegisterLibsClick(Sender: TObject);
+begin
+  if selDirDialog.Execute then
+  begin
+    Memo1.Lines.Add('***RegisterInPath***');
+    Memo1.Lines.Add('   '+IntToStr(theBridge.Plugins.RegisterInPath(selDirDialog.FileName))+' New Plugins Registered');
+  end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  test :=TTestTaker.Create;
+  //test :=TTestTaker.Create;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   //test.Free;
+  //theBridge.Free;
 end;
 
 end.

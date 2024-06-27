@@ -31,7 +31,7 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
-    function Summary: PChar; stdcall;
+    function Summary(const ASummary: PChar): Integer; stdcall;
 
     destructor Destroy; override;
   end;
@@ -45,24 +45,10 @@ type
     lastFolder: String;
 
   public
-  (*  constructor Create(aParams :TPersistent); override;
-    destructor Destroy; override;
-
-    class function RegisterName: String; override;
-    class function Params_GetClass : TPersistentClass; override;
-    function Params_GetFromUser: Boolean; override;
-    procedure Params_Set(newParams: TPersistent); override;
-    class function UI_Title: String; override;
-    class function UI_ImageIndex: Integer; override;
-    function UI_Params_Summary: String; override;
-
-    function Preview(var Data:Variant):TDigIt_TakerResultType; override;
-    function Take(var Data:Variant):TDigIt_TakerResultType; override;
-    function ReTake(var Data:Variant):TDigIt_TakerResultType; override;
-    *)
     constructor Create;
     destructor Destroy; override;
 
+    function Flags: Word; stdcall;
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
@@ -203,9 +189,10 @@ begin
   end;
 end;
 
-function TDigIt_Taker_FolderParams.Summary: PChar; stdcall;
+function TDigIt_Taker_FolderParams.Summary(const ASummary: PChar): Integer; stdcall;
 begin
-  Result :=PChar('Folder = '+Folder+#13#10+'Taked = '+LastTaked);
+  StrPCopy(ASummary, 'Folder= '+Folder+#13#10+'Taked= '+LastTaked);
+  Result:= Length(ASummary);
 end;
 
 destructor TDigIt_Taker_FolderParams.Destroy;
@@ -233,30 +220,30 @@ begin
   rParams.Free;
 end;
 
+function TDigIt_Taker_Folder.Flags: Word; stdcall;
+begin
+  Result:= 0;
+end;
+
 function TDigIt_Taker_Folder.Init: Boolean; stdcall;
 begin
-  Result :=True;
+  Result:= True;
 end;
 
 function TDigIt_Taker_Folder.Enabled(AEnabled: Boolean): Boolean; stdcall;
 begin
-  Result :=True;
+  Result:= True;
 end;
 
 function TDigIt_Taker_Folder.Release: Boolean; stdcall;
 begin
   Free;
-  Result :=True;
+  Result:= True;
 end;
-
-(*function TDigIt_Taker_Folder.RegisterName: PChar; stdcall;
-begin
-  Result :=DigIt_Taker_Folder_Name;
-end;*)
 
 function TDigIt_Taker_Folder.Params: IDigIt_Params; stdcall;
 begin
-  Result :=rParams;
+  Result:= rParams;
 end;
 
 function TDigIt_Taker_Folder.UI_Title(const AUI_Title: PChar): Integer; stdcall;
@@ -267,10 +254,9 @@ end;
 
 function TDigIt_Taker_Folder.UI_ImageIndex: Integer; stdcall;
 begin
-  Result :=3;
+  Result:= 3;
 end;
 
-//function TDigIt_Taker_Folder.Preview(AFileName: PChar):Integer; stdcall;
 function TDigIt_Taker_Folder.Preview(const AFileName: PChar):Integer; stdcall;
 begin
   Result:= 0;
@@ -312,7 +298,6 @@ begin
   else begin
          Inc(lastFile);
          rParams.LastTaked:=xFiles[lastFile];
-         //Result :=PChar(rParams.Folder+DirectorySeparator+rParams.LastTaked);
 
          StrPCopy(AFileName, rParams.Folder+DirectorySeparator+rParams.LastTaked);
          Result:= Length(AFileName);
@@ -340,159 +325,10 @@ begin
   if (xFiles.Count=0) or (lastFile=xFiles.Count)
   then Result :=0
   else begin
-         //Result :=PChar(rParams.Folder+DirectorySeparator+rParams.LastTaked);
          StrPCopy(AFileName, rParams.Folder+DirectorySeparator+rParams.LastTaked);
          Result:= Length(AFileName);
        end;
 end;
-
-{ TDigIt_Taker_Folder }
-(*
-constructor TDigIt_Taker_Folder.Create(aParams: TPersistent);
-begin
-  inherited Create(aParams);
-  xFiles :=TStringList.Create;
-  lastFile :=-1;
-  lastFolder :='';
-end;
-
-destructor TDigIt_Taker_Folder.Destroy;
-begin
-  inherited Destroy;
-  xFiles.Free;
-end;
-
-class function TDigIt_Taker_Folder.RegisterName: String;
-begin
-  Result :=TDigIt_Taker_Folder_Name;
-end;
-
-class function TDigIt_Taker_Folder.Params_GetClass: TPersistentClass;
-begin
-  result :=TDigIt_Taker_FolderParams;
-end;
-
-class function TDigIt_Taker_Folder.UI_Title: String;
-begin
-  Result :=TDigIt_Taker_Folder_Name;
-end;
-
-class function TDigIt_Taker_Folder.UI_ImageIndex: Integer;
-begin
-  Result :=3;
-end;
-
-function TDigIt_Taker_Folder.UI_Params_Summary: String;
-begin
-  if (rParams<>nil)
-  then Result :='Folder = '+TDigIt_Taker_FolderParams(rParams).Folder+#13#10+
-                'Taked = '+TDigIt_Taker_FolderParams(rParams).LastTaked
-  else Result :='';
-end;
-
-function TDigIt_Taker_Folder.Preview(var Data:Variant):TDigIt_TakerResultType;
-begin
-  Result :=trtFilename;
-  with TDigIt_Taker_FolderParams(rParams) do
-  begin
-    if (lastFolder<>Folder)
-    then xFiles.Clear;
-
-    if (xFiles.Count=0)
-    then begin
-           SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-           lastFolder :=Folder;
-           lastFile :=xFiles.IndexOf(LastTaked);
-           //if (lastFile=-1) then lastFile:=0;
-         end;
-
-    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-    then Data :=''
-    else Data :=Folder+DirectorySeparator+xFiles[lastFile+1];
-  end;
-end;
-
-function TDigIt_Taker_Folder.Take(var Data:Variant):TDigIt_TakerResultType;
-begin
-  Result :=trtFilename;
-  with TDigIt_Taker_FolderParams(rParams) do
-  begin
-    if (lastFolder<>Folder)
-    then xFiles.Clear;
-
-    if (xFiles.Count=0)
-    then begin
-           SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-           lastFolder :=Folder;
-           lastFile :=xFiles.IndexOf(LastTaked);
-           //if (lastFile=-1) then lastFile:=0;
-         end;
-
-    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-    then Data :=''
-    else begin
-           Inc(lastFile);
-           LastTaked:=xFiles[lastFile];
-           Data :=Folder+DirectorySeparator+LastTaked;
-         end;
-  end;
-end;
-
-function TDigIt_Taker_Folder.ReTake(var Data:Variant):TDigIt_TakerResultType;
-begin
-  Result :=trtFilename;
-  with TDigIt_Taker_FolderParams(rParams) do
-  begin
-    if (lastFolder<>Folder)
-    then xFiles.Clear;
-
-    if (xFiles.Count=0)
-    then begin
-           SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-           lastFolder :=Folder;
-           lastFile :=xFiles.IndexOf(LastTaked);
-           if (lastFile=-1) then
-           begin
-             lastFile:=0;
-             LastTaked :=xFiles[lastFile];
-           end;
-         end;
-
-    if (xFiles.Count=0) or (lastFile=xFiles.Count)
-    then Data :=''
-    else Data :=Folder+DirectorySeparator+LastTaked;
-  end;
-end;
-
-function TDigIt_Taker_Folder.Params_GetFromUser: Boolean;
-var
-   openDialog:TSelectDirectoryDialog;
-
-begin
-  Result :=False;
-  if (rParams=nil) then exit;
-  try
-     with TDigIt_Taker_FolderParams(rParams) do
-     begin
-       openDialog:=TSelectDirectoryDialog.Create(nil);
-       openDialog.InitialDir:=Folder;
-       Result :=openDialog.Execute;
-       if Result then
-       begin
-         Folder :=openDialog.FileName;
-         LastTaked:='';
-       end;
-     end;
-  finally
-    openDialog.Free;
-  end;
-end;
-
-procedure TDigIt_Taker_Folder.Params_Set(newParams: TPersistent);
-begin
-  rParams :=newParams;
-end;
-*)
 
 initialization
   try

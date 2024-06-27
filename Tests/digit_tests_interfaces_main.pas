@@ -19,10 +19,11 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
-    function Summary: PChar; stdcall;
+    function Summary(const ASummary: PChar): Integer; stdcall;
   end;
 
   TTestTaker = class(TInterfacedObject, IDigIt_Taker)
+    function Flags: Word; stdcall;
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
@@ -95,12 +96,17 @@ begin
 
 end;
 
-function TTestTakerParams.Summary: PChar; stdcall;
+function TTestTakerParams.Summary(const ASummary: PChar): Integer; stdcall;
 begin
 
 end;
 
 { TTestTakerParams }
+
+function TTestTaker.Flags: Word; stdcall;
+begin
+  Result:= 0;
+end;
 
 function TTestTaker.Init: Boolean; stdcall;
 begin

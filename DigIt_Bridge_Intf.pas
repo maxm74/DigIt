@@ -28,6 +28,7 @@ type
 
   TDigIt_PluginInfo = packed record
     BridgeMinVer: Byte;
+    Flags: Word;        { #note -oMaxM : Future use, like kind of Plugin, etc... }
     Name: String[32];
     Ver: String[5];
   end;
@@ -52,11 +53,12 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Summary: PChar; stdcall;
+    function Summary(const ASummary: PChar): Integer; stdcall;
   end;
 
   IDigIt_Taker = Interface
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE84}']
+    function Flags: Word; stdcall; { #note -oMaxM : Future use, like kind of Taker, etc... }
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;

@@ -14,6 +14,7 @@ type
     Digit_Bridge: IDigIt_Bridge;
 
   public
+    function Flags: Word; stdcall;
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
@@ -36,6 +37,7 @@ var
 
 function DigIt_Plugin_Info(var PluginInfo: TDigIt_PluginInfo): Boolean; stdcall;
 begin
+  PluginInfo.Flags:= 0;
   PluginInfo.BridgeMinVer:= 0;
   PluginInfo.Name:= 'Test Plugin Lib';
   PluginInfo.Ver:= '1.0';
@@ -72,19 +74,24 @@ exports
 
 { TTestLibTaker }
 
+function TTestLibTaker.Flags: Word; stdcall;
+begin
+  Result:= 0;
+end;
+
 function TTestLibTaker.Init: Boolean; stdcall;
 begin
-  Result :=True;
+  Result:= True;
 end;
 
 function TTestLibTaker.Enabled(AEnabled: Boolean): Boolean; stdcall;
 begin
-  Result :=True;
+  Result:= True;
 end;
 
 function TTestLibTaker.Release: Boolean; stdcall;
 begin
-  Result :=True;
+  Result:= True;
 end;
 
 function TTestLibTaker.Params: IDigIt_Params; stdcall;

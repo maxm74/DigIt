@@ -462,7 +462,7 @@ begin
   try
     if (takerInst<>nil) then
     begin
-      curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+      curImageFile:= AllocPChar;
 
       res:= takerInst.Preview(curImageFile);
       if (res>0) and (curImageFile<>'') then
@@ -501,7 +501,7 @@ begin
   try
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
-      curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+      curImageFile:= AllocPChar;
 
       res:= takerInst.Take(curImageFile);
       if (res>0) and (curImageFile<>'') then
@@ -530,7 +530,7 @@ begin
   try
     if (takerInst<>nil) and not(imgManipulation.Empty) then
     begin
-      curImageFile:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+      curImageFile:= AllocPChar;
 
       res:= takerInst.ReTake(curImageFile);
 

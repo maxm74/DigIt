@@ -36,3 +36,4 @@
 26/06/2024 Switch to Interface use in Bridge, Taker, etc;
            Temporarily removed Taker Twain until it is converted to interfaces;
            First test of Load Plugins from Library;
+27/06/2024 Changed IDigIt_Params.Summary params list; Added Flags in Plugin/Taker; Added function AllocPChar

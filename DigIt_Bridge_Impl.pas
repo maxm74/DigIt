@@ -149,9 +149,17 @@ type
 var
    theBridge: TDigIt_Bridge = nil;
 
+function AllocPChar: PChar;
+
 implementation
 
 uses DigIt_Types, dynlibs, Masks;
+
+function AllocPChar: PChar;
+begin
+  Result:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+  Result^:= #0;
+end;
 
 { TDigIt_Plugins }
 

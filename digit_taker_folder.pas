@@ -25,15 +25,13 @@ type
     LastTaked :String;
 
   public
-//    property Folder:String read rFolder write rFolder;
-//    property LastTaked:String read rLastTaked write rLastTaked;
     function GetFromUser: Boolean; stdcall;
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
     function Summary(const ASummary: PChar): Integer; stdcall;
 
-    destructor Destroy; override;
+    function OnSet: Boolean; stdcall;
   end;
 
   { TDigIt_Taker_Folder }
@@ -147,7 +145,7 @@ end;
 
 function TDigIt_Taker_FolderParams.Duplicate: IDigIt_Params; stdcall;
 begin
-
+  Result:= nil;
 end;
 
 function TDigIt_Taker_FolderParams.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
@@ -195,9 +193,9 @@ begin
   Result:= Length(ASummary);
 end;
 
-destructor TDigIt_Taker_FolderParams.Destroy;
+function TDigIt_Taker_FolderParams.OnSet: Boolean; stdcall;
 begin
-  inherited Destroy;
+  Result:= True;
 end;
 
 { TDigIt_Taker_Folder }
@@ -332,7 +330,7 @@ end;
 
 initialization
   try
-     Taker_Folder :=TDigIt_Taker_Folder.Create;
+     Taker_Folder:= TDigIt_Taker_Folder.Create;
      theBridge.Takers.Register(DigIt_Taker_Folder_Name, Taker_Folder);
   except
   end;

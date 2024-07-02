@@ -19,8 +19,11 @@ uses
 
 type
   { TDigIt_Taker_Twain }
-  TDigIt_Taker_Twain = class(TDigIt_Taker)
+  TDigIt_Taker_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Taker)
   private
+    rScannerInfo: TTwainScannerInfo;
+    rParams: TTwainParams;
+
     rTwain:TCustomDelphiTwain;
     ipcProcess:TProcess;
     rCommsClient:TSyncIPCClient;
@@ -47,7 +50,7 @@ type
 
     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
                                  nativeHandle: TW_UINT32; var Cancel: Boolean);
-    function internalTake(isPreview:Boolean; var Data:Variant):TDigIt_TakerResultType;
+    function internalTake(isPreview:Boolean; const AFileName: PChar): Integer;
 
     procedure FreeCommsClient;
 
@@ -57,27 +60,46 @@ type
     property CommsClient:TSyncIPCClient read getCommsClient;
 
   public
-    constructor Create(aParams :TPersistent); override;
+    //IDigIt_Params Implementation
+    function GetFromUser: Boolean; stdcall;
+    function Duplicate: IDigIt_Params; stdcall;
+    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+    function Summary(const ASummary: PChar): Integer; stdcall;
+
+    function OnSet: Boolean; stdcall;
+
+    //IDigIt_Taker Implementation
+    function Flags: Word; stdcall;
+    function Init: Boolean; stdcall;
+    function Enabled(AEnabled: Boolean): Boolean; stdcall;
+    function Release: Boolean; stdcall;
+
+    function Params: IDigIt_Params; stdcall;
+    function UI_Title(const AUI_Title: PChar): Integer; stdcall;
+    function UI_ImageIndex: Integer; stdcall;
+
+     //Take a Picture and returns FileName
+    function Preview(const AFileName: PChar): Integer; stdcall;
+    function Take(const AFileName: PChar): Integer; stdcall;
+    function ReTake(const AFileName: PChar): Integer; stdcall;
+
+    constructor Create;
     destructor Destroy; override;
-
-    class function RegisterName: String; override;
-    class function Params_GetClass: TPersistentClass; override;
-    function Params_GetFromUser: Boolean; override;
-    procedure Params_Set(newParams: TPersistent); override;
-    class function UI_Title: String; override;
-    class function UI_ImageIndex: Integer; override;
-    function UI_Params_Summary: String; override;
-
-    function Preview(var Data:Variant):TDigIt_TakerResultType; override;
-    function Take(var Data:Variant):TDigIt_TakerResultType; override;
-    function ReTake(var Data:Variant):TDigIt_TakerResultType; override;
   end;
 
 implementation
 
-uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes
+uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes, Laz2_XMLCfg, Digit_Bridge_Impl
  // ,DigIt_Form_AnimAcquiring
   ;
+
+const
+  DigIt_Taker_Twain_Name = 'Twain Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
+
+var
+   Taker_Twain : TDigIt_Taker_Twain = nil;
+
 
 { TDigIt_Taker_Twain }
 
@@ -127,8 +149,8 @@ begin
       if (ipcProcess = nil) then
       begin
         ipcProcess :=TProcess.Create(nil);
-        ipcProcess.CurrentDirectory :=ApplicationDir;
-        ipcProcess.Executable :=ApplicationDir+TWAIN32_SERVER_EXE;
+        ipcProcess.CurrentDirectory :=Path_Application;
+        ipcProcess.Executable :=Path_Application+TWAIN32_SERVER_EXE;
         ipcProcess.StartupOptions:=[suoUseShowWindow];
         {$ifopt D+}
         ipcProcess.ShowWindow := swoShow;
@@ -251,10 +273,10 @@ var
 
 begin
   Result:=False;
-  recSize :=SizeOf(TDigIt_Taker_TwainParams(rParams).TwainParams);
+  recSize :=SizeOf(rParams);
   resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_SET, mtSync_Var,
-               TDigIt_Taker_TwainParams(rParams).TwainParams, recSize, res, recSize);
-  Result := (resType=mtSync_Integer) and (res=True);
+               rParams, recSize, res, recSize);
+  Result := (resType = mtSync_Integer) and (res = True);
 end;
 
 function TDigIt_Taker_Twain.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
@@ -373,7 +395,7 @@ begin
   WriteBitmapToFile(AcquireFileName, nativeHandle);
 end;
 
-function TDigIt_Taker_Twain.internalTake(isPreview: Boolean; var Data:Variant): TDigIt_TakerResultType;
+function TDigIt_Taker_Twain.internalTake(isPreview:Boolean; const AFileName: PChar): Integer;
 var
    capRet:TCapabilityRet;
    TwainSource:TTwainSource;
@@ -381,15 +403,14 @@ var
 
 begin
   try
-     Result :=trtFilename;
-     Data :='';
+     Result:= 0;
    //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
      //Delete previous scanned file
-     if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
-     then DeleteFile(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp');
+     if FileExists(Path_Temp+'twain_'+IntToStr(iTempFile-1)+'.bmp')
+     then DeleteFile(Path_Temp+'twain_'+IntToStr(iTempFile-1)+'.bmp');
 
-     AcquireFileName :=TempDir+'twain_'+IntToStr(iTempFile)+'.bmp';
+     AcquireFileName:= Path_Temp+'twain_'+IntToStr(iTempFile)+'.bmp';
 
      if SelectedSourceIPC
      then begin
@@ -399,52 +420,49 @@ begin
             then resTake :=IPC_Preview(AcquireFileName)
             else resTake :=IPC_Take(AcquireFileName);
 
-            if resTake
-            then begin
-                   Data :=AcquireFileName;
-                   Inc(iTempFile);
-                 end
-            else Data :='';
+            if resTake then
+            begin
+              StrPCopy(AFileName, AcquireFileName); Result:= Length(AcquireFileName);
+              Inc(iTempFile);
+            end;
           end
-     else begin
-            if Assigned(Twain.SelectedSource)
-            then begin
-                   TwainSource:=Twain.SelectedSource;
-                   TwainSource.Loaded :=True;
+     else if Assigned(Twain.SelectedSource) then
+          begin
+            TwainSource:=Twain.SelectedSource;
+            TwainSource.Loaded :=True;
 
-                   with TDigIt_Taker_TwainParams(rParams) do
-                   begin
-                   //Set Parameters, (after a capture the scanner reset it to default???)
-                   capRet :=TwainSource.SetPaperFeeding(PaperFeed);
-                   capRet :=TwainSource.SetDuplexEnabled(False);
-                   capRet :=TwainSource.SetPaperSize(PaperSize);
-                   capRet :=TwainSource.SetIPixelType(PixelType);
+            with rParams do
+            begin
+              //Set Parameters, (after a capture the scanner reset it to default???)
+              capRet :=TwainSource.SetPaperFeeding(PaperFeed);
+              capRet :=TwainSource.SetDuplexEnabled(False);
+              capRet :=TwainSource.SetPaperSize(PaperSize);
+              capRet :=TwainSource.SetIPixelType(PixelType);
 
-                   if isPreview
-                   then begin
-                          capRet :=TwainSource.SetIXResolution(75);
-                          capRet :=TwainSource.SetIYResolution(75);
-                        end
-                   else begin
-                          capRet :=TwainSource.SetIXResolution(Resolution);
-                          capRet :=TwainSource.SetIYResolution(Resolution);
-                        end;
-                   capRet :=TwainSource.SetContrast(Contrast);
-                   capRet :=TwainSource.SetBrightness(Brightness);
+              if isPreview
+              then begin
+                     capRet :=TwainSource.SetIXResolution(75);
+                     capRet :=TwainSource.SetIYResolution(75);
+                   end
+              else begin
+                     capRet :=TwainSource.SetIXResolution(Resolution);
+                     capRet :=TwainSource.SetIYResolution(Resolution);
                    end;
-                   Twain.SelectedSource.SetIndicators(True);
+              capRet :=TwainSource.SetContrast(Contrast);
+              capRet :=TwainSource.SetBrightness(Brightness);
+            end;
 
-                   { #todo 10 -oMaxM : Switch to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-                   TwainSource.TransferMode:=ttmNative; //ttmFile;
-                   //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
-                   Twain.OnTwainAcquireNative:=@TwainAcquireNative;
-                   TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
-                   //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
+            Twain.SelectedSource.SetIndicators(True);
 
-                   Data :=AcquireFileName;
-                   Inc(iTempFile);
-                 end
-            else Data :='';
+            { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
+            TwainSource.TransferMode:=ttmNative; //ttmFile;
+            //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
+            Twain.OnTwainAcquireNative:=@TwainAcquireNative;
+            TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
+            //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
+
+            StrPCopy(AFileName, AcquireFileName); Result:= Length(AcquireFileName);
+            Inc(iTempFile);
           end;
 
   finally
@@ -470,15 +488,15 @@ begin
   FreeAndNil(ipcProcess);
 end;
 
-constructor TDigIt_Taker_Twain.Create(aParams: TPersistent);
+constructor TDigIt_Taker_Twain.Create;
 begin
+  inherited Create;
+
   rTwain:=nil;
   rCommsClient:=nil;
   SelectedSourceIPC:=False;
   SelectedSourceIndex:=-1;
   iTempFile :=0;
-
-  inherited Create(aParams);
 end;
 
 destructor TDigIt_Taker_Twain.Destroy;
@@ -487,50 +505,10 @@ begin
   FreeCommsClient;
 
   //Delete previous scanned file
-  if FileExists(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp')
-  then DeleteFile(TempDir+'twain_'+IntToStr(iTempFile-1)+'.bmp');
+  if FileExists(Path_Application+'twain_'+IntToStr(iTempFile-1)+'.bmp')
+  then DeleteFile(Path_Application+'twain_'+IntToStr(iTempFile-1)+'.bmp');
 
   inherited Destroy;
-end;
-
-class function TDigIt_Taker_Twain.RegisterName: String;
-begin
-  Result :='TDigIt_Taker_Twain';
-end;
-
-class function TDigIt_Taker_Twain.Params_GetClass: TPersistentClass;
-begin
-  result :=TDigIt_Taker_TwainParams;
-end;
-
-class function TDigIt_Taker_Twain.UI_Title: String;
-begin
-  Result :='Twain Source'; { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
-end;
-
-class function TDigIt_Taker_Twain.UI_ImageIndex: Integer;
-begin
-  Result :=2;
-end;
-
-function TDigIt_Taker_Twain.UI_Params_Summary: String;
-begin
-  Result :='';
-end;
-
-function TDigIt_Taker_Twain.Preview(var Data:Variant):TDigIt_TakerResultType;
-begin
-  Result :=internalTake(True, Data);
-end;
-
-function TDigIt_Taker_Twain.Take(var Data:Variant):TDigIt_TakerResultType;
-begin
-  Result :=internalTake(False, Data);
-end;
-
-function TDigIt_Taker_Twain.ReTake(var Data:Variant):TDigIt_TakerResultType;
-begin
-  Result :=internalTake(False, Data);
 end;
 
 procedure TDigIt_Taker_Twain.RefreshList(ASender:TTwainSelectSource);
@@ -544,15 +522,13 @@ begin
   ASender.FillList(ipcSourceList);
 end;
 
-function TDigIt_Taker_Twain.Params_GetFromUser: Boolean;
+function TDigIt_Taker_Twain.GetFromUser: Boolean; stdcall;
 var
   selectedSource:Integer;
   TwainCap:TTwainParamsCapabilities;
 
 begin
   Result :=False;
-  if (rParams=nil) then exit;
-  with TDigIt_Taker_TwainParams(rParams) do
   try
      if Twain.SourceManagerLoaded then
      begin
@@ -568,7 +544,7 @@ begin
      //Get 32bit Devices
      countIPC_Source :=IPC_GetDevicesList;
 
-     selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, TDigIt_Taker_TwainParams(rParams));
+     selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, rScannerInfo);
      if (selectedSource>-1) then
      begin
        //if the index of selected device is greater than countTwain_Source then is a 32bit scanner
@@ -587,24 +563,24 @@ begin
 
        if Result then
        begin
-           IPC_Scanner:=SelectedSourceIPC;
+           rScannerInfo.IPC_Scanner:=SelectedSourceIPC;
            if SelectedSourceIPC
            then begin
-                  Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
-                  ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
-                  ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
+                  rScannerInfo.Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
+                  rScannerInfo.ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
+                  rScannerInfo.ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
 
                   IPC_ParamsGet(TwainCap);
                 end
            else begin
-                  Manufacturer :=Twain.SelectedSource.Manufacturer;
-                  ProductFamily :=Twain.SelectedSource.ProductFamily;
-                  ProductName :=Twain.SelectedSource.ProductName;
+                  rScannerInfo.Manufacturer :=Twain.SelectedSource.Manufacturer;
+                  rScannerInfo.ProductFamily :=Twain.SelectedSource.ProductFamily;
+                  rScannerInfo.ProductName :=Twain.SelectedSource.ProductName;
 
                   ParamsGet(TwainCap);
                 end;
 
-         TTwainSettingsSource.Execute(TwainCap, TDigIt_Taker_TwainParams(rParams));
+         TTwainSettingsSource.Execute(TwainCap, rParams);
        end;
      end;
 
@@ -614,13 +590,61 @@ begin
   end;
 end;
 
-procedure TDigIt_Taker_Twain.Params_Set(newParams: TPersistent);
+function TDigIt_Taker_Twain.Duplicate: IDigIt_Params; stdcall;
+begin
+  Result:= nil;
+end;
+
+function TDigIt_Taker_Twain.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+var
+   XMLWork: TXMLConfig;
+
+begin
+  try
+     Result:= False;
+     XMLWork:= TXMLConfig.Create(xml_File);
+
+   //  Folder:= XMLWork.GetValue(xml_RootPath+'/Folder', '');
+   //  LastTaked:= XMLWork.GetValue(xml_RootPath+'/LastTaked', '');
+
+     Result:= True;
+
+  finally
+    XMLWork.Free;
+  end;
+end;
+
+function TDigIt_Taker_Twain.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+var
+   XMLWork: TXMLConfig;
+
+begin
+  try
+     Result:= False;
+     XMLWork:= TXMLConfig.Create(xml_File);
+
+    // XMLWork.SetValue(xml_RootPath+'/Folder', Folder);
+    // XMLWork.SetValue(xml_RootPath+'/LastTaked', LastTaked);
+    // XMLWork.Flush;
+
+     Result:= True;
+
+  finally
+    XMLWork.Free;
+  end;
+end;
+
+function TDigIt_Taker_Twain.Summary(const ASummary: PChar): Integer; stdcall;
+begin
+  Result:= 0;
+end;
+
+function TDigIt_Taker_Twain.OnSet: Boolean; stdcall;
 var
    dlgRes:TModalResult;
 
 begin
-  rParams :=newParams;
-  with TDigIt_Taker_TwainParams(rParams) do
+  with rScannerInfo do
   begin
     SelectedSourceIndex :=-1;
     repeat
@@ -642,7 +666,7 @@ begin
     until (SelectedSourceIndex>-1);
 
     if (SelectedSourceIndex=-1)
-    then Params_GetFromUser
+    then Result:= GetFromUser
     else begin
            SelectedSourceIPC :=IPC_Scanner;
            if IPC_Scanner
@@ -666,8 +690,63 @@ begin
   end;
 end;
 
+function TDigIt_Taker_Twain.Flags: Word; stdcall;
+begin
+  Result:= 0;
+end;
+
+function TDigIt_Taker_Twain.Init: Boolean; stdcall;
+begin
+  Result:= True;
+end;
+
+function TDigIt_Taker_Twain.Enabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+  Result:= True;
+end;
+
+function TDigIt_Taker_Twain.Release: Boolean; stdcall;
+begin
+  Result:= True;
+end;
+
+function TDigIt_Taker_Twain.Params: IDigIt_Params; stdcall;
+begin
+  Result:= Self;
+end;
+
+function TDigIt_Taker_Twain.UI_Title(const AUI_Title: PChar): Integer; stdcall;
+begin
+  StrPCopy(AUI_Title, DigIt_Taker_Twain_Name);
+  Result:= Length(AUI_Title);
+end;
+
+function TDigIt_Taker_Twain.UI_ImageIndex: Integer; stdcall;
+begin
+  Result:= 2;
+end;
+
+function TDigIt_Taker_Twain.Preview(const AFileName: PChar): Integer; stdcall;
+begin
+  Result :=internalTake(True, AFileName);
+end;
+
+function TDigIt_Taker_Twain.Take(const AFileName: PChar): Integer; stdcall;
+begin
+  Result :=internalTake(False, AFileName);
+end;
+
+function TDigIt_Taker_Twain.ReTake(const AFileName: PChar): Integer; stdcall;
+begin
+  Result :=internalTake(False, AFileName);
+end;
+
 initialization
-  theBridge.Takers.Register(TDigIt_Taker_Twain.RegisterName, TDigIt_Taker_Twain);
+  try
+     Taker_Twain:= TDigIt_Taker_Twain.Create;
+     theBridge.Takers.Register(DigIt_Taker_Twain_Name, Taker_Twain);
+  except
+  end;
 
 end.
 

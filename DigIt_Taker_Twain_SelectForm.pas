@@ -27,11 +27,11 @@ type
     Twain: TCustomDelphiTwain;
     countTwain_Source:Integer;
     rRefreshClick:TRefreshNotify;
-    rParams:TDigIt_Taker_TwainParams;
+    rScannerInfo: TTwainScannerInfo;
 
   public
-     class function Execute(ARefreshClick:TRefreshNotify; ATwain: TCustomDelphiTwain;
-                            const ipcList:array of TW_IDENTITY; AParams:TDigIt_Taker_TwainParams):Integer;
+     class function Execute(ARefreshClick: TRefreshNotify; ATwain: TCustomDelphiTwain;
+                            const ipcList: array of TW_IDENTITY; AScannerInfo: TTwainScannerInfo):Integer;
     procedure FillList(const ipcList: array of TW_IDENTITY);
   end;
 
@@ -69,10 +69,10 @@ begin
     curItem.SubItems.Add(curSource.Manufacturer);
 
     //if is Current Selected Scanner set selectedIndex
-    if not(rParams.IPC_Scanner) and
-       (curSource.Manufacturer=rParams.Manufacturer) and
-       (curSource.ProductFamily=rParams.ProductFamily) and
-       (curSource.ProductName=rParams.ProductName) then selectedIndex :=curItem.Index;
+    if not(rScannerInfo.IPC_Scanner) and
+       (curSource.Manufacturer=rScannerInfo.Manufacturer) and
+       (curSource.ProductFamily=rScannerInfo.ProductFamily) and
+       (curSource.ProductName=rScannerInfo.ProductName) then selectedIndex :=curItem.Index;
   end;
 
   for i:=Low(ipcList) to High(ipcList) do
@@ -84,10 +84,10 @@ begin
     curItem.SubItems.Add('(32bit)');
 
     //if is Current Selected Scanner set selectedIndex
-    if (rParams.IPC_Scanner) and
-       (ipcList[i].Manufacturer=rParams.Manufacturer) and
-       (ipcList[i].ProductFamily=rParams.ProductFamily) and
-       (ipcList[i].ProductName=rParams.ProductName) then selectedIndex :=curItem.Index;
+    if (rScannerInfo.IPC_Scanner) and
+       (ipcList[i].Manufacturer=rScannerInfo.Manufacturer) and
+       (ipcList[i].ProductFamily=rScannerInfo.ProductFamily) and
+       (ipcList[i].ProductName=rScannerInfo.ProductName) then selectedIndex :=curItem.Index;
   end;
 
   //Select Current Scanner
@@ -97,7 +97,7 @@ begin
 end;
 
 class function TTwainSelectSource.Execute(ARefreshClick: TRefreshNotify; ATwain: TCustomDelphiTwain;
-  const ipcList: array of TW_IDENTITY; AParams: TDigIt_Taker_TwainParams): Integer;
+  const ipcList: array of TW_IDENTITY; AScannerInfo: TTwainScannerInfo): Integer;
 begin
   Result :=-1;
   if (TwainSelectSource=nil)
@@ -105,17 +105,17 @@ begin
 
   with TwainSelectSource do
   begin
-    Twain :=ATwain;
-    rParams:=AParams;
+    Twain:= ATwain;
+    rScannerInfo:= AScannerInfo;
     FillList(ipcList);
 
     if (lvSources.Items.Count=0)
     then MessageDlg('DigIt', 'No Twain Scanner present...', mtError, [mbOk], 0)
     else begin
-           rRefreshClick:=ARefreshClick;
-           btRefresh.Visible :=Assigned(rRefreshClick);
+           rRefreshClick:= ARefreshClick;
+           btRefresh.Visible:= Assigned(rRefreshClick);
 
-           if (ShowModal=mrOk) then Result :=lvSources.ItemIndex
+           if (ShowModal=mrOk) then Result:= lvSources.ItemIndex
          end;
   end;
 end;

@@ -33,6 +33,13 @@ const
   RES_TWAIN32_STOPPED = $0CACA; //:-( A message for you in Italian...
 
 type
+  TTwainScannerInfo = record
+    IPC_Scanner: Boolean;
+    Manufacturer,
+    ProductFamily,
+    ProductName: String;
+  end;
+
   TTwainParams = packed record
     PaperFeed: TTwainPaperFeeding;
     PaperSize: TTwainPaperSize;
@@ -60,18 +67,14 @@ type
     BitDepthArray: TArrayInteger;
   end;
 
-  TDigIt_Taker_TwainParams = class(TPersistent)
+(*  { TDigIt_Taker_TwainParams }
+
+  TDigIt_Taker_TwainParams = class(TObject)
   protected
-    rIPC_Scanner: Boolean;
-    rManufacturer,
-    rProductFamily,
-    rProductName: String;
-    rTwainParams: TTwainParams;
 
   public
     property TwainParams: TTwainParams read rTwainParams; //Used in IPC to set 32bit Scanner capabilities
 
-  published
     property IPC_Scanner:Boolean read rIPC_Scanner write rIPC_Scanner;
     property Manufacturer: String read rManufacturer write rManufacturer;
     property ProductFamily: String read rProductFamily write rProductFamily;
@@ -84,8 +87,9 @@ type
     property Contrast:Single read rTwainParams.Contrast write rTwainParams.Contrast;
     property Brightness:Single read rTwainParams.Brightness write rTwainParams.Brightness;
     property BitDepth: Integer read rTwainParams.BitDepth write rTwainParams.BitDepth;
-  end;
 
+    end;
+*)
 
 implementation
 

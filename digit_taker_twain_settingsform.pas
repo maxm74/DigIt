@@ -48,7 +48,7 @@ type
 
   public
      class function Execute(TwainCap:TTwainParamsCapabilities;
-                            var AParams:TDigIt_Taker_TwainParams): Boolean;
+                            var AParams:TTwainParams): Boolean;
   end;
 
 var
@@ -80,8 +80,8 @@ begin
   edContrast.Value:=trContrast.Position;
 end;
 
-class function TTwainSettingsSource.Execute(TwainCap:TTwainParamsCapabilities;
-                                            var AParams:TDigIt_Taker_TwainParams): Boolean;
+class function TTwainSettingsSource.Execute(TwainCap: TTwainParamsCapabilities;
+                                            var AParams: TTwainParams): Boolean;
 var
   paperI: TTwainPaperSize;
   pixelI:TTwainPixelType;

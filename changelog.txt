@@ -37,3 +37,4 @@
            Temporarily removed Taker Twain until it is converted to interfaces;
            First test of Load Plugins from Library;
 27/06/2024 Changed IDigIt_Params.Summary params list; Added Flags in Plugin/Taker; Added function AllocPChar
+02/07/2024 Switched Taker Twain to interfaces; Added OnSet to IDigIt_Params interface

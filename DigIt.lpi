@@ -106,7 +106,7 @@
         <PackageName Value="LCL"/>
       </Item6>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="16">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -168,6 +168,30 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Bridge_Impl"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="DigIt_Taker_Twain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Taker_Twain"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="DigIt_Taker_Twain_Types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Taker_Twain_Types"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="digit_taker_twain_settingsform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="TwainSettingsSource"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Digit_Taker_Twain_SettingsForm"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="DigIt_Taker_Twain_SelectForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="Digit_Taker_Twain_SelectForm"/>
+      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

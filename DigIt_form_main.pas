@@ -1220,9 +1220,9 @@ begin
         //Read Params
         aClassInstParams :=aClass.Params;
       //  ReadPersistentFromXMLConfig(XMLWork, 'Params', '', aClassInstParams);
-        aClassInstParams.Load(PChar(Path_Config+Config_XMLWork), 'Params');
-
-        Taker_SelectWithParams(curTakerName, aClass, aClassInstParams);
+        if aClassInstParams.Load(PChar(Path_Config+Config_XMLWork), 'Params')
+        then Taker_SelectWithParams(curTakerName, aClass, aClassInstParams);
+        { #todo 3 -oMaxM : else ? Error }
       end;
     end;
     Counters.Load(XMLWork, True);
@@ -1262,6 +1262,7 @@ begin
      XMLWork.SetValue('Taker', takerName);
      XMLWork.SetValue('Format', SaveExt);
      XMLWork.SetValue('Destination', SavePath);
+     XMLWork.DeleteValue('Params');
      takerInst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Params');
 
      XMLWork.Flush;
@@ -1421,9 +1422,8 @@ begin
 
     takerInst:= curClass;
     takerName:= ATakerName;
-//    if (takerParams <> nil)
-//    then takerParams.Assign(curParams); { #todo 10 -oMaxM : ? }
-
+    if (curParams <> nil)
+    then curParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
   end;
 end;
 

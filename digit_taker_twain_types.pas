@@ -67,30 +67,6 @@ type
     BitDepthArray: TArrayInteger;
   end;
 
-(*  { TDigIt_Taker_TwainParams }
-
-  TDigIt_Taker_TwainParams = class(TObject)
-  protected
-
-  public
-    property TwainParams: TTwainParams read rTwainParams; //Used in IPC to set 32bit Scanner capabilities
-
-    property IPC_Scanner:Boolean read rIPC_Scanner write rIPC_Scanner;
-    property Manufacturer: String read rManufacturer write rManufacturer;
-    property ProductFamily: String read rProductFamily write rProductFamily;
-    property ProductName: String read rProductName write rProductName;
-
-    property PaperFeed:TTwainPaperFeeding read rTwainParams.PaperFeed write rTwainParams.PaperFeed;
-    property PaperSize:TTwainPaperSize read rTwainParams.PaperSize write rTwainParams.PaperSize;
-    property PixelType:TTwainPixelType read rTwainParams.PixelType write rTwainParams.PixelType;
-    property Resolution:Single read rTwainParams.Resolution write rTwainParams.Resolution;
-    property Contrast:Single read rTwainParams.Contrast write rTwainParams.Contrast;
-    property Brightness:Single read rTwainParams.Brightness write rTwainParams.Brightness;
-    property BitDepth: Integer read rTwainParams.BitDepth write rTwainParams.BitDepth;
-
-    end;
-*)
-
 implementation
 
 end.

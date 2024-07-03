@@ -604,8 +604,36 @@ begin
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
 
-   //  Folder:= XMLWork.GetValue(xml_RootPath+'/Folder', '');
-   //  LastTaked:= XMLWork.GetValue(xml_RootPath+'/LastTaked', '');
+     rScannerInfo.IPC_Scanner:= XMLWork.GetValue(xml_RootPath+'/IPC_Scanner', False);
+     rScannerInfo.Manufacturer:= XMLWork.GetValue(xml_RootPath+'/Manufacturer', '');
+     rScannerInfo.ProductFamily:= XMLWork.GetValue(xml_RootPath+'/ProductFamily', '');
+     rScannerInfo.ProductName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
+
+     //rParams.PaperFeed:= TTwainPaperFeeding(XMLWork.GetValue(xml_RootPath+'/PaperFeed', Integer(pfFlatbed)));
+     //rParams.PaperSize:= TTwainPaperSize(XMLWork.GetValue(xml_RootPath+'/PaperSize', Integer(tpsNone)));
+     //rParams.PixelType:= TTwainPixelType(XMLWork.GetValue(xml_RootPath+'/PixelType', Integer(tbdRgb)));
+     XMLWork.GetValue(xml_RootPath+'/PaperFeed', rParams.PaperFeed, TypeInfo(TTwainPaperFeeding));
+     XMLWork.GetValue(xml_RootPath+'/PaperSize', rParams.PaperSize, TypeInfo(TTwainPaperSize));
+     XMLWork.GetValue(xml_RootPath+'/PixelType', rParams.PixelType, TypeInfo(TTwainPixelType));
+     rParams.Resolution:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Resolution', '150'));
+     rParams.Contrast:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Contrast', '0'));
+     rParams.Brightness:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Brightness', '0'));
+     rParams.BitDepth:= XMLWork.GetValue(xml_RootPath+'/BitDepth', 24);
+
+(*
+property IPC_Scanner:Boolean read rIPC_Scanner write rIPC_Scanner;
+property Manufacturer: String read rManufacturer write rManufacturer;
+property ProductFamily: String read rProductFamily write rProductFamily;
+property ProductName: String read rProductName write rProductName;
+
+property PaperFeed:TTwainPaperFeeding read rTwainParams.PaperFeed write rTwainParams.PaperFeed;
+property PaperSize:TTwainPaperSize read rTwainParams.PaperSize write rTwainParams.PaperSize;
+property PixelType:TTwainPixelType read rTwainParams.PixelType write rTwainParams.PixelType;
+property Resolution:Single read rTwainParams.Resolution write rTwainParams.Resolution;
+property Contrast:Single read rTwainParams.Contrast write rTwainParams.Contrast;
+property Brightness:Single read rTwainParams.Brightness write rTwainParams.Brightness;
+property BitDepth: Integer read rTwainParams.BitDepth write rTwainParams.BitDepth;
+*)
 
      Result:= True;
 
@@ -623,9 +651,20 @@ begin
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
 
-    // XMLWork.SetValue(xml_RootPath+'/Folder', Folder);
-    // XMLWork.SetValue(xml_RootPath+'/LastTaked', LastTaked);
-    // XMLWork.Flush;
+     XMLWork.SetValue(xml_RootPath+'/IPC_Scanner', rScannerInfo.IPC_Scanner);
+     XMLWork.SetValue(xml_RootPath+'/Manufacturer', rScannerInfo.Manufacturer);
+     XMLWork.SetValue(xml_RootPath+'/ProductFamily', rScannerInfo.ProductFamily);
+     XMLWork.SetValue(xml_RootPath+'/ProductName', rScannerInfo.ProductName);
+
+     XMLWork.SetValue(xml_RootPath+'/PaperFeed', rParams.PaperFeed, TypeInfo(TTwainPaperFeeding));
+     XMLWork.SetValue(xml_RootPath+'/PaperSize', rParams.PaperSize, TypeInfo(TTwainPaperSize));
+     XMLWork.SetValue(xml_RootPath+'/PixelType', rParams.PixelType, TypeInfo(TTwainPixelType));
+     XMLWork.SetValue(xml_RootPath+'/Resolution', FloatToStr(rParams.Resolution));
+     XMLWork.SetValue(xml_RootPath+'/Contrast', FloatToStr(rParams.Contrast));
+     XMLWork.SetValue(xml_RootPath+'/Brightness', FloatToStr(rParams.Brightness));
+     XMLWork.SetValue(xml_RootPath+'/BitDepth', rParams.BitDepth);
+
+     XMLWork.Flush;
 
      Result:= True;
 

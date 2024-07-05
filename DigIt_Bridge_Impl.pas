@@ -59,9 +59,11 @@ type
   end;
 
   TTakerInfo = record
+    Flags: DWord;
     Name: String;
     Inst: IDigIt_Taker;
   end;
+  PTakerInfo = ^TTakerInfo;
 
   { TDigIt_Takers }
 
@@ -72,8 +74,8 @@ type
     function Find(const aName: String): Integer; overload;
     function Find(const aClass: IDigIt_Taker): Integer; overload;
 
-    function GetTaker(const aName: String) : IDigIt_Taker; overload;
-    function GetTaker(Index: Integer) : IDigIt_Taker; overload;
+    function GetTaker(const aName: String) : PTakerInfo; overload;
+    function GetTaker(Index: Integer) : PTakerInfo; overload;
     function GetTakerName(Index: Integer) : String;
     function GetCount: Integer;
 
@@ -89,8 +91,8 @@ type
 
     property Count: Integer read GetCount;
 
-    property TakerByName [const aName: String]: IDigIt_Taker read GetTaker;
-    property Taker [const aIndex: Integer]: IDigIt_Taker read GetTaker;
+    property TakerByName [const aName: String]: PTakerInfo read GetTaker;
+    property Taker [const aIndex: Integer]: PTakerInfo read GetTaker;
     property Name [const aIndex: Integer]: String read GetTakerName;
   end;
 
@@ -400,7 +402,7 @@ begin
     end;
 end;
 
-function TDigIt_Takers.GetTaker(const aName: String): IDigIt_Taker;
+function TDigIt_Takers.GetTaker(const aName: String): PTakerInfo;
 var
   i: Integer;
 
@@ -409,14 +411,14 @@ begin
   for i:=0 to Length(rTakersList)-1 do
     if (rTakersList[i].Name = aName) then
     begin
-      Result:= rTakersList[i].Inst; break;
+      Result:= @rTakersList[i]; break;
     end;
 end;
 
-function TDigIt_Takers.GetTaker(Index: Integer): IDigIt_Taker;
+function TDigIt_Takers.GetTaker(Index: Integer): PTakerInfo;
 begin
   if (Index >= 0) and (Index < Length(rTakersList))
-  then Result:= rTakersList[Index].Inst
+  then Result:= @rTakersList[Index]
   else Result:= Nil;
 end;
 
@@ -432,7 +434,7 @@ begin
   Result:= Length(rTakersList);
 end;
 
-function TDigIt_Takers.FreeElement(Index: integer): Boolean;
+function TDigIt_Takers.FreeElement(Index: Integer): Boolean;
 begin
   if (rTakersList[Index].Inst <> nil)
   then rTakersList[Index].Inst.Release;

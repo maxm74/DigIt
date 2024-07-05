@@ -50,7 +50,7 @@ type
 
     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
                                  nativeHandle: TW_UINT32; var Cancel: Boolean);
-    function internalTake(isPreview:Boolean; const AFileName: PChar): Integer;
+    function internalTake(isPreview:Boolean; var AFileName: String): DWord;
 
     procedure FreeCommsClient;
 
@@ -70,7 +70,7 @@ type
     function OnSet: Boolean; stdcall;
 
     //IDigIt_Taker Implementation
-    function Flags: Word; stdcall;
+    function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
@@ -80,9 +80,9 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileName
-    function Preview(const AFileName: PChar): Integer; stdcall;
-    function Take(const AFileName: PChar): Integer; stdcall;
-    function ReTake(const AFileName: PChar): Integer; stdcall;
+    function Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -395,7 +395,7 @@ begin
   WriteBitmapToFile(AcquireFileName, nativeHandle);
 end;
 
-function TDigIt_Taker_Twain.internalTake(isPreview:Boolean; const AFileName: PChar): Integer;
+function TDigIt_Taker_Twain.internalTake(isPreview: Boolean; var AFileName: String): DWord;
 var
    capRet:TCapabilityRet;
    TwainSource:TTwainSource;
@@ -422,7 +422,7 @@ begin
 
             if resTake then
             begin
-              StrPCopy(AFileName, AcquireFileName); Result:= Length(AcquireFileName);
+              AFileName:= AcquireFileName; Result:= Length(AcquireFileName);
               Inc(iTempFile);
             end;
           end
@@ -461,7 +461,7 @@ begin
             TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
             //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
 
-            StrPCopy(AFileName, AcquireFileName); Result:= Length(AcquireFileName);
+            AFileName:= AcquireFileName; Result:= Length(AcquireFileName);
             Inc(iTempFile);
           end;
 
@@ -729,9 +729,9 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.Flags: Word; stdcall;
+function TDigIt_Taker_Twain.Flags: DWord; stdcall;
 begin
-  Result:= 0;
+  Result:= DigIt_Taker_TakeKind_FILENAME;
 end;
 
 function TDigIt_Taker_Twain.Init: Boolean; stdcall;
@@ -765,19 +765,37 @@ begin
   Result:= 2;
 end;
 
-function TDigIt_Taker_Twain.Preview(const AFileName: PChar): Integer; stdcall;
+function TDigIt_Taker_Twain.Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+var
+   AFileName: String;
+
 begin
-  Result :=internalTake(True, AFileName);
+  Result:= internalTake(True, AFileName);
+
+  StrPLCopy(PChar(AData), AFileName, MaxDataSize);
+  Result:= Length(AFileName);
 end;
 
-function TDigIt_Taker_Twain.Take(const AFileName: PChar): Integer; stdcall;
+function TDigIt_Taker_Twain.Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+var
+   AFileName: String;
+
 begin
-  Result :=internalTake(False, AFileName);
+  Result:= internalTake(False, AFileName);
+
+  StrPLCopy(PChar(AData), AFileName, MaxDataSize);
+  Result:= Length(AFileName);
 end;
 
-function TDigIt_Taker_Twain.ReTake(const AFileName: PChar): Integer; stdcall;
+function TDigIt_Taker_Twain.ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+var
+   AFileName: String;
+
 begin
-  Result :=internalTake(False, AFileName);
+  Result:= internalTake(False, AFileName);
+
+  StrPLCopy(PChar(AData), AFileName, MaxDataSize);
+  Result:= Length(AFileName);
 end;
 
 initialization

@@ -265,7 +265,7 @@ procedure BuildTakersMenu(AOwner: TComponent; menuTakers: TMenu; menuOnClick: TN
 var
    i, res  :Integer;
    newItem :TMenuItem;
-   curIntf :IDigIt_Taker;
+   curTaker:PTakerInfo;
    curTitle:PChar;
 
 begin
@@ -273,17 +273,17 @@ begin
 
   for i:=0 to theBridge.TakersImpl.Count-1 do
   begin
-    curIntf :=theBridge.TakersImpl.Taker[i];
-    if (curIntf<>nil) then
+    curTaker:= theBridge.TakersImpl.Taker[i];
+    if (curTaker<>nil) then
     begin
       newItem :=TMenuItem.Create(AOwner);
 
-      res :=curIntf.UI_Title(curTitle);
+      res :=curTaker^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
       then newItem.Caption:= curTitle
-      else newItem.Caption:= theBridge.TakersImpl.Name[i];
+      else newItem.Caption:= curTaker^.Name;
 
-      newItem.ImageIndex:=curIntf.UI_ImageIndex;
+      newItem.ImageIndex:=curTaker^.Inst.UI_ImageIndex;
       newItem.Tag:=i;
       newItem.OnClick:=menuOnClick;
       menuTakers.Items.Add(newItem);

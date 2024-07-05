@@ -46,7 +46,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Flags: Word; stdcall;
+    function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
@@ -57,9 +57,9 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
     //Take a Picture and returns FileName
-    function Preview(const AFileName: PChar): Integer; stdcall;
-    function Take(const AFileName: PChar): Integer; stdcall;
-    function ReTake(const AFileName: PChar): Integer; stdcall;
+    function Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
  end;
 
 
@@ -218,9 +218,9 @@ begin
   rParams.Free;
 end;
 
-function TDigIt_Taker_Folder.Flags: Word; stdcall;
+function TDigIt_Taker_Folder.Flags: DWord; stdcall;
 begin
-  Result:= 0;
+  Result:= DigIt_Taker_TakeKind_FILENAME;
 end;
 
 function TDigIt_Taker_Folder.Init: Boolean; stdcall;
@@ -255,7 +255,7 @@ begin
   Result:= 3;
 end;
 
-function TDigIt_Taker_Folder.Preview(const AFileName: PChar):Integer; stdcall;
+function TDigIt_Taker_Folder.Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
   if (lastFolder<>rParams.Folder)
@@ -272,12 +272,12 @@ begin
   if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
   then Result:= 0
   else begin
-        StrPCopy(AFileName, rParams.Folder+DirectorySeparator+xFiles[lastFile+1]);
-        Result:= Length(AFileName);
+        StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+xFiles[lastFile+1], MaxDataSize);
+        Result:= Length(PChar(AData));
        end;
 end;
 
-function TDigIt_Taker_Folder.Take(const AFileName: PChar):Integer; stdcall;
+function TDigIt_Taker_Folder.Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
   if (lastFolder<>rParams.Folder)
@@ -297,12 +297,12 @@ begin
          Inc(lastFile);
          rParams.LastTaked:=xFiles[lastFile];
 
-         StrPCopy(AFileName, rParams.Folder+DirectorySeparator+rParams.LastTaked);
-         Result:= Length(AFileName);
+         StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+rParams.LastTaked, MaxDataSize);
+         Result:= Length(PChar(AData));
        end;
 end;
 
-function TDigIt_Taker_Folder.ReTake(const AFileName: PChar):Integer; stdcall;
+function TDigIt_Taker_Folder.ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result :=0;
   if (lastFolder<>rParams.Folder)
@@ -323,8 +323,8 @@ begin
   if (xFiles.Count=0) or (lastFile=xFiles.Count)
   then Result :=0
   else begin
-         StrPCopy(AFileName, rParams.Folder+DirectorySeparator+rParams.LastTaked);
-         Result:= Length(AFileName);
+         StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+rParams.LastTaked, MaxDataSize);
+         Result:= Length(PChar(AData));
        end;
 end;
 

@@ -39,3 +39,7 @@
 27/06/2024 Changed IDigIt_Params.Summary params list; Added Flags in Plugin/Taker; Added function AllocPChar
 02/07/2024 Switched Taker Twain to interfaces; Added OnSet to IDigIt_Params interface
 03/07/2024 Porting of Twain Taker Completed; Taker_SelectWithParams calls IDigitParams.OnSet;
+05/07/2024 In Interfaces Added Kind of Taker, Changed Preview/Take Params; 
+	   Updated Takers;
+	   Bridge Implementation GetTaker return PTakerInfo;
+	   Updated MainForm according to this changes;

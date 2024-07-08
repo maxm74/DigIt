@@ -54,6 +54,13 @@ type
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
     BCLabel9: TBCLabel;
+    btCRotate180: TSpeedButton;
+    btPRotateLeft: TSpeedButton;
+    btPRotateRight: TSpeedButton;
+    btPRotate180: TSpeedButton;
+    imgListImgActions: TImageList;
+    Label9: TLabel;
+    panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
     btBox_Del: TBGRASpeedButton;
     btCFlipHLeft: TSpeedButton;
@@ -1177,21 +1184,36 @@ end;
 
 procedure TDigIt_Main.LoadImage(AImageFile: String);
 var
-   Bitmap :TBGRABitmap;
+   Bitmap,
+   BitmapR :TBGRABitmap;
 
 begin
   try
+     Bitmap:= Nil;
+     BitmapR:= Nil;
+
      if FileExists(AImageFile)
      then begin
-            Bitmap := TBGRABitmap.Create;
+            Bitmap:= TBGRABitmap.Create;
             //DetectFileFormat(AImageFile);
             Bitmap.LoadFromFile(AImageFile);
-            imgManipulation.Bitmap := Bitmap;
+
+            if btPRotateLeft.Down
+            then BitmapR:= Bitmap.RotateCCW(True);
+            if btPRotateRight.Down
+            then BitmapR:= Bitmap.RotateCW(True);
+            if btPRotate180.Down
+            then BitmapR:= Bitmap.RotateUD(True);
+
+            if (BitmapR <> Nil)
+            then imgManipulation.Bitmap := BitmapR
+            else imgManipulation.Bitmap := Bitmap;
           end
      else raise Exception.Create('LoadImage Failed');
 
   finally
-     Bitmap.Free;
+     if (Bitmap <> Nil) then Bitmap.Free;
+     if (BitmapR <> Nil) then BitmapR.Free;
   end;
 end;
 

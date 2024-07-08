@@ -10,7 +10,7 @@ pagina in orrizzontale
 (quasi fatto) Bridge, Taker, etc... come Interfacce
 
 Twain:
-  Convertire all'uso delle interfacce
+
 
   avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??
 xTestare di più(Risolto?)  In Realease non avvia subito il 32bit e non lo chiude in uscita (singola istanza?)

@@ -43,3 +43,4 @@
 	   Updated Takers;
 	   Bridge Implementation GetTaker return PTakerInfo;
 	   Updated MainForm according to this changes;
+08/07/2024 Main Form Buttons use ImageList and some adjustments

@@ -54,11 +54,13 @@ type
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
     BCLabel9: TBCLabel;
-    btCRotate180: TSpeedButton;
+    btPFlipH: TSpeedButton;
     btPRotateLeft: TSpeedButton;
     btPRotateRight: TSpeedButton;
+    btPFlipV: TSpeedButton;
     btPRotate180: TSpeedButton;
     imgListImgActions: TImageList;
+    Label10: TLabel;
     Label9: TLabel;
     panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
@@ -1198,12 +1200,23 @@ begin
             //DetectFileFormat(AImageFile);
             Bitmap.LoadFromFile(AImageFile);
 
+            //Pre processing Filters
+
+            //Flip
+            if btPFlipH.Down
+            then Bitmap.HorizontalFlip;
+            if btPFlipV.Down
+            then Bitmap.VerticalFlip;
+
+            //Rotate
             if btPRotateLeft.Down
             then BitmapR:= Bitmap.RotateCCW(True);
             if btPRotateRight.Down
             then BitmapR:= Bitmap.RotateCW(True);
             if btPRotate180.Down
             then BitmapR:= Bitmap.RotateUD(True);
+
+            { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
 
             if (BitmapR <> Nil)
             then imgManipulation.Bitmap := BitmapR

@@ -31,10 +31,11 @@ type
   end;
 
 const
-  Config_XMLWork='digit.xml';
-  Config_Options='digit.ini';
+  Config_XMLWork = 'digit.xml';
+  Config_Options = 'digit.ini';
 
-  XMLWork_Captured='CapturedFile/';
+  XMLWork_Captured = 'CapturedFile/';
+  XMLWork_PageSettings = 'PageSettings/';
 
 var
    Path_Application,

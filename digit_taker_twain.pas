@@ -150,11 +150,12 @@ begin
       begin
         ipcProcess :=TProcess.Create(nil);
         ipcProcess.CurrentDirectory :=Path_Application;
-        ipcProcess.Executable :=Path_Application+TWAIN32_SERVER_EXE;
         ipcProcess.StartupOptions:=[suoUseShowWindow];
         {$ifopt D+}
+        ipcProcess.Executable :=Path_Application+TWAIN32_SERVER_EXE+'-dbg.exe';
         ipcProcess.ShowWindow := swoShow;
         {$else}
+        ipcProcess.Executable :=Path_Application+TWAIN32_SERVER_EXE+'.exe';
         ipcProcess.Options:=[poDetached];
         ipcProcess.ShowWindow := swoHIDE;
         {$endif}
@@ -465,6 +466,8 @@ begin
             Inc(iTempFile);
           end;
 
+     Application.BringToFront;
+
   finally
    // FreeAndNil(FormAnimAcquiring);
   end;
@@ -481,6 +484,7 @@ begin
     //In Debug Stop the Process Manually
     {$ifopt D-}
     resType :=rCommsClient.SendSyncMessage(30000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
+    ipcProcess.Terminate(0);
     {$endif}
     //No need to test RES_TWAIN32_STOPPED
     FreeAndNil(rCommsClient);
@@ -746,6 +750,7 @@ end;
 
 function TDigIt_Taker_Twain.Release: Boolean; stdcall;
 begin
+  Free;
   Result:= True;
 end;
 

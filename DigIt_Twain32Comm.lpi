@@ -74,7 +74,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="bin\DigIt_Twain32Comm"/>
+      <Filename Value="bin\DigIt_Twain32Comm-dbg"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

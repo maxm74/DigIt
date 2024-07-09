@@ -16,7 +16,7 @@ uses
   Classes, SysUtils, DelphiTwain;
 
 const
-  TWAIN32_SERVER_EXE = 'DigIt_Twain32Comm.exe';
+  TWAIN32_SERVER_EXE = 'DigIt_Twain32Comm';
   TWAIN32_SERVER_NAME = 'DigIt_Twain32CommServer';
 
   MSG_TWAIN32_TIMEOUT = 100; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)

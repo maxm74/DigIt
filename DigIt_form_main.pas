@@ -279,6 +279,8 @@ type
     procedure XML_SaveCapturedFile(AItem:TFileListItem);
     procedure XML_LoadProject(AFileName:String);
     procedure XML_SaveProject(AFileName:String);
+    procedure XML_LoadPageSettings;
+    procedure XML_SavePageSettings;
     procedure Taker_SelectUserParams(newTaker: PTakerInfo);
     procedure Taker_SelectWithParams(newTaker: PTakerInfo; newParams:IDigIt_Params);
     procedure setProject_File(AValue: String);
@@ -1256,6 +1258,8 @@ begin
              { #todo 3 -oMaxM : else ? Error }
       end;
     end;
+
+    XML_LoadPageSettings;
     Counters.Load(XMLWork, True);
     imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
     XML_LoadCapturedFiles;
@@ -1278,6 +1282,7 @@ begin
   try
      if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
+     XML_SavePageSettings;
      Counters.Save(XMLWork, True);
      XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
      imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
@@ -1374,6 +1379,66 @@ begin
      XMLProject.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
      imgManipulation.CropAreas.Save(XMLProject, 'CropAreas');
      XMLProject.Flush;
+  finally
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadPageSettings;
+var
+   selButton: Integer;
+
+begin
+  try
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     selButton := XMLWork.GetValue(XMLWork_PageSettings+'Rotate', -1);
+     Case selButton of
+     0: btPRotateLeft.Down:= True;
+     1: btPRotateRight.Down:= True;
+     2: btPRotate180.Down:= True;
+     else begin
+            btPRotateLeft.Down:= False;
+            btPRotateRight.Down:= False;
+            btPRotate180.Down:= False;
+          end;
+     end;
+
+     selButton := XMLWork.GetValue(XMLWork_PageSettings+'Flip', -1);
+     Case selButton of
+     0: btPFlipV.Down:= True;
+     1: btPFlipH.Down:= True;
+     else begin
+            btPFlipV.Down:=  False;
+            btPFlipH.Down:= False;
+          end;
+     end;
+
+  finally
+  end;
+end;
+
+procedure TDigIt_Main.XML_SavePageSettings;
+begin
+  try
+     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     if btPRotateLeft.Down
+     then XMLWork.SetValue(XMLWork_PageSettings+'Rotate', 0)
+     else
+     if btPRotateRight.Down
+     then XMLWork.SetValue(XMLWork_PageSettings+'Rotate', 1)
+     else
+     if btPRotate180.Down
+     then XMLWork.SetValue(XMLWork_PageSettings+'Rotate', 2)
+     else XMLWork.SetValue(XMLWork_PageSettings+'Rotate', -1);
+
+     if btPFlipV.Down
+     then XMLWork.SetValue(XMLWork_PageSettings+'Flip', 0)
+     else
+     if btPFlipH.Down
+     then XMLWork.SetValue(XMLWork_PageSettings+'Flip', 1)
+     else XMLWork.SetValue(XMLWork_PageSettings+'Flip', -1);
+
   finally
   end;
 end;

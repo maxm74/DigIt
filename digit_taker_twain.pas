@@ -17,6 +17,9 @@ uses
   simpleipc, MM_SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
   Digit_Bridge_Intf, Digit_Taker_Twain_Types, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
 
+const
+  Twain_TakeFileName = 'twain_take.bmp';
+
 type
   { TDigIt_Taker_Twain }
   TDigIt_Taker_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Taker)
@@ -31,9 +34,8 @@ type
     SelectedSourceIPC:Boolean;
     SelectedSourceIndex,
     countTwain_Source,
-    countIPC_Source,
-    iTempFile:Integer;
-    AcquireFileName:String;
+    countIPC_Source: Integer;
+    AcquireFileName: String;
 
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
@@ -137,7 +139,7 @@ var
              end;
 
      except
-       FreeAndNil(rCommsClient);
+       rCommsClient.Free; rCommsClient:= Nil;
      end;
    end;
 
@@ -167,8 +169,8 @@ begin
     end;
 
   except
-    FreeAndNil(rCommsClient);
-    FreeAndNil(ipcProcess);
+    rCommsClient.Free; rCommsClient:= Nil;
+    ipcProcess.Free; ipcProcess:= Nil;
   end;
 
   Result :=rCommsClient;
@@ -408,10 +410,10 @@ begin
    //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
      //Delete previous scanned file
-     if FileExists(Path_Temp+'twain_'+IntToStr(iTempFile-1)+'.bmp')
-     then DeleteFile(Path_Temp+'twain_'+IntToStr(iTempFile-1)+'.bmp');
+     if FileExists(Path_Temp+Twain_TakeFileName)
+     then DeleteFile(Path_Temp+Twain_TakeFileName);
 
-     AcquireFileName:= Path_Temp+'twain_'+IntToStr(iTempFile)+'.bmp';
+     AcquireFileName:= Path_Temp+Twain_TakeFileName;
 
      if SelectedSourceIPC
      then begin
@@ -423,8 +425,8 @@ begin
 
             if resTake then
             begin
-              AFileName:= AcquireFileName; Result:= Length(AcquireFileName);
-              Inc(iTempFile);
+              AFileName:= AcquireFileName;
+              Result:= Length(AcquireFileName);
             end;
           end
      else if Assigned(Twain.SelectedSource) then
@@ -462,14 +464,14 @@ begin
             TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
             //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
 
-            AFileName:= AcquireFileName; Result:= Length(AcquireFileName);
-            Inc(iTempFile);
+            AFileName:= AcquireFileName;
+            Result:= Length(AcquireFileName);
           end;
 
      Application.BringToFront;
 
   finally
-   // FreeAndNil(FormAnimAcquiring);
+   // FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
   end;
 end;
 
@@ -487,9 +489,9 @@ begin
     ipcProcess.Terminate(0);
     {$endif}
     //No need to test RES_TWAIN32_STOPPED
-    FreeAndNil(rCommsClient);
+    rCommsClient.Free; rCommsClient:= Nil;
   end;
-  FreeAndNil(ipcProcess);
+  ipcProcess.Free; ipcProcess:= Nil;
 end;
 
 constructor TDigIt_Taker_Twain.Create;
@@ -498,9 +500,9 @@ begin
 
   rTwain:=nil;
   rCommsClient:=nil;
+  ipcProcess:=nil;
   SelectedSourceIPC:=False;
   SelectedSourceIndex:=-1;
-  iTempFile :=0;
 end;
 
 destructor TDigIt_Taker_Twain.Destroy;
@@ -508,9 +510,13 @@ begin
   if (rTwain<>nil) then rTwain.Free;
   FreeCommsClient;
 
-  //Delete previous scanned file
-  if FileExists(Path_Application+'twain_'+IntToStr(iTempFile-1)+'.bmp')
-  then DeleteFile(Path_Application+'twain_'+IntToStr(iTempFile-1)+'.bmp');
+  try
+     //Delete previous scanned file
+     if FileExists(Path_Temp+Twain_TakeFileName)
+     then DeleteFile(Path_Temp+Twain_TakeFileName);
+  except
+    //Strange Windows Error when closing the Application and deleting files
+  end;
 
   inherited Destroy;
 end;
@@ -589,8 +595,8 @@ begin
      end;
 
   finally
-    FreeAndNil(TwainSelectSource);
-    FreeAndNil(TwainSettingsSource);
+    TwainSelectSource.Free; TwainSelectSource:= Nil;
+    TwainSettingsSource.Free; TwainSettingsSource:= Nil;
   end;
 end;
 
@@ -623,21 +629,6 @@ begin
      rParams.Contrast:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Contrast', '0'));
      rParams.Brightness:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Brightness', '0'));
      rParams.BitDepth:= XMLWork.GetValue(xml_RootPath+'/BitDepth', 24);
-
-(*
-property IPC_Scanner:Boolean read rIPC_Scanner write rIPC_Scanner;
-property Manufacturer: String read rManufacturer write rManufacturer;
-property ProductFamily: String read rProductFamily write rProductFamily;
-property ProductName: String read rProductName write rProductName;
-
-property PaperFeed:TTwainPaperFeeding read rTwainParams.PaperFeed write rTwainParams.PaperFeed;
-property PaperSize:TTwainPaperSize read rTwainParams.PaperSize write rTwainParams.PaperSize;
-property PixelType:TTwainPixelType read rTwainParams.PixelType write rTwainParams.PixelType;
-property Resolution:Single read rTwainParams.Resolution write rTwainParams.Resolution;
-property Contrast:Single read rTwainParams.Contrast write rTwainParams.Contrast;
-property Brightness:Single read rTwainParams.Brightness write rTwainParams.Brightness;
-property BitDepth: Integer read rTwainParams.BitDepth write rTwainParams.BitDepth;
-*)
 
      Result:= True;
 
@@ -690,6 +681,8 @@ begin
   with rScannerInfo do
   begin
     SelectedSourceIndex :=-1;
+
+    if (Manufacturer<>'') and (ProductFamily<>'') and (ProductName<>'') then
     repeat
       if IPC_Scanner
       then SelectedSourceIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)

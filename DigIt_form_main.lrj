@@ -4,12 +4,10 @@
 {"hash":363140,"name":"tdigit_main.tbtest1.caption","sourcebytes":[84,69,83,84],"value":"TEST"},
 {"hash":128425009,"name":"tdigit_main.tbsep1.caption","sourcebytes":[116,98,83,101,112,49],"value":"tbSep1"},
 {"hash":5491433,"name":"tdigit_main.tbmenu.caption","sourcebytes":[77,101,110,195,185],"value":"Men\u00F9"},
-{"hash":71680202,"name":"tdigit_main.label6.caption","sourcebytes":[68,101,115,116,105,110,97,116,105,111,110,32,70,111,108,100,101,114,32,58],"value":"Destination Folder :"},
-{"hash":110330602,"name":"tdigit_main.bclabel9.caption","sourcebytes":[70,111,114,109,97,116,32,58],"value":"Format :"},
-{"hash":2518810,"name":"tdigit_main.bclabel15.caption","sourcebytes":[68,101,115,116,105,110,97,116,105,111,110,58],"value":"Destination:"},
 {"hash":210320238,"name":"tdigit_main.tbsource.caption","sourcebytes":[83,111,117,114,99,101,46,46,46],"value":"Source..."},
 {"hash":110140709,"name":"tdigit_main.tbworksave.caption","sourcebytes":[87,111,114,107,83,97,118,101],"value":"WorkSave"},
 {"hash":128425010,"name":"tdigit_main.tbsep2.caption","sourcebytes":[116,98,83,101,112,50],"value":"tbSep2"},
+{"hash":181797203,"name":"tdigit_main.toolbutton2.caption","sourcebytes":[68,101,115,116,105,110,97,116,105,111,110,32,83,101,116,116,105,110,103,115],"value":"Destination Settings"},
 {"hash":38544099,"name":"tdigit_main.rollcrops.button.caption","sourcebytes":[67,114,111,112,32,65,114,101,97,115],"value":"Crop Areas"},
 {"hash":4687233,"name":"tdigit_main.btbox_add.hint","sourcebytes":[65,100,100,32,97,32,67,114,111,112,32,65,114,101,97],"value":"Add a Crop Area"},
 {"hash":43,"name":"tdigit_main.btbox_add.caption","sourcebytes":[43],"value":"+"},
@@ -88,5 +86,7 @@
 {"hash":170803540,"name":"tdigit_main.actrotateleft.caption","sourcebytes":[82,111,116,97,116,101,32,76,101,102,116],"value":"Rotate Left"},
 {"hash":47076692,"name":"tdigit_main.actrotateright.caption","sourcebytes":[82,111,116,97,116,101,32,82,105,103,104,116],"value":"Rotate Right"},
 {"hash":39807138,"name":"tdigit_main.menutimertakestop.caption","sourcebytes":[83,116,111,112,32,84,105,109,101,114],"value":"Stop Timer"},
-{"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"}
+{"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"},
+{"hash":213947411,"name":"tdigit_main.menuitem1.caption","sourcebytes":[83,97,118,101,32,97,115,32,70,105,108,101,115],"value":"Save as Files"},
+{"hash":174554181,"name":"tdigit_main.menuitem2.caption","sourcebytes":[84,101,115,116,32,109,111,114,101],"value":"Test more"}
 ]}

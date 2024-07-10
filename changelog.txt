@@ -47,3 +47,7 @@
 09/07/2024 Rotate/Flip Preprocessing filters;
 	   Load/SavePageSettings (Rotate and Flip); 
 	   Twain 32bit Comm executable debug name -dbg
+10/07/2024 Destination as ToolButton with a Settings Form; 
+	   Changed XML Structure; 
+           Twain Taker use twain_take.bmp as temp file, if start with null Product call GetFromUser;
+	   Cleanup of old commented code

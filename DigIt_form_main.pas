@@ -45,7 +45,6 @@ type
     BCLabel12: TBCLabel;
     BCLabel13: TBCLabel;
     BCLabel14: TBCLabel;
-    BCLabel15: TBCLabel;
     BCLabel2: TBCLabel;
     BCLabel3: TBCLabel;
     BCLabel4: TBCLabel;
@@ -53,7 +52,6 @@ type
     BCLabel6: TBCLabel;
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
-    BCLabel9: TBCLabel;
     btPFlipH: TSpeedButton;
     btPRotateLeft: TSpeedButton;
     btPRotateRight: TSpeedButton;
@@ -62,6 +60,9 @@ type
     imgListImgActions: TImageList;
     Label10: TLabel;
     Label9: TLabel;
+    menuDestinations: TPopupMenu;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
     panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
     btBox_Del: TBGRASpeedButton;
@@ -111,12 +112,9 @@ type
     Label5: TLabel;
     Label7: TLabel;
     Label8: TLabel;
-    cbSaveFormat: TComboBox;
-    dirDestination: TDirectoryEdit;
     imgListCaptured: TImageList;
     imgManipulation: TBGRAImageManipulation;
     imgListMain: TImageList;
-    Label6: TLabel;
     lbCounterExample: TLabel;
     lbPrevious: TLabel;
     lvCaptured: TListView;
@@ -126,7 +124,6 @@ type
     OpenProject: TOpenDialog;
     panelCounter: TBCPanel;
     panelCropArea: TBCPanel;
-    panelMainToolbar: TPanel;
     menuPaperSizes: TPopupMenu;
     menuTakers: TPopupMenu;
     panelPageSize: TBCPanel;
@@ -162,6 +159,7 @@ type
     tbSep2: TToolButton;
     ToolButton1: TToolButton;
     tbTimerTake: TToolButton;
+    ToolButton2: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
@@ -194,17 +192,15 @@ type
     procedure cbCropCounterListChange(Sender: TObject);
     procedure btCropCounter_AddClick(Sender: TObject);
     procedure btCropCounter_DelClick(Sender: TObject);
-    procedure cbSaveFormatChange(Sender: TObject);
-    procedure dirDestinationChange(Sender: TObject);
     procedure edPageHeightChange(Sender: TObject);
     procedure edPageWidthChange(Sender: TObject);
     procedure edPage_UnitTypeChange(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
     procedure lvCapturedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
       var DefaultDraw: Boolean);
     procedure lvCapturedDblClick(Sender: TObject);
     procedure lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
+    procedure MenuItem1Click(Sender: TObject);
     procedure TakerMenuClick(Sender: TObject);
     procedure edCounterNameEditingDone(Sender: TObject);
     procedure edCounterValueChange(Sender: TObject);
@@ -265,13 +261,11 @@ type
     procedure UI_FillPageSizes;
     procedure UI_FillTaker;
     procedure UI_Load;
-    function UI_FindSaveFormat(AExt:String):Integer;
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
     procedure UpdateCounterExampleLabel(ACounter :TDigIt_Counter);
     procedure CounterSelect(AIndex:Integer);
-    procedure BuildSaveFormats;
     procedure LoadImage(AImageFile:String);
     procedure XML_LoadWork;
     procedure XML_SaveWork;
@@ -304,7 +298,7 @@ uses
   {$ifopt D+}
   lazlogger,
   {$endif}
-  LCLIntf, DigIt_Form_Templates, DelphiTwain, DelphiTwain_VCL;
+  LCLIntf, DigIt_Form_Templates, DigIt_Dest_SaveFiles_SettingsForm; //DelphiTwain, DelphiTwain_VCL;
 
 
 { TDigIt_Main }
@@ -422,7 +416,6 @@ begin
   taker:= Nil;
   takerParams:= Nil;
   BuildTakersMenu(Self, menuTakers, @TakerMenuClick);
-  BuildSaveFormats;
   {$ifopt D+}
   tbTest1.Visible:= True;
   tbWorkSave.Visible:= True;
@@ -896,22 +889,6 @@ begin
   //
 end;
 
-procedure TDigIt_Main.cbSaveFormatChange(Sender: TObject);
-var
-   i:Integer;
-
-begin
-  SaveExt:=ImageHandlers.Extensions[cbSaveFormat.Items[cbSaveFormat.ItemIndex]];
-  i :=Pos(';', SaveExt);
-  if (i>0) then SaveExt :=Copy(SaveExt, 1, i-1);
-end;
-
-procedure TDigIt_Main.dirDestinationChange(Sender: TObject);
-begin
-  SavePath :=dirDestination.Directory;
-  UI_FillTaker;
-end;
-
 procedure TDigIt_Main.edPageHeightChange(Sender: TObject);
 begin
   if inFillPagesUI then exit;
@@ -940,12 +917,6 @@ begin
                                          edPageWidth.Value, edPageHeight.Value);
        end;
   UI_FillPageSizes;
-end;
-
-procedure TDigIt_Main.FormResize(Sender: TObject);
-begin
-  panelMainToolbar.Left:=tbMain.Width div 2;
-  panelMainToolbar.Width:=tbMain.Width div 2;
 end;
 
 procedure TDigIt_Main.lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
@@ -1008,6 +979,14 @@ begin
   then HintInfo^.HintStr:=tt.FileName;
 end;
 
+procedure TDigIt_Main.MenuItem1Click(Sender: TObject);
+begin
+  if TDest_SaveFiles_Settings.Execute(SaveExt, SavePath) then
+  begin
+  end;
+  UI_FillTaker;
+end;
+
 procedure TDigIt_Main.TakerMenuClick(Sender: TObject);
 var
    newTaker: PTakerInfo;
@@ -1034,7 +1013,7 @@ begin
 
      end;
    finally
-      FreeAndNil(DigIt_Templates);
+      DigIt_Templates.Free; DigIt_Templates:= Nil;
    end;
 end;
 
@@ -1165,27 +1144,6 @@ begin
   UI_FillCounter(GetCurrentCounter);
 end;
 
-procedure TDigIt_Main.BuildSaveFormats;
-var
-   i,j :Integer;
-   t,e:String;
-
-begin
-  j:=0;
-  for i :=0 to ImageHandlers.Count-1 do
-  begin
-    t :=ImageHandlers.TypeNames[i];
-    e :=ImageHandlers.Extensions[t];
-    if (ImageHandlers.ImageWriter[t]<>nil) then
-    begin
-      cbSaveFormat.Items.Add(t);
-      if (Pos('jpg', e)>0) then j:=i;
-    end;
-  end;
-  cbSaveFormat.ItemIndex:=j-1;
-  SaveExt :='jpg';
-end;
-
 procedure TDigIt_Main.LoadImage(AImageFile: String);
 var
    Bitmap,
@@ -1234,17 +1192,17 @@ end;
 
 procedure TDigIt_Main.XML_LoadWork;
 var
-   newTakerName: String;
+   newTakerName,
+   newDestinationName: String;
    newTaker: PTakerInfo;
    newParams: IDigIt_Params;
 
 begin
   try
-    if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+    XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-    newTakerName:= XMLWork.GetValue('Taker', '');
-    SaveExt:= XMLWork.GetValue('Format', 'jpg');
-    SavePath:= XMLWork.GetValue('Destination', '');
+    //Load Taker and its Params
+    newTakerName:= XMLWork.GetValue('Taker/Name', '');
     if (newTakerName<>'') then
     begin
       newTaker:= theBridge.TakersImpl.TakerByName[newTakerName];
@@ -1253,11 +1211,17 @@ begin
         //Read Params
         newParams :=newTaker^.Inst.Params;
         if (newParams <> nil)
-        then if newParams.Load(PChar(Path_Config+Config_XMLWork), 'Params')
+        then if newParams.Load(PChar(Path_Config+Config_XMLWork), 'Taker/Params')
              then Taker_SelectWithParams(newTaker, newParams);
              { #todo 3 -oMaxM : else ? Error }
       end;
     end;
+
+    //Load Destination and its Params
+    newDestinationName:= XMLWork.GetValue('Destination/Name', 'SaveAsFiles');
+    { #todo -oMaxM : Get From A List of Destination Interfaces (at this time only SaveAsFiles}
+    SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
+    SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
 
     XML_LoadPageSettings;
     Counters.Load(XMLWork, True);
@@ -1273,6 +1237,7 @@ begin
     rollCounters.Collapsed:=XMLWork.GetValue('UI/rollCounters_Collapsed', True);
 
   finally
+    XMLWork.Free; XMLWork:= Nil;
   end;
 end;
 
@@ -1292,16 +1257,23 @@ begin
      XMLWork.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
      XMLWork.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
 
-     XMLWork.Flush;
-
      //Save Taker and its Params
-     XMLWork.SetValue('Taker', taker^.Name);
-     XMLWork.SetValue('Format', SaveExt);
-     XMLWork.SetValue('Destination', SavePath);
-     XMLWork.DeleteValue('Params');
-     taker^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Params');
+     XMLWork.SetValue('Taker/Name', taker^.Name);
+     XMLWork.DeletePath('Taker/Params/');
 
+     //Save Destination and its Params
+     XMLWork.SetValue('Destination/Name', 'SaveAsFiles');
+     XMLWork.DeletePath('Destination/Params/');
+     XMLWork.SetValue('Destination/Params/Format', SaveExt);
+     XMLWork.SetValue('Destination/Params/Path', SavePath);
      XMLWork.Flush;
+     XMLWork.Free; XMLWork:= Nil;
+
+     //FPC Bug?
+     //If a key like "Taker/Params" is written to the same open file, even after a flush, it is ignored.
+     //So we do it after destroying XMLWork.
+     taker^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Taker/Params');
+     { #todo -oMaxM : Save Destination Params as Interfaces (at this time only SaveAsFiles written above}
 
   finally
   end;
@@ -1371,10 +1343,6 @@ begin
   try
      if (XMLProject=nil) then XMLProject:=TXMLConfig.Create(AFileName);
 
-     //XMLProject.SetValue('Taker', takerInst.RegisterName);
-     //XMLProject.SetValue('Format', SaveExt);
-     //XMLProject.SetValue('Destination', SavePath);
-     //WritePersistentToXMLConfig(XMLProject, 'Params', '', takerInst.Params_Get);
      Counters.Save(XMLProject, False);
      XMLProject.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
      imgManipulation.CropAreas.Save(XMLProject, 'CropAreas');
@@ -1447,28 +1415,6 @@ procedure TDigIt_Main.Taker_SelectUserParams(newTaker: PTakerInfo);
 begin
   if (newTaker <> Nil) then
   begin
-    (*
-    if (curClass <> takerClass)
-    then begin
-           //New Taker is different from actual, Create a new Instance and GetParams from User
-           newInst :=curClass.Create(nil);
-           if newInst.Params_GetFromUser
-           then begin
-                  //If User say Ok then use this New Instance as Taker
-                  if (takerInst<>nil) then takerInst.Free;
-                  takerClass :=curClass;
-                  takerInst :=newInst;
-                end
-           else newInst.Free;
-         end
-    else begin
-           //GetParams from User only
-           if (takerInst=nil) { #todo 2 -oMaxM : anomaly }
-           then takerInst :=takerClass.Create(nil);
-
-           takerInst.Params_GetFromUser; { #todo 2 -oMaxM : if False? }
-         end;
-         *)
     if (newTaker <> taker) then
     begin
          { #note -oMaxM : Taker Switched...Do something? }
@@ -1485,24 +1431,6 @@ procedure TDigIt_Main.Taker_SelectWithParams(newTaker: PTakerInfo; newParams: ID
 begin
   if (newTaker <> nil) then
   begin
-    (*
-    if (curClass<>takerClass)
-    then begin
-           //New Taker is different from actual, Create a new Instance
-           newInst :=curClass.Create(curParams);
-
-           if (takerInst<>nil) then takerInst.Free;
-           takerClass :=curClass;
-           takerInst :=newInst;
-         end
-    else begin
-           { #todo 2 -oMaxM : anomaly }
-           if (takerInst=nil)
-           then takerInst :=takerClass.Create(curParams);
-         end;
-
-    takerInst.Params_Set(curParams);
-    *)
     if (newTaker <> taker) then
     begin
          { #note -oMaxM : Taker Switched...Do something? }
@@ -1809,9 +1737,6 @@ var
 begin
   UI_FillTaker;
 
-  dirDestination.Directory:=SavePath;
-  cbSaveFormat.ItemIndex:=UI_FindSaveFormat(SaveExt);
-
   //UI for Crop Areas is filled in Events
 
   //Fill Counters related UI
@@ -1827,23 +1752,6 @@ begin
   if (curCropArea=nil)
   then cbCropCounterList.ItemIndex:=-1
   else cbCropCounterList.ItemIndex:=curCropArea.UserData;
-end;
-
-function TDigIt_Main.UI_FindSaveFormat(AExt: String): Integer;
-var
-   i:Integer;
-
-begin
-  Result:=-1;
-
-  if (AExt<>'') then
-  for i:=0 to cbSaveFormat.Items.Count-1 do
-  begin
-    if (Pos(AExt, ImageHandlers.Extensions[cbSaveFormat.Items[i]]) > 0) then
-    begin
-      Result :=i; break;
-    end;
-  end;
 end;
 
 procedure TDigIt_Main.UI_FillBox(ABox: TCropArea);

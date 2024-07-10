@@ -585,7 +585,7 @@ begin
 //      capRet :=TwainSource.GetAutoFeed(capBool);
 //      Memo2.Lines.Add('Capability AutoFeed='+BoolToStr(capBool, True)+' canSet='+BoolToStr(TwainSource.CapabilityCanSet(CAP_AUTOFEED)));
 
-       FreeAndNil(TwainSettingsSource);
+       TwainSettingsSource.Free; TwainSettingsSource:= Nil;
     end;
   end;
 end;

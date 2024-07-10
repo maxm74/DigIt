@@ -10,7 +10,7 @@ uses
   Forms, lazcontrols, Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Types, DigIt_Counters, DigIt_Utils,
   Digit_Taker_Folder,
   Digit_Taker_Twain, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm, Digit_Taker_Twain_Types,
-  DigIt_Form_Main, DigIt_Form_Templates, DigIt_Form_AnimAcquiring;
+  DigIt_Form_Main, DigIt_Form_Templates, DigIt_Form_AnimAcquiring, DigIt_Dest_SaveFiles_SettingsForm;
 
 {$R *.res}
 

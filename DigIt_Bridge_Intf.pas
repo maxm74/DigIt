@@ -15,26 +15,26 @@ unit Digit_Bridge_Intf;
 interface
 
 const
-  DigIt_TakerFlags_Kind     = $0000000F;
-  DigIt_TakerFlags_TakeKind = $000000F0;
+  DigIt_Taker_Kind         = $0000000F;
+  DigIt_Taker_TakeDataType = $000000F0;
 
   //
-  //DigIt_TakerFlags_Kind constants
+  //DigIt_Takers_Kind constants
   //
 
   //Standard Taker
   DigIt_Taker_Kind_STD      = $00000000;
 
   //
-  //DigIt_TakerFlags_TakeKind constants
+  //DigIt_Taker_TakeDataType constants
   //
 
   //Taker return a Filename in Preview/Take/ReTake as a PChar (IDigIt_Settings.GetMaxPCharSize maximum size)
-  DigIt_Taker_TakeKind_FILENAME = $00000000;
+  DigIt_Taker_TakeData_PICTUREFILE = $00000000;
 
   (* Maybe Tomorrow
   //Taker return a Pointer to a Bitmap in Preview/Take/ReTake as a Pointer (IDigIt_Settings.GetMaxBufferSize maximum size)
-  DigIt_Taker_TakeKind_BITMAP   = $00000010;
+  DigIt_Taker_TakeData_BITMAP   = $00000010;
   *)
 
   //Default Max PChar Size when passing/receiving parameters to the interface
@@ -80,6 +80,11 @@ type
     function OnSet: Boolean; stdcall;
   end;
 
+  //
+  //DigIt_Taker_TakeAction enum
+  //
+  DigIt_Taker_TakeAction = (takeActPreview, takeActTake, takeActReTake);
+
   IDigIt_Taker = Interface
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE84}']
     function Flags: DWord; stdcall; { #note -oMaxM : Future use, like kind of Taker, etc... }
@@ -91,10 +96,8 @@ type
     function UI_Title(const AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
-     //Take a Picture and returns it on AData according with DigIt_TakerFlags_TakeKind
-    function Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+     //Take a Picture and returns it on AData according with DigIt_Taker_TakeDataType
+    function Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
   end;
 
   IDigIt_Takers = Interface

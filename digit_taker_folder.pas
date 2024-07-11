@@ -57,9 +57,7 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
     //Take a Picture and returns FileName
-    function Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
  end;
 
 
@@ -220,7 +218,7 @@ end;
 
 function TDigIt_Taker_Folder.Flags: DWord; stdcall;
 begin
-  Result:= DigIt_Taker_TakeKind_FILENAME;
+  Result:= DigIt_Taker_TakeData_PICTUREFILE;
 end;
 
 function TDigIt_Taker_Folder.Init: Boolean; stdcall;
@@ -255,6 +253,7 @@ begin
   Result:= 3;
 end;
 
+(*
 function TDigIt_Taker_Folder.Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
@@ -276,32 +275,58 @@ begin
         Result:= Length(PChar(AData));
        end;
 end;
-
-function TDigIt_Taker_Folder.Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+*)
+function TDigIt_Taker_Folder.Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
   if (lastFolder<>rParams.Folder)
   then xFiles.Clear;
 
-  if (xFiles.Count=0)
-  then begin
-         SearchOnPath(xFiles, rParams.Folder, '*.*', faAnyFile, False);
-         lastFolder :=rParams.Folder;
-         lastFile :=xFiles.IndexOf(rParams.LastTaked);
-         //if (lastFile=-1) then lastFile:=0;
-       end;
+  if (xFiles.Count=0) then
+  begin
+    SearchOnPath(xFiles, rParams.Folder, '*.*', faAnyFile, False);
+    lastFolder:= rParams.Folder;
+    lastFile :=xFiles.IndexOf(rParams.LastTaked);
 
-  if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-  then Result :=0
-  else begin
-         Inc(lastFile);
-         rParams.LastTaked:=xFiles[lastFile];
+    if (takeAction = takeActReTake) and
+       (lastFile=-1) then
+    begin
+      lastFile:=0;
+      rParams.LastTaked :=xFiles[lastFile];
+    end;
+  end;
 
-         StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+rParams.LastTaked, MaxDataSize);
-         Result:= Length(PChar(AData));
-       end;
+  Case takeAction of
+  takeActPreview: begin
+    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
+    then Result:= 0
+    else begin
+          StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+xFiles[lastFile+1], MaxDataSize);
+          Result:= Length(PChar(AData));
+         end;
+  end;
+  takeActTake: begin
+    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
+    then Result :=0
+    else begin
+           Inc(lastFile);
+           rParams.LastTaked:=xFiles[lastFile];
+
+           StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+rParams.LastTaked, MaxDataSize);
+           Result:= Length(PChar(AData));
+         end;
+  end;
+  takeActReTake: begin
+    if (xFiles.Count=0) or (lastFile=xFiles.Count)
+    then Result :=0
+    else begin
+           StrPLCopy(PChar(AData), rParams.Folder+DirectorySeparator+rParams.LastTaked, MaxDataSize);
+           Result:= Length(PChar(AData));
+         end;
+  end;
+  end;
 end;
-
+(*
 function TDigIt_Taker_Folder.ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result :=0;
@@ -327,7 +352,7 @@ begin
          Result:= Length(PChar(AData));
        end;
 end;
-
+*)
 initialization
   try
      Taker_Folder:= TDigIt_Taker_Folder.Create;

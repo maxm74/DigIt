@@ -34,7 +34,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Programming\Lazarus\Projects\DigIt\bin\x86_64-win64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Programming\Lazarus\Projects\DigIt\bin\x86_64-win64\DigIt_Twain32Comm.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Programming\Lazarus\Projects\DigIt\bin\DigIt_Twain32Comm.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

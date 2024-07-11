@@ -466,7 +466,7 @@ begin
     begin
       curImageFile:= AllocPChar;
 
-      res:= taker^.Inst.Preview(theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= taker^.Inst.Take(takeActPreview, theBridge.Settings.GetMaxPCharSize, curImageFile);
       if (res>0) and (curImageFile<>'') then
       begin
            WaitForAFile(curImageFile, 30000);
@@ -505,13 +505,13 @@ begin
     begin
       curImageFile:= AllocPChar;
 
-      res:= taker^.Inst.Take(theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= taker^.Inst.Take(takeActTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
       if (res>0) and (curImageFile<>'') then
       begin
            WaitForAFile(curImageFile, 30000);
            LoadImage(curImageFile);
            Counters.CopyValuesToPrevious;
-           imgManipulation.getAllBitmaps(@SaveCallBack);
+           imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
            XML_SaveWork;
        end;
 
@@ -534,7 +534,7 @@ begin
     begin
       curImageFile:= AllocPChar;
 
-      res:= taker^.Inst.ReTake(theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= taker^.Inst.Take(takeActReTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
 
       if (res>0) and (curImageFile<>'') then
       begin
@@ -542,7 +542,7 @@ begin
            LoadImage(curImageFile);
            Counters.CopyPreviousToValues;
            //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
-           imgManipulation.getAllBitmaps(@SaveCallBack, 1);
+           imgManipulation.getAllBitmaps(@SaveCallBack, 1, True);
            lvCaptured.Refresh;
            //lvCaptured.EndUpdate;
            XML_SaveWork;
@@ -1072,23 +1072,29 @@ begin
   begin
     if (CropArea.UserData<0)
     then begin
+           //No Counter, Save File with CropArea Name
            savedFile:=SavePath+DirectorySeparator+CropArea.Name+'.'+SaveExt;
            Bitmap.SaveToFile(savedFile);
          end
     else begin
+           //Increment the Counter Value
            cropCounter :=TDigIt_Counter(Counters.items[CropArea.UserData]);
            cropCounter.Value:=cropCounter.Value+1;
+
+           //Save File
            savedFile:=SavePath+DirectorySeparator+cropCounter.GetValue+'.'+SaveExt;
            Bitmap.SaveToFile(savedFile);
          end;
 
     if (AUserData=0)
-    then begin   //Take, add file to Captured List
+    then begin
+           //Take, add file to Captured List
            captItem :=TFileListItem(lvCaptured.Items.Add);
            captItem.FileName:=savedFile;
            XML_SaveCapturedFile(captItem);
          end
     else begin
+           //ReTake, search file in Captured List and update the image
            captItem :=FindFileListItem(lvCaptured.Items, savedFile);
            if (captItem=nil)
            then begin
@@ -1096,8 +1102,10 @@ begin
                   captItem.FileName:=savedFile;
                   XML_SaveCapturedFile(captItem);
                 end;
-           //else lvCaptured;   { #todo 2 -oMaxM : Update Item }
+           //else lvCaptured...;   { #todo 4 -oMaxM : Update Item }
          end;
+
+    //Go to last Item in Captured List
     captItem.MakeVisible(False);
   end;
 end;

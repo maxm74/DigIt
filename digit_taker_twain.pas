@@ -82,9 +82,7 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileName
-    function Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -728,7 +726,7 @@ end;
 
 function TDigIt_Taker_Twain.Flags: DWord; stdcall;
 begin
-  Result:= DigIt_Taker_TakeKind_FILENAME;
+  Result:= DigIt_Taker_TakeData_PICTUREFILE;
 end;
 
 function TDigIt_Taker_Twain.Init: Boolean; stdcall;
@@ -763,34 +761,12 @@ begin
   Result:= 2;
 end;
 
-function TDigIt_Taker_Twain.Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+function TDigIt_Taker_Twain.Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 var
    AFileName: String;
 
 begin
-  Result:= internalTake(True, AFileName);
-
-  StrPLCopy(PChar(AData), AFileName, MaxDataSize);
-  Result:= Length(AFileName);
-end;
-
-function TDigIt_Taker_Twain.Take(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-var
-   AFileName: String;
-
-begin
-  Result:= internalTake(False, AFileName);
-
-  StrPLCopy(PChar(AData), AFileName, MaxDataSize);
-  Result:= Length(AFileName);
-end;
-
-function TDigIt_Taker_Twain.ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-var
-   AFileName: String;
-
-begin
-  Result:= internalTake(False, AFileName);
+  Result:= internalTake((takeAction=takeActPreview), AFileName);
 
   StrPLCopy(PChar(AData), AFileName, MaxDataSize);
   Result:= Length(AFileName);

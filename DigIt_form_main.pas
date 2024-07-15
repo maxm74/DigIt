@@ -997,6 +997,7 @@ begin
     newTaker:= theBridge.TakersImpl.Taker[TMenuItem(Sender).Tag];
     Taker_SelectUserParams(newTaker);
     UI_FillTaker;
+    TMenuItem(Sender).Checked:= True;
   end;
 end;
 

@@ -53,3 +53,4 @@
 	   Cleanup of old commented code
 11/07/2024 Only one method Take in IDigIt_Taker with DigIt_Taker_TakeAction param; 
            Changed some constant name; More comments
+15/07/2024 Twain use Scanner Default Values when is a new Selection

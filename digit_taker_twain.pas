@@ -407,9 +407,13 @@ begin
      Result:= 0;
    //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
-     //Delete previous scanned file
-     if FileExists(Path_Temp+Twain_TakeFileName)
-     then DeleteFile(Path_Temp+Twain_TakeFileName);
+     try
+        //Delete previous scanned file
+        if FileExists(Path_Temp+Twain_TakeFileName)
+        then DeleteFile(Path_Temp+Twain_TakeFileName);
+     except
+        //Sometimes FileExists will raise and Exception (?)
+     end;
 
      AcquireFileName:= Path_Temp+Twain_TakeFileName;
 
@@ -532,8 +536,10 @@ end;
 
 function TDigIt_Taker_Twain.GetFromUser: Boolean; stdcall;
 var
-  selectedSource:Integer;
-  TwainCap:TTwainParamsCapabilities;
+  newSelectedIndex: Integer;
+  newSelectedSourceIPC: Boolean;
+  TwainCap: TTwainParamsCapabilities;
+  useScannerDefault: Boolean;
 
 begin
   Result :=False;
@@ -552,26 +558,33 @@ begin
      //Get 32bit Devices
      countIPC_Source :=IPC_GetDevicesList;
 
-     selectedSource :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, rScannerInfo);
-     if (selectedSource>-1) then
+     newSelectedIndex :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, rScannerInfo);
+     if (newSelectedIndex>-1) then
      begin
        //if the index of selected device is greater than countTwain_Source then is a 32bit scanner
-       SelectedSourceIPC :=(selectedSource>=countTwain_Source);
-       if SelectedSourceIPC
+       newSelectedSourceIPC :=(newSelectedIndex >= countTwain_Source);
+
+       if newSelectedSourceIPC
        then begin
-              SelectedSourceIndex :=selectedSource-countTwain_Source;
+              useScannerDefault:= not(SelectedSourceIPC) or ((newSelectedIndex-countTwain_Source)<>SelectedSourceIndex);
+
+              SelectedSourceIndex :=newSelectedIndex-countTwain_Source;
               Result :=IPC_OpenDevice(SelectedSourceIndex);
             end
        else begin
-              SelectedSourceIndex :=selectedSource;
+              useScannerDefault:= SelectedSourceIPC or (newSelectedIndex <> SelectedSourceIndex);
+
+              SelectedSourceIndex :=newSelectedIndex;
               Twain.SelectedSourceIndex :=SelectedSourceIndex;
               Result :=(Twain.SelectedSource<>nil);
               if Result then Twain.SelectedSource.Loaded:=True;
             end;
 
+       SelectedSourceIPC:= newSelectedSourceIPC;
+
        if Result then
        begin
-           rScannerInfo.IPC_Scanner:=SelectedSourceIPC;
+           rScannerInfo.IPC_Scanner:= SelectedSourceIPC;
            if SelectedSourceIPC
            then begin
                   rScannerInfo.Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
@@ -588,7 +601,7 @@ begin
                   ParamsGet(TwainCap);
                 end;
 
-         TTwainSettingsSource.Execute(TwainCap, rParams);
+         TTwainSettingsSource.Execute(useScannerDefault, TwainCap, rParams);
        end;
      end;
 

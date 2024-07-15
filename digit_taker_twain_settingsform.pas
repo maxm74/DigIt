@@ -47,7 +47,7 @@ type
     SelectedSourceIndex:Integer;
 
   public
-     class function Execute(TwainCap:TTwainParamsCapabilities;
+     class function Execute(useScannerDefault: Boolean; TwainCap:TTwainParamsCapabilities;
                             var AParams:TTwainParams): Boolean;
   end;
 
@@ -80,7 +80,7 @@ begin
   edContrast.Value:=trContrast.Position;
 end;
 
-class function TTwainSettingsSource.Execute(TwainCap: TTwainParamsCapabilities;
+class function TTwainSettingsSource.Execute(useScannerDefault: Boolean; TwainCap: TTwainParamsCapabilities;
                                             var AParams: TTwainParams): Boolean;
 var
   paperI: TTwainPaperSize;
@@ -110,8 +110,9 @@ begin
                   FloatToStrF(PaperSizesTwain[paperI].h, ffFixed, 15, 2)+')',
              TObject(PtrUInt(paperI)));
 
-      //if (paperI=tCurrent) then cbSelected :=cbPaperSize.Items.Count-1;
-      if (paperI=AParams.PaperSize) then cbSelected :=cbPaperSize.Items.Count-1;
+      if useScannerDefault
+      then begin if (paperI = TwainCap.PaperSizeDefault) then cbSelected :=cbPaperSize.Items.Count-1; end
+      else begin if (paperI = AParams.PaperSize) then cbSelected :=cbPaperSize.Items.Count-1; end;
     end;
     cbPaperSize.ItemIndex:=cbSelected;
 
@@ -122,8 +123,9 @@ begin
     begin
       cbBitDepth.Items.AddObject(IntToStr(TwainCap.BitDepthArray[i])+' Bit', TObject(PtrUInt(TwainCap.BitDepthArray[i])));
 
-      //if (bitArray[i]=Current) then cbSelected :=cbBitDepth.Items.Count-1;
-      if (TwainCap.BitDepthArray[i]=AParams.BitDepth) then cbSelected :=cbBitDepth.Items.Count-1;
+      if useScannerDefault
+      then begin if (TwainCap.BitDepthArray[i] = TwainCap.BitDepthDefault) then cbSelected :=cbBitDepth.Items.Count-1; end
+      else begin if (TwainCap.BitDepthArray[i] = AParams.BitDepth) then cbSelected :=cbBitDepth.Items.Count-1; end;
     end;
     cbBitDepth.ItemIndex:=cbSelected;
 
@@ -134,8 +136,9 @@ begin
     begin
       cbPixelType.Items.AddObject(TwainPixelTypes[pixelI], TObject(PtrUInt(pixelI)));
 
-      //if (pixelI=pixelCurrent) then cbSelected :=cbPixelType.Items.Count-1;
-      if (pixelI=AParams.PixelType) then cbSelected :=cbPixelType.Items.Count-1;
+      if useScannerDefault
+      then begin if (pixelI = TwainCap.PixelTypeDefault) then cbSelected :=cbPixelType.Items.Count-1; end
+      else begin if (pixelI = AParams.PixelType) then cbSelected :=cbPixelType.Items.Count-1; end;
     end;
     cbPixelType.ItemIndex:=cbSelected;
 
@@ -146,8 +149,9 @@ begin
     begin
       cbResolution.Items.AddObject(FloatToStr(TwainCap.ResolutionArray[i]), TObject(PtrUInt(i)));
 
-      //if (resolutionList[i]=resolutionCurrent) then cbSelected :=cbResolution.Items.Count-1;
-      if (TwainCap.ResolutionArray[i] = AParams.Resolution) then cbSelected :=cbResolution.Items.Count-1;
+      if useScannerDefault
+      then begin if (TwainCap.ResolutionArray[i] = TwainCap.ResolutionDefault) then cbSelected :=cbResolution.Items.Count-1; end
+      else begin if (TwainCap.ResolutionArray[i] = AParams.Resolution) then cbSelected :=cbResolution.Items.Count-1; end;
     end;
     cbResolution.ItemIndex:=cbSelected;
 

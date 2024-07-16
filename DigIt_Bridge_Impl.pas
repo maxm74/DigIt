@@ -71,8 +71,6 @@ type
   protected
     rTakersList: array of TTakerInfo;
 
-    function Find(const aName: String): Integer; overload;
-    function Find(const aClass: IDigIt_Taker): Integer; overload;
 
     function GetTaker(const aName: String) : PTakerInfo; overload;
     function GetTaker(Index: Integer) : PTakerInfo; overload;
@@ -88,6 +86,9 @@ type
     function Register(const aName: PChar; const aClass: IDigIt_Taker): Boolean; stdcall;
     function UnRegister(const aName: String): Boolean; overload;
     function UnRegister(const aClass: IDigIt_Taker): Boolean; overload;
+
+    function Find(const aName: String): Integer; overload;
+    function Find(const aClass: IDigIt_Taker): Integer; overload;
 
     property Count: Integer read GetCount;
 

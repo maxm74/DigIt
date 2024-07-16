@@ -18,7 +18,7 @@ uses
   ActnList, Spin, ShellCtrls, EditBtn,
   Digit_Bridge_Intf, Digit_Bridge_Impl, //Digit_Taker_Folder,
   FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
-  BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters;
+  BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters, LCLType;
 
 type
 
@@ -261,6 +261,7 @@ type
     procedure UI_FillPageSizes;
     procedure UI_FillTaker;
     procedure UI_Load;
+    procedure UI_MenuItemsChecks(newTakerI, newDestinationI: Integer);
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
@@ -996,8 +997,8 @@ begin
   begin
     newTaker:= theBridge.TakersImpl.Taker[TMenuItem(Sender).Tag];
     Taker_SelectUserParams(newTaker);
-    UI_FillTaker;
     TMenuItem(Sender).Checked:= True;
+    UI_FillTaker;
   end;
 end;
 
@@ -1203,18 +1204,23 @@ procedure TDigIt_Main.XML_LoadWork;
 var
    newTakerName,
    newDestinationName: String;
+   newTakerI,
+   newDestinationI: Integer;
    newTaker: PTakerInfo;
    newParams: IDigIt_Params;
 
 begin
   try
+    newTakerI:= -1;
+    newDestinationI:= -1;
     XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
     //Load Taker and its Params
     newTakerName:= XMLWork.GetValue('Taker/Name', '');
     if (newTakerName<>'') then
     begin
-      newTaker:= theBridge.TakersImpl.TakerByName[newTakerName];
+      newTakerI:= theBridge.TakersImpl.Find(newTakerName);
+      newTaker:= theBridge.TakersImpl.Taker[newTakerI];
       if (newTaker <> nil) then
       begin
         //Read Params
@@ -1232,10 +1238,14 @@ begin
     SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
     SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
 
+    newDestinationI:= 0; //Remove when Get From A List of Destination Interfaces
+
     XML_LoadPageSettings;
     Counters.Load(XMLWork, True);
     imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
     XML_LoadCapturedFiles;
+
+    UI_MenuItemsChecks(newTakerI, newDestinationI);
     UI_Load;
     cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
@@ -1761,6 +1771,18 @@ begin
   if (curCropArea=nil)
   then cbCropCounterList.ItemIndex:=-1
   else cbCropCounterList.ItemIndex:=curCropArea.UserData;
+end;
+
+procedure TDigIt_Main.UI_MenuItemsChecks(newTakerI, newDestinationI: Integer);
+var
+   curItem: TMenuItem;
+
+begin
+  curItem:= FindMenuItemByTag(menuTakers, newTakerI);
+  if (curItem <> Nil) then curItem.Checked:= True;
+
+  curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
+  if (curItem <> Nil) then curItem.Checked:= True;
 end;
 
 procedure TDigIt_Main.UI_FillBox(ABox: TCropArea);

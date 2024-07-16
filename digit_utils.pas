@@ -32,6 +32,7 @@ procedure PaperSizesMenuTag_decode(ATag:Integer; var ResUnit: TResolutionUnit; v
 function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 
 procedure BuildTakersMenu(AOwner: TComponent; menuTakers: TMenu; menuOnClick: TNotifyEvent);
+function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
 procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
                           var newWidth, newHeight:Integer);
@@ -283,6 +284,9 @@ begin
       then newItem.Caption:= curTitle
       else newItem.Caption:= curTaker^.Name;
 
+      newItem.Checked:= False;
+      newItem.GroupIndex:= 1;
+      newItem.RadioItem:= True;
       newItem.ImageIndex:=curTaker^.Inst.UI_ImageIndex;
       newItem.Tag:=i;
       newItem.OnClick:=menuOnClick;
@@ -291,6 +295,22 @@ begin
   end;
 
   StrDispose(curTitle);
+end;
+
+function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
+var
+   i: Integer;
+
+begin
+  Result:= Nil;
+
+  //No Need to recurvilly find in subitems
+  for i:=0 to AMenu.Items.Count-1 do
+    if (AMenu.Items[i].Tag = ATag)
+    then begin
+           Result:= AMenu.Items[i];
+           break;
+         end;
 end;
 
 procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;

@@ -65,7 +65,7 @@ object DigIt_Main: TDigIt_Main
       Left = 69
       Top = 2
       Caption = 'Source...'
-      DropdownMenu = menuTakers
+      DropdownMenu = menuSources
       ImageIndex = 9
       Style = tbsDropDown
       OnClick = tbSourceClick
@@ -2381,7 +2381,7 @@ object DigIt_Main: TDigIt_Main
     Left = 424
     Top = 256
   end
-  object menuTakers: TPopupMenu
+  object menuSources: TPopupMenu
     Images = imgListMenu
     Left = 424
     Top = 392
@@ -3371,12 +3371,12 @@ object DigIt_Main: TDigIt_Main
     Images = imgListMenu
     Left = 424
     Top = 456
-    object MenuItem1: TMenuItem
+    object SaveAsFilesItem: TMenuItem
       Caption = 'Save as Files'
       GroupIndex = 2
       ImageIndex = 3
       RadioItem = True
-      OnClick = MenuItem1Click
+      OnClick = DestinationMenuClick
     end
     object MenuItem2: TMenuItem
       Caption = '   Test more'

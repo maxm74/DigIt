@@ -1,4 +1,4 @@
-unit Digit_Taker_Twain_SelectForm;
+unit Digit_Source_Twain_SelectForm;
 
 {$mode ObjFPC}{$H+}
 
@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Grids, ExtCtrls, Buttons,
-  ComCtrls, Twain, DelphiTwain, Digit_Taker_Twain_Types;
+  ComCtrls, Twain, DelphiTwain, Digit_Source_Twain_Types;
 
 type
 

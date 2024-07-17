@@ -4,9 +4,9 @@
 **          (s) 2023 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Twain Taker Data Types and Inter Process Comunication                    **
+**   Twain Source Data Types and Inter Process Comunication                    **
 *******************************************************************************)
-unit Digit_Taker_Twain_Types;
+unit Digit_Source_Twain_Types;
 
 {$mode ObjFPC}{$H+}
 

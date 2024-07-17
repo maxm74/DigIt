@@ -4,10 +4,10 @@
 **          (s) 2023 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Twain Taker                                                             **
+**   Twain Source                                                             **
 *******************************************************************************)
 
-unit Digit_Taker_Twain;
+unit Digit_Source_Twain;
 
 {$mode ObjFPC}{$H+}
 
@@ -15,14 +15,14 @@ interface
 
 uses
   simpleipc, MM_SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
-  Digit_Bridge_Intf, Digit_Taker_Twain_Types, Digit_Taker_Twain_SelectForm, Digit_Taker_Twain_SettingsForm;
+  Digit_Bridge_Intf, Digit_Source_Twain_Types, Digit_Source_Twain_SelectForm, Digit_Source_Twain_SettingsForm;
 
 const
   Twain_TakeFileName = 'twain_take.bmp';
 
 type
-  { TDigIt_Taker_Twain }
-  TDigIt_Taker_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Taker)
+  { TDigIt_Source_Twain }
+  TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source)
   private
     rScannerInfo: TTwainScannerInfo;
     rParams: TTwainParams;
@@ -71,7 +71,7 @@ type
 
     function OnSet: Boolean; stdcall;
 
-    //IDigIt_Taker Implementation
+    //IDigIt_Source Implementation
     function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
     function Enabled(AEnabled: Boolean): Boolean; stdcall;
@@ -82,7 +82,7 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileName
-    function Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -95,15 +95,15 @@ uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes, Laz2_XMLCfg, Digit_
   ;
 
 const
-  DigIt_Taker_Twain_Name = 'Twain Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
+  DigIt_Source_Twain_Name = 'Twain Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
 
 var
-   Taker_Twain : TDigIt_Taker_Twain = nil;
+   Source_Twain : TDigIt_Source_Twain = nil;
 
 
-{ TDigIt_Taker_Twain }
+{ TDigIt_Source_Twain }
 
-function TDigIt_Taker_Twain.getCommsClient: TSyncIPCClient;
+function TDigIt_Source_Twain.getCommsClient: TSyncIPCClient;
 var
    i:Integer;
 
@@ -174,7 +174,7 @@ begin
   Result :=rCommsClient;
 end;
 
-function TDigIt_Taker_Twain.getTwain: TCustomDelphiTwain;
+function TDigIt_Source_Twain.getTwain: TCustomDelphiTwain;
 begin
   //Create Twain
   if (rTwain = nil) then
@@ -188,7 +188,7 @@ begin
   Result :=rTwain;
 end;
 
-function TDigIt_Taker_Twain.IPC_GetDevicesList: Integer;
+function TDigIt_Source_Twain.IPC_GetDevicesList: Integer;
 var
    recBuf:pTW_IDENTITY=nil;
    curBuf:pTW_IDENTITY;
@@ -219,7 +219,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.IPC_FindSource(AManufacturer, AProductFamily, AProductName: String): Integer;
+function TDigIt_Source_Twain.IPC_FindSource(AManufacturer, AProductFamily, AProductName: String): Integer;
 var
    recSize, recBuf:Longint;
    AIdentity:TW_IDENTITY;
@@ -239,7 +239,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.IPC_OpenDevice(AIndex: Integer): Boolean;
+function TDigIt_Source_Twain.IPC_OpenDevice(AIndex: Integer): Boolean;
 var
    recSize:Longint;
    recBuf:Boolean;
@@ -266,7 +266,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.IPC_ParamsSet: Boolean;
+function TDigIt_Source_Twain.IPC_ParamsSet: Boolean;
 var
    recSize:Integer;
    resType:TMessageType;
@@ -280,7 +280,7 @@ begin
   Result := (resType = mtSync_Integer) and (res = True);
 end;
 
-function TDigIt_Taker_Twain.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
+function TDigIt_Source_Twain.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
 var
    recStream:TMemoryStream=nil;
    recSize, i:Integer;
@@ -336,7 +336,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.IPC_Preview(AFileName: String): Boolean;
+function TDigIt_Source_Twain.IPC_Preview(AFileName: String): Boolean;
 var
    recSize:Longint;
    recBuf:Boolean;
@@ -353,7 +353,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.IPC_Take(AFileName: String): Boolean;
+function TDigIt_Source_Twain.IPC_Take(AFileName: String): Boolean;
 var
    recSize:Longint;
    recBuf:Boolean;
@@ -370,7 +370,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
+function TDigIt_Source_Twain.ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
 var
    capRet:TCapabilityRet;
    TwainSource:TTwainSource;
@@ -390,13 +390,13 @@ begin
   TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
 end;
 
-procedure TDigIt_Taker_Twain.TwainAcquireNative(Sender: TObject; const Index: Integer;
+procedure TDigIt_Source_Twain.TwainAcquireNative(Sender: TObject; const Index: Integer;
                                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
 begin
   WriteBitmapToFile(AcquireFileName, nativeHandle);
 end;
 
-function TDigIt_Taker_Twain.internalTake(isPreview: Boolean; var AFileName: String): DWord;
+function TDigIt_Source_Twain.internalTake(isPreview: Boolean; var AFileName: String): DWord;
 var
    capRet:TCapabilityRet;
    TwainSource:TTwainSource;
@@ -409,8 +409,8 @@ begin
 
      try
         //Delete previous scanned file
-        if FileExists(Path_Temp+Twain_TakeFileName)
-        then DeleteFile(Path_Temp+Twain_TakeFileName);
+        (*if FileExists(Path_Temp+Twain_TakeFileName)
+        then*) DeleteFile(Path_Temp+Twain_TakeFileName);
      except
         //Sometimes FileExists will raise and Exception (?)
      end;
@@ -477,7 +477,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Taker_Twain.FreeCommsClient;
+procedure TDigIt_Source_Twain.FreeCommsClient;
 var
    recSize, recBuf:Longint;
    resType:TMessageType;
@@ -496,7 +496,7 @@ begin
   ipcProcess.Free; ipcProcess:= Nil;
 end;
 
-constructor TDigIt_Taker_Twain.Create;
+constructor TDigIt_Source_Twain.Create;
 begin
   inherited Create;
 
@@ -507,15 +507,15 @@ begin
   SelectedSourceIndex:=-1;
 end;
 
-destructor TDigIt_Taker_Twain.Destroy;
+destructor TDigIt_Source_Twain.Destroy;
 begin
   if (rTwain<>nil) then rTwain.Free;
   FreeCommsClient;
 
   try
      //Delete previous scanned file
-     if FileExists(Path_Temp+Twain_TakeFileName)
-     then DeleteFile(Path_Temp+Twain_TakeFileName);
+     (*if FileExists(Path_Temp+Twain_TakeFileName)
+     then*) DeleteFile(Path_Temp+Twain_TakeFileName);
   except
     //Strange Windows Error when closing the Application and deleting files
   end;
@@ -523,7 +523,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TDigIt_Taker_Twain.RefreshList(ASender:TTwainSelectSource);
+procedure TDigIt_Source_Twain.RefreshList(ASender:TTwainSelectSource);
 begin
   //Load source manager and Enumerate Internal Devices
   Twain.SourceManagerLoaded :=False;
@@ -534,7 +534,7 @@ begin
   ASender.FillList(ipcSourceList);
 end;
 
-function TDigIt_Taker_Twain.GetFromUser: Boolean; stdcall;
+function TDigIt_Source_Twain.GetFromUser: Boolean; stdcall;
 var
   newSelectedIndex: Integer;
   newSelectedSourceIPC: Boolean;
@@ -611,12 +611,12 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.Duplicate: IDigIt_Params; stdcall;
+function TDigIt_Source_Twain.Duplicate: IDigIt_Params; stdcall;
 begin
   Result:= nil;
 end;
 
-function TDigIt_Taker_Twain.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+function TDigIt_Source_Twain.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
 
@@ -648,7 +648,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+function TDigIt_Source_Twain.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
 
@@ -679,12 +679,12 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.Summary(const ASummary: PChar): Integer; stdcall;
+function TDigIt_Source_Twain.Summary(const ASummary: PChar): Integer; stdcall;
 begin
   Result:= 0;
 end;
 
-function TDigIt_Taker_Twain.OnSet: Boolean; stdcall;
+function TDigIt_Source_Twain.OnSet: Boolean; stdcall;
 var
    dlgRes:TModalResult;
 
@@ -737,44 +737,44 @@ begin
   end;
 end;
 
-function TDigIt_Taker_Twain.Flags: DWord; stdcall;
+function TDigIt_Source_Twain.Flags: DWord; stdcall;
 begin
-  Result:= DigIt_Taker_TakeData_PICTUREFILE;
+  Result:= DigIt_Source_TakeData_PICTUREFILE;
 end;
 
-function TDigIt_Taker_Twain.Init: Boolean; stdcall;
-begin
-  Result:= True;
-end;
-
-function TDigIt_Taker_Twain.Enabled(AEnabled: Boolean): Boolean; stdcall;
+function TDigIt_Source_Twain.Init: Boolean; stdcall;
 begin
   Result:= True;
 end;
 
-function TDigIt_Taker_Twain.Release: Boolean; stdcall;
+function TDigIt_Source_Twain.Enabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+  Result:= True;
+end;
+
+function TDigIt_Source_Twain.Release: Boolean; stdcall;
 begin
   Free;
   Result:= True;
 end;
 
-function TDigIt_Taker_Twain.Params: IDigIt_Params; stdcall;
+function TDigIt_Source_Twain.Params: IDigIt_Params; stdcall;
 begin
   Result:= Self;
 end;
 
-function TDigIt_Taker_Twain.UI_Title(const AUI_Title: PChar): Integer; stdcall;
+function TDigIt_Source_Twain.UI_Title(const AUI_Title: PChar): Integer; stdcall;
 begin
-  StrPCopy(AUI_Title, DigIt_Taker_Twain_Name);
+  StrPCopy(AUI_Title, DigIt_Source_Twain_Name);
   Result:= Length(AUI_Title);
 end;
 
-function TDigIt_Taker_Twain.UI_ImageIndex: Integer; stdcall;
+function TDigIt_Source_Twain.UI_ImageIndex: Integer; stdcall;
 begin
   Result:= 2;
 end;
 
-function TDigIt_Taker_Twain.Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+function TDigIt_Source_Twain.Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 var
    AFileName: String;
 
@@ -787,8 +787,8 @@ end;
 
 initialization
   try
-     Taker_Twain:= TDigIt_Taker_Twain.Create;
-     theBridge.Takers.Register(DigIt_Taker_Twain_Name, Taker_Twain);
+     Source_Twain:= TDigIt_Source_Twain.Create;
+     theBridge.Sources.Register(DigIt_Source_Twain_Name, Source_Twain);
   except
   end;
 

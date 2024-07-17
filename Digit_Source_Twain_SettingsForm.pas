@@ -1,4 +1,4 @@
-unit Digit_Taker_Twain_SettingsForm;
+unit Digit_Source_Twain_SettingsForm;
 
 {$mode ObjFPC}{$H+}
 
@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Buttons,
-  ComCtrls, StdCtrls, Spin, Twain, DelphiTwain, Digit_Taker_Twain_Types;
+  ComCtrls, StdCtrls, Spin, Twain, DelphiTwain, Digit_Source_Twain_Types;
 
 type
   { TTwainSettingsSource }

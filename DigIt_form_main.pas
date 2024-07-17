@@ -16,7 +16,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs, ExtCtrls, Menus, ComCtrls,
   ActnList, Spin, ShellCtrls, EditBtn,
-  Digit_Bridge_Intf, Digit_Bridge_Impl, //Digit_Taker_Folder,
+  Digit_Bridge_Intf, Digit_Bridge_Impl,
   FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
   BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters, LCLType;
 
@@ -61,7 +61,7 @@ type
     Label10: TLabel;
     Label9: TLabel;
     menuDestinations: TPopupMenu;
-    MenuItem1: TMenuItem;
+    SaveAsFilesItem: TMenuItem;
     MenuItem2: TMenuItem;
     panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
@@ -125,7 +125,7 @@ type
     panelCounter: TBCPanel;
     panelCropArea: TBCPanel;
     menuPaperSizes: TPopupMenu;
-    menuTakers: TPopupMenu;
+    menuSources: TPopupMenu;
     panelPageSize: TBCPanel;
     menuTimerTake: TPopupMenu;
     rgCropAspect: TRadioGroup;
@@ -200,8 +200,8 @@ type
       var DefaultDraw: Boolean);
     procedure lvCapturedDblClick(Sender: TObject);
     procedure lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
-    procedure MenuItem1Click(Sender: TObject);
-    procedure TakerMenuClick(Sender: TObject);
+    procedure DestinationMenuClick(Sender: TObject);
+    procedure SourceMenuClick(Sender: TObject);
     procedure edCounterNameEditingDone(Sender: TObject);
     procedure edCounterValueChange(Sender: TObject);
     procedure edCounterValueStringDigitsChange(Sender: TObject);
@@ -246,8 +246,13 @@ type
     XMLWork,
     XMLProject: TXMLConfig;
 
-    taker: PTakerInfo;
-    takerParams: IDigIt_Params;
+    Source: PSourceInfo;
+    SourceName: String;
+    SourceParams: IDigIt_Params;
+
+    Destination: PDestinationInfo;
+    DestinationName: String;
+    DestinationParams: IDigIt_Params;
 
     SaveExt,
     SavePath,
@@ -259,9 +264,10 @@ type
     procedure UI_FillBox(ABox :TCropArea);
     procedure UI_FillCounter(ACounter :TDigIt_Counter);
     procedure UI_FillPageSizes;
-    procedure UI_FillTaker;
+    procedure UI_FillSource;
+    procedure UI_FillDestination;
     procedure UI_Load;
-    procedure UI_MenuItemsChecks(newTakerI, newDestinationI: Integer);
+    procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
@@ -276,8 +282,10 @@ type
     procedure XML_SaveProject(AFileName:String);
     procedure XML_LoadPageSettings;
     procedure XML_SavePageSettings;
-    procedure Taker_SelectUserParams(newTaker: PTakerInfo);
-    procedure Taker_SelectWithParams(newTaker: PTakerInfo; newParams:IDigIt_Params);
+    procedure Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
+    procedure Source_SelectWithParams(newSourceName: String; newSource: PSourceInfo; newParams:IDigIt_Params);
+    procedure Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
+    procedure Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo; newParams:IDigIt_Params);
     procedure setProject_File(AValue: String);
 
     procedure WaitForAFile(AFileName: String; ATimeOut: Integer);
@@ -414,9 +422,16 @@ begin
   TStringList(cbBoxList.Items).OwnsObjects:=False;
   TStringList(cbCounterList.Items).OwnsObjects:=False;
 
-  taker:= Nil;
-  takerParams:= Nil;
-  BuildTakersMenu(Self, menuTakers, @TakerMenuClick);
+  Source:= Nil;
+  SourceName:= '';;
+  SourceParams:= Nil;
+  BuildSourcesMenu(Self, menuSources, @SourceMenuClick);
+
+  Destination:= Nil;
+  DestinationName:= '';
+  DestinationParams:= Nil;
+  BuildDestinationsMenu(Self, menuDestinations, @DestinationMenuClick);
+
   {$ifopt D+}
   tbTest1.Visible:= True;
   tbWorkSave.Visible:= True;
@@ -428,7 +443,7 @@ procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
   Counters.Free;
 
-//  if (takerInst<>nil) then takerInst.Free;
+//  if (SourceInst<>nil) then SourceInst.Free;
   if (XMLWork<>nil) then XMLWork.Free;
   if (XMLProject<>nil) then XMLProject.Free;
 end;
@@ -463,11 +478,11 @@ var
 
 begin
   try
-    if (taker <> Nil) and (taker^.Inst <> Nil) then
+    if (Source <> Nil) and (Source^.Inst <> Nil) then
     begin
       curImageFile:= AllocPChar;
 
-      res:= taker^.Inst.Take(takeActPreview, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= Source^.Inst.Take(takeActPreview, theBridge.Settings.GetMaxPCharSize, curImageFile);
       if (res>0) and (curImageFile<>'') then
       begin
            WaitForAFile(curImageFile, 30000);
@@ -477,7 +492,7 @@ begin
 
       StrDispose(curImageFile);
 
-      UI_FillTaker;
+      UI_FillSource;
     end;
   finally
   end;
@@ -486,9 +501,9 @@ end;
 procedure TDigIt_Main.actSourceOptExecute(Sender: TObject);
 begin
   try
-    if (taker <> Nil) and (taker^.Inst <> Nil) then
+    if (Source <> Nil) and (Source^.Inst <> Nil) then
     begin
-      if taker^.Inst.Params.GetFromUser
+      if Source^.Inst.Params.GetFromUser
       then XML_SaveWork;
     end;
   finally
@@ -502,11 +517,11 @@ var
 
 begin
   try
-    if (taker <> Nil) and (taker^.Inst <> Nil) and not(imgManipulation.Empty) then
+    if (Source <> Nil) and (Source^.Inst <> Nil) and not(imgManipulation.Empty) then
     begin
       curImageFile:= AllocPChar;
 
-      res:= taker^.Inst.Take(takeActTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= Source^.Inst.Take(takeActTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
       if (res>0) and (curImageFile<>'') then
       begin
            WaitForAFile(curImageFile, 30000);
@@ -518,7 +533,7 @@ begin
 
       StrDispose(curImageFile);
 
-      UI_FillTaker;
+      UI_FillSource;
     end;
   finally
   end;
@@ -531,11 +546,11 @@ var
 
 begin
   try
-    if (taker <> Nil) and (taker^.Inst <> Nil) and not(imgManipulation.Empty) then
+    if (Source <> Nil) and (Source^.Inst <> Nil) and not(imgManipulation.Empty) then
     begin
       curImageFile:= AllocPChar;
 
-      res:= taker^.Inst.Take(takeActReTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= Source^.Inst.Take(takeActReTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
 
       if (res>0) and (curImageFile<>'') then
       begin
@@ -551,7 +566,7 @@ begin
 
       StrDispose(curImageFile);
 
-      UI_FillTaker;
+      UI_FillSource;
     end;
   finally
   end;
@@ -980,25 +995,48 @@ begin
   then HintInfo^.HintStr:=tt.FileName;
 end;
 
-procedure TDigIt_Main.MenuItem1Click(Sender: TObject);
-begin
-  if TDest_SaveFiles_Settings.Execute(SaveExt, SavePath) then
-  begin
-  end;
-  UI_FillTaker;
-end;
-
-procedure TDigIt_Main.TakerMenuClick(Sender: TObject);
+procedure TDigIt_Main.DestinationMenuClick(Sender: TObject);
 var
-   newTaker: PTakerInfo;
+   newDestination: PDestinationInfo;
+   newDestinationName: String;
 
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
-    newTaker:= theBridge.TakersImpl.Taker[TMenuItem(Sender).Tag];
-    Taker_SelectUserParams(newTaker);
+    if (Sender = SaveAsFilesItem)
+    then begin
+           newDestination:= nil;
+           newDestinationName:= '';
+         end
+    else begin
+           newDestination:= theBridge.DestinationsImpl.Data[TMenuItem(Sender).Tag];
+           newDestinationName:= theBridge.DestinationsImpl.Name[TMenuItem(Sender).Tag];
+         end;
+    Destination_SelectUserParams(newDestinationName, newDestination);
     TMenuItem(Sender).Checked:= True;
-    UI_FillTaker;
+    UI_FillDestination;
+  end;
+  (*
+  if TDest_SaveFiles_Settings.Execute(SaveExt, SavePath) then
+  begin
+  end;
+  UI_FillSource;
+  *)
+end;
+
+procedure TDigIt_Main.SourceMenuClick(Sender: TObject);
+var
+   newSource: PSourceInfo;
+   newSourceName: String;
+
+begin
+  if (Sender<>nil) and (Sender is TMenuItem) then
+  begin
+    newSource:= theBridge.SourcesImpl.Data[TMenuItem(Sender).Tag];
+    newSourceName:= theBridge.DestinationsImpl.Name[TMenuItem(Sender).Tag];
+    Source_SelectUserParams(newSourceName, newSource);
+    TMenuItem(Sender).Checked:= True;
+    UI_FillSource;
   end;
 end;
 
@@ -1202,33 +1240,33 @@ end;
 
 procedure TDigIt_Main.XML_LoadWork;
 var
-   newTakerName,
+   newSourceName,
    newDestinationName: String;
-   newTakerI,
+   newSourceI,
    newDestinationI: Integer;
-   newTaker: PTakerInfo;
+   newSource: PSourceInfo;
    newParams: IDigIt_Params;
 
 begin
   try
-    newTakerI:= -1;
+    newSourceI:= -1;
     newDestinationI:= -1;
     XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-    //Load Taker and its Params
-    newTakerName:= XMLWork.GetValue('Taker/Name', '');
-    if (newTakerName<>'') then
+    //Load Source and its Params
+    newSourceName:= XMLWork.GetValue('Source/Name', '');
+    if (newSourceName<>'') then
     begin
-      newTakerI:= theBridge.TakersImpl.Find(newTakerName);
-      newTaker:= theBridge.TakersImpl.Taker[newTakerI];
-      if (newTaker <> nil) then
+      newSourceI:= theBridge.SourcesImpl.FindByName(newSourceName);
+      newSource:= theBridge.SourcesImpl.Data[newSourceI];
+      if (newSource <> nil) then
       begin
         //Read Params
-        newParams :=newTaker^.Inst.Params;
+        newParams :=newSource^.Inst.Params;
         if (newParams <> nil)
-        then if newParams.Load(PChar(Path_Config+Config_XMLWork), 'Taker/Params')
-             then Taker_SelectWithParams(newTaker, newParams);
-             { #todo 3 -oMaxM : else ? Error }
+        then newParams.Load(PChar(Path_Config+Config_XMLWork), 'Source/Params');
+
+        Source_SelectWithParams(newSourceName, newSource, newParams);
       end;
     end;
 
@@ -1245,7 +1283,7 @@ begin
     imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
     XML_LoadCapturedFiles;
 
-    UI_MenuItemsChecks(newTakerI, newDestinationI);
+    UI_MenuItemsChecks(newSourceI, newDestinationI);
     UI_Load;
     cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
@@ -1262,7 +1300,7 @@ end;
 
 procedure TDigIt_Main.XML_SaveWork;
 begin
-  if (taker <> Nil) and (taker^.Inst <> Nil) then
+  if (Source <> Nil) and (Source^.Inst <> Nil) then
   try
      if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
@@ -1276,9 +1314,9 @@ begin
      XMLWork.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
      XMLWork.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
 
-     //Save Taker and its Params
-     XMLWork.SetValue('Taker/Name', taker^.Name);
-     XMLWork.DeletePath('Taker/Params/');
+     //Save Source and its Params
+     XMLWork.SetValue('Source/Name', SourceName);
+     XMLWork.DeletePath('Source/Params/');
 
      //Save Destination and its Params
      XMLWork.SetValue('Destination/Name', 'SaveAsFiles');
@@ -1289,9 +1327,9 @@ begin
      XMLWork.Free; XMLWork:= Nil;
 
      //FPC Bug?
-     //If a key like "Taker/Params" is written to the same open file, even after a flush, it is ignored.
+     //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
      //So we do it after destroying XMLWork.
-     taker^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Taker/Params');
+     Source^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
      { #todo -oMaxM : Save Destination Params as Interfaces (at this time only SaveAsFiles written above}
 
   finally
@@ -1430,35 +1468,72 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.Taker_SelectUserParams(newTaker: PTakerInfo);
+procedure TDigIt_Main.Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
 begin
-  if (newTaker <> Nil) then
+  if (newSource <> Nil) then
   begin
-    if (newTaker <> taker) then
+    if (newSource <> Source) then
     begin
-         { #note -oMaxM : Taker Switched...Do something? }
+         { #note -oMaxM : Source Switched...Do something? }
     end;
 
-    taker:= newTaker;
-    takerParams:= taker^.Inst.Params;
-    if (takerParams <> Nil)
-    then takerParams.GetFromUser; { #todo 2 -oMaxM : if False? }
+    Source:= newSource;
+    SourceName:= newSourceName;
+    SourceParams:= Source^.Inst.Params;
+    if (SourceParams <> Nil)
+    then SourceParams.GetFromUser; { #todo 2 -oMaxM : if False? }
   end;
 end;
 
-procedure TDigIt_Main.Taker_SelectWithParams(newTaker: PTakerInfo; newParams: IDigIt_Params);
+procedure TDigIt_Main.Source_SelectWithParams(newSourceName: String; newSource: PSourceInfo; newParams: IDigIt_Params);
 begin
-  if (newTaker <> nil) then
+  if (newSource <> nil) then
   begin
-    if (newTaker <> taker) then
+    if (newSource <> Source) then
     begin
-         { #note -oMaxM : Taker Switched...Do something? }
+         { #note -oMaxM : Source Switched...Do something? }
     end;
 
-    taker:= newTaker;
-    takerParams:= newParams;
-    if (takerParams <> Nil)
-    then takerParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
+    Source:= newSource;
+    SourceName:= newSourceName;
+    SourceParams:= newParams;
+    if (SourceParams <> Nil)
+    then SourceParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
+  end;
+end;
+
+procedure TDigIt_Main.Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
+begin
+  if (newDestination <> Nil) then
+  begin
+    if (newDestination <> Destination) then
+    begin
+         { #note -oMaxM : Destination Switched...Do something? }
+    end;
+
+    Destination:= newDestination;
+    DestinationName:= newDestinationName;
+    DestinationParams:= Destination^.Inst.Params;
+    if (DestinationParams <> Nil)
+    then DestinationParams.GetFromUser; { #todo 2 -oMaxM : if False? }
+  end;
+end;
+
+procedure TDigIt_Main.Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo;
+  newParams: IDigIt_Params);
+begin
+  if (newDestination <> nil) then
+  begin
+    if (newDestination <> Destination) then
+    begin
+         { #note -oMaxM : Destination Switched...Do something? }
+    end;
+
+    Destination:= newDestination;
+    DestinationName:= newDestinationName;
+    DestinationParams:= newParams;
+    if (DestinationParams <> Nil)
+    then DestinationParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
   end;
 end;
 
@@ -1735,16 +1810,21 @@ begin
   else Result :=TDigIt_Counter(cbCounterList.Items.Objects[cbCounterList.ItemIndex]);
 end;
 
-procedure TDigIt_Main.UI_FillTaker;
+procedure TDigIt_Main.UI_FillSource;
 begin
-  actPreview.Enabled:=(taker<>nil);
-  actTake.Enabled:=(taker<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
+  actPreview.Enabled:=(Source<>nil);
+  actTake.Enabled:=(Source<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
   actReTake.Enabled:=actTake.Enabled;
   actTimerTake.Enabled:=actTake.Enabled;
-  actSourceOpt.Enabled:=(taker<>nil);
-(*  if (taker<>nil)
-  then lbTakerSummary.Caption:=taker^.Inst.UI_Title+':'+#13#10+taker^.Inst.UI_Params_Summary
-  else lbTakerSummary.Caption:='';  *)
+  actSourceOpt.Enabled:=(Source<>nil);
+(*  if (Source<>nil)
+  then lbSourceSummary.Caption:=Source^.Inst.UI_Title+':'+#13#10+Source^.Inst.UI_Params_Summary
+  else lbSourceSummary.Caption:='';  *)
+end;
+
+procedure TDigIt_Main.UI_FillDestination;
+begin
+  //
 end;
 
 procedure TDigIt_Main.UI_Load;
@@ -1754,7 +1834,7 @@ var
    curCropArea:TCropArea;
 
 begin
-  UI_FillTaker;
+  UI_FillSource;
 
   //UI for Crop Areas is filled in Events
 
@@ -1773,12 +1853,12 @@ begin
   else cbCropCounterList.ItemIndex:=curCropArea.UserData;
 end;
 
-procedure TDigIt_Main.UI_MenuItemsChecks(newTakerI, newDestinationI: Integer);
+procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
 var
    curItem: TMenuItem;
 
 begin
-  curItem:= FindMenuItemByTag(menuTakers, newTakerI);
+  curItem:= FindMenuItemByTag(menuSources, newSourceI);
   if (curItem <> Nil) then curItem.Checked:= True;
 
   curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);

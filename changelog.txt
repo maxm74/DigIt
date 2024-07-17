@@ -1,58 +1,65 @@
-10/10/2023 First Test Twain source load/save; some UI adjust
-11/10/2023 First write of Twain Taker; use WaitForAFile in main Window
-16/10/2023 TDigIt_Taker.Create always call Params_Set; Twain params store only Scanner name
-17/10/2023 First Implementation of Sync IPC
-18/10/2023 Complete rewrite of IPC with formal Parameters
-20/10/2023 moved SyncIPC to syncipc.pp file (maybe tomorrow in fcl-process)
-25/10/2023 First Twain32 Communication Server App; Twain32Comm first Message (Stop); Folder reorganization
-27/10/2023 Twain32 bit Communication Server and Test Client
-30/10/2023 corrected Taker Params Load; First write of Twain Select Form with IPC List
-31/10/2023 first write of IPC_OPEN and IPC_TAKE in Client and Server
-06/11/2023 MessageLoop in 32bitServer; MSG_TWAIN32_TIMEOUT;SelectForm show only ProductName/Manufacturer
-07/11/2023 TWAIN32_FIND implementation in 32bitServer; IPC_FindSource in Twain Taker
-08/11/2023 Captured Images Icon of Image not Found; First Release Full Test
-10/11/2023 Retry for Scanner not Found; Refresh in TwainSelectSource
-15/11/2023 MSG_TWAIN32_USERINTERFACE in 32bit Server; Animation in Acquire; Test cleaned and renamed
-29/11/2023 Twain First Tests with PaperSizes and Resolution
-01/12/2023 Settings on Twain (PaperFeed,Size,Resolution); TWAIN32_OPEN Select the Source
-06/12/2023 Twain Params use of TTwainParams record; TTwainParamsCapabilities record;
-11/12/2023 TwainSetting PixelType, use of TTwainParamsCapabilities record;
-           First write of TWAIN32_PARAMS_SET/GET TWAIN32_PREVIEW
-12/12/2023 Twain SettingForm use only TTwainParamsCapabilities; 32bit server set Capabilities,TWAIN32_PARAMS_GET;
-           TwainTaker use IPC_ParamsSet/Get,IPC_Preview
+
+2024/07/17 Changed identifiers and units names from "Taker" to "Source";
+           Avoid OpenArray runerror(204) on destroy using FillChar(0) in FreeElement
+           First write of Destinations interfaces
+           Moved interfaces common code to a new ancestor interface IDigIt_Interface
+           IDigIt_Source/Destination derived from IDigIt_Interface
+           Bridge implemetations of List use the new generic TOpenArrayList in MaxM_Commons package
+
+16/07/2024 Takers List implementation moved Find method as public;
+           Taker/Destination MenuItems Checkbox
+15/07/2024 Twain use Scanner Default Values when is a new Selection
+11/07/2024 Only one method Take in IDigIt_Taker with DigIt_Taker_TakeAction param;
+           Changed some constant name; More comments
+10/07/2024 Destination as ToolButton with a Settings Form;
+	   Changed XML Structure;
+           Twain Taker use twain_take.bmp as temp file, if start with null Product call GetFromUser;
+	   Cleanup of old commented code
+09/07/2024 Rotate/Flip Preprocessing filters;
+	   Load/SavePageSettings (Rotate and Flip);
+	   Twain 32bit Comm executable debug name -dbg
+08/07/2024 Main Form Buttons use ImageList and some adjustments
+05/07/2024 In Interfaces Added Kind of Taker, Changed Preview/Take Params;
+	   Updated Takers;
+	   Bridge Implementation GetTaker return PTakerInfo;
+	   Updated MainForm according to this changes;
+03/07/2024 Porting of Twain Taker Completed; Taker_SelectWithParams calls IDigitParams.OnSet;
+02/07/2024 Switched Taker Twain to interfaces; Added OnSet to IDigIt_Params interface
+27/06/2024 Changed IDigIt_Params.Summary params list; Added Flags in Plugin/Taker; Added function AllocPChar
+26/06/2024 Switch to Interface use in Bridge, Taker, etc;
+           Temporarily removed Taker Twain until it is converted to interfaces;
+           First test of Load Plugins from Library;
+12/06/2024 First Tests to Switch Bridge to Interfaces
+07/06/2024 Added Button TimerTake to MainForm
+06/06/2024 Added Use of MaxM_Commons Package and MM_SyncIPC in it;
+           Changed Use of Package ExpandPanels with BCExpandPanelses
+20/12/2023 Twain switched to ttmNative; TDigIt_Taker use Variant+TDigIt_TakerResultType;
+           32bit Server use new TwainAcquireNative;
+19/12/2023 32bit Server switched to ttmNative TransferMode; Test added TwainAcquireNative or Acquire with TBitmap
 14/12/2023 SelectForm Select current Scanner;
            Changed Extended to Single (for platform compatibility and for my actual state);
            32bit Server Result for internalTake;
            Test use ttmNative mode (MUST be used in Main app)
-19/12/2023 32bit Server switched to ttmNative TransferMode; Test added TwainAcquireNative or Acquire with TBitmap
-20/12/2023 Twain switched to ttmNative; TDigIt_Taker use Variant+TDigIt_TakerResultType;
-           32bit Server use new TwainAcquireNative;
+12/12/2023 Twain SettingForm use only TTwainParamsCapabilities; 32bit server set Capabilities,TWAIN32_PARAMS_GET;
+           TwainTaker use IPC_ParamsSet/Get,IPC_Preview
+11/12/2023 TwainSetting PixelType, use of TTwainParamsCapabilities record;
+           First write of TWAIN32_PARAMS_SET/GET TWAIN32_PREVIEW
+06/12/2023 Twain Params use of TTwainParams record; TTwainParamsCapabilities record;
+01/12/2023 Settings on Twain (PaperFeed,Size,Resolution); TWAIN32_OPEN Select the Source
+29/11/2023 Twain First Tests with PaperSizes and Resolution
+15/11/2023 MSG_TWAIN32_USERINTERFACE in 32bit Server; Animation in Acquire; Test cleaned and renamed
+10/11/2023 Retry for Scanner not Found; Refresh in TwainSelectSource
+08/11/2023 Captured Images Icon of Image not Found; First Release Full Test
+07/11/2023 TWAIN32_FIND implementation in 32bitServer; IPC_FindSource in Twain Taker
+06/11/2023 MessageLoop in 32bitServer; MSG_TWAIN32_TIMEOUT;SelectForm show only ProductName/Manufacturer
+31/10/2023 first write of IPC_OPEN and IPC_TAKE in Client and Server
+30/10/2023 corrected Taker Params Load; First write of Twain Select Form with IPC List
+27/10/2023 Twain32 bit Communication Server and Test Client
+25/10/2023 First Twain32 Communication Server App; Twain32Comm first Message (Stop); Folder reorganization
+20/10/2023 moved SyncIPC to syncipc.pp file (maybe tomorrow in fcl-process)
+18/10/2023 Complete rewrite of IPC with formal Parameters
+17/10/2023 First Implementation of Sync IPC
+16/10/2023 TDigIt_Taker.Create always call Params_Set; Twain params store only Scanner name
+11/10/2023 First write of Twain Taker; use WaitForAFile in main Window
+10/10/2023 First Test Twain source load/save; some UI adjust
 
-06/06/2024 Added Use of MaxM_Commons Package and MM_SyncIPC in it; 
-           Changed Use of Package ExpandPanels with BCExpandPanelses
-07/06/2024 Added Button TimerTake to MainForm
-
-12/06/2024 First Tests to Switch Bridge to Interfaces
-26/06/2024 Switch to Interface use in Bridge, Taker, etc;
-           Temporarily removed Taker Twain until it is converted to interfaces;
-           First test of Load Plugins from Library;
-27/06/2024 Changed IDigIt_Params.Summary params list; Added Flags in Plugin/Taker; Added function AllocPChar
-02/07/2024 Switched Taker Twain to interfaces; Added OnSet to IDigIt_Params interface
-03/07/2024 Porting of Twain Taker Completed; Taker_SelectWithParams calls IDigitParams.OnSet;
-05/07/2024 In Interfaces Added Kind of Taker, Changed Preview/Take Params; 
-	   Updated Takers;
-	   Bridge Implementation GetTaker return PTakerInfo;
-	   Updated MainForm according to this changes;
-08/07/2024 Main Form Buttons use ImageList and some adjustments
-09/07/2024 Rotate/Flip Preprocessing filters;
-	   Load/SavePageSettings (Rotate and Flip); 
-	   Twain 32bit Comm executable debug name -dbg
-10/07/2024 Destination as ToolButton with a Settings Form; 
-	   Changed XML Structure; 
-           Twain Taker use twain_take.bmp as temp file, if start with null Product call GetFromUser;
-	   Cleanup of old commented code
-11/07/2024 Only one method Take in IDigIt_Taker with DigIt_Taker_TakeAction param; 
-           Changed some constant name; More comments
-15/07/2024 Twain use Scanner Default Values when is a new Selection
-16/07/2024 Takers List implementation moved Find method as public; 
-           Taker/Destination MenuItems Checkbox

@@ -31,7 +31,8 @@ procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit;
 procedure PaperSizesMenuTag_decode(ATag:Integer; var ResUnit: TResolutionUnit; var Paper: TPaperSize);
 function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 
-procedure BuildTakersMenu(AOwner: TComponent; menuTakers: TMenu; menuOnClick: TNotifyEvent);
+procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent);
+procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
 procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
@@ -262,35 +263,70 @@ begin
 end;
 
 
-procedure BuildTakersMenu(AOwner: TComponent; menuTakers: TMenu; menuOnClick: TNotifyEvent);
+procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent);
 var
    i, res  :Integer;
    newItem :TMenuItem;
-   curTaker:PTakerInfo;
+   curSource:PSourceInfo;
    curTitle:PChar;
 
 begin
   curTitle:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
 
-  for i:=0 to theBridge.TakersImpl.Count-1 do
+  for i:=0 to theBridge.SourcesImpl.Count-1 do
   begin
-    curTaker:= theBridge.TakersImpl.Taker[i];
-    if (curTaker<>nil) then
+    curSource:= theBridge.SourcesImpl.Data[i];
+    if (curSource<>nil) then
     begin
       newItem :=TMenuItem.Create(AOwner);
 
-      res :=curTaker^.Inst.UI_Title(curTitle);
+      res :=curSource^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
       then newItem.Caption:= curTitle
-      else newItem.Caption:= curTaker^.Name;
+      else newItem.Caption:= theBridge.SourcesImpl.Name[i];
 
       newItem.Checked:= False;
       newItem.GroupIndex:= 1;
       newItem.RadioItem:= True;
-      newItem.ImageIndex:=curTaker^.Inst.UI_ImageIndex;
+      newItem.ImageIndex:=curSource^.Inst.UI_ImageIndex;
       newItem.Tag:=i;
       newItem.OnClick:=menuOnClick;
-      menuTakers.Items.Add(newItem);
+      menuSources.Items.Add(newItem);
+    end;
+  end;
+
+  StrDispose(curTitle);
+end;
+
+procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
+var
+   i, res  :Integer;
+   newItem :TMenuItem;
+   curDestination:PDestinationInfo;
+   curTitle:PChar;
+
+begin
+  curTitle:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
+
+  for i:=0 to theBridge.DestinationsImpl.Count-1 do
+  begin
+    curDestination:= theBridge.DestinationsImpl.Data[i];
+    if (curDestination<>nil) then
+    begin
+      newItem :=TMenuItem.Create(AOwner);
+
+      res :=curDestination^.Inst.UI_Title(curTitle);
+      if (res >0 ) and (curTitle <> '')
+      then newItem.Caption:= curTitle
+      else newItem.Caption:= theBridge.DestinationsImpl.Name[i];
+
+      newItem.Checked:= False;
+      newItem.GroupIndex:= 1;
+      newItem.RadioItem:= True;
+      newItem.ImageIndex:=curDestination^.Inst.UI_ImageIndex;
+      newItem.Tag:=i;
+      newItem.OnClick:=menuOnClick;
+      menuDestinations.Items.Add(newItem);
     end;
   end;
 

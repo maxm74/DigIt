@@ -4,10 +4,10 @@
 **          (s) 2023 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Folder Taker                                                             **
+**   Folder Source                                                             **
 *******************************************************************************)
 
-unit Digit_Taker_Folder;
+unit Digit_Source_Folder;
 
 {$mode ObjFPC}{$H+}
 
@@ -17,9 +17,9 @@ uses
   Classes, SysUtils, Digit_Bridge_Intf;
 
 type
-  { TDigIt_Taker_FolderParams }
+  { TDigIt_Source_FolderParams }
 
-  TDigIt_Taker_FolderParams = class(TNoRefCountObject, IDigIt_Params)
+  TDigIt_Source_FolderParams = class(TNoRefCountObject, IDigIt_Params)
   protected
     Folder,
     LastTaked :String;
@@ -34,10 +34,10 @@ type
     function OnSet: Boolean; stdcall;
   end;
 
-  { TDigIt_Taker_Folder }
-  TDigIt_Taker_Folder = class(TNoRefCountObject, IDigIt_Taker) { #note 10 -oMaxM : Meglio TNoRefCountObject }
+  { TDigIt_Source_Folder }
+  TDigIt_Source_Folder = class(TNoRefCountObject, IDigIt_Source) { #note 10 -oMaxM : Meglio TNoRefCountObject }
   protected
-    rParams: TDigIt_Taker_FolderParams;
+    rParams: TDigIt_Source_FolderParams;
     xFiles : TStringList; //A Citation
     lastFile: Integer;
     lastFolder: String;
@@ -57,7 +57,7 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
     //Take a Picture and returns FileName
-    function Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
  end;
 
 
@@ -66,10 +66,10 @@ implementation
 uses Laz2_XMLCfg, Digit_Bridge_Impl, Dialogs, masks, BGRABitmapTypes;
 
 const
-  DigIt_Taker_Folder_Name = 'Folder Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
+  DigIt_Source_Folder_Name = 'Folder Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
 
 var
-   Taker_Folder : TDigIt_Taker_Folder = nil;
+   Source_Folder : TDigIt_Source_Folder = nil;
 
 procedure SearchOnPath(xItems: TStringList; BaseDir, EnumFilter: String; EnumAttr:Integer; Recursive:Boolean);
 var
@@ -118,9 +118,9 @@ begin
   end;
 end;
 
-{ TDigIt_Taker_FolderParams }
+{ TDigIt_Source_FolderParams }
 
-function TDigIt_Taker_FolderParams.GetFromUser: Boolean; stdcall;
+function TDigIt_Source_FolderParams.GetFromUser: Boolean; stdcall;
 var
    openDialog: TSelectDirectoryDialog;
 
@@ -141,12 +141,12 @@ begin
   end;
 end;
 
-function TDigIt_Taker_FolderParams.Duplicate: IDigIt_Params; stdcall;
+function TDigIt_Source_FolderParams.Duplicate: IDigIt_Params; stdcall;
 begin
   Result:= nil;
 end;
 
-function TDigIt_Taker_FolderParams.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+function TDigIt_Source_FolderParams.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
 
@@ -165,7 +165,7 @@ begin
   end;
 end;
 
-function TDigIt_Taker_FolderParams.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+function TDigIt_Source_FolderParams.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
 
@@ -185,30 +185,30 @@ begin
   end;
 end;
 
-function TDigIt_Taker_FolderParams.Summary(const ASummary: PChar): Integer; stdcall;
+function TDigIt_Source_FolderParams.Summary(const ASummary: PChar): Integer; stdcall;
 begin
   StrPCopy(ASummary, 'Folder= '+Folder+#13#10+'Taked= '+LastTaked);
   Result:= Length(ASummary);
 end;
 
-function TDigIt_Taker_FolderParams.OnSet: Boolean; stdcall;
+function TDigIt_Source_FolderParams.OnSet: Boolean; stdcall;
 begin
   Result:= True;
 end;
 
-{ TDigIt_Taker_Folder }
+{ TDigIt_Source_Folder }
 
-constructor TDigIt_Taker_Folder.Create;
+constructor TDigIt_Source_Folder.Create;
 begin
   inherited Create;
 
   xFiles :=TStringList.Create;
   lastFile :=-1;
   lastFolder :='';
-  rParams :=TDigIt_Taker_FolderParams.Create;
+  rParams :=TDigIt_Source_FolderParams.Create;
 end;
 
-destructor TDigIt_Taker_Folder.Destroy;
+destructor TDigIt_Source_Folder.Destroy;
 begin
   inherited Destroy;
 
@@ -216,45 +216,45 @@ begin
   rParams.Free;
 end;
 
-function TDigIt_Taker_Folder.Flags: DWord; stdcall;
+function TDigIt_Source_Folder.Flags: DWord; stdcall;
 begin
-  Result:= DigIt_Taker_TakeData_PICTUREFILE;
+  Result:= DigIt_Source_TakeData_PICTUREFILE;
 end;
 
-function TDigIt_Taker_Folder.Init: Boolean; stdcall;
-begin
-  Result:= True;
-end;
-
-function TDigIt_Taker_Folder.Enabled(AEnabled: Boolean): Boolean; stdcall;
+function TDigIt_Source_Folder.Init: Boolean; stdcall;
 begin
   Result:= True;
 end;
 
-function TDigIt_Taker_Folder.Release: Boolean; stdcall;
+function TDigIt_Source_Folder.Enabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+  Result:= True;
+end;
+
+function TDigIt_Source_Folder.Release: Boolean; stdcall;
 begin
   Free;
   Result:= True;
 end;
 
-function TDigIt_Taker_Folder.Params: IDigIt_Params; stdcall;
+function TDigIt_Source_Folder.Params: IDigIt_Params; stdcall;
 begin
   Result:= rParams;
 end;
 
-function TDigIt_Taker_Folder.UI_Title(const AUI_Title: PChar): Integer; stdcall;
+function TDigIt_Source_Folder.UI_Title(const AUI_Title: PChar): Integer; stdcall;
 begin
-  StrPCopy(AUI_Title, DigIt_Taker_Folder_Name);
+  StrPCopy(AUI_Title, DigIt_Source_Folder_Name);
   Result:= Length(AUI_Title);
 end;
 
-function TDigIt_Taker_Folder.UI_ImageIndex: Integer; stdcall;
+function TDigIt_Source_Folder.UI_ImageIndex: Integer; stdcall;
 begin
   Result:= 3;
 end;
 
 (*
-function TDigIt_Taker_Folder.Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+function TDigIt_Source_Folder.Preview(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
   if (lastFolder<>rParams.Folder)
@@ -276,7 +276,7 @@ begin
        end;
 end;
 *)
-function TDigIt_Taker_Folder.Take(takeAction: DigIt_Taker_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+function TDigIt_Source_Folder.Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
   if (lastFolder<>rParams.Folder)
@@ -327,7 +327,7 @@ begin
   end;
 end;
 (*
-function TDigIt_Taker_Folder.ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+function TDigIt_Source_Folder.ReTake(MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 begin
   Result :=0;
   if (lastFolder<>rParams.Folder)
@@ -355,8 +355,8 @@ end;
 *)
 initialization
   try
-     Taker_Folder:= TDigIt_Taker_Folder.Create;
-     theBridge.Takers.Register(DigIt_Taker_Folder_Name, Taker_Folder);
+     Source_Folder:= TDigIt_Source_Folder.Create;
+     theBridge.Sources.Register(DigIt_Source_Folder_Name, Source_Folder);
   except
   end;
 

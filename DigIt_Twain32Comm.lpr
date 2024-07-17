@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Windows, Classes, SysUtils, Digit_Taker_Twain_Types, CustApp,
-  MM_SyncIPC, Twain, DelphiTwain, DelphiTwainUtils;
+  Windows, Classes, SysUtils, CustApp,
+  MM_SyncIPC, Twain, DelphiTwain, DelphiTwainUtils, Digit_Source_Twain_Types;
 
 type
 

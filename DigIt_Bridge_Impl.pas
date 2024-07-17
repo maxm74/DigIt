@@ -14,7 +14,7 @@ unit Digit_Bridge_Impl;
 interface
 
 uses
-  Classes, SysUtils, Digit_Bridge_Intf;
+  Classes, SysUtils, Digit_Bridge_Intf, MM_OpenArrayList;
 
 type
   TPluginInfo = record
@@ -58,46 +58,33 @@ type
     property Name [const aIndex: Integer]: String read GetPluginName;
   end;
 
-  TTakerInfo = record
+  { TDigIt_Sources }
+
+  TSourceInfo = record
     Flags: DWord;
-    Name: String;
-    Inst: IDigIt_Taker;
+    Inst: IDigIt_Source;
   end;
-  PTakerInfo = ^TTakerInfo;
+  PSourceInfo = ^TSourceInfo;
 
-  { TDigIt_Takers }
-
-  TDigIt_Takers = class(TNoRefCountObject, IDigIt_Takers)
+  TDigIt_Sources = class(specialize TOpenArrayList<TSourceInfo>, IDigIt_Sources)
+    function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
   protected
-    rTakersList: array of TTakerInfo;
-
-
-    function GetTaker(const aName: String) : PTakerInfo; overload;
-    function GetTaker(Index: Integer) : PTakerInfo; overload;
-    function GetTakerName(Index: Integer) : String;
-    function GetCount: Integer;
-
-    function FreeElement(Index: Integer): Boolean;
-
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    function Register(const aName: PChar; const aClass: IDigIt_Taker): Boolean; stdcall;
-    function UnRegister(const aName: String): Boolean; overload;
-    function UnRegister(const aClass: IDigIt_Taker): Boolean; overload;
-
-    function Find(const aName: String): Integer; overload;
-    function Find(const aClass: IDigIt_Taker): Integer; overload;
-
-    property Count: Integer read GetCount;
-
-    property TakerByName [const aName: String]: PTakerInfo read GetTaker;
-    property Taker [const aIndex: Integer]: PTakerInfo read GetTaker;
-    property Name [const aIndex: Integer]: String read GetTakerName;
+    function FreeElement(var aData: TSourceInfo): Boolean; override;
   end;
 
-  { TDigIt_Bridge_Settings }
+  { TDigIt_Destinations }
+
+  TDestinationInfo = record
+    Flags: DWord;
+    Inst: IDigIt_Destination;
+  end;
+  PDestinationInfo = ^TDestinationInfo;
+
+  TDigIt_Destinations = class(specialize TOpenArrayList<TDestinationInfo>, IDigIt_Destinations)
+    function Register(const aName: PChar; const aClass: IDigIt_Destination): Boolean; stdcall;
+  protected
+    function FreeElement(var aData: TDestinationInfo): Boolean; override;
+  end;
 
   { TDigIt_Settings }
 
@@ -127,14 +114,16 @@ type
   TDigIt_Bridge = class(TNoRefCountObject, IDigIt_Bridge)
   protected
     rSettings: TDigIt_Settings;
-    rTakers: TDigIt_Takers;
+    rSources: TDigIt_Sources;
+    rDestinations: TDigIt_Destinations;
     rPlugins: TDigIt_Plugins;
 
   public
     constructor Create;
     destructor Destroy; override;
 
-    function Takers: IDigIt_Takers; stdcall;
+    function Sources: IDigIt_Sources; stdcall;
+    function Destinations: IDigIt_Destinations; stdcall;
     function Settings: IDigIt_Settings; stdcall;
 
     (*function Register(const aDisplayName: PChar;
@@ -144,7 +133,8 @@ type
     *)
 
     //Internal Use only
-    function TakersImpl: TDigIt_Takers;
+    function SourcesImpl: TDigIt_Sources;
+    function DestinationsImpl: TDigIt_Destinations;
     function SettingsImpl: TDigIt_Settings;
     function Plugins: TDigIt_Plugins;
   end;
@@ -375,121 +365,34 @@ begin
   then Result:= FreeLibrary(rPluginsList[Index].LibHandle);
 end;
 
-{ TDigIt_Takers }
+{ TDigIt_Sources }
 
-function TDigIt_Takers.Find(const aName: String): Integer;
-var
-  i: Integer;
-
-begin
-  Result:= -1;
-  for i:=0 to Length(rTakersList)-1 do
-    if (rTakersList[i].Name = aName) then
-    begin
-      Result:= i; break;
-    end;
-end;
-
-function TDigIt_Takers.Find(const aClass: IDigIt_Taker): Integer;
-var
-  i: Integer;
-
-begin
-  Result:= -1;
-  for i:=0 to Length(rTakersList)-1 do
-    if (rTakersList[i].Inst = aClass) then
-    begin
-      Result:= i; break;
-    end;
-end;
-
-function TDigIt_Takers.GetTaker(const aName: String): PTakerInfo;
-var
-  i: Integer;
-
-begin
-  Result:= Nil;
-  for i:=0 to Length(rTakersList)-1 do
-    if (rTakersList[i].Name = aName) then
-    begin
-      Result:= @rTakersList[i]; break;
-    end;
-end;
-
-function TDigIt_Takers.GetTaker(Index: Integer): PTakerInfo;
-begin
-  if (Index >= 0) and (Index < Length(rTakersList))
-  then Result:= @rTakersList[Index]
-  else Result:= Nil;
-end;
-
-function TDigIt_Takers.GetTakerName(Index: Integer): String;
-begin
-  if (Index >= 0) and (Index < Length(rTakersList))
-  then Result:= rTakersList[Index].Name
-  else Result:= '';
-end;
-
-function TDigIt_Takers.GetCount: Integer;
-begin
-  Result:= Length(rTakersList);
-end;
-
-function TDigIt_Takers.FreeElement(Index: Integer): Boolean;
-begin
-  if (rTakersList[Index].Inst <> nil)
-  then rTakersList[Index].Inst.Release;
-
-  //rTakersList[Index].Name:='';
-  //FillChar(rTakersList[Index], SizeOf(rTakersList[Index]), 0);
-end;
-
-constructor TDigIt_Takers.Create;
-begin
-  inherited Create;
-
-  rTakersList:= Nil;
-end;
-
-destructor TDigIt_Takers.Destroy;
-var
-   i: Integer;
-
-begin
-  { #todo 10 -oMaxM : Free the Instances?  }
-  for i:=0 to Length(rTakersList)-1 do
-  begin
-    try
-       FreeElement(i);
-
-    except
-    end;
-  end;
-
-  try
-     rTakersList:= Nil;
-  except
-  end;
-
-  inherited Destroy;
-end;
-
-function TDigIt_Takers.Register(const aName: PChar; const aClass: IDigIt_Taker): Boolean; stdcall;
+function TDigIt_Sources.FreeElement(var aData: TSourceInfo): Boolean;
 begin
   Result:= False;
+  try
+     if (aData.Inst <> nil)
+     then aData.Inst.Release;
 
-  if (Find(aName) = -1) then
-  begin
-    SetLength(rTakersList, Length(rTakersList)+1);
+     Result:= True;
 
-    rTakersList[Length(rTakersList)-1].Name:= aName;
-    rTakersList[Length(rTakersList)-1].Inst:= aClass;
-
-    Result:= True;
+  finally
+    //MaxM: When the open array is freed the compiler frees the contents of the record using rtti,
+    //      a very dangerous thing for us.
+    FillChar(aData, SizeOf(aData), 0);
   end;
 end;
 
-function TDigIt_Takers.UnRegister(const aName: String): Boolean;
+function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
+var
+   newData: TSourceInfo;
+
+begin
+  newData.Inst:= aClass;
+  Result:= (Add(aName, newData) > -1);
+end;
+(*
+function TDigIt_Sources.UnRegister(const aName: String): Boolean;
 var
    r : Integer;
 
@@ -502,12 +405,12 @@ begin
     { #todo 10 -oMaxM : Free the Instances?  }
     Result:= FreeElement(r);
 
-    Delete(rTakersList, r, 1);
+    Delete(rSourcesList, r, 1);
     Result:= True;
   end;
 end;
 
-function TDigIt_Takers.UnRegister(const aClass: IDigIt_Taker): Boolean;
+function TDigIt_Sources.UnRegister(const aClass: IDigIt_Source): Boolean;
 var
    r : Integer;
 
@@ -520,10 +423,76 @@ begin
     { #todo 10 -oMaxM : Free the Instances?  }
     Result:= FreeElement(r);
 
-    Delete(rTakersList, r, 1);
+    Delete(rSourcesList, r, 1);
     Result:= True;
   end;
 end;
+*)
+
+{ TDigIt_Destinations }
+
+function TDigIt_Destinations.FreeElement(var aData: TDestinationInfo): Boolean;
+begin
+  Result:= False;
+  try
+     if (aData.Inst <> nil)
+     then aData.Inst.Release;
+
+     Result:= True;
+
+  finally
+    //MaxM: When the open array is freed the compiler frees the contents of the record using rtti,
+    //      a very dangerous thing for us.
+    FillChar(aData, SizeOf(aData), 0);
+  end;
+end;
+
+function TDigIt_Destinations.Register(const aName: PChar; const aClass: IDigIt_Destination): Boolean; stdcall;
+var
+   newData: TDestinationInfo;
+
+begin
+  newData.Inst:= aClass;
+  Result:= (Add(aName, newData) > -1);
+end;
+
+(*
+function TDigIt_Destinations.UnRegister(const aName: String): Boolean;
+var
+   r : Integer;
+
+begin
+  Result:= False;
+
+  r:= Find(aName);
+  if (r > -1) then
+  begin
+    { #todo 10 -oMaxM : Free the Instances?  }
+    Result:= FreeElement(r);
+
+    Delete(rDestinationsList, r, 1);
+    Result:= True;
+  end;
+end;
+
+function TDigIt_Destinations.UnRegister(const aClass: IDigIt_Destination): Boolean;
+var
+   r : Integer;
+
+begin
+  Result:= False;
+
+  r:= Find(aClass);
+  if (r > -1) then
+  begin
+    { #todo 10 -oMaxM : Free the Instances?  }
+    Result:= FreeElement(r);
+
+    Delete(rDestinationsList, r, 1);
+    Result:= True;
+  end;
+end;
+*)
 
 { TDigIt_Settings }
 
@@ -589,21 +558,28 @@ begin
 
   rPlugins:= TDigIt_Plugins.Create;
   rSettings:= TDigIt_Settings.Create;
-  rTakers:= TDigIt_Takers.Create;
+  rSources:= TDigIt_Sources.Create;
+  rDestinations:= TDigIt_Destinations.Create;
 end;
 
 destructor TDigIt_Bridge.Destroy;
 begin
-  rTakers.Free;
+  rSources.Free;
   rSettings.Free;
   rPlugins.Free;
+  rDestinations.free;
 
   inherited Destroy;
 end;
 
-function TDigIt_Bridge.Takers: IDigIt_Takers; stdcall;
+function TDigIt_Bridge.Sources: IDigIt_Sources; stdcall;
 begin
-  Result:= rTakers;
+  Result:= rSources;
+end;
+
+function TDigIt_Bridge.Destinations: IDigIt_Destinations; stdcall;
+begin
+  Result:= rDestinations;
 end;
 
 function TDigIt_Bridge.Settings: IDigIt_Settings; stdcall;
@@ -611,9 +587,14 @@ begin
   Result:= rSettings;
 end;
 
-function TDigIt_Bridge.TakersImpl: TDigIt_Takers;
+function TDigIt_Bridge.SourcesImpl: TDigIt_Sources;
 begin
-  Result:= rTakers;
+  Result:= rSources;
+end;
+
+function TDigIt_Bridge.DestinationsImpl: TDigIt_Destinations;
+begin
+  Result:= rDestinations;
 end;
 
 function TDigIt_Bridge.SettingsImpl: TDigIt_Settings;

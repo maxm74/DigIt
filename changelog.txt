@@ -1,3 +1,9 @@
+2024/07/25 Moved theBridge.Free in MainForm so the Twain 32bit process will close on exit;
+           XML_SaveWork called on exit;
+           XML Work Load/Save Destination from the Interfaces List;
+           TwainSource and 32bit Comm Server use new syncipc constants and async message on exit; 
+           Destination menu item filled from Interfaces List;
+           Sources/Destination menuitem use Default to indicate the selected one (lcl bug? remove others item)
 
 2024/07/17 Changed identifiers and units names from "Taker" to "Source";
            Avoid OpenArray runerror(204) on destroy using FillChar(0) in FreeElement

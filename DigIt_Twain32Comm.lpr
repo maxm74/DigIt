@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}
   Windows, Classes, SysUtils, CustApp,
-  MM_SyncIPC, Twain, DelphiTwain, DelphiTwainUtils, Digit_Source_Twain_Types;
+  SyncIPC, Twain, DelphiTwain, DelphiTwainUtils, Digit_Source_Twain_Types;
 
 type
 
@@ -33,15 +33,15 @@ type
     function MessageReceived(AMsgID:Integer; const Buffer; Count: LongInt):Boolean; override; overload;
     function MessageReceived(AMsgID:Integer; const APointer:Pointer; Count: LongInt):Boolean; override; overload;
 
-    function TWAIN32_TIMEOUT(ATimeout:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
-    function TWAIN32_LIST:Boolean; //Input=mtSync_Null Output=mtSync_Pointer (array of TW_IDENTITY)
-    function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtSync_Var (TW_IDENTITY) Output=mtSync_Integer
-    function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtSync_Integer Output=mtSync_Integer (Boolean)
-    function TWAIN32_USERINTERFACE(AUserInterface:TW_USERINTERFACE):Boolean; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
-    function TWAIN32_PARAMS_SET(AParams:TTwainParams):Boolean; //Input=mtSync_Var (TW_USERINTERFACE) Output=mtSync_Integer (Boolean)
-    function TWAIN32_PARAMS_GET:Boolean; //Input=mtSync_Null Output=mtSync_Var (TTwainParamsCapabilities)
-    function TWAIN32_PREVIEW(APath:String):Boolean; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
-    function TWAIN32_TAKE(APath:String):Boolean; //Input=mtSync_String  Output=mtSync_Integer (Boolean)
+    function TWAIN32_TIMEOUT(ATimeout:Integer):Boolean; //Input=mtData_Integer Output=mtData_Integer (Boolean)
+    function TWAIN32_LIST:Boolean; //Input=mtData_Null Output=mtData_Pointer (array of TW_IDENTITY)
+    function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtData_Var (TW_IDENTITY) Output=mtData_Integer
+    function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtData_Integer Output=mtData_Integer (Boolean)
+    function TWAIN32_USERINTERFACE(AUserInterface:TW_USERINTERFACE):Boolean; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
+    function TWAIN32_PARAMS_SET(AParams:TTwainParams):Boolean; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
+    function TWAIN32_PARAMS_GET:Boolean; //Input=mtData_Null Output=mtData_Var (TTwainParamsCapabilities)
+    function TWAIN32_PREVIEW(APath:String):Boolean; //Input=mtData_String  Output=mtData_Integer (Boolean)
+    function TWAIN32_TAKE(APath:String):Boolean; //Input=mtData_String  Output=mtData_Integer (Boolean)
 
     function getTwain: TCustomDelphiTwain;
     procedure FreeTwain;
@@ -144,7 +144,8 @@ begin
                        {$ifopt D+}
                        Writeln('MSG_TWAIN32_STOP:'+IntToStr(AMsgID));
                        {$endif}
-                       Result:=MessageResult(RES_TWAIN32_STOPPED);
+                       //Result:=MessageResult(RES_TWAIN32_STOPPED);
+                       Result:= True;
                        DoStop:=True;
                      end;
   MSG_TWAIN32_LIST : Result:=TWAIN32_LIST;
@@ -654,7 +655,7 @@ begin
      stopClient.ServerID:=TWAIN32_SERVER_NAME {$ifdef UNIX} + '-' + GetEnvironmentVariable('USER'){$endif};
      stopClient.Connect;
      if stopClient.ServerRunning
-     then stopClient.SendSyncMessage(10000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
+     then stopClient.SendMessage(MSG_TWAIN32_STOP, mtData_Null, recBuf);
      //    else ShowException(Exception.Create('Server '+stopClient.ServerID+' NOT Running'));
 
      stopClient.Free;

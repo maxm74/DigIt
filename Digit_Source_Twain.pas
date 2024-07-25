@@ -14,7 +14,7 @@ unit Digit_Source_Twain;
 interface
 
 uses
-  simpleipc, MM_SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
+  simpleipc, SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
   Digit_Bridge_Intf, Digit_Source_Twain_Types, Digit_Source_Twain_SelectForm, Digit_Source_Twain_SettingsForm;
 
 const
@@ -199,8 +199,8 @@ begin
   Result :=0;
   if Length(ipcSourceList)>0 then SetLength(ipcSourceList, 0);
   try
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_LIST, mtSync_Null, recBuf, 0, recBuf, recSize);
-     if (resType=mtSync_Pointer) and (recBuf<>nil) then
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_LIST, mtData_Null, recBuf, 0, recBuf, recSize);
+     if (resType=mtData_Pointer) and (recBuf<>nil) then
      begin
        count :=Trunc(recSize/SizeOf(TW_IDENTITY));
        SetLength(ipcSourceList, count);
@@ -231,8 +231,8 @@ begin
      AIdentity.Manufacturer:=AManufacturer;
      AIdentity.ProductFamily:=AProductFamily;
      AIdentity.ProductName:=AProductName;
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_FIND, mtSync_Var, AIdentity, sizeof(TW_IDENTITY), recBuf, recSize);
-     if (resType=mtSync_Integer)
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_FIND, mtData_Var, AIdentity, sizeof(TW_IDENTITY), recBuf, recSize);
+     if (resType=mtData_Integer)
      then Result:=recBuf;
 
   except
@@ -253,13 +253,13 @@ begin
      aUserInterface.ModalUI:=False;
      aUserInterface.hParent:=Application.ActiveFormHandle;
 
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_USERINTERFACE, mtSync_Var,
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_USERINTERFACE, mtData_Var,
                                                   aUserInterface, SizeOf(TW_USERINTERFACE), recBuf, recSize);
-     if (resType=mtSync_Integer)
+     if (resType=mtData_Integer)
      then Result:=recBuf;
 
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtSync_Integer, AIndex, 0, recBuf, recSize);
-     if (resType=mtSync_Integer)
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtData_Integer, AIndex, 0, recBuf, recSize);
+     if (resType=mtData_Integer)
      then Result:=recBuf;
 
   except
@@ -275,9 +275,9 @@ var
 begin
   Result:=False;
   recSize :=SizeOf(rParams);
-  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_SET, mtSync_Var,
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_SET, mtData_Var,
                rParams, recSize, res, recSize);
-  Result := (resType = mtSync_Integer) and (res = True);
+  Result := (resType = mtData_Integer) and (res = True);
 end;
 
 function TDigIt_Source_Twain.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
@@ -291,8 +291,8 @@ var
 begin
   Result:=False;
   FillChar(TwainCap, Sizeof(TwainCap), 0);
-  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_GET, mtSync_Null, i, 0, recStream, recSize);
-  if (resType=mtSync_Stream) and (recStream<>nil) then
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_GET, mtData_Null, i, 0, recStream, recSize);
+  if (resType=mtData_Stream) and (recStream<>nil) then
   try
     recStream.Position:=0;
     recSize :=Sizeof(TwainCap.ResolutionArray);
@@ -345,8 +345,8 @@ var
 begin
   Result :=False;
   try
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PREVIEW, mtSync_String, AFileName, 0, recBuf, recSize);
-     if (resType=mtSync_Integer)
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PREVIEW, mtData_String, AFileName, 0, recBuf, recSize);
+     if (resType=mtData_Integer)
      then Result:=recBuf;
 
   except
@@ -362,8 +362,8 @@ var
 begin
   Result :=False;
   try
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_TAKE, mtSync_String, AFileName, 0, recBuf, recSize);
-     if (resType=mtSync_Integer)
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_TAKE, mtData_String, AFileName, 0, recBuf, recSize);
+     if (resType=mtData_Integer)
      then Result:=recBuf;
 
   except
@@ -479,18 +479,15 @@ end;
 
 procedure TDigIt_Source_Twain.FreeCommsClient;
 var
-   recSize, recBuf:Longint;
-   resType:TMessageType;
+   recBuf:Longint;
 
 begin
   if (rCommsClient<>nil) then
   begin
     //In Debug Stop the Process Manually
     {$ifopt D-}
-    resType :=rCommsClient.SendSyncMessage(30000, MSG_TWAIN32_STOP, mtSync_Null, recBuf, 0, recBuf, recSize);
-    ipcProcess.Terminate(0);
+      rCommsClient.SendMessage(MSG_TWAIN32_STOP, mtData_Null, recBuf);
     {$endif}
-    //No need to test RES_TWAIN32_STOPPED
     rCommsClient.Free; rCommsClient:= Nil;
   end;
   ipcProcess.Free; ipcProcess:= Nil;

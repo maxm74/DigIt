@@ -61,8 +61,6 @@ type
     Label10: TLabel;
     Label9: TLabel;
     menuDestinations: TPopupMenu;
-    SaveAsFilesItem: TMenuItem;
-    MenuItem2: TMenuItem;
     panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
     btBox_Del: TBGRASpeedButton;
@@ -200,8 +198,6 @@ type
       var DefaultDraw: Boolean);
     procedure lvCapturedDblClick(Sender: TObject);
     procedure lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
-    procedure DestinationMenuClick(Sender: TObject);
-    procedure SourceMenuClick(Sender: TObject);
     procedure edCounterNameEditingDone(Sender: TObject);
     procedure edCounterValueChange(Sender: TObject);
     procedure edCounterValueStringDigitsChange(Sender: TObject);
@@ -268,6 +264,8 @@ type
     procedure UI_FillDestination;
     procedure UI_Load;
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
+    procedure DestinationMenuClick(Sender: TObject);
+    procedure SourceMenuClick(Sender: TObject);
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
@@ -441,11 +439,10 @@ end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
-  Counters.Free;
-
-//  if (SourceInst<>nil) then SourceInst.Free;
-  if (XMLWork<>nil) then XMLWork.Free;
+  XML_SaveWork;
   if (XMLProject<>nil) then XMLProject.Free;
+  Counters.Free;
+  theBridge.Free;
 end;
 
 procedure TDigIt_Main.FormShow(Sender: TObject);
@@ -1003,8 +1000,9 @@ var
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
-    if (Sender = SaveAsFilesItem)
+    if (TMenuItem(Sender).Tag = -1)
     then begin
+           // SaveAsFile Destination
            newDestination:= nil;
            newDestinationName:= '';
          end
@@ -1013,15 +1011,9 @@ begin
            newDestinationName:= theBridge.DestinationsImpl.Name[TMenuItem(Sender).Tag];
          end;
     Destination_SelectUserParams(newDestinationName, newDestination);
-    TMenuItem(Sender).Checked:= True;
+    //TMenuItem(Sender).Default:= True;
     UI_FillDestination;
   end;
-  (*
-  if TDest_SaveFiles_Settings.Execute(SaveExt, SavePath) then
-  begin
-  end;
-  UI_FillSource;
-  *)
 end;
 
 procedure TDigIt_Main.SourceMenuClick(Sender: TObject);
@@ -1033,9 +1025,9 @@ begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
     newSource:= theBridge.SourcesImpl.Data[TMenuItem(Sender).Tag];
-    newSourceName:= theBridge.DestinationsImpl.Name[TMenuItem(Sender).Tag];
+    newSourceName:= theBridge.SourcesImpl.Name[TMenuItem(Sender).Tag];
     Source_SelectUserParams(newSourceName, newSource);
-    TMenuItem(Sender).Checked:= True;
+    //TMenuItem(Sender).Default:= True;
     UI_FillSource;
   end;
 end;
@@ -1244,39 +1236,58 @@ var
    newDestinationName: String;
    newSourceI,
    newDestinationI: Integer;
-   newSource: PSourceInfo;
-   newParams: IDigIt_Params;
+   newSource: PSourceInfo =nil;
+   newDestination: PDestinationInfo =nil;
+   newSourceParams,
+   newDestinationParams: IDigIt_Params;
 
 begin
   try
     newSourceI:= -1;
     newDestinationI:= -1;
+
     XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
     //Load Source and its Params
+    newSourceParams:= nil;
     newSourceName:= XMLWork.GetValue('Source/Name', '');
     if (newSourceName<>'') then
     begin
       newSourceI:= theBridge.SourcesImpl.FindByName(newSourceName);
       newSource:= theBridge.SourcesImpl.Data[newSourceI];
-      if (newSource <> nil) then
-      begin
-        //Read Params
-        newParams :=newSource^.Inst.Params;
-        if (newParams <> nil)
-        then newParams.Load(PChar(Path_Config+Config_XMLWork), 'Source/Params');
-
-        Source_SelectWithParams(newSourceName, newSource, newParams);
-      end;
+      if (newSource <> nil)
+      then begin
+             //Read Params
+             newSourceParams :=newSource^.Inst.Params;
+             if (newSourceParams <> nil)
+             then newSourceParams.Load(PChar(Path_Config+Config_XMLWork), 'Source/Params');
+           end
+      else newSourceName:= '';
     end;
+    Source_SelectWithParams(newSourceName, newSource, newSourceParams);
 
     //Load Destination and its Params
-    newDestinationName:= XMLWork.GetValue('Destination/Name', 'SaveAsFiles');
-    { #todo -oMaxM : Get From A List of Destination Interfaces (at this time only SaveAsFiles}
-    SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
-    SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
+    newDestinationParams:= nil;
+    newDestinationName:= XMLWork.GetValue('Destination/Name', '');
+    if (newDestinationName = '')
+    then begin
+           SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
+           SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
+         end
+    else begin
+           newDestinationI:= theBridge.DestinationsImpl.FindByName(newDestinationName);
+           newDestination:= theBridge.DestinationsImpl.Data[newDestinationI];
+           if (newDestination <> nil)
+           then begin
+                  //Read Params
+                  newDestinationParams :=newDestination^.Inst.Params;
+                  if (newDestinationParams <> nil)
+                  then newDestinationParams.Load(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
 
-    newDestinationI:= 0; //Remove when Get From A List of Destination Interfaces
+                end
+           else newDestinationName:= '';
+         end;
+    Destination_SelectWithParams(newDestinationName, newDestination, newDestinationParams);
 
     XML_LoadPageSettings;
     Counters.Load(XMLWork, True);
@@ -1319,19 +1330,23 @@ begin
      XMLWork.DeletePath('Source/Params/');
 
      //Save Destination and its Params
-     XMLWork.SetValue('Destination/Name', 'SaveAsFiles');
-     XMLWork.DeletePath('Destination/Params/');
-     XMLWork.SetValue('Destination/Params/Format', SaveExt);
-     XMLWork.SetValue('Destination/Params/Path', SavePath);
+     XMLWork.SetValue('Destination/Name', DestinationName);
+     if (Destination = nil) then
+     begin
+       XMLWork.DeletePath('Destination/Params/');
+       XMLWork.SetValue('Destination/Params/Format', SaveExt);
+       XMLWork.SetValue('Destination/Params/Path', SavePath);
+     end;
+
      XMLWork.Flush;
      XMLWork.Free; XMLWork:= Nil;
 
      //FPC Bug?
      //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
      //So we do it after destroying XMLWork.
-     Source^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
-     { #todo -oMaxM : Save Destination Params as Interfaces (at this time only SaveAsFiles written above}
 
+     if (Source <> nil) then Source^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
+     if (Destination <> nil) then Destination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
   finally
   end;
 end;
@@ -1504,37 +1519,47 @@ end;
 
 procedure TDigIt_Main.Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
 begin
-  if (newDestination <> Nil) then
-  begin
-    if (newDestination <> Destination) then
-    begin
-         { #note -oMaxM : Destination Switched...Do something? }
-    end;
+  if (newDestination = Nil)
+  then begin
+         //SaveAsFiles destination
+         if TDest_SaveFiles_Settings.Execute(SaveExt, SavePath) then
+         begin
+         end;
+         DestinationParams:= nil;
+       end
+  else begin
+         if (newDestination <> Destination) then
+         begin
+           { #note -oMaxM : Destination Switched...Do something? }
+         end;
 
-    Destination:= newDestination;
-    DestinationName:= newDestinationName;
-    DestinationParams:= Destination^.Inst.Params;
-    if (DestinationParams <> Nil)
-    then DestinationParams.GetFromUser; { #todo 2 -oMaxM : if False? }
-  end;
+         DestinationParams:= Destination^.Inst.Params;
+         if (DestinationParams <> Nil)
+         then DestinationParams.GetFromUser; { #todo 2 -oMaxM : if False? }
+       end;
+
+  Destination:= newDestination;
+  DestinationName:= newDestinationName;
 end;
 
 procedure TDigIt_Main.Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo;
   newParams: IDigIt_Params);
 begin
-  if (newDestination <> nil) then
-  begin
-    if (newDestination <> Destination) then
-    begin
-         { #note -oMaxM : Destination Switched...Do something? }
-    end;
+  if (newDestination <> nil)
+  then begin
+         if (newDestination <> Destination) then
+         begin
+           { #note -oMaxM : Destination Switched...Do something? }
+         end;
 
-    Destination:= newDestination;
-    DestinationName:= newDestinationName;
-    DestinationParams:= newParams;
-    if (DestinationParams <> Nil)
-    then DestinationParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
-  end;
+         if (newParams <> Nil)
+         then newParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
+       end
+  else newParams:= nil;
+
+  Destination:= newDestination;
+  DestinationName:= newDestinationName;
+  DestinationParams:= newParams;
 end;
 
 procedure TDigIt_Main.edNameChange(Sender: TObject);
@@ -1550,6 +1575,7 @@ procedure TDigIt_Main.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
      closing :=True;
+     { #todo 1 -oMaxM : Project Save Confirmation }
 end;
 
 procedure TDigIt_Main.btBox_AddClick(Sender: TObject);
@@ -1859,10 +1885,10 @@ var
 
 begin
   curItem:= FindMenuItemByTag(menuSources, newSourceI);
-  if (curItem <> Nil) then curItem.Checked:= True;
+ // if (curItem <> Nil) then curItem.Default:= True;
 
   curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
-  if (curItem <> Nil) then curItem.Checked:= True;
+ // if (curItem <> Nil) then curItem.Default:= True;
 end;
 
 procedure TDigIt_Main.UI_FillBox(ABox: TCropArea);

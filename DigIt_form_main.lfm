@@ -3371,18 +3371,5 @@ object DigIt_Main: TDigIt_Main
     Images = imgListMenu
     Left = 424
     Top = 456
-    object SaveAsFilesItem: TMenuItem
-      Caption = 'Save as Files'
-      GroupIndex = 2
-      ImageIndex = 3
-      RadioItem = True
-      OnClick = DestinationMenuClick
-    end
-    object MenuItem2: TMenuItem
-      Caption = '   Test more'
-      GroupIndex = 2
-      ImageIndex = 2
-      RadioItem = True
-    end
   end
 end

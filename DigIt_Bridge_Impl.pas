@@ -611,7 +611,7 @@ initialization
   theBridge:= TDigIt_Bridge.Create;
 
 finalization
-  theBridge.Free;
+  //theBridge.Free;   { #note -oMaxM : MainForm Free the Bridge otherwise the TwainSource does not send the message STOP to 32 bit Comm }
 
 end.
 

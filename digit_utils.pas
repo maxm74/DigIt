@@ -278,19 +278,16 @@ begin
     curSource:= theBridge.SourcesImpl.Data[i];
     if (curSource<>nil) then
     begin
-      newItem :=TMenuItem.Create(AOwner);
+      newItem:= TMenuItem.Create(AOwner);
 
-      res :=curSource^.Inst.UI_Title(curTitle);
+      res:= curSource^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
       then newItem.Caption:= curTitle
       else newItem.Caption:= theBridge.SourcesImpl.Name[i];
 
-      newItem.Checked:= False;
-      newItem.GroupIndex:= 1;
-      newItem.RadioItem:= True;
-      newItem.ImageIndex:=curSource^.Inst.UI_ImageIndex;
-      newItem.Tag:=i;
-      newItem.OnClick:=menuOnClick;
+      newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
+      newItem.Tag:= i;
+      newItem.OnClick:= menuOnClick;
       menuSources.Items.Add(newItem);
     end;
   end;
@@ -306,6 +303,14 @@ var
    curTitle:PChar;
 
 begin
+  //Add SaveAsFile Destination
+  newItem:= TMenuItem.Create(AOwner);
+  newItem.Caption:= 'Save as Files';
+  newItem.ImageIndex:= 3;
+  newItem.Tag:= -1;
+  newItem.OnClick:= menuOnClick;
+  menuDestinations.Items.Add(newItem);
+
   curTitle:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
 
   for i:=0 to theBridge.DestinationsImpl.Count-1 do
@@ -313,19 +318,16 @@ begin
     curDestination:= theBridge.DestinationsImpl.Data[i];
     if (curDestination<>nil) then
     begin
-      newItem :=TMenuItem.Create(AOwner);
+      newItem:= TMenuItem.Create(AOwner);
 
-      res :=curDestination^.Inst.UI_Title(curTitle);
+      res:= curDestination^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
       then newItem.Caption:= curTitle
       else newItem.Caption:= theBridge.DestinationsImpl.Name[i];
 
-      newItem.Checked:= False;
-      newItem.GroupIndex:= 1;
-      newItem.RadioItem:= True;
-      newItem.ImageIndex:=curDestination^.Inst.UI_ImageIndex;
-      newItem.Tag:=i;
-      newItem.OnClick:=menuOnClick;
+      newItem.ImageIndex:= curDestination^.Inst.UI_ImageIndex;
+      newItem.Tag:= i;
+      newItem.OnClick:= menuOnClick;
       menuDestinations.Items.Add(newItem);
     end;
   end;

@@ -40,7 +40,8 @@ const
 var
    Path_Application,
    Path_Config,
-   Path_Temp:String;
+   Path_Temp,
+   Path_Pictures: String;
 
 implementation
 
@@ -63,6 +64,7 @@ initialization
    Path_Application :=ExtractFilePath(ParamStr(0));
    Path_Config :=GetAppConfigDir(False);
    Path_Temp :=GetTempDir(False)+'DigIt'+DirectorySeparator;
+   Path_Pictures :=GetUserDir+'Pictures\';
    ForceDirectories(Path_Config);
    ForceDirectories(Path_Temp);
 

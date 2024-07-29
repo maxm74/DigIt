@@ -18,7 +18,11 @@ uses
   Digit_Bridge_Intf, Digit_Source_Twain_Types, Digit_Source_Twain_SelectForm, Digit_Source_Twain_SettingsForm;
 
 const
+  DigIt_Source_Twain_Name = 'Twain Device';
   Twain_TakeFileName = 'twain_take.bmp';
+
+resourcestring
+  DigIt_Source_Twain_NameL = 'Twain Device';
 
 type
   { TDigIt_Source_Twain }
@@ -93,9 +97,6 @@ implementation
 uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes, Laz2_XMLCfg, Digit_Bridge_Impl
  // ,DigIt_Form_AnimAcquiring
   ;
-
-const
-  DigIt_Source_Twain_Name = 'Twain Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
 
 var
    Source_Twain : TDigIt_Source_Twain = nil;
@@ -762,7 +763,7 @@ end;
 
 function TDigIt_Source_Twain.UI_Title(const AUI_Title: PChar): Integer; stdcall;
 begin
-  StrPCopy(AUI_Title, DigIt_Source_Twain_Name);
+  StrPCopy(AUI_Title, DigIt_Source_Twain_NameL);
   Result:= Length(AUI_Title);
 end;
 

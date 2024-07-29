@@ -26,7 +26,6 @@ type
 
   TDigIt_Main = class(TForm)
     actTimerTake: TAction;
-    actSourceOpt: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
     actRotateRight: TAction;
@@ -153,7 +152,6 @@ type
     tbMenu: TToolButton;
     tbSource: TToolButton;
     tbPreview: TToolButton;
-    tbSourceOpt: TToolButton;
     tbSep2: TToolButton;
     ToolButton1: TToolButton;
     tbTimerTake: TToolButton;
@@ -166,7 +164,6 @@ type
     procedure actRotateLeftExecute(Sender: TObject);
     procedure actRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
-    procedure actSourceOptExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
     procedure actReTakeExecute(Sender: TObject);
     procedure actTimerTakeExecute(Sender: TObject);
@@ -225,7 +222,6 @@ type
     procedure DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
-    procedure tbSourceClick(Sender: TObject);
     procedure tbWorkSaveClick(Sender: TObject);
 
     procedure TestClick(Sender: TObject);
@@ -280,6 +276,7 @@ type
     procedure XML_SaveProject(AFileName:String);
     procedure XML_LoadPageSettings;
     procedure XML_SavePageSettings;
+    procedure Default_Work;
     procedure Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
     procedure Source_SelectWithParams(newSourceName: String; newSource: PSourceInfo; newParams:IDigIt_Params);
     procedure Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
@@ -305,7 +302,7 @@ uses
   {$ifopt D+}
   lazlogger,
   {$endif}
-  LCLIntf, DigIt_Form_Templates, DigIt_Dest_SaveFiles_SettingsForm; //DelphiTwain, DelphiTwain_VCL;
+  LCLIntf, DigIt_Form_Templates, DigIt_Dest_SaveFiles_SettingsForm;
 
 
 { TDigIt_Main }
@@ -459,13 +456,17 @@ begin
      {$endif}
   then begin
          XML_LoadWork;
+         {$ifopt D-}
          actPreview.Execute;
+         {$endif}
        end
   else begin
-         //rollCrops.Collapsed:=True;
-         rollPages.Collapsed:=True;
-         //rollCounters.Collapsed:=True;
+         Default_Work;
+         UI_MenuItemsChecks(-1, -1);
        end;
+
+  UI_FillSource;
+  UI_FillDestination;
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
@@ -490,18 +491,6 @@ begin
       StrDispose(curImageFile);
 
       UI_FillSource;
-    end;
-  finally
-  end;
-end;
-
-procedure TDigIt_Main.actSourceOptExecute(Sender: TObject);
-begin
-  try
-    if (Source <> Nil) and (Source^.Inst <> Nil) then
-    begin
-      if Source^.Inst.Params.GetFromUser
-      then XML_SaveWork;
     end;
   finally
   end;
@@ -556,7 +545,7 @@ begin
            Counters.CopyPreviousToValues;
            //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
            imgManipulation.getAllBitmaps(@SaveCallBack, 1, True);
-           lvCaptured.Refresh;
+           //lvCaptured.Refresh;
            //lvCaptured.EndUpdate;
            XML_SaveWork;
       end;
@@ -974,22 +963,22 @@ end;
 
 procedure TDigIt_Main.lvCapturedDblClick(Sender: TObject);
 var
-   tt:TFileListItem;
+   captItem: TFileListItem;
 
 begin
-  tt:=TFileListItem(lvCaptured.Selected);
-  if (tt<>nil)
-  then OpenDocument(tt.FileName);
+  captItem:= TFileListItem(lvCaptured.Selected);
+  if (captItem <> nil)
+  then OpenDocument(captItem.FileName);
 end;
 
 procedure TDigIt_Main.lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
 var
-   tt:TFileListItem;
+   captItem: TFileListItem;
 
 begin
-  tt:=TFileListItem(lvCaptured.GetItemAt(HintInfo^.CursorPos.X, HintInfo^.CursorPos.Y));
-  if (tt<>nil)
-  then HintInfo^.HintStr:=tt.FileName;
+  captItem:= TFileListItem(lvCaptured.GetItemAt(HintInfo^.CursorPos.X, HintInfo^.CursorPos.Y));
+  if (captItem <> nil)
+  then HintInfo^.HintStr:=captItem.FileName;
 end;
 
 procedure TDigIt_Main.DestinationMenuClick(Sender: TObject);
@@ -1027,7 +1016,7 @@ begin
     newSource:= theBridge.SourcesImpl.Data[TMenuItem(Sender).Tag];
     newSourceName:= theBridge.SourcesImpl.Name[TMenuItem(Sender).Tag];
     Source_SelectUserParams(newSourceName, newSource);
-    //TMenuItem(Sender).Default:= True;
+    TMenuItem(Sender).Default:= True;
     UI_FillSource;
   end;
 end;
@@ -1084,13 +1073,50 @@ begin
 end;
 
 procedure TDigIt_Main.actRotateLeftExecute(Sender: TObject);
+var
+   captItem: TFileListItem;
+   sourceBitmap,
+   rotatedBitmap: TBGRABitmap;
+
 begin
-  //
+  captItem:= TFileListItem(lvCaptured.Selected);
+
+  if (captItem <> nil) then
+  try
+     sourceBitmap:= TBGRABitmap.Create(captItem.FileName);
+     rotatedBitmap:= sourceBitmap.RotateCCW(True);
+     rotatedBitmap.SaveToFile(captItem.FileName);
+
+     lvCaptured.Selected:= nil;
+     lvCaptured.Selected:= captItem;
+  finally
+     if (sourceBitmap <> nil) then sourceBitmap.Free;
+     if (rotatedBitmap <> nil) then rotatedBitmap.Free;
+  end;
 end;
 
 procedure TDigIt_Main.actRotateRightExecute(Sender: TObject);
+var
+   captItem: TFileListItem;
+   sourceBitmap,
+   rotatedBitmap: TBGRABitmap;
+
 begin
-  //
+  captItem:= TFileListItem(lvCaptured.Selected);
+
+  if (captItem <> nil) then
+  try
+     sourceBitmap:= TBGRABitmap.Create(captItem.FileName);
+     rotatedBitmap:= sourceBitmap.RotateCW(True);
+     rotatedBitmap.SaveToFile(captItem.FileName);
+
+     lvCaptured.Selected:= nil;
+     lvCaptured.Selected:= captItem;
+
+  finally
+     if (sourceBitmap <> nil) then sourceBitmap.Free;
+     if (rotatedBitmap <> nil) then rotatedBitmap.Free;
+  end;
 end;
 
 procedure TDigIt_Main.SaveCallBack(Bitmap: TBGRABitmap; CropArea: TCropArea; AUserData: Integer);
@@ -1105,7 +1131,7 @@ begin
     if (CropArea.UserData<0)
     then begin
            //No Counter, Save File with CropArea Name
-           savedFile:=SavePath+DirectorySeparator+CropArea.Name+'.'+SaveExt;
+           savedFile:=SavePath+CropArea.Name+'.'+SaveExt;
            Bitmap.SaveToFile(savedFile);
          end
     else begin
@@ -1114,27 +1140,33 @@ begin
            cropCounter.Value:=cropCounter.Value+1;
 
            //Save File
-           savedFile:=SavePath+DirectorySeparator+cropCounter.GetValue+'.'+SaveExt;
+           savedFile:=SavePath+cropCounter.GetValue+'.'+SaveExt;
            Bitmap.SaveToFile(savedFile);
          end;
 
     if (AUserData=0)
     then begin
            //Take, add file to Captured List
-           captItem :=TFileListItem(lvCaptured.Items.Add);
-           captItem.FileName:=savedFile;
+           captItem:= TFileListItem(lvCaptured.Items.Add);
+           captItem.FileName:= savedFile;
            XML_SaveCapturedFile(captItem);
          end
     else begin
            //ReTake, search file in Captured List and update the image
-           captItem :=FindFileListItem(lvCaptured.Items, savedFile);
-           if (captItem=nil)
+           captItem:= FindFileListItem(lvCaptured.Items, savedFile);
+           if (captItem = nil)
            then begin
-                  captItem :=TFileListItem(lvCaptured.Items.Add);
-                  captItem.FileName:=savedFile;
+                  //if not found (?) add file to Captured List
+                  captItem:= TFileListItem(lvCaptured.Items.Add);
+                  captItem.FileName:= savedFile;
                   XML_SaveCapturedFile(captItem);
+                end
+           else begin
+                  captItem.FileName:= savedFile;
+
+                  lvCaptured.Selected:= nil;
+                  lvCaptured.Selected:= captItem;
                 end;
-           //else lvCaptured...;   { #todo 4 -oMaxM : Update Item }
          end;
 
     //Go to last Item in Captured List
@@ -1483,6 +1515,16 @@ begin
   end;
 end;
 
+procedure TDigIt_Main.Default_Work;
+begin
+  DestinationName:= '';
+  SaveExt:= 'jpg';
+  SavePath:= Path_Pictures;
+  rollCrops.Collapsed:=False;
+  rollPages.Collapsed:=True;
+  rollCounters.Collapsed:=True;
+end;
+
 procedure TDigIt_Main.Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
 begin
   if (newSource <> Nil) then
@@ -1757,15 +1799,6 @@ begin
    UI_FillBox(imgManipulation.SelectedCropArea);
 end;
 
-procedure TDigIt_Main.tbSourceClick(Sender: TObject);
-var
-   coo:TPoint;
-
-begin
-  coo :=tbSource.ClientToScreen(Point(0, tbSource.ClientHeight));
-  tbSource.DropdownMenu.PopUp(coo.X, coo.Y);
-end;
-
 procedure TDigIt_Main.tbWorkSaveClick(Sender: TObject);
 begin
   Self.XML_SaveWork;
@@ -1838,11 +1871,10 @@ end;
 
 procedure TDigIt_Main.UI_FillSource;
 begin
-  actPreview.Enabled:=(Source<>nil);
-  actTake.Enabled:=(Source<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
-  actReTake.Enabled:=actTake.Enabled;
-  actTimerTake.Enabled:=actTake.Enabled;
-  actSourceOpt.Enabled:=(Source<>nil);
+  actPreview.Enabled:= (Source<>nil);
+  actTake.Enabled:= (Source<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
+  actReTake.Enabled:= actTake.Enabled;
+  actTimerTake.Enabled:= actTake.Enabled;
 (*  if (Source<>nil)
   then lbSourceSummary.Caption:=Source^.Inst.UI_Title+':'+#13#10+Source^.Inst.UI_Params_Summary
   else lbSourceSummary.Caption:='';  *)
@@ -1882,13 +1914,28 @@ end;
 procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
 var
    curItem: TMenuItem;
+   i: Integer;
 
 begin
   curItem:= FindMenuItemByTag(menuSources, newSourceI);
- // if (curItem <> Nil) then curItem.Default:= True;
+  if (curItem <> Nil) then
+  begin
+    //waiting for my patch to be accepted in lcl let's remove the old default item
+    //freepascal.org/lazarus/lazarus#41034
+    for i:=0 to menuSources.Items.Count-1 do menuSources.Items[i].Default:= False;
+
+    curItem.Default:= True;
+  end;
 
   curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
- // if (curItem <> Nil) then curItem.Default:= True;
+  if (curItem <> Nil) then
+  begin
+    //waiting for my patch to be accepted in lcl let's remove the old default item
+    //freepascal.org/lazarus/lazarus#41034
+    for i:=0 to menuDestinations.Items.Count-1 do menuDestinations.Items[i].Default:= False;
+
+    curItem.Default:= True;
+  end;
 end;
 
 procedure TDigIt_Main.UI_FillBox(ABox: TCropArea);

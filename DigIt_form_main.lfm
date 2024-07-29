@@ -29,17 +29,17 @@ object DigIt_Main: TDigIt_Main
     TabOrder = 0
     Transparent = True
     object tbTake: TToolButton
-      Left = 428
+      Left = 299
       Top = 2
       Action = actTake
     end
     object tbReTake: TToolButton
-      Left = 483
+      Left = 354
       Top = 2
       Action = actReTake
     end
     object tbTest1: TToolButton
-      Left = 693
+      Left = 564
       Top = 2
       Caption = 'TEST'
       ImageIndex = 7
@@ -67,47 +67,41 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Source...'
       DropdownMenu = menuSources
       ImageIndex = 9
-      Style = tbsDropDown
-      OnClick = tbSourceClick
+      Style = tbsButtonDrop
     end
     object tbPreview: TToolButton
-      Left = 356
+      Left = 227
       Top = 2
       Action = actPreview
     end
     object tbWorkSave: TToolButton
-      Left = 633
+      Left = 504
       Top = 2
       Caption = 'WorkSave'
       ImageIndex = 7
       Visible = False
       OnClick = tbWorkSaveClick
     end
-    object tbSourceOpt: TToolButton
-      Left = 134
-      Top = 2
-      Action = actSourceOpt
-    end
     object tbSep2: TToolButton
-      Left = 348
+      Left = 219
       Height = 48
       Top = 2
       Caption = 'tbSep2'
       Style = tbsSeparator
     end
     object tbTimerTake: TToolButton
-      Left = 556
+      Left = 427
       Top = 2
       Action = actTimerTake
       DropdownMenu = menuTimerTake
       Style = tbsDropDown
     end
     object ToolButton2: TToolButton
-      Left = 223
+      Left = 132
       Top = 2
-      Caption = 'Destination Settings'
+      Caption = 'Destination...'
       DropdownMenu = menuDestinations
-      Style = tbsDropDown
+      Style = tbsButtonDrop
     end
   end
   object imgManipulation: TBGRAImageManipulation
@@ -2288,12 +2282,6 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Options ...'
       ImageIndex = 7
       OnExecute = actOptionsExecute
-    end
-    object actSourceOpt: TAction
-      Caption = 'Source Settings'
-      Enabled = False
-      ImageIndex = 10
-      OnExecute = actSourceOptExecute
     end
     object actTimerTake: TAction
       Caption = 'Timer Take'

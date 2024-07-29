@@ -711,14 +711,17 @@ var
 begin
     while PeekMessage(AMessage, HWnd(nil), 0, 0, PM_REMOVE) do
     begin
+      TranslateMessage(@AMessage);
+      DispatchMessageW(@AMessage);
+
       if AMessage.message = WM_QUIT then
       begin
         PostQuitMessage(AMessage.wParam);
         DoStop :=True;
       end;
 
-      TranslateMessage(@AMessage);
-      DispatchMessageW(@AMessage);
+      //TranslateMessage(@AMessage);
+      //DispatchMessageW(@AMessage);
 
       CheckSynchronize;
     end;

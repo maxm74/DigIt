@@ -17,6 +17,9 @@ uses
   Classes, SysUtils, ComCtrls, DOM, XMLConf, Laz2_DOM, Laz_XMLStreaming, Laz2_XMLCfg,
   FPImage, Menus, DigIt_types, BGRAPapers;
 
+resourcestring
+  DigIt_Destination_Default = 'Save as Files';
+
 function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
 function CreateXMLReader(ADoc: TDOMDocument; const Path: string; var DestroyDriver: boolean): TReader;
 
@@ -305,7 +308,7 @@ var
 begin
   //Add SaveAsFile Destination
   newItem:= TMenuItem.Create(AOwner);
-  newItem.Caption:= 'Save as Files';
+  newItem.Caption:= DigIt_Destination_Default;
   newItem.ImageIndex:= 3;
   newItem.Tag:= -1;
   newItem.OnClick:= menuOnClick;

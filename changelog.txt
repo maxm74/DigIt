@@ -1,3 +1,9 @@
+2024/07/29 Use ResourceString and changed names in Sources; 
+	   Use home\pictures as default Save Pictures Path; 
+	   Deleted SourceOptions Button;  
+	   Default Item in Sources/Destinations;
+	   Captured Rotate and Refresh a single item
+
 2024/07/25 Moved theBridge.Free in MainForm so the Twain 32bit process will close on exit;
            XML_SaveWork called on exit;
            XML Work Load/Save Destination from the Interfaces List;

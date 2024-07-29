@@ -16,6 +16,12 @@ interface
 uses
   Classes, SysUtils, Digit_Bridge_Intf;
 
+const
+  DigIt_Source_Folder_Name = 'Folder Pictures';
+
+resourcestring
+  DigIt_Source_Folder_NameL = 'Folder Pictures';
+
 type
   { TDigIt_Source_FolderParams }
 
@@ -64,9 +70,6 @@ type
 implementation
 
 uses Laz2_XMLCfg, Digit_Bridge_Impl, Dialogs, masks, BGRABitmapTypes;
-
-const
-  DigIt_Source_Folder_Name = 'Folder Source';  { #todo 2 -oMaxM : Usare Risorse per la Traduzione }
 
 var
    Source_Folder : TDigIt_Source_Folder = nil;
@@ -244,7 +247,7 @@ end;
 
 function TDigIt_Source_Folder.UI_Title(const AUI_Title: PChar): Integer; stdcall;
 begin
-  StrPCopy(AUI_Title, DigIt_Source_Folder_Name);
+  StrPCopy(AUI_Title, DigIt_Source_Folder_NameL);
   Result:= Length(AUI_Title);
 end;
 

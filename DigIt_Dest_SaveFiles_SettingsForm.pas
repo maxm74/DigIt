@@ -117,6 +117,9 @@ begin
     begin
       ASaveExt:= SaveExt;
       ASavePath:= SavePath;
+      //Last Char of the Path MUST be the Directory Separator
+      if (ASavePath[Length(ASavePath)] <> DirectorySeparator)
+      then ASavePath:= ASavePath+DirectorySeparator;
     end;
   end;
 

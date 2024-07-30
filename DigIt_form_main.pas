@@ -1918,24 +1918,10 @@ var
 
 begin
   curItem:= FindMenuItemByTag(menuSources, newSourceI);
-  if (curItem <> Nil) then
-  begin
-    //waiting for my patch to be accepted in lcl let's remove the old default item
-    //freepascal.org/lazarus/lazarus#41034
-    for i:=0 to menuSources.Items.Count-1 do menuSources.Items[i].Default:= False;
-
-    curItem.Default:= True;
-  end;
+  if (curItem <> Nil) then curItem.Default:= True;
 
   curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
-  if (curItem <> Nil) then
-  begin
-    //waiting for my patch to be accepted in lcl let's remove the old default item
-    //freepascal.org/lazarus/lazarus#41034
-    for i:=0 to menuDestinations.Items.Count-1 do menuDestinations.Items[i].Default:= False;
-
-    curItem.Default:= True;
-  end;
+  if (curItem <> Nil) then curItem.Default:= True;
 end;
 
 procedure TDigIt_Main.UI_FillBox(ABox: TCropArea);

@@ -28,15 +28,13 @@ type
   { TDigIt_Source_Twain }
   TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source)
   private
-    rScannerInfo: TTwainScannerInfo;
+    rScannerInfo: TTwainDeviceInfo;
     rParams: TTwainParams;
-
     rTwain:TCustomDelphiTwain;
+
     ipcProcess:TProcess;
     rCommsClient:TSyncIPCClient;
     ipcSourceList:array of TW_IDENTITY;
-    SelectedSourceIPC:Boolean;
-    SelectedSourceIndex,
     countTwain_Source,
     countIPC_Source: Integer;
     AcquireFileName: String;
@@ -45,12 +43,14 @@ type
     function getTwain: TCustomDelphiTwain;
 
     function IPC_GetDevicesList:Integer;
-    function IPC_FindSource(AManufacturer, AProductFamily, AProductName:String):Integer;
-    function IPC_OpenDevice(AIndex:Integer):Boolean;
+    function IPC_FindSource(AManufacturer, AProductFamily, AProductName: TW_STR32): Integer;
+    function IPC_OpenDevice(AManufacturer, AProductFamily, AProductName: TW_STR32):Boolean;
     function IPC_ParamsSet:Boolean;
     function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
     function IPC_Preview(AFileName:String):Boolean;
     function IPC_Take(AFileName:String):Boolean;
+
+    function GetTwainSource(Load: Boolean): TTwainSource;
 
     function ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
 
@@ -220,19 +220,20 @@ begin
   end;
 end;
 
-function TDigIt_Source_Twain.IPC_FindSource(AManufacturer, AProductFamily, AProductName: String): Integer;
+function TDigIt_Source_Twain.IPC_FindSource(AManufacturer, AProductFamily, AProductName: TW_STR32): Integer;
 var
    recSize, recBuf:Longint;
    AIdentity:TW_IDENTITY;
    resType:TMessageType;
 
 begin
-  Result :=-1;
+  Result :=0;
   try
      AIdentity.Manufacturer:=AManufacturer;
      AIdentity.ProductFamily:=AProductFamily;
      AIdentity.ProductName:=AProductName;
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_FIND, mtData_Var, AIdentity, sizeof(TW_IDENTITY), recBuf, recSize);
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_FIND, mtData_Var,
+                                                  AIdentity, sizeof(TW_IDENTITY), recBuf, recSize);
      if (resType=mtData_Integer)
      then Result:=recBuf;
 
@@ -240,9 +241,10 @@ begin
   end;
 end;
 
-function TDigIt_Source_Twain.IPC_OpenDevice(AIndex: Integer): Boolean;
+function TDigIt_Source_Twain.IPC_OpenDevice(AManufacturer, AProductFamily, AProductName: TW_STR32): Boolean;
 var
    recSize:Longint;
+   AIdentity:TW_IDENTITY;
    recBuf:Boolean;
    resType:TMessageType;
    aUserInterface:TW_USERINTERFACE;
@@ -259,7 +261,11 @@ begin
      if (resType=mtData_Integer)
      then Result:=recBuf;
 
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtData_Integer, AIndex, 0, recBuf, recSize);
+     AIdentity.Manufacturer:=AManufacturer;
+     AIdentity.ProductFamily:=AProductFamily;
+     AIdentity.ProductName:=AProductName;
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_OPEN, mtData_Var,
+                                                  AIdentity, SizeOf(TW_IDENTITY), recBuf, recSize);
      if (resType=mtData_Integer)
      then Result:=recBuf;
 
@@ -371,24 +377,41 @@ begin
   end;
 end;
 
+function TDigIt_Source_Twain.GetTwainSource(Load: Boolean): TTwainSource;
+begin
+  Result:= Twain.SelectedSource;
+  { #note 10 -oMaxM : For some reason Twain change the device order, so we MUST check if is our Selected Device }
+  if (Result = nil) or (DeviceInfoDifferent(rScannerInfo, Result.SourceIdentity^))
+  then Result:= Twain.SelectSource(rScannerInfo.Manufacturer,
+                                   rScannerInfo.ProductFamily,
+                                   rScannerInfo.ProductName, Load)
+  else if Load then Result.Loaded:= True;
+end;
+
 function TDigIt_Source_Twain.ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
 var
+   TwainSource: TTwainSource;
    capRet:TCapabilityRet;
-   TwainSource:TTwainSource;
    Current: Integer;
    paperCurrent: TTwainPaperSize;
    pixelCurrent:TTwainPixelType;
    resolutionCurrent:Single;
 
 begin
-  TwainSource:=Twain.SelectedSource;
-  TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
-  capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
-  capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
-  TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
-  capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
-  capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
-  TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
+  Result:= False;
+  TwainSource:= GetTwainSource(True);
+  if (TwainSource <> nil) then
+  begin
+    TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
+    capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
+    capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
+    TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
+    capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
+    capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
+    TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
+
+    Result:= True;
+  end;
 end;
 
 procedure TDigIt_Source_Twain.TwainAcquireNative(Sender: TObject; const Index: Integer;
@@ -400,8 +423,8 @@ end;
 function TDigIt_Source_Twain.internalTake(isPreview: Boolean; var AFileName: String): DWord;
 var
    capRet:TCapabilityRet;
-   TwainSource:TTwainSource;
    resTake:Boolean;
+   TwainSource: TTwainSource;
 
 begin
   try
@@ -418,7 +441,7 @@ begin
 
      AcquireFileName:= Path_Temp+Twain_TakeFileName;
 
-     if SelectedSourceIPC
+     if rScannerInfo.IPC
      then begin
             resTake :=IPC_ParamsSet;
 
@@ -432,13 +455,13 @@ begin
               Result:= Length(AcquireFileName);
             end;
           end
-     else if Assigned(Twain.SelectedSource) then
-          begin
-            TwainSource:=Twain.SelectedSource;
-            TwainSource.Loaded :=True;
-
-            with rParams do
+     else begin
+            TwainSource:= GetTwainSource(True);
+            if (TwainSource <> nil) then
             begin
+//              TwainSource.Loaded :=True;
+              with rParams do
+              begin
               //Set Parameters, (after a capture the scanner reset it to default???)
               capRet :=TwainSource.SetPaperFeeding(PaperFeed);
               capRet :=TwainSource.SetDuplexEnabled(False);
@@ -456,19 +479,20 @@ begin
                    end;
               capRet :=TwainSource.SetContrast(Contrast);
               capRet :=TwainSource.SetBrightness(Brightness);
+              end;
+
+              TwainSource.SetIndicators(True);
+
+              { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
+              TwainSource.TransferMode:=ttmNative; //ttmFile;
+              //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
+              Twain.OnTwainAcquireNative:=@TwainAcquireNative;
+              TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
+              //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
+
+              AFileName:= AcquireFileName;
+              Result:= Length(AcquireFileName);
             end;
-
-            Twain.SelectedSource.SetIndicators(True);
-
-            { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-            TwainSource.TransferMode:=ttmNative; //ttmFile;
-            //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
-            Twain.OnTwainAcquireNative:=@TwainAcquireNative;
-            TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
-            //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
-
-            AFileName:= AcquireFileName;
-            Result:= Length(AcquireFileName);
           end;
 
      Application.BringToFront;
@@ -498,11 +522,10 @@ constructor TDigIt_Source_Twain.Create;
 begin
   inherited Create;
 
-  rTwain:=nil;
-  rCommsClient:=nil;
-  ipcProcess:=nil;
-  SelectedSourceIPC:=False;
-  SelectedSourceIndex:=-1;
+  rTwain:= nil;
+  rCommsClient:= nil;
+  ipcProcess:= nil;
+  FillChar(rScannerInfo, Sizeof(rScannerInfo), 0);
 end;
 
 destructor TDigIt_Source_Twain.Destroy;
@@ -534,8 +557,8 @@ end;
 
 function TDigIt_Source_Twain.GetFromUser: Boolean; stdcall;
 var
-  newSelectedIndex: Integer;
-  newSelectedSourceIPC: Boolean;
+  //newSelectedID: Integer;
+  newSelectedInfo: TTwainDeviceInfo;
   TwainCap: TTwainParamsCapabilities;
   useScannerDefault: Boolean;
 
@@ -544,8 +567,10 @@ begin
   try
      if Twain.SourceManagerLoaded then
      begin
-       //Close Current Scanner
-       if Assigned(Twain.SelectedSource) then Twain.SelectedSource.Loaded:=False;
+       //Close Current Scanner if any
+       if (Twain.SelectedSource <> nil)
+       then Twain.SelectedSource.Loaded:= False;
+
        Twain.SourceManagerLoaded:=False;
      end;
 
@@ -556,50 +581,29 @@ begin
      //Get 32bit Devices
      countIPC_Source :=IPC_GetDevicesList;
 
-     newSelectedIndex :=TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, rScannerInfo);
-     if (newSelectedIndex>-1) then
+     newSelectedInfo:= rScannerInfo;
+     if TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, newSelectedInfo) then
      begin
-       //if the index of selected device is greater than countTwain_Source then is a 32bit scanner
-       newSelectedSourceIPC :=(newSelectedIndex >= countTwain_Source);
+       useScannerDefault:= DeviceInfoDifferent(rScannerInfo, newSelectedInfo);
 
-       if newSelectedSourceIPC
-       then begin
-              useScannerDefault:= not(SelectedSourceIPC) or ((newSelectedIndex-countTwain_Source)<>SelectedSourceIndex);
+       //if the selected device is a 32bit scanner
+       if newSelectedInfo.IPC
+       then Result:= IPC_OpenDevice(newSelectedInfo.Manufacturer,
+                                    newSelectedInfo.ProductFamily,
+                                    newSelectedInfo.ProductName)
+       else Result:= (Twain.SelectSource(newSelectedInfo.Manufacturer,
+                                         newSelectedInfo.ProductFamily,
+                                         newSelectedInfo.ProductName, True) <> nil);
 
-              SelectedSourceIndex :=newSelectedIndex-countTwain_Source;
-              Result :=IPC_OpenDevice(SelectedSourceIndex);
-            end
-       else begin
-              useScannerDefault:= SelectedSourceIPC or (newSelectedIndex <> SelectedSourceIndex);
-
-              SelectedSourceIndex :=newSelectedIndex;
-              Twain.SelectedSourceIndex :=SelectedSourceIndex;
-              Result :=(Twain.SelectedSource<>nil);
-              if Result then Twain.SelectedSource.Loaded:=True;
-            end;
-
-       SelectedSourceIPC:= newSelectedSourceIPC;
-
+       //If Device is opened
        if Result then
        begin
-           rScannerInfo.IPC_Scanner:= SelectedSourceIPC;
-           if SelectedSourceIPC
-           then begin
-                  rScannerInfo.Manufacturer :=ipcSourceList[SelectedSourceIndex].Manufacturer;
-                  rScannerInfo.ProductFamily :=ipcSourceList[SelectedSourceIndex].ProductFamily;
-                  rScannerInfo.ProductName :=ipcSourceList[SelectedSourceIndex].ProductName;
+           rScannerInfo:= newSelectedInfo;
+           if rScannerInfo.IPC
+           then IPC_ParamsGet(TwainCap)
+           else ParamsGet(TwainCap);
 
-                  IPC_ParamsGet(TwainCap);
-                end
-           else begin
-                  rScannerInfo.Manufacturer :=Twain.SelectedSource.Manufacturer;
-                  rScannerInfo.ProductFamily :=Twain.SelectedSource.ProductFamily;
-                  rScannerInfo.ProductName :=Twain.SelectedSource.ProductName;
-
-                  ParamsGet(TwainCap);
-                end;
-
-         TTwainSettingsSource.Execute(useScannerDefault, TwainCap, rParams);
+           TTwainSettingsSource.Execute(useScannerDefault, TwainCap, rParams);
        end;
      end;
 
@@ -623,7 +627,7 @@ begin
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
 
-     rScannerInfo.IPC_Scanner:= XMLWork.GetValue(xml_RootPath+'/IPC_Scanner', False);
+     rScannerInfo.IPC:= XMLWork.GetValue(xml_RootPath+'/IPC_Scanner', False);
      rScannerInfo.Manufacturer:= XMLWork.GetValue(xml_RootPath+'/Manufacturer', '');
      rScannerInfo.ProductFamily:= XMLWork.GetValue(xml_RootPath+'/ProductFamily', '');
      rScannerInfo.ProductName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
@@ -655,7 +659,7 @@ begin
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
 
-     XMLWork.SetValue(xml_RootPath+'/IPC_Scanner', rScannerInfo.IPC_Scanner);
+     XMLWork.SetValue(xml_RootPath+'/IPC_Scanner', rScannerInfo.IPC);
      XMLWork.SetValue(xml_RootPath+'/Manufacturer', rScannerInfo.Manufacturer);
      XMLWork.SetValue(xml_RootPath+'/ProductFamily', rScannerInfo.ProductFamily);
      XMLWork.SetValue(xml_RootPath+'/ProductName', rScannerInfo.ProductName);
@@ -684,52 +688,44 @@ end;
 
 function TDigIt_Source_Twain.OnSet: Boolean; stdcall;
 var
-   dlgRes:TModalResult;
+   dlgRes: TModalResult;
+   TwainSource: TTwainSource;
+   aIndex: Integer;
 
 begin
   with rScannerInfo do
   begin
-    SelectedSourceIndex :=-1;
-
+    aIndex:= -1;
     if (Manufacturer<>'') and (ProductFamily<>'') and (ProductName<>'') then
     repeat
-      if IPC_Scanner
-      then SelectedSourceIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
+      //Try to Open searching by Name Until Opened or user select Abort
+      if IPC
+      then aIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
       else begin
              Twain.SourceManagerLoaded :=False;
-             Application.ProcessMessages; { #todo -oMaxM : Is really necessary? }
+             Application.ProcessMessages;
              Twain.SourceManagerLoaded :=True;
-             SelectedSourceIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
+             aIndex :=Twain.FindSource(Manufacturer, ProductFamily, ProductName);
            end;
 
-      if (SelectedSourceIndex=-1)
+      if (aIndex = -1)
       then begin
              if (MessageDlg('DigIt Twain', 'Device not found...'#13#10+
                             ProductName+#13#10+Manufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
              then break;
            end;
-    until (SelectedSourceIndex>-1);
+    until (aIndex > -1);
 
-    if (SelectedSourceIndex=-1)
-    then Result:= GetFromUser
+    if (aIndex = -1)
+    then Result:= GetFromUser //User has selected Abort, Get Another Device from List
     else begin
-           SelectedSourceIPC :=IPC_Scanner;
-           if IPC_Scanner
-           then begin
-                  if IPC_OpenDevice(SelectedSourceIndex) then
-                  begin
-                  end;
-                  { #todo 1 -oMaxM : else ? }
-                end
+           if IPC
+           then Result:= IPC_OpenDevice(Manufacturer, ProductFamily, ProductName)
            else begin
-                  Twain.SelectedSourceIndex:=SelectedSourceIndex;
-                  if Assigned(Twain.SelectedSource) then
-                  begin
-                    Manufacturer :=Twain.SelectedSource.Manufacturer;
-                    ProductFamily :=Twain.SelectedSource.ProductFamily;
-                    ProductName :=Twain.SelectedSource.ProductName;
-                  end;
-                  { #todo 1 -oMaxM : else ? }
+                  Twain.SourceManagerLoaded:= True;
+                  TwainSource:= GetTwainSource(False);
+                  Result:= (TwainSource <> nil);
+                  if Result then TwainSource.Loaded:= True;
                 end;
          end;
   end;

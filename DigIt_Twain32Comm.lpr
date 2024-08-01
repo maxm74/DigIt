@@ -15,11 +15,15 @@ type
 
   TTwain32SyncIPCServer=class(TSyncIPCServer)
   private
+    rScannerInfo: TW_IDENTITY;
+    rParams: TTwainParams;
     rTwain:TCustomDelphiTwain;
+
     rUserInterface:TW_USERINTERFACE;
-    rParams:TTwainParams;
     AcquireFileName:String;
     AcquireResolution:Single;
+
+    function GetTwainSource(Load: Boolean): TTwainSource;
 
     function InternalTake(AResolution: Single; APath:String):Boolean;
     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
@@ -36,7 +40,7 @@ type
     function TWAIN32_TIMEOUT(ATimeout:Integer):Boolean; //Input=mtData_Integer Output=mtData_Integer (Boolean)
     function TWAIN32_LIST:Boolean; //Input=mtData_Null Output=mtData_Pointer (array of TW_IDENTITY)
     function TWAIN32_FIND(AIdentity:TW_IDENTITY):Boolean; //Input=mtData_Var (TW_IDENTITY) Output=mtData_Integer
-    function TWAIN32_OPEN(AIndex:Integer):Boolean; //Input=mtData_Integer Output=mtData_Integer (Boolean)
+    function TWAIN32_OPEN(AIdentity:TW_IDENTITY):Boolean; //Input=mtData_Var (TW_IDENTITY) Output=mtData_Integer (Boolean)
     function TWAIN32_USERINTERFACE(AUserInterface:TW_USERINTERFACE):Boolean; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
     function TWAIN32_PARAMS_SET(AParams:TTwainParams):Boolean; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
     function TWAIN32_PARAMS_GET:Boolean; //Input=mtData_Null Output=mtData_Var (TTwainParamsCapabilities)
@@ -77,6 +81,25 @@ var
 
 { TTwain32SyncIPCServer }
 
+function TTwain32SyncIPCServer.GetTwainSource(Load: Boolean): TTwainSource;
+begin
+  Result:= Twain.SelectedSource;
+  { #note 10 -oMaxM : For some reason Twain change the device order, so we MUST check if is our Selected Device }
+  if (Result = nil) or (DeviceInfoDifferent(rScannerInfo, Result.SourceIdentity^))
+  then begin
+         {$ifopt D+}
+         if (Result = nil)
+         then Writeln('  ERROR SelectedSource = NIL')
+         else Writeln('  ERROR SelectedSource Name:'+rScannerInfo.ProductName+'<>'+Result.SourceIdentity^.ProductName);
+         {$endif}
+
+         Result:= Twain.SelectSource(rScannerInfo.Manufacturer,
+                                     rScannerInfo.ProductFamily,
+                                     rScannerInfo.ProductName, Load);
+       end
+  else if Load then Result.Loaded:= True;
+end;
+
 function TTwain32SyncIPCServer.InternalTake(AResolution: Single; APath: String): Boolean;
 var
    i:Integer;
@@ -85,15 +108,12 @@ var
 
 begin
   Result:=False;
-  if Assigned(Twain.SelectedSource) then
+  TwainSource:= GetTwainSource(True);
+  if (TwainSource <> nil) then
   begin
-    TwainSource:=Twain.SelectedSource;
-
     {$ifopt D+}
-     Writeln('  InternalTake['+IntToStr(TwainSource.Index)+'] '+TwainSource.ProductName);
+     Writeln('  InternalTake ['+IntToStr(TwainSource.Index)+'] ID:'+IntToStr(TwainSource.Id)+'-'+TwainSource.ProductName);
     {$endif}
-
-    TwainSource.Loaded := True;
 
     //Set Parameters, (after a capture the scanner reset it to default???)
     capRet :=TwainSource.SetPaperFeeding(rParams.PaperFeed);
@@ -106,8 +126,7 @@ begin
     capRet :=TwainSource.SetBrightness(rParams.Brightness);
     TwainSource.SetIndicators(True);
 
-    //MaxM: can not use ttmFile,
-    //Brother MFC-6490 Exception with tpsNONE and dpi>150, don't set Contratst/Brightness
+    { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
     TwainSource.TransferMode:=ttmNative; //ttmFile;
     //TwainSource.SetupFileTransfer(APath, tfBMP);
     AcquireFileName :=APath;
@@ -163,7 +182,6 @@ function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; AInteger: Intege
 begin
   Case AMsgID of
   MSG_TWAIN32_TIMEOUT : Result:=TWAIN32_TIMEOUT(AInteger);
-  MSG_TWAIN32_OPEN : Result:=TWAIN32_OPEN(AInteger);
   else begin
          {$ifopt D+}
          Writeln('MSG_Unknown:'+IntToStr(AMsgID));
@@ -199,6 +217,7 @@ function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer; const Buffer; Co
 begin
   Case AMsgID of
   MSG_TWAIN32_FIND : Result:=TWAIN32_FIND(TW_IDENTITY(Buffer));
+  MSG_TWAIN32_OPEN : Result:=TWAIN32_OPEN(TW_IDENTITY(Buffer));
   MSG_TWAIN32_USERINTERFACE : Result:=TWAIN32_USERINTERFACE(TW_USERINTERFACE(Buffer));
   MSG_TWAIN32_PARAMS_SET: Result:=TWAIN32_PARAMS_SET(TTwainParams(Buffer));
   else begin
@@ -267,7 +286,12 @@ begin
      begin
        SetLength(theList, listCount);
        for i:=0 to listCount-1 do
+       begin
           theList[i] :=Twain.Source[i].SourceIdentity^;
+          {$ifopt D+}
+          Writeln('    ['+IntToStr(i)+'] = ID:'+IntToStr(theList[i].Id)+'-'+theList[i].Manufacturer+' - '+theList[i].ProductName);
+          {$endif}
+       end;
 
        //Copy theList on result Stream
        Result:=MessageResult(Pointer(theList), listCount*Sizeof(TW_IDENTITY));
@@ -292,7 +316,7 @@ end;
 
 function TTwain32SyncIPCServer.TWAIN32_FIND(AIdentity: TW_IDENTITY): Boolean;
 var
-  res: Integer;
+  res, i: Integer;
 
 begin
   Result :=False;
@@ -301,11 +325,19 @@ begin
       Writeln(' TWAIN32_FIND: '+AIdentity.Manufacturer);
       Writeln('               '+AIdentity.ProductFamily);
       Writeln('               '+AIdentity.ProductName);
+      Writeln('    list before:');
+      for i:=0 to Twain.SourceCount-1 do
+        Writeln('    ['+IntToStr(i)+'] = ID:'+IntToStr(Twain.Source[i].SourceIdentity^.ID)+' - '+Twain.Source[i].SourceIdentity^.ProductName);
      {$endif}
 
      Twain.SourceManagerLoaded :=False; //So we Refresh Devices List
      Application.MsgRunLoop;
      Twain.SourceManagerLoaded :=True;
+     {$ifopt D+}
+     Writeln('    list after:');
+     for i:=0 to Twain.SourceCount-1 do
+       Writeln('    ['+IntToStr(i)+'] = ID:'+IntToStr(Twain.Source[i].SourceIdentity^.ID)+' - '+Twain.Source[i].SourceIdentity^.ProductName);
+    {$endif}
      res :=Twain.FindSource(AIdentity.Manufacturer, AIdentity.ProductFamily, AIdentity.ProductName);
      Result:=MessageResult(res);
 
@@ -324,33 +356,46 @@ begin
   end;
 end;
 
-function TTwain32SyncIPCServer.TWAIN32_OPEN(AIndex:Integer): Boolean;
+function TTwain32SyncIPCServer.TWAIN32_OPEN(AIdentity:TW_IDENTITY): Boolean;
 var
    listCount: Integer;
+   TwainSource,
+   oldTwainSource: TTwainSource;
 
 begin
   Result :=False;
   try
-     {$ifopt D+}
-      Writeln(' TWAIN32_OPEN: '+IntToStr(AIndex));
-     {$endif}
+    {$ifopt D+}
+     Writeln(' TWAIN32_OPEN: '+IntToStr(AIdentity.Id)+'-'+AIdentity.ProductName);
+    {$endif}
 
-     Twain.SourceManagerLoaded :=True;
-     listCount :=Twain.SourceCount;
-     Result :=(listCount>0) and (AIndex>=0) and (AIndex<listCount);
-     if Result then
-     begin
-       Twain.SelectedSourceIndex:=AIndex;
-       Result :=(Twain.SelectedSource<>nil);
-       if Result then
-       begin
-         Twain.SelectedSource.Loaded:=True;
-         Result:=MessageResult(Integer(Twain.SelectedSource.Loaded));
-       end;
+    if Twain.SourceManagerLoaded
+    then oldTwainSource:= Twain.SelectedSource
+    else oldTwainSource:= nil;
+
+    Twain.SourceManagerLoaded :=True;
+    TwainSource:= Twain.SelectSource(AIdentity.Manufacturer,
+                                     AIdentity.ProductFamily,
+                                     AIdentity.ProductName, False);
+    Result:= (TwainSource <> nil);
+    if Result then
+    begin
+       //Close Current Scanner if any
+       if (oldTwainSource <> nil)
+       then oldTwainSource.Loaded:= False;
+
+       TwainSource.Loaded:= True;
+
+       rScannerInfo:= AIdentity;
+
+       Result:=MessageResult(Integer(TwainSource.Loaded));
+       {$ifopt D+}
+        Writeln('  Opened ID:'+IntToStr(TwainSource.ID)+'-'+TwainSource.ProductName);
+       {$endif}
      end;
 
      {$ifopt D+}
-      Writeln(' TWAIN32_OPEN Result: '+BoolToStr(Result, True));
+      Writeln(' TWAIN32_OPEN: Result: '+BoolToStr(Result, True));
      {$endif}
 
   except
@@ -440,8 +485,9 @@ begin
       Writeln(' TWAIN32_PARAMS_GET:');
      {$endif}
 
-     TwainSource:=Twain.SelectedSource;
-     if Assigned(TwainSource) and TwainSource.Loaded then
+     TwainSource:= GetTwainSource(True);
+     Result:= (TwainSource <> nil);
+     if Result then
      begin
        TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
        capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
@@ -451,7 +497,7 @@ begin
        capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
        TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
 
-       {$ifopt D+}
+(*       {$ifopt D+}
         Writeln('   Sizeof(TwainCap):'+IntToStr(Sizeof(TwainCap)));
         Writeln('   Sizeof(Single):'+IntToStr(Sizeof(Single)));
         Writeln('   Sizeof(ResolutionArray):'+IntToStr(Sizeof(TwainCap.ResolutionArray)));
@@ -459,7 +505,7 @@ begin
         Writeln('   Sizeof(BitDepthArray):'+IntToStr(Sizeof(TwainCap.BitDepthArray)));
         Writeln('   Length(BitDepthArray):'+IntToStr(TwainCap.BitDepthArraySize));
        {$endif}
-
+*)
        //Create a MemoryStream to send back result and write the Buffer
        curResBuffer:=TMemoryStream.Create;
        curResBuffer.Write(TwainCap,

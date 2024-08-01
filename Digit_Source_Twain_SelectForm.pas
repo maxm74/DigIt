@@ -27,12 +27,13 @@ type
     Twain: TCustomDelphiTwain;
     countTwain_Source:Integer;
     rRefreshClick:TRefreshNotify;
-    rScannerInfo: TTwainScannerInfo;
+    rScannerInfo: TTwainDeviceInfo;
 
   public
      class function Execute(ARefreshClick: TRefreshNotify; ATwain: TCustomDelphiTwain;
-                            const ipcList: array of TW_IDENTITY; AScannerInfo: TTwainScannerInfo):Integer;
-    procedure FillList(const ipcList: array of TW_IDENTITY);
+                            const ipcList: array of TW_IDENTITY;
+                            var AScannerInfo: TTwainDeviceInfo): Boolean;
+     procedure FillList(const ipcList: array of TW_IDENTITY);
   end;
 
 var
@@ -69,10 +70,8 @@ begin
     curItem.SubItems.Add(curSource.Manufacturer);
 
     //if is Current Selected Scanner set selectedIndex
-    if not(rScannerInfo.IPC_Scanner) and
-       (curSource.Manufacturer=rScannerInfo.Manufacturer) and
-       (curSource.ProductFamily=rScannerInfo.ProductFamily) and
-       (curSource.ProductName=rScannerInfo.ProductName) then selectedIndex :=curItem.Index;
+    if not(rScannerInfo.IPC) and not(DeviceInfoDifferent(rScannerInfo, curSource.SourceIdentity^))
+    then selectedIndex :=curItem.Index;
   end;
 
   for i:=Low(ipcList) to High(ipcList) do
@@ -83,11 +82,8 @@ begin
     curItem.SubItems.Add(ipcList[i].Manufacturer);
     curItem.SubItems.Add('(32bit)');
 
-    //if is Current Selected Scanner set selectedIndex
-    if (rScannerInfo.IPC_Scanner) and
-       (ipcList[i].Manufacturer=rScannerInfo.Manufacturer) and
-       (ipcList[i].ProductFamily=rScannerInfo.ProductFamily) and
-       (ipcList[i].ProductName=rScannerInfo.ProductName) then selectedIndex :=curItem.Index;
+    if (rScannerInfo.IPC) and not(DeviceInfoDifferent(rScannerInfo, ipcList[i]))
+    then selectedIndex :=curItem.Index;
   end;
 
   //Select Current Scanner
@@ -97,9 +93,12 @@ begin
 end;
 
 class function TTwainSelectSource.Execute(ARefreshClick: TRefreshNotify; ATwain: TCustomDelphiTwain;
-  const ipcList: array of TW_IDENTITY; AScannerInfo: TTwainScannerInfo): Integer;
+  const ipcList: array of TW_IDENTITY; var AScannerInfo: TTwainDeviceInfo): Boolean;
+var
+   listIndex: Integer;
+
 begin
-  Result :=-1;
+  Result :=False;
   if (TwainSelectSource=nil)
   then TwainSelectSource :=TTwainSelectSource.Create(nil);
 
@@ -115,7 +114,24 @@ begin
            rRefreshClick:= ARefreshClick;
            btRefresh.Visible:= Assigned(rRefreshClick);
 
-           if (ShowModal=mrOk) then Result:= lvSources.ItemIndex
+           Result:= (ShowModal=mrOk);
+           if Result then
+           begin
+             AScannerInfo.IPC:= (lvSources.ItemIndex >= countTwain_Source);
+             if AScannerInfo.IPC
+             then begin
+                    listIndex:= lvSources.ItemIndex-countTwain_Source;
+                    AScannerInfo.Manufacturer:= ipcList[listIndex].Manufacturer;
+                    AScannerInfo.ProductFamily:= ipcList[listIndex].ProductFamily;
+                    AScannerInfo.ProductName:= ipcList[listIndex].ProductName;
+                  end
+             else begin
+                    listIndex:= lvSources.ItemIndex;
+                    AScannerInfo.Manufacturer:= Twain.Source[listIndex].Manufacturer;
+                    AScannerInfo.ProductFamily:= Twain.Source[listIndex].ProductFamily;
+                    AScannerInfo.ProductName:= Twain.Source[listIndex].ProductName;
+                  end
+           end;
          end;
   end;
 end;

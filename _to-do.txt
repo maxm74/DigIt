@@ -1,17 +1,12 @@
 Main:
-  Perdita del Focus dopo la Percentuale dello Scanner Twain
   CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
   Salvare la sessione più spesso
-  Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
+  (risolto, testare di più) Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
   Animazione durante la scansione?
   Take attivo con nessuna Crop Area?
   riprendi sessione : barra di captured alla fine
 
 Twain:
+  (risolto, testare di più) Avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??
 
-
-Avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??
-xTestare di più(Risolto?)
-
-In Realease non si chiude in uscita il 32bit Comm
 

@@ -115,7 +115,6 @@ object DigIt_Main: TDigIt_Main
     KeepAspectRatio = False
     MinHeight = 53
     MinWidth = 40
-    EmptyImage.Allow = True
     EmptyImage.ResolutionUnit = ruPixelsPerInch
     EmptyImage.ShowBorder = True
     NewCropAreaDefault.AspectRatio = '3:4'

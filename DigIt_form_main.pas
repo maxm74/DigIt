@@ -997,7 +997,7 @@ begin
          end
     else begin
            newDestination:= theBridge.DestinationsImpl.Data[TMenuItem(Sender).Tag];
-           newDestinationName:= theBridge.DestinationsImpl.Name[TMenuItem(Sender).Tag];
+           newDestinationName:= theBridge.DestinationsImpl.Key[TMenuItem(Sender).Tag];
          end;
     Destination_SelectUserParams(newDestinationName, newDestination);
     //TMenuItem(Sender).Default:= True;
@@ -1014,7 +1014,7 @@ begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
     newSource:= theBridge.SourcesImpl.Data[TMenuItem(Sender).Tag];
-    newSourceName:= theBridge.SourcesImpl.Name[TMenuItem(Sender).Tag];
+    newSourceName:= theBridge.SourcesImpl.Key[TMenuItem(Sender).Tag];
     Source_SelectUserParams(newSourceName, newSource);
     TMenuItem(Sender).Default:= True;
     UI_FillSource;
@@ -1285,7 +1285,7 @@ begin
     newSourceName:= XMLWork.GetValue('Source/Name', '');
     if (newSourceName<>'') then
     begin
-      newSourceI:= theBridge.SourcesImpl.FindByName(newSourceName);
+      newSourceI:= theBridge.SourcesImpl.FindByKey(newSourceName);
       newSource:= theBridge.SourcesImpl.Data[newSourceI];
       if (newSource <> nil)
       then begin
@@ -1307,7 +1307,7 @@ begin
            SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
          end
     else begin
-           newDestinationI:= theBridge.DestinationsImpl.FindByName(newDestinationName);
+           newDestinationI:= theBridge.DestinationsImpl.FindByKey(newDestinationName);
            newDestination:= theBridge.DestinationsImpl.Data[newDestinationI];
            if (newDestination <> nil)
            then begin

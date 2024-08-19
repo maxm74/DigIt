@@ -1,3 +1,6 @@
+2024/08/19 TOpenArrayList use a generic Key intestead of String; 
+           Removed EmptyImage.Allow Property in ImageManipulation
+
 2024/08/01 Twain Source do not use index to Select Device (Twain change order in some cases); 
            32bit server Open using TW_IDENTITY;
            GetTwainSource function in 32bit server/Twain Source test current Selected Device is correct;

@@ -286,7 +286,7 @@ begin
       res:= curSource^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
       then newItem.Caption:= curTitle
-      else newItem.Caption:= theBridge.SourcesImpl.Name[i];
+      else newItem.Caption:= theBridge.SourcesImpl.Key[i];
 
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
       newItem.Tag:= i;
@@ -326,7 +326,7 @@ begin
       res:= curDestination^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
       then newItem.Caption:= curTitle
-      else newItem.Caption:= theBridge.DestinationsImpl.Name[i];
+      else newItem.Caption:= theBridge.DestinationsImpl.Key[i];
 
       newItem.ImageIndex:= curDestination^.Inst.UI_ImageIndex;
       newItem.Tag:= i;

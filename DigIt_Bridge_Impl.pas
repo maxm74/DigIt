@@ -66,7 +66,7 @@ type
   end;
   PSourceInfo = ^TSourceInfo;
 
-  TDigIt_Sources = class(specialize TOpenArrayList<TSourceInfo>, IDigIt_Sources)
+  TDigIt_Sources = class(specialize TOpenArrayList<TSourceInfo, String>, IDigIt_Sources)
     function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
   protected
     function FreeElement(var aData: TSourceInfo): Boolean; override;
@@ -80,7 +80,7 @@ type
   end;
   PDestinationInfo = ^TDestinationInfo;
 
-  TDigIt_Destinations = class(specialize TOpenArrayList<TDestinationInfo>, IDigIt_Destinations)
+  TDigIt_Destinations = class(specialize TOpenArrayList<TDestinationInfo, String>, IDigIt_Destinations)
     function Register(const aName: PChar; const aClass: IDigIt_Destination): Boolean; stdcall;
   protected
     function FreeElement(var aData: TDestinationInfo): Boolean; override;

@@ -1,10 +1,29 @@
 Main:
+  Aggiornare il valore dei Counter nella UI subito dopo il Take
   CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
   Salvare la sessione più spesso
   (risolto, testare di più) Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
   Animazione durante la scansione?
   Take attivo con nessuna Crop Area?
   riprendi sessione : barra di captured alla fine
+  pulsante elimina in barra captured (elimina anche il file)
+
+  Tasto per creare una cartella numerata -> incrementa il foldercounter 
+      -> crea una cartella con il nome (CartellaSalvataggio)\foldercounter 
+      -> azzera i contatori 
+      -> il take salva in questa cartella.
+           tipo:   Cartella-00
+                              Foto-00.jpg
+	                      Foto-01.jpg , etc...
+                   Cartella-01
+                              Foto-00.jpg
+	                      Foto-01.jpg , etc...
+
+Takers:
+WIA / Twain?
+  il metodo Take potrebbe catturare n pagine (se l'origine è il feeder ad esempio), 
+    se n > 1 i prossimi Take non catturano veramente dallo scanner ma ritornano l'[iesimo] file temporaneo,
+    incrementa un contatore interno (iPage) quando è maggiore di n cattura veramente dallo scanner e il ciclo ricomincia. 
 
 Twain:
   (risolto, testare di più) Avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??

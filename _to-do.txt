@@ -6,8 +6,11 @@ Main:
   Animazione durante la scansione?
   Take attivo con nessuna Crop Area?
   riprendi sessione : barra di captured alla fine
-  pulsante elimina in barra captured (elimina anche il file)
-
+  
+  Pulsante elimina in barra captured (elimina anche il file)
+  Take/Preview con Countdown
+  Take automatico, Giorni della Settimana con Checkbox e Orari (eventuali notifiche via email,etc)
+ 
   Tasto per creare una cartella numerata -> incrementa il foldercounter 
       -> crea una cartella con il nome (CartellaSalvataggio)\foldercounter 
       -> azzera i contatori 

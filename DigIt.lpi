@@ -106,7 +106,7 @@
         <PackageName Value="LCL"/>
       </Item6>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="15">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -176,26 +176,12 @@
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="Digit_Source_Twain_SettingsForm.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="TwainSettingsSource"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="Digit_Source_Twain_SelectForm.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="TwainSelectSource"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit15>
-      <Unit16>
         <Filename Value="DigIt_Dest_SaveFiles_SettingsForm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Dest_SaveFiles_Settings"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit16>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

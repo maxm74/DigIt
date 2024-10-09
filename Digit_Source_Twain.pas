@@ -14,8 +14,9 @@ unit Digit_Source_Twain;
 interface
 
 uses
-  simpleipc, SyncIPC, Process, Classes, SysUtils, Twain, DelphiTwain, DelphiTwainUtils,
-  Digit_Bridge_Intf, Digit_Source_Twain_Types, Digit_Source_Twain_SelectForm, Digit_Source_Twain_SettingsForm;
+  simpleipc, SyncIPC, Process, Classes, SysUtils,
+  Twain, DelphiTwain, DelphiTwainTypes, DelphiTwainUtils,
+  Digit_Bridge_Intf, Digit_Source_Twain_Types, DelphiTwain_SelectForm, DelphiTwain_SettingsForm;
 
 const
   DigIt_Source_Twain_Name = 'Twain Device';
@@ -392,7 +393,7 @@ function TDigIt_Source_Twain.ParamsGet(var TwainCap: TTwainParamsCapabilities): 
 var
    TwainSource: TTwainSource;
    capRet:TCapabilityRet;
-   Current: Integer;
+   bitCurrent: Integer;
    paperCurrent: TTwainPaperSize;
    pixelCurrent:TTwainPixelType;
    resolutionCurrent:Single;
@@ -404,7 +405,7 @@ begin
   begin
     TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
     capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
-    capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
+    capRet :=TwainSource.GetIBitDepth(bitCurrent, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
     TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
     capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
     capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
@@ -441,7 +442,7 @@ begin
 
      AcquireFileName:= Path_Temp+Twain_TakeFileName;
 
-     if rScannerInfo.IPC
+     if rScannerInfo.FromAddList
      then begin
             resTake :=IPC_ParamsSet;
 
@@ -582,12 +583,12 @@ begin
      countIPC_Source :=IPC_GetDevicesList;
 
      newSelectedInfo:= rScannerInfo;
-     if TTwainSelectSource.Execute(@RefreshList, Twain, ipcSourceList, newSelectedInfo) then
+     if TTwainSelectSource.Execute('DigIt', '(32 bit)', @RefreshList, Twain, ipcSourceList, newSelectedInfo) then
      begin
        useScannerDefault:= DeviceInfoDifferent(rScannerInfo, newSelectedInfo);
 
        //if the selected device is a 32bit scanner
-       if newSelectedInfo.IPC
+       if newSelectedInfo.FromAddList
        then Result:= IPC_OpenDevice(newSelectedInfo.Manufacturer,
                                     newSelectedInfo.ProductFamily,
                                     newSelectedInfo.ProductName)
@@ -599,7 +600,7 @@ begin
        if Result then
        begin
            rScannerInfo:= newSelectedInfo;
-           if rScannerInfo.IPC
+           if rScannerInfo.FromAddList
            then IPC_ParamsGet(TwainCap)
            else ParamsGet(TwainCap);
 
@@ -627,7 +628,7 @@ begin
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
 
-     rScannerInfo.IPC:= XMLWork.GetValue(xml_RootPath+'/IPC_Scanner', False);
+     rScannerInfo.FromAddList:= XMLWork.GetValue(xml_RootPath+'/IPC_Scanner', False);
      rScannerInfo.Manufacturer:= XMLWork.GetValue(xml_RootPath+'/Manufacturer', '');
      rScannerInfo.ProductFamily:= XMLWork.GetValue(xml_RootPath+'/ProductFamily', '');
      rScannerInfo.ProductName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
@@ -659,7 +660,7 @@ begin
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
 
-     XMLWork.SetValue(xml_RootPath+'/IPC_Scanner', rScannerInfo.IPC);
+     XMLWork.SetValue(xml_RootPath+'/IPC_Scanner', rScannerInfo.FromAddList);
      XMLWork.SetValue(xml_RootPath+'/Manufacturer', rScannerInfo.Manufacturer);
      XMLWork.SetValue(xml_RootPath+'/ProductFamily', rScannerInfo.ProductFamily);
      XMLWork.SetValue(xml_RootPath+'/ProductName', rScannerInfo.ProductName);
@@ -699,7 +700,7 @@ begin
     if (Manufacturer<>'') and (ProductFamily<>'') and (ProductName<>'') then
     repeat
       //Try to Open searching by Name Until Opened or user select Abort
-      if IPC
+      if FromAddList
       then aIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
       else begin
              Twain.SourceManagerLoaded :=False;
@@ -719,7 +720,7 @@ begin
     if (aIndex = -1)
     then Result:= GetFromUser //User has selected Abort, Get Another Device from List
     else begin
-           if IPC
+           if FromAddList
            then Result:= IPC_OpenDevice(Manufacturer, ProductFamily, ProductName)
            else begin
                   Twain.SourceManagerLoaded:= True;

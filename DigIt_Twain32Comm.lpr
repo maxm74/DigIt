@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}
   Windows, Classes, SysUtils, CustApp,
-  SyncIPC, Twain, DelphiTwain, DelphiTwainUtils, Digit_Source_Twain_Types;
+  SyncIPC, Twain, DelphiTwain, DelphiTwainUtils, DelphiTwainTypes,
+  Digit_Source_Twain_Types;
 
 type
 

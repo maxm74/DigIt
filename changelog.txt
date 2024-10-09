@@ -1,3 +1,6 @@
+2024/09/10 Moved Source_Twain_Select and Settings Forms to DelphiTwain Package; 
+	   Use of TTwainDeviceInfo.FromAddList
+
 2024/08/19 TOpenArrayList use a generic Key intestead of String; 
            Removed EmptyImage.Allow Property in ImageManipulation
 

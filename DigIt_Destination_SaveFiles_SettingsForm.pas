@@ -1,4 +1,4 @@
-unit DigIt_Dest_SaveFiles_SettingsForm;
+unit DigIt_Destination_SaveFiles_SettingsForm;
 
 {$mode ObjFPC}{$H+}
 

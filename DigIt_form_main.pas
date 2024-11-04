@@ -302,7 +302,7 @@ uses
   {$ifopt D+}
   lazlogger,
   {$endif}
-  LCLIntf, DigIt_Form_Templates, DigIt_Dest_SaveFiles_SettingsForm;
+  LCLIntf, DigIt_Form_Templates, Digit_Destinations;
 
 
 { TDigIt_Main }
@@ -1563,8 +1563,9 @@ procedure TDigIt_Main.Destination_SelectUserParams(newDestinationName: String; n
 begin
   if (newDestination = Nil)
   then begin
+         { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
          //SaveAsFiles destination
-         if TDest_SaveFiles_Settings.Execute(SaveExt, SavePath) then
+         if Destination_SaveFiles_Settings_Execute(SaveExt, SavePath) then
          begin
          end;
          DestinationParams:= nil;

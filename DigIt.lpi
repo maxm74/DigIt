@@ -86,27 +86,30 @@
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="6">
+    <RequiredPackages Count="7">
       <Item1>
-        <PackageName Value="MaxM_Commons"/>
+        <PackageName Value="WIAPascal_pkg"/>
       </Item1>
       <Item2>
         <PackageName Value="DelphiTwain_pkg"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="MaxM_Commons"/>
       </Item3>
       <Item4>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="LazControls"/>
       </Item4>
       <Item5>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item5>
       <Item6>
-        <PackageName Value="LCL"/>
+        <PackageName Value="bgracontrols"/>
       </Item6>
+      <Item7>
+        <PackageName Value="LCL"/>
+      </Item7>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="12">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -135,53 +138,34 @@
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="Digit_Source_Folder.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
         <Filename Value="DigIt_Form_Templates.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Templates"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit7>
-      <Unit8>
+      </Unit6>
+      <Unit7>
         <Filename Value="_to-do.txt"/>
         <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="digit_form_animacquiring.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="FormAnimAcquiring"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="DigIt_Form_AnimAcquiring"/>
-      </Unit9>
-      <Unit10>
+      </Unit7>
+      <Unit8>
         <Filename Value="DigIt_Bridge_Intf.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Bridge_Intf"/>
-      </Unit10>
-      <Unit11>
+        <UnitName Value="DigIt_Bridge_Intf"/>
+      </Unit8>
+      <Unit9>
         <Filename Value="DigIt_Bridge_Impl.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Digit_Bridge_Impl"/>
+        <UnitName Value="DigIt_Bridge_Impl"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="DigIt_Sources.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="DigIt_Destinations.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit11>
-      <Unit12>
-        <Filename Value="Digit_Source_Twain.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="Digit_Source_Twain_Types.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="DigIt_Dest_SaveFiles_SettingsForm.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="Dest_SaveFiles_Settings"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

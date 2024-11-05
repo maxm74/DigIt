@@ -151,12 +151,12 @@
       <Unit8>
         <Filename Value="DigIt_Bridge_Intf.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DigIt_Bridge_Intf"/>
+        <UnitName Value="Digit_Bridge_Intf"/>
       </Unit8>
       <Unit9>
         <Filename Value="DigIt_Bridge_Impl.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DigIt_Bridge_Impl"/>
+        <UnitName Value="Digit_Bridge_Impl"/>
       </Unit9>
       <Unit10>
         <Filename Value="DigIt_Sources.pas"/>

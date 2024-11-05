@@ -1,7 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
-2024/11/ 
+2024/11/
+        05 First Write of TDigIt_Source_WIA.GetFromUser 
         04 Added DigIt_Sources, DigIt_Destinations for future multiplatform use;
            Changed DigIt_Dest_SaveFiles_SettingsForm filename to DigIt_Destination_SaveFiles_SettingsForm;
            Moved use of DigIt_Source_XXX inside DigIt_Sources;

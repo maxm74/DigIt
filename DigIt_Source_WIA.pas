@@ -30,10 +30,15 @@ type
   { TDigIt_Source_WIA }
   TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source)
   private
-    rDeviceID,
-    rDeviceItem: String;
-    rParams: TWIAParams;
     rWIA: TWIAManager;
+    rWIASource: TWIADevice;
+    DeviceID,
+    DeviceName,
+    DeviceManufacturer: String;
+    DeviceItemIndex: Integer;
+    DeviceItem: PWiaItem;
+    WIACap: TWIAParamsCapabilities;
+    WIAParams: TArrayWIAParams;
     AcquireFileName: String;
 
     function getWIA: TWIAManager;
@@ -48,8 +53,6 @@ type
                                  nativeHandle: TW_UINT32; var Cancel: Boolean);
     function internalTake(isPreview:Boolean; var AFileName: String): DWord;
 *)
-    property WIA: TWIAManager read getWIA;
-
   public
     //IDigIt_Params Implementation
     function GetFromUser: Boolean; stdcall;
@@ -248,7 +251,10 @@ constructor TDigIt_Source_WIA.Create;
 begin
   inherited Create;
 
+  DeviceID:= '';
+  DeviceItemIndex:= -1;
   rWIA:= nil;
+  rWIASource:= nil;
 end;
 
 destructor TDigIt_Source_WIA.Destroy;
@@ -268,62 +274,49 @@ end;
 
 function TDigIt_Source_WIA.GetFromUser: Boolean; stdcall;
 var
-  //newSelectedID: Integer;
-  //newSelectedInfo: TWIADeviceInfo;
-  WIACap: TWIAParamsCapabilities;
-  useScannerDefault: Boolean;
+  newItemIndex,
+  newDeviceIndex: Integer;
+  newWIASource: TWIADevice;
+  initPar: TInitialItemValues;
 
 begin
   Result :=False;
-  (*
+
+  if (getWIA <> nil) then
   try
-     if WIA.SourceManagerLoaded then
+     rWia.EnumAll:= False;
+
+     //Open the Select Device Dialog
+     newDeviceIndex:= rWia.SelectDeviceDialog;
+     if (newDeviceIndex > -1) then
      begin
-       //Close Current Scanner if any
-       if (WIA.SelectedSource <> nil)
-       then WIA.SelectedSource.Loaded:= False;
+       //Select the Device
+       rWia.SelectedDeviceIndex:= newDeviceIndex;
+       newWIASource:= rWia.SelectedDevice;
+       if (newWIASource = nil) then raise Exception.Create('Error Connecting Device');
 
-       WIA.SourceManagerLoaded:=False;
-     end;
+       //if not(newWIASource.GetParamsCapabilities(WIACap) then raise Exception.Create('Error Get Params Capabilities');;
 
-     //Load source manager and Enumerate Internal Devices
-     WIA.SourceManagerLoaded :=True;
-     countWIA_Source:=WIA.SourceCount;
+       newItemIndex:= newWIASource.SelectedItemIndex;
 
-     //Get 32bit Devices
-     countIPC_Source :=IPC_GetDevicesList;
+       //If Device is different start with Default Values  { #note 5 -oMaxM : Store Params for others devices in XML? }
+       if (DeviceID <> newWIASource.ID)
+       then initPar:= initDefault
+       else initPar:= initParams;
 
-     newSelectedInfo:= rDeviceInfo;
-     if TWIASelectSource.Execute('DigIt', '(32 bit)', @RefreshList, WIA, ipcSourceList, newSelectedInfo) then
-     begin
-       useScannerDefault:= DeviceInfoDifferent(rDeviceInfo, newSelectedInfo);
-
-       //if the selected device is a 32bit scanner
-       if newSelectedInfo.FromAddList
-       then Result:= IPC_OpenDevice(newSelectedInfo.Manufacturer,
-                                    newSelectedInfo.ProductFamily,
-                                    newSelectedInfo.ProductName)
-       else Result:= (WIA.SelectSource(newSelectedInfo.Manufacturer,
-                                         newSelectedInfo.ProductFamily,
-                                         newSelectedInfo.ProductName, True) <> nil);
-
-       //If Device is opened
+       //Select Scanner Item and Settings to use
+       Result:= TWIASettingsSource.Execute(newWIASource, newItemIndex, initPar, WIAParams);
        if Result then
        begin
-           rDeviceInfo:= newSelectedInfo;
-           if rDeviceInfo.FromAddList
-           then IPC_ParamsGet(WIACap)
-           else ParamsGet(WIACap);
-
-           TWIASettingsSource.Execute(useScannerDefault, WIACap, rParams);
+         rWIASource:= newWIASource;
+         rWIASource.SelectedItemIndex:= newItemIndex;
+         DeviceID:= rWIASource.ID;
+         DeviceItemIndex:= newItemIndex;
+         DeviceItem:= rWIASource.SelectedItem;
        end;
      end;
-
   finally
-    WIASelectSource.Free; WIASelectSource:= Nil;
-    WIASettingsSource.Free; WIASettingsSource:= Nil;
   end;
-  *)
 end;
 
 function TDigIt_Source_WIA.Duplicate: IDigIt_Params; stdcall;

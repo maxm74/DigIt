@@ -54,8 +54,9 @@ type
 
     function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
-    function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
+    function Enabled: Boolean; stdcall;
+    function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     //function RegisterName: PChar; stdcall;
     function Params: IDigIt_Params; stdcall;
@@ -229,8 +230,14 @@ begin
   Result:= True;
 end;
 
-function TDigIt_Source_Folder.Enabled(AEnabled: Boolean): Boolean; stdcall;
+function TDigIt_Source_Folder.Enabled: Boolean; stdcall;
 begin
+  Result:= True;
+end;
+
+function TDigIt_Source_Folder.setEnabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+  //Always return True, Predefined Source cannot be disabled
   Result:= True;
 end;
 

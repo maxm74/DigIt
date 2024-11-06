@@ -83,8 +83,9 @@ type
   IDigIt_Interface = Interface
     function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
-    function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
+    function Enabled: Boolean; stdcall;
+    function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     function Params: IDigIt_Params; stdcall;
     function UI_Title(const AUI_Title: PChar): Integer; stdcall;

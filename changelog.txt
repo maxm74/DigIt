@@ -2,6 +2,11 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+        06 Changed Interfaces method Enabled and added setEnabled;
+	   Added Test of Interfaces Init in Register;
+	   Added Test of Interfaces Enabled in Menu Build;
+	   Added Enabled to False in Twain/WIA if no dll/wia manager founds;
+	   First WIAParams save tests
         05 First Write of TDigIt_Source_WIA.GetFromUser 
         04 Added DigIt_Sources, DigIt_Destinations for future multiplatform use;
            Changed DigIt_Dest_SaveFiles_SettingsForm filename to DigIt_Destination_SaveFiles_SettingsForm;

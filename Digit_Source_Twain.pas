@@ -39,6 +39,7 @@ type
     countTwain_Source,
     countIPC_Source: Integer;
     AcquireFileName: String;
+    rEnabled: Boolean;
 
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
@@ -79,8 +80,9 @@ type
     //IDigIt_Source Implementation
     function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
-    function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
+    function Enabled: Boolean; stdcall;
+    function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     function Params: IDigIt_Params; stdcall;
     function UI_Title(const AUI_Title: PChar): Integer; stdcall;
@@ -527,6 +529,7 @@ begin
   rCommsClient:= nil;
   ipcProcess:= nil;
   FillChar(rScannerInfo, Sizeof(rScannerInfo), 0);
+  rEnabled:= True;
 end;
 
 destructor TDigIt_Source_Twain.Destroy;
@@ -742,9 +745,17 @@ begin
   Result:= True;
 end;
 
-function TDigIt_Source_Twain.Enabled(AEnabled: Boolean): Boolean; stdcall;
+function TDigIt_Source_Twain.Enabled: Boolean; stdcall;
 begin
-  Result:= True;
+  Result:= False;
+//  Result:= rEnabled and
+//          ((GetTwainDirectory(TWAINLIBRARY_32)<>'') or (GetTwainDirectory(TWAINLIBRARY_64)<>''));
+end;
+
+function TDigIt_Source_Twain.setEnabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+  rEnabled:= AEnabled;
+  Result:= rEnabled;
 end;
 
 function TDigIt_Source_Twain.Release: Boolean; stdcall;

@@ -40,6 +40,7 @@ type
     WIACap: TWIAParamsCapabilities;
     WIAParams: TArrayWIAParams;
     AcquireFileName: String;
+    rEnabled: Boolean;
 
     function getWIA: TWIAManager;
 
@@ -66,8 +67,9 @@ type
     //IDigIt_Source Implementation
     function Flags: DWord; stdcall;
     function Init: Boolean; stdcall;
-    function Enabled(AEnabled: Boolean): Boolean; stdcall;
     function Release: Boolean; stdcall;
+    function Enabled: Boolean; stdcall;
+    function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     function Params: IDigIt_Params; stdcall;
     function UI_Title(const AUI_Title: PChar): Integer; stdcall;
@@ -255,6 +257,7 @@ begin
   DeviceItemIndex:= -1;
   rWIA:= nil;
   rWIASource:= nil;
+  rEnabled:= True;
 end;
 
 destructor TDigIt_Source_WIA.Destroy;
@@ -305,7 +308,7 @@ begin
        else initPar:= initParams;
 
        //Select Scanner Item and Settings to use
-       Result:= TWIASettingsSource.Execute(newWIASource, newItemIndex, initPar, WIAParams);
+       Result:= TWIASettingsSource.Execute(newWIASource, newItemIndex, initParams, WIAParams);
        if Result then
        begin
          rWIASource:= newWIASource;
@@ -359,6 +362,9 @@ end;
 function TDigIt_Source_WIA.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
+   i: Integer;
+   curPath,
+   curItemPath: String;
 
 begin
   try
@@ -378,8 +384,41 @@ begin
      XMLWork.SetValue(xml_RootPath+'/Brightness', FloatToStr(rParams.Brightness));
      XMLWork.SetValue(xml_RootPath+'/BitDepth', rParams.BitDepth);
 
-     XMLWork.Flush;
+
 *)
+     XMLWork.SetValue(xml_RootPath+'/ID', DeviceID);
+
+     if (DeviceItem <> nil)
+     then XMLWork.SetValue(xml_RootPath+'/Item', DeviceItem^.Name)
+     else XMLWork.SetValue(xml_RootPath+'/Item', '');
+
+     XMLWork.SetValue(xml_RootPath+'/Manufacturer', DeviceManufacturer);
+     XMLWork.SetValue(xml_RootPath+'/ProductName', DeviceName);
+
+     curPath:= xml_RootPath+'/WIAParams/';
+     XMLWork.DeletePath(curPath);
+     XMLWork.SetValue(curPath+'Count', Length(WIAParams));
+
+     for i:=0 to Length(WIAParams)-1 do
+     with (WIAParams[i]) do
+     begin
+       curItemPath :=curPath+'Item' + IntToStr(i)+'/';
+
+       XMLWork.SetValue(curItemPath+'NativeUI', NativeUI);
+       XMLWork.SetValue(curItemPath+'PaperType', Integer(PaperType));
+       XMLWork.SetValue(curItemPath+'PaperW', PaperW);
+       XMLWork.SetValue(curItemPath+'PaperH', PaperH);
+       XMLWork.SetValue(curItemPath+'Rotation', Integer(Rotation));
+       XMLWork.SetValue(curItemPath+'HAlign', Integer(HAlign));
+       XMLWork.SetValue(curItemPath+'VAlign', Integer(VAlign));
+       XMLWork.SetValue(curItemPath+'Resolution', Resolution);
+       XMLWork.SetValue(curItemPath+'Contrast', Contrast);
+       XMLWork.SetValue(curItemPath+'Brightness', Brightness);
+       XMLWork.SetValue(curItemPath+'DataType', Integer(DataType));
+     end;
+
+     XMLWork.Flush;
+
      Result:= True;
 
   finally
@@ -449,9 +488,15 @@ begin
   Result:= True;
 end;
 
-function TDigIt_Source_WIA.Enabled(AEnabled: Boolean): Boolean; stdcall;
+function TDigIt_Source_WIA.Enabled: Boolean; stdcall;
 begin
-  Result:= True;
+  Result:= rEnabled and (getWIA <> nil) and (rWIA.DevMgrIntf <> nil);
+end;
+
+function TDigIt_Source_WIA.setEnabled(AEnabled: Boolean): Boolean; stdcall;
+begin
+  rEnabled:= AEnabled;
+  Result:= rEnabled;
 end;
 
 function TDigIt_Source_WIA.Release: Boolean; stdcall;

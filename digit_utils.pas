@@ -291,6 +291,7 @@ begin
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
       newItem.Tag:= i;
       newItem.OnClick:= menuOnClick;
+      newItem.Enabled:= curSource^.Inst.Enabled;
       menuSources.Items.Add(newItem);
     end;
   end;
@@ -331,6 +332,7 @@ begin
       newItem.ImageIndex:= curDestination^.Inst.UI_ImageIndex;
       newItem.Tag:= i;
       newItem.OnClick:= menuOnClick;
+      newItem.Enabled:= curDestination^.Inst.Enabled;
       menuDestinations.Items.Add(newItem);
     end;
   end;

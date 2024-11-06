@@ -388,8 +388,16 @@ var
    newData: TSourceInfo;
 
 begin
-  newData.Inst:= aClass;
-  Result:= (Add(aName, newData) > -1);
+  Result:= False;
+  if (aClass = nil) then exit;
+
+  //If the Class cannot Init don't register it and Release
+  if (aClass.Init)
+  then begin
+         newData.Inst:= aClass;
+         Result:= (Add(aName, newData) > -1);
+       end
+  else aClass.Release;
 end;
 (*
 function TDigIt_Sources.UnRegister(const aName: String): Boolean;
@@ -452,8 +460,16 @@ var
    newData: TDestinationInfo;
 
 begin
-  newData.Inst:= aClass;
-  Result:= (Add(aName, newData) > -1);
+  Result:= False;
+  if (aClass = nil) then exit;
+
+  //If the Class cannot Init don't register it and Release
+  if (aClass.Init)
+  then begin
+         newData.Inst:= aClass;
+         Result:= (Add(aName, newData) > -1);
+       end
+  else aClass.Release;
 end;
 
 (*

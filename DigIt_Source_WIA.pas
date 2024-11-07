@@ -15,7 +15,7 @@ interface
 
 uses 
   Windows, Classes, SysUtils,
-  WIA, WiaDef, WIA_LH, WIA_SettingsForm,
+  WIA, WiaDef, WIA_LH, WIA_PaperSizes, WIA_SettingsForm,
   Digit_Bridge_Intf;
 
 const
@@ -34,7 +34,8 @@ type
     rWIASource: TWIADevice;
     DeviceID,
     DeviceName,
-    DeviceManufacturer: String;
+    DeviceManufacturer,
+    DeviceItemName: String;
     DeviceItemIndex: Integer;
     DeviceItem: PWiaItem;
     WIACap: TWIAParamsCapabilities;
@@ -316,8 +317,102 @@ begin
          DeviceID:= rWIASource.ID;
          DeviceItemIndex:= newItemIndex;
          DeviceItem:= rWIASource.SelectedItem;
+
+         if (DeviceItem <> nil)
+         then DeviceItemName:= DeviceItem^.Name
+         else DeviceItemName:= '';
+
+         DeviceManufacturer:= rWIASource.Manufacturer;
+         DeviceName:= rWIASource.Name;
        end;
      end;
+  finally
+  end;
+end;
+
+function TDigIt_Source_WIA.OnSet: Boolean; stdcall;
+var
+   curSource: TWIADevice;
+   curItem: PWIAItem;
+   curItemName: String;
+   aIndex: Integer;
+
+begin
+  if (getWIA <> nil) then
+  try
+     rWia.EnumAll:= False;
+     aIndex:= -1;
+
+     if (DeviceManufacturer <> '') and (DeviceName <> '') then
+     repeat
+       Application.ProcessMessages;
+       rWia.RefreshDeviceList;
+
+       //Try to Open searching by ID and ItemName then by Name
+       rWIA.SelectDeviceItem(DeviceID, DeviceItemName, curSource, aIndex);
+       if (curSource = nil)
+       then begin
+              //aIndex refers to Device List but we use it only to test if finded
+              aIndex:= rWia.FindDevice(DeviceName, DeviceManufacturer);
+              if (aIndex >= 0) then
+              begin
+                curSource:= rWia.Devices[aIndex];
+                if (curSource <> nil) and (curSource.SelectItem(DeviceItemName))
+                then break
+                else
+                  begin
+                    //We have finded the Device but not the Item, ask the user what to do
+                    curItem:= curSource.Items[0];
+                    if (curItem <> nil) then
+                    Case MessageDlg('DigIt WIA', 'Device found but Item '+DeviceItemName+' not...'#13#10+
+                                        'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
+                                        [mbYes, mbRetry, mbAbort], 0) of
+                    mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
+                    mrAbort: break;
+                    end;
+                  end;
+              end;
+            end
+       else begin
+              if (aIndex = -1) then
+              begin
+                //We have finded the Device but not the Item, ask the user what to do
+                curItem:= curSource.Items[0];
+                if (curItem <> nil) then
+                Case MessageDlg('DigIt WIA', 'Device found but Item '+DeviceItemName+' not...'#13#10+
+                                    'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
+                                    [mbYes, mbRetry, mbAbort], 0) of
+                mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
+                mrAbort: break;
+                end;
+              end;
+            end;
+
+      if (aIndex = -1) then
+      begin
+        if (MessageDlg('DigIt WIA', 'Device not found...'#13#10+
+                       DeviceName+#13#10+DeviceManufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
+        then break;
+      end;
+    until (aIndex > -1);
+
+    if (aIndex = -1)
+    then Result:= GetFromUser //User has selected Abort, Get Another Device from List
+    else begin
+           rWIASource:= curSource;
+           rWIASource.SelectedItemIndex:= aIndex;
+           DeviceID:= rWIASource.ID;
+           DeviceItemIndex:= aIndex;
+           DeviceItem:= rWIASource.SelectedItem;
+
+           if (DeviceItem <> nil)
+           then DeviceItemName:= DeviceItem^.Name
+           else DeviceItemName:= '';
+
+           DeviceManufacturer:= rWIASource.Manufacturer;
+           DeviceName:= rWIASource.Name;
+         end;
+
   finally
   end;
 end;
@@ -330,28 +425,55 @@ end;
 function TDigIt_Source_WIA.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
+   i,
+   iCount: Integer;
+   curPath,
+   curItemPath: String;
 
 begin
   try
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
-(*
-     rDeviceInfo.FromAddList:= XMLWork.GetValue(xml_RootPath+'/IPC_Scanner', False);
-     rDeviceInfo.Manufacturer:= XMLWork.GetValue(xml_RootPath+'/Manufacturer', '');
-     rDeviceInfo.ProductFamily:= XMLWork.GetValue(xml_RootPath+'/ProductFamily', '');
-     rDeviceInfo.ProductName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
 
-     //rParams.PaperFeed:= TWIAPaperFeeding(XMLWork.GetValue(xml_RootPath+'/PaperFeed', Integer(pfFlatbed)));
-     //rParams.PaperSize:= TWIAPaperSize(XMLWork.GetValue(xml_RootPath+'/PaperSize', Integer(tpsNone)));
-     //rParams.PixelType:= TWIAPixelType(XMLWork.GetValue(xml_RootPath+'/PixelType', Integer(tbdRgb)));
-     XMLWork.GetValue(xml_RootPath+'/PaperFeed', rParams.PaperFeed, TypeInfo(TWIAPaperFeeding));
-     XMLWork.GetValue(xml_RootPath+'/PaperSize', rParams.PaperSize, TypeInfo(TWIAPaperSize));
-     XMLWork.GetValue(xml_RootPath+'/PixelType', rParams.PixelType, TypeInfo(TWIAPixelType));
-     rParams.Resolution:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Resolution', '150'));
-     rParams.Contrast:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Contrast', '0'));
-     rParams.Brightness:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Brightness', '0'));
-     rParams.BitDepth:= XMLWork.GetValue(xml_RootPath+'/BitDepth', 24);
-*)
+     DeviceID:= XMLWork.GetValue(xml_RootPath+'/ID', '');
+     DeviceItemName:= XMLWork.GetValue(xml_RootPath+'/Item', '');
+     DeviceManufacturer:= XMLWork.GetValue(xml_RootPath+'/Manufacturer', '');
+     DeviceName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
+
+     curPath:= xml_RootPath+'/WIAParams/';
+     iCount:= XMLWork.GetValue(curPath+'Count', 0);
+
+
+     WIAParams:= nil; //Avoid possible data overlaps by eliminating any existing array
+     SetLength(WIAParams, iCount);
+
+     for i:=0 to Length(WIAParams)-1 do
+     with (WIAParams[i]) do
+     begin
+       curItemPath :=curPath+'Item' + IntToStr(i)+'/';
+
+       //Set Default Values
+       PaperType:= wptMAX;
+       Rotation:= wrPortrait;
+       HAlign:= waHLeft;
+       VAlign:= waVTop;
+       DataType:= wdtCOLOR;
+       DocHandling:= [];
+
+       NativeUI:= XMLWork.GetValue(curItemPath+'NativeUI', False);
+       XMLWork.GetValue(curItemPath+'PaperType', PaperType, TypeInfo(TWIAPaperType));
+       PaperW:= XMLWork.GetValue(curItemPath+'PaperW', 0);
+       PaperH:= XMLWork.GetValue(curItemPath+'PaperH', 0);
+       XMLWork.GetValue(curItemPath+'Rotation', Rotation, TypeInfo(TWIARotation));
+       XMLWork.GetValue(curItemPath+'HAlign', HAlign, TypeInfo(TWIAAlignHorizontal));
+       XMLWork.GetValue(curItemPath+'VAlign', VAlign, TypeInfo(TWIAAlignVertical));
+       Resolution:= XMLWork.GetValue(curItemPath+'Resolution', 100);
+       Contrast:= XMLWork.GetValue(curItemPath+'Contrast', 0);
+       Brightness:= XMLWork.GetValue(curItemPath+'Brightness', 0);
+       XMLWork.GetValue(curItemPath+'DataType', DataType, TypeInfo(TWIADataType));
+       XMLWork.GetValue(curItemPath+'DocHandling', DocHandling, TypeInfo(TWIADocumentHandlingSet));
+     end;
+
      Result:= True;
 
   finally
@@ -370,28 +492,9 @@ begin
   try
      Result:= False;
      XMLWork:= TXMLConfig.Create(xml_File);
-(*
-     XMLWork.SetValue(xml_RootPath+'/IPC_Scanner', rDeviceInfo.FromAddList);
-     XMLWork.SetValue(xml_RootPath+'/Manufacturer', rDeviceInfo.Manufacturer);
-     XMLWork.SetValue(xml_RootPath+'/ProductFamily', rDeviceInfo.ProductFamily);
-     XMLWork.SetValue(xml_RootPath+'/ProductName', rDeviceInfo.ProductName);
 
-     XMLWork.SetValue(xml_RootPath+'/PaperFeed', rParams.PaperFeed, TypeInfo(TWIAPaperFeeding));
-     XMLWork.SetValue(xml_RootPath+'/PaperSize', rParams.PaperSize, TypeInfo(TWIAPaperSize));
-     XMLWork.SetValue(xml_RootPath+'/PixelType', rParams.PixelType, TypeInfo(TWIAPixelType));
-     XMLWork.SetValue(xml_RootPath+'/Resolution', FloatToStr(rParams.Resolution));
-     XMLWork.SetValue(xml_RootPath+'/Contrast', FloatToStr(rParams.Contrast));
-     XMLWork.SetValue(xml_RootPath+'/Brightness', FloatToStr(rParams.Brightness));
-     XMLWork.SetValue(xml_RootPath+'/BitDepth', rParams.BitDepth);
-
-
-*)
      XMLWork.SetValue(xml_RootPath+'/ID', DeviceID);
-
-     if (DeviceItem <> nil)
-     then XMLWork.SetValue(xml_RootPath+'/Item', DeviceItem^.Name)
-     else XMLWork.SetValue(xml_RootPath+'/Item', '');
-
+     XMLWork.SetValue(xml_RootPath+'/Item', DeviceItemName);
      XMLWork.SetValue(xml_RootPath+'/Manufacturer', DeviceManufacturer);
      XMLWork.SetValue(xml_RootPath+'/ProductName', DeviceName);
 
@@ -405,16 +508,17 @@ begin
        curItemPath :=curPath+'Item' + IntToStr(i)+'/';
 
        XMLWork.SetValue(curItemPath+'NativeUI', NativeUI);
-       XMLWork.SetValue(curItemPath+'PaperType', Integer(PaperType));
+       XMLWork.SetValue(curItemPath+'PaperType', PaperType, TypeInfo(TWIAPaperType));
        XMLWork.SetValue(curItemPath+'PaperW', PaperW);
        XMLWork.SetValue(curItemPath+'PaperH', PaperH);
-       XMLWork.SetValue(curItemPath+'Rotation', Integer(Rotation));
-       XMLWork.SetValue(curItemPath+'HAlign', Integer(HAlign));
-       XMLWork.SetValue(curItemPath+'VAlign', Integer(VAlign));
+       XMLWork.SetValue(curItemPath+'Rotation', Rotation, TypeInfo(TWIARotation));
+       XMLWork.SetValue(curItemPath+'HAlign', HAlign, TypeInfo(TWIAAlignHorizontal));
+       XMLWork.SetValue(curItemPath+'VAlign', VAlign, TypeInfo(TWIAAlignVertical));
        XMLWork.SetValue(curItemPath+'Resolution', Resolution);
        XMLWork.SetValue(curItemPath+'Contrast', Contrast);
        XMLWork.SetValue(curItemPath+'Brightness', Brightness);
-       XMLWork.SetValue(curItemPath+'DataType', Integer(DataType));
+       XMLWork.SetValue(curItemPath+'DataType', DataType, TypeInfo(TWIADataType));
+       XMLWork.SetValue(curItemPath+'DocHandling', DocHandling, TypeInfo(TWIADocumentHandlingSet));
      end;
 
      XMLWork.Flush;
@@ -429,53 +533,6 @@ end;
 function TDigIt_Source_WIA.Summary(const ASummary: PChar): Integer; stdcall;
 begin
   Result:= 0;
-end;
-
-function TDigIt_Source_WIA.OnSet: Boolean; stdcall;
-var
-   dlgRes: TModalResult;
-//   WIASource: TWIASource;
-   aIndex: Integer;
-
-begin
-  (*
-  with rDeviceInfo do
-  begin
-    aIndex:= -1;
-    if (Manufacturer<>'') and (ProductFamily<>'') and (ProductName<>'') then
-    repeat
-      //Try to Open searching by Name Until Opened or user select Abort
-      if FromAddList
-      then aIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
-      else begin
-             WIA.SourceManagerLoaded :=False;
-             Application.ProcessMessages;
-             WIA.SourceManagerLoaded :=True;
-             aIndex :=WIA.FindSource(Manufacturer, ProductFamily, ProductName);
-           end;
-
-      if (aIndex = -1)
-      then begin
-             if (MessageDlg('DigIt WIA', 'Device not found...'#13#10+
-                            ProductName+#13#10+Manufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
-             then break;
-           end;
-    until (aIndex > -1);
-
-    if (aIndex = -1)
-    then Result:= GetFromUser //User has selected Abort, Get Another Device from List
-    else begin
-           if FromAddList
-           then Result:= IPC_OpenDevice(Manufacturer, ProductFamily, ProductName)
-           else begin
-                  WIA.SourceManagerLoaded:= True;
-                  WIASource:= GetWIASource(False);
-                  Result:= (WIASource <> nil);
-                  if Result then WIASource.Loaded:= True;
-                end;
-         end;
-  end;
-  *)
 end;
 
 function TDigIt_Source_WIA.Flags: DWord; stdcall;

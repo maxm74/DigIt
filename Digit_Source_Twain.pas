@@ -636,13 +636,15 @@ begin
      rScannerInfo.ProductFamily:= XMLWork.GetValue(xml_RootPath+'/ProductFamily', '');
      rScannerInfo.ProductName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
 
-     //rParams.PaperFeed:= TTwainPaperFeeding(XMLWork.GetValue(xml_RootPath+'/PaperFeed', Integer(pfFlatbed)));
-     //rParams.PaperSize:= TTwainPaperSize(XMLWork.GetValue(xml_RootPath+'/PaperSize', Integer(tpsNone)));
-     //rParams.PixelType:= TTwainPixelType(XMLWork.GetValue(xml_RootPath+'/PixelType', Integer(tbdRgb)));
+     //Set Default Values
+     rParams.PaperFeed:= pfFlatbed;
+     rParams.PaperSize:= tpsNone;
+     rParams.PixelType:= tbdRgb;
+
      XMLWork.GetValue(xml_RootPath+'/PaperFeed', rParams.PaperFeed, TypeInfo(TTwainPaperFeeding));
      XMLWork.GetValue(xml_RootPath+'/PaperSize', rParams.PaperSize, TypeInfo(TTwainPaperSize));
      XMLWork.GetValue(xml_RootPath+'/PixelType', rParams.PixelType, TypeInfo(TTwainPixelType));
-     rParams.Resolution:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Resolution', '150'));
+     rParams.Resolution:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Resolution', '100'));
      rParams.Contrast:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Contrast', '0'));
      rParams.Brightness:= StrToFloat(XMLWork.GetValue(xml_RootPath+'/Brightness', '0'));
      rParams.BitDepth:= XMLWork.GetValue(xml_RootPath+'/BitDepth', 24);
@@ -747,9 +749,8 @@ end;
 
 function TDigIt_Source_Twain.Enabled: Boolean; stdcall;
 begin
-  Result:= False;
-//  Result:= rEnabled and
-//          ((GetTwainDirectory(TWAINLIBRARY_32)<>'') or (GetTwainDirectory(TWAINLIBRARY_64)<>''));
+  Result:= rEnabled and
+          ((GetTwainDirectory(TWAINLIBRARY_32)<>'') or (GetTwainDirectory(TWAINLIBRARY_64)<>''));
 end;
 
 function TDigIt_Source_Twain.setEnabled(AEnabled: Boolean): Boolean; stdcall;

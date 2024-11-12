@@ -2,6 +2,7 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+        12 Changed Source_Wia onSet method.
         07 Writed WIA Source Load/Save from XML;
 	   Writed WIA Source OnSet maybe deeply tested;
 	   Added defualt value when Load from XML in Twain Source

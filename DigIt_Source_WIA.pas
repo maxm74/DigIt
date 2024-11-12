@@ -343,57 +343,70 @@ begin
      rWia.EnumAll:= False;
      aIndex:= -1;
 
-     if (DeviceManufacturer <> '') and (DeviceName <> '') then
+     if (DeviceID <> '') or ((DeviceManufacturer <> '') and (DeviceName <> '')) then
      repeat
        Application.ProcessMessages;
        rWia.RefreshDeviceList;
 
-       //Try to Open searching by ID and ItemName then by Name
+       //Try to Open searching by ID and ItemName
        rWIA.SelectDeviceItem(DeviceID, DeviceItemName, curSource, aIndex);
        if (curSource = nil)
        then begin
-              //aIndex refers to Device List but we use it only to test if finded
+              //Device not finded, search with DeviceName/DeviceManufacturer
               aIndex:= rWia.FindDevice(DeviceName, DeviceManufacturer);
               if (aIndex >= 0) then
               begin
+                //Device found, try to connect
                 curSource:= rWia.Devices[aIndex];
-                if (curSource <> nil) and (curSource.SelectItem(DeviceItemName))
-                then break
-                else
-                  begin
-                    //We have finded the Device but not the Item, ask the user what to do
-                    curItem:= curSource.Items[0];
-                    if (curItem <> nil) then
-                    Case MessageDlg('DigIt WIA', 'Device found but Item '+DeviceItemName+' not...'#13#10+
-                                        'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
-                                        [mbYes, mbRetry, mbAbort], 0) of
-                    mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
-                    mrAbort: break;
-                    end;
-                  end;
-              end;
+                if (curSource <> nil)
+                then begin
+                       //Device connected, search for Item
+                       if curSource.SelectItem(DeviceItemName)
+                       then aIndex:= curSource.SelectedItemIndex
+                       else begin
+                              //Item not founded, ask the user what to do
+                              aIndex:= -1;
+                              curItem:= curSource.Items[0];
+                              if (curItem <> nil) then
+                              Case MessageDlg('DigIt WIA', 'Device found '#13#10+
+                                      DeviceName+' '+DeviceManufacturer+#13#10+
+                                      'but Item '+DeviceItemName+' not...'#13#10+
+                                      'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
+                                      [mbYes, mbRetry, mbAbort], 0) of
+                              mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
+                              mrAbort: break;
+                              end;
+                            end;
+                     end
+                else begin
+                       //We have some Error connecting Device ask the user what to do
+                       aIndex:= -1;
+                       if (MessageDlg('DigIt WIA', 'Error connecting Device'#13#10+
+                                      DeviceName+' '+DeviceManufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
+                       then break;
+                     end;
+              end
+              else if (MessageDlg('DigIt WIA', 'Device not found...'#13#10+
+                       DeviceName+' '+DeviceManufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
+                   then break;
             end
        else begin
+              //Device found and to connect
               if (aIndex = -1) then
               begin
                 //We have finded the Device but not the Item, ask the user what to do
                 curItem:= curSource.Items[0];
                 if (curItem <> nil) then
-                Case MessageDlg('DigIt WIA', 'Device found but Item '+DeviceItemName+' not...'#13#10+
-                                    'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
-                                    [mbYes, mbRetry, mbAbort], 0) of
+                Case MessageDlg('DigIt WIA', 'Device found '#13#10+
+                                DeviceName+' '+DeviceManufacturer+#13#10+
+                                'but Item '+DeviceItemName+' not...'#13#10+
+                                'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
+                                [mbYes, mbRetry, mbAbort], 0) of
                 mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
                 mrAbort: break;
                 end;
               end;
             end;
-
-      if (aIndex = -1) then
-      begin
-        if (MessageDlg('DigIt WIA', 'Device not found...'#13#10+
-                       DeviceName+#13#10+DeviceManufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
-        then break;
-      end;
     until (aIndex > -1);
 
     if (aIndex = -1)

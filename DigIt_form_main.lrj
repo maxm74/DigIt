@@ -8,6 +8,8 @@
 {"hash":110140709,"name":"tdigit_main.tbworksave.caption","sourcebytes":[87,111,114,107,83,97,118,101],"value":"WorkSave"},
 {"hash":128425010,"name":"tdigit_main.tbsep2.caption","sourcebytes":[116,98,83,101,112,50],"value":"tbSep2"},
 {"hash":107942190,"name":"tdigit_main.toolbutton2.caption","sourcebytes":[68,101,115,116,105,110,97,116,105,111,110,46,46,46],"value":"Destination..."},
+{"hash":103124789,"name":"tdigit_main.tbcropmode.caption","sourcebytes":[67,114,111,112,32,77,111,100,101],"value":"Crop Mode"},
+{"hash":160486419,"name":"tdigit_main.toolbutton3.caption","sourcebytes":[84,111,111,108,66,117,116,116,111,110,51],"value":"ToolButton3"},
 {"hash":38544099,"name":"tdigit_main.rollcrops.button.caption","sourcebytes":[67,114,111,112,32,65,114,101,97,115],"value":"Crop Areas"},
 {"hash":4687233,"name":"tdigit_main.btbox_add.hint","sourcebytes":[65,100,100,32,97,32,67,114,111,112,32,65,114,101,97],"value":"Add a Crop Area"},
 {"hash":43,"name":"tdigit_main.btbox_add.caption","sourcebytes":[43],"value":"+"},
@@ -73,7 +75,7 @@
 {"hash":101181333,"name":"tdigit_main.openpicture.title","sourcebytes":[79,112,101,110,32,97,110,32,101,120,105,115,116,105,110,103,32,105,109,97,103,101],"value":"Open an existing image"},
 {"hash":245786329,"name":"tdigit_main.actpreview.caption","sourcebytes":[80,114,101,118,105,101,119,32,40,38,70,50,41],"value":"Preview (&F2)"},
 {"hash":120521081,"name":"tdigit_main.acttake.caption","sourcebytes":[84,97,107,101,32,40,38,70,52,41],"value":"Take (&F4)"},
-{"hash":262668601,"name":"tdigit_main.actretake.caption","sourcebytes":[82,101,45,84,97,107,101,32,40,38,70,53,41],"value":"Re-Take (&F5)"},
+{"hash":36569113,"name":"tdigit_main.actcrop.caption","sourcebytes":[67,114,111,112,32,40,38,70,53,41],"value":"Crop (&F5)"},
 {"hash":49402830,"name":"tdigit_main.actprojectnew.caption","sourcebytes":[78,101,119,32,80,114,111,106,101,99,116,32,46,46,46],"value":"New Project ..."},
 {"hash":21033678,"name":"tdigit_main.actprojectopen.caption","sourcebytes":[97,99,116,80,114,111,106,101,99,116,79,112,101,110],"value":"actProjectOpen"},
 {"hash":20843701,"name":"tdigit_main.actprojectsave.caption","sourcebytes":[97,99,116,80,114,111,106,101,99,116,83,97,118,101],"value":"actProjectSave"},
@@ -85,5 +87,8 @@
 {"hash":170803540,"name":"tdigit_main.actrotateleft.caption","sourcebytes":[82,111,116,97,116,101,32,76,101,102,116],"value":"Rotate Left"},
 {"hash":47076692,"name":"tdigit_main.actrotateright.caption","sourcebytes":[82,111,116,97,116,101,32,82,105,103,104,116],"value":"Rotate Right"},
 {"hash":39807138,"name":"tdigit_main.menutimertakestop.caption","sourcebytes":[83,116,111,112,32,84,105,109,101,114],"value":"Stop Timer"},
-{"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"}
+{"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"},
+{"hash":48547185,"name":"tdigit_main.itemcropmodefull.caption","sourcebytes":[70,117,108,108,32,65,114,101,97],"value":"Full Area"},
+{"hash":19901140,"name":"tdigit_main.itemcropmodepersonalized.caption","sourcebytes":[80,101,114,115,111,110,97,108,105,122,101,100],"value":"Personalized"},
+{"hash":197676484,"name":"tdigit_main.itemcropmodeadvanced.caption","sourcebytes":[65,100,118,97,110,99,101,100],"value":"Advanced"}
 ]}

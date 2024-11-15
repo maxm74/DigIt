@@ -2,6 +2,10 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+        15 Added CropMode;
+	   Added Array Interfaces;
+	   Preview return a Single Filename and Take returns Array Interfaces;
+	   Changed Entire acquisition structure with Take/Crop.
         12 Changed Source_Wia onSet method.
         07 Writed WIA Source Load/Save from XML;
 	   Writed WIA Source OnSet maybe deeply tested;

@@ -16,6 +16,12 @@ interface
 uses SysUtils, ComCtrls;
 
 type
+  TDigItCropMode = (
+    diCropNull = -1,
+    diCropFull,         //All captured pages are processed in bulk as they are
+    diCropPersonalized, //All captured pages are processed in bulk with the cut chosen the first time with the preview
+    diCropAdvanced      //The captured pages are processed one at a time with the cut chosen each time
+  );
 
   { TFileListItem }
 

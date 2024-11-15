@@ -35,7 +35,7 @@ type
     actProjectOpen: TAction;
     actProjectSave: TAction;
     actProjectNew: TAction;
-    actReTake: TAction;
+    actCrop: TAction;
     actTake: TAction;
     ActionListMain: TActionList;
     BCLabel1: TBCLabel;
@@ -60,6 +60,9 @@ type
     Label10: TLabel;
     Label9: TLabel;
     menuDestinations: TPopupMenu;
+    itemCropModeFull: TMenuItem;
+    itemCropModePersonalized: TMenuItem;
+    itemCropModeAdvanced: TMenuItem;
     panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
     btBox_Del: TBGRASpeedButton;
@@ -125,6 +128,7 @@ type
     menuSources: TPopupMenu;
     panelPageSize: TBCPanel;
     menuTimerTake: TPopupMenu;
+    menuCropMode: TPopupMenu;
     rgCropAspect: TRadioGroup;
     rollCounters: TBCExpandPanel;
     rollCrops: TBCExpandPanel;
@@ -147,6 +151,7 @@ type
     tbReTake: TToolButton;
     tbTest1: TToolButton;
     tbTest2: TToolButton;
+    tbCropMode: TToolButton;
     tbWorkSave: TToolButton;
     tbSep1: TToolButton;
     tbMenu: TToolButton;
@@ -156,6 +161,7 @@ type
     ToolButton1: TToolButton;
     tbTimerTake: TToolButton;
     ToolButton2: TToolButton;
+    ToolButton3: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
@@ -165,7 +171,7 @@ type
     procedure actRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
-    procedure actReTakeExecute(Sender: TObject);
+    procedure actCropExecute(Sender: TObject);
     procedure actTimerTakeExecute(Sender: TObject);
     procedure btCFlipHLeftClick(Sender: TObject);
     procedure btCFlipHRightClick(Sender: TObject);
@@ -190,6 +196,7 @@ type
     procedure edPageHeightChange(Sender: TObject);
     procedure edPageWidthChange(Sender: TObject);
     procedure edPage_UnitTypeChange(Sender: TObject);
+    procedure itemCropModeClick(Sender: TObject);
     procedure lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
     procedure lvCapturedCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
       var DefaultDraw: Boolean);
@@ -246,6 +253,7 @@ type
     DestinationName: String;
     DestinationParams: IDigIt_Params;
 
+    CropMode: TDigItCropMode;
     SaveExt,
     SavePath,
     rProject_File: String;
@@ -267,7 +275,7 @@ type
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
     procedure UpdateCounterExampleLabel(ACounter :TDigIt_Counter);
     procedure CounterSelect(AIndex:Integer);
-    procedure LoadImage(AImageFile:String);
+    function LoadImage(AImageFile: String): Boolean;
     procedure XML_LoadWork;
     procedure XML_SaveWork;
     procedure XML_LoadCapturedFiles;
@@ -281,9 +289,11 @@ type
     procedure Source_SelectWithParams(newSourceName: String; newSource: PSourceInfo; newParams:IDigIt_Params);
     procedure Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
     procedure Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo; newParams:IDigIt_Params);
-    procedure setProject_File(AValue: String);
 
-    procedure WaitForAFile(AFileName: String; ATimeOut: Integer);
+    procedure setProject_File(AValue: String);
+    procedure setCropMode(ANewCropMode: TDigItCropMode);
+
+    function WaitForAFile(AFileName: String; ATimeOut: Integer): Boolean;
 
     property Project_File:String read rProject_File write setProject_File;
   public
@@ -404,6 +414,7 @@ begin
   XMLWork:=nil;
   XMLProject:=nil;
   Project_File:='';
+  CropMode:= diCropNull;
 
   Counters :=TDigIt_CounterList.Create('Counters');
 
@@ -471,24 +482,38 @@ end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
 var
-  curImageFile: PChar;
+  curData: Pointer;
+  curDataType: TDigItDataType;
   res: Integer;
+  curImageFile: PChar;
 
 begin
   try
     if (Source <> Nil) and (Source^.Inst <> Nil) then
     begin
-      curImageFile:= AllocPChar;
-
-      res:= Source^.Inst.Take(takeActPreview, theBridge.Settings.GetMaxPCharSize, curImageFile);
-      if (res>0) and (curImageFile<>'') then
+//      curImageFile:= AllocPChar;
+//      res:= Source^.Inst.Take(takeActPreview, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      curData:= nil;
+      res:= Source^.Inst.Take(takeActPreview, curDataType, curData);
+      if (res > 0) and (curData <> nil) then
       begin
-           WaitForAFile(curImageFile, 30000);
-           LoadImage(curImageFile);
-           XML_SaveWork;
-       end;
+        if (curDataType = diDataType_FileName) then
+        begin
+          if (res = 1)
+          then curImageFile:= PChar(curData)
+          else
+          if (res > 1)  //This is really strange, preview should return only one file
+          then if not(IDigIt_ROArray(curData).Get(0, curImageFile))
+               then curImageFile:= '';
 
-      StrDispose(curImageFile);
+          if (curImageFile <> '') then
+          begin
+            LoadImage(curImageFile);
+            XML_SaveWork;
+            StrDispose(curImageFile);
+          end;
+        end;
+      end;
 
       UI_FillSource;
     end;
@@ -498,16 +523,20 @@ end;
 
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
-  curImageFile: PChar;
-  res: Integer;
+   curData: Pointer;
+   curDataType: TDigItDataType;
+   res, i: Integer;
+   curImageFile: PChar;
+   curArray: IDigIt_ROArray;
 
 begin
   try
     if (Source <> Nil) and (Source^.Inst <> Nil) and not(imgManipulation.Empty) then
     begin
-      curImageFile:= AllocPChar;
+(*      //curImageFile:= AllocPChar;
 
-      res:= Source^.Inst.Take(takeActTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      ///res:= Source^.Inst.Take(takeActTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= Source^.Inst.Take(takeActTake, curImageFile);
       if (res>0) and (curImageFile<>'') then
       begin
            WaitForAFile(curImageFile, 30000);
@@ -520,12 +549,56 @@ begin
       StrDispose(curImageFile);
 
       UI_FillSource;
+*)
+      curData:= nil;
+      res:= Source^.Inst.Take(takeActTake, curDataType, curData);
+      if (res > 0) and (curData <> nil) then
+      begin
+        if (curDataType = diDataType_FileName) then
+        begin
+          if (res = 1)
+          then curImageFile:= PChar(curData)
+          else
+          if (res > 1)
+          then curArray:= IDigIt_ROArray(curData);
+
+          if (CropMode = diCropAdvanced)
+          then begin
+               end
+          else begin
+                 for i:=0 to curArray.GetCount-1 do
+                 begin
+                   Application.ProcessMessages;
+
+                   if not(curArray.Get(i, curImageFile))
+                   then curImageFile:= '';
+
+                   if (curImageFile <> '') and LoadImage(curImageFile) then
+                   begin
+                     Counters.CopyValuesToPrevious;
+
+                     if (CropMode = diCropFull)
+                     then SaveCallBack(imgManipulation.Bitmap, nil, 0)
+                     else imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
+
+                     StrDispose(curImageFile);
+                   end;
+                 end;
+                 Application.ProcessMessages;
+               end;
+
+          XML_SaveWork;
+        end;
+
+        UI_FillSource;
+      end;
+
     end;
   finally
   end;
 end;
 
-procedure TDigIt_Main.actReTakeExecute(Sender: TObject);
+procedure TDigIt_Main.actCropExecute(Sender: TObject);
 var
   curImageFile: PChar;
   res: Integer;
@@ -534,10 +607,10 @@ begin
   try
     if (Source <> Nil) and (Source^.Inst <> Nil) and not(imgManipulation.Empty) then
     begin
-      curImageFile:= AllocPChar;
+(*      //curImageFile:= AllocPChar;
 
-      res:= Source^.Inst.Take(takeActReTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
-
+      //res:= Source^.Inst.Take(takeActReTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
+      res:= Source^.Inst.Take(takeActReTake, curImageFile);
       if (res>0) and (curImageFile<>'') then
       begin
            WaitForAFile(curImageFile, 30000);
@@ -553,6 +626,7 @@ begin
       StrDispose(curImageFile);
 
       UI_FillSource;
+*)
     end;
   finally
   end;
@@ -921,6 +995,11 @@ begin
   UI_FillPageSizes;
 end;
 
+procedure TDigIt_Main.itemCropModeClick(Sender: TObject);
+begin
+  setCropMode(TDigItCropMode(TMenuItem(Sender).Tag));
+end;
+
 procedure TDigIt_Main.lvCapturedCreateItemClass(Sender: TCustomListView; var ItemClass: TListItemClass);
 begin
   ItemClass :=TFileListItem;
@@ -1126,52 +1205,61 @@ var
   captItem:TFileListItem;
 
 begin
-  if (CropArea<>nil) then
-  begin
-    if (CropArea.UserData<0)
-    then begin
-           //No Counter, Save File with CropArea Name
-           savedFile:=SavePath+CropArea.Name+'.'+SaveExt;
-           Bitmap.SaveToFile(savedFile);
-         end
-    else begin
-           //Increment the Counter Value
-           cropCounter :=TDigIt_Counter(Counters.items[CropArea.UserData]);
-           cropCounter.Value:=cropCounter.Value+1;
+  if (CropArea <> nil)
+  then begin
+         if (CropArea.UserData<0)
+         then begin
+                //No Counter, Save File with CropArea Name
+                savedFile:=SavePath+CropArea.Name+'.'+SaveExt;
+                Bitmap.SaveToFile(savedFile);
+              end
+         else begin
+                //Increment the Counter Value
+                cropCounter :=TDigIt_Counter(Counters.items[CropArea.UserData]);
+                cropCounter.Value:=cropCounter.Value+1;
 
-           //Save File
-           savedFile:=SavePath+cropCounter.GetValue+'.'+SaveExt;
-           Bitmap.SaveToFile(savedFile);
-         end;
+                //Save File
+                savedFile:=SavePath+cropCounter.GetValue+'.'+SaveExt;
+                Bitmap.SaveToFile(savedFile);
+              end;
+       end
+  else begin
+         //Increment the Counter Value
+         cropCounter :=TDigIt_Counter(Counters.items[0]);
+         cropCounter.Value:=cropCounter.Value+1;
 
-    if (AUserData=0)
-    then begin
-           //Take, add file to Captured List
-           captItem:= TFileListItem(lvCaptured.Items.Add);
-           captItem.FileName:= savedFile;
-           XML_SaveCapturedFile(captItem);
-         end
-    else begin
-           //ReTake, search file in Captured List and update the image
-           captItem:= FindFileListItem(lvCaptured.Items, savedFile);
-           if (captItem = nil)
-           then begin
-                  //if not found (?) add file to Captured List
-                  captItem:= TFileListItem(lvCaptured.Items.Add);
-                  captItem.FileName:= savedFile;
-                  XML_SaveCapturedFile(captItem);
-                end
-           else begin
-                  captItem.FileName:= savedFile;
+         //Save File
+         savedFile:=SavePath+cropCounter.GetValue+'.'+SaveExt;
+         Bitmap.SaveToFile(savedFile);
+       end;
 
-                  lvCaptured.Selected:= nil;
-                  lvCaptured.Selected:= captItem;
-                end;
-         end;
+  if (AUserData=0)
+  then begin
+         //Take, add file to Captured List
+         captItem:= TFileListItem(lvCaptured.Items.Add);
+         captItem.FileName:= savedFile;
+         XML_SaveCapturedFile(captItem);
+       end
+  else begin
+         //ReTake, search file in Captured List and update the image
+         captItem:= FindFileListItem(lvCaptured.Items, savedFile);
+         if (captItem = nil)
+         then begin
+                //if not found (?) add file to Captured List
+                captItem:= TFileListItem(lvCaptured.Items.Add);
+                captItem.FileName:= savedFile;
+                XML_SaveCapturedFile(captItem);
+              end
+         else begin
+                captItem.FileName:= savedFile;
 
-    //Go to last Item in Captured List
-    captItem.MakeVisible(False);
-  end;
+                lvCaptured.Selected:= nil;
+                lvCaptured.Selected:= captItem;
+              end;
+       end;
+
+  //Go to last Item in Captured List
+  captItem.MakeVisible(False);
 end;
 
 procedure TDigIt_Main.UpdateBoxList;
@@ -1216,7 +1304,7 @@ begin
   UI_FillCounter(GetCurrentCounter);
 end;
 
-procedure TDigIt_Main.LoadImage(AImageFile: String);
+function TDigIt_Main.LoadImage(AImageFile: String): Boolean;
 var
    Bitmap,
    BitmapR :TBGRABitmap;
@@ -1226,35 +1314,39 @@ begin
      Bitmap:= Nil;
      BitmapR:= Nil;
 
-     if FileExists(AImageFile)
-     then begin
-            Bitmap:= TBGRABitmap.Create;
-            //DetectFileFormat(AImageFile);
-            Bitmap.LoadFromFile(AImageFile);
+     Result:= WaitForAFile(AImageFile, 30000);
+     if Result then
+     begin
+       Result:= False;
 
-            //Pre processing Filters
+       Bitmap:= TBGRABitmap.Create;
+       //DetectFileFormat(AImageFile);
+       Bitmap.LoadFromFile(AImageFile);
 
-            //Flip
-            if btPFlipH.Down
-            then Bitmap.HorizontalFlip;
-            if btPFlipV.Down
-            then Bitmap.VerticalFlip;
+       //Pre processing Filters
 
-            //Rotate
-            if btPRotateLeft.Down
-            then BitmapR:= Bitmap.RotateCCW(True);
-            if btPRotateRight.Down
-            then BitmapR:= Bitmap.RotateCW(True);
-            if btPRotate180.Down
-            then BitmapR:= Bitmap.RotateUD(True);
+       //Flip
+       if btPFlipH.Down
+       then Bitmap.HorizontalFlip;
+       if btPFlipV.Down
+       then Bitmap.VerticalFlip;
 
-            { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
+       //Rotate
+       if btPRotateLeft.Down
+       then BitmapR:= Bitmap.RotateCCW(True);
+       if btPRotateRight.Down
+       then BitmapR:= Bitmap.RotateCW(True);
+       if btPRotate180.Down
+       then BitmapR:= Bitmap.RotateUD(True);
 
-            if (BitmapR <> Nil)
-            then imgManipulation.Bitmap := BitmapR
-            else imgManipulation.Bitmap := Bitmap;
-          end
-     else raise Exception.Create('LoadImage Failed');
+       { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
+
+       if (BitmapR <> Nil)
+       then imgManipulation.Bitmap := BitmapR
+       else imgManipulation.Bitmap := Bitmap;
+
+       Result:= True;
+     end;
 
   finally
      if (Bitmap <> Nil) then Bitmap.Free;
@@ -1331,6 +1423,9 @@ begin
     cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
 
+    CropMode:= TDigItCropMode(XMLWork.GetValue('CropMode', 0));
+    setCropMode(CropMode);
+
     //User Interface
     rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', False);
     rollPages.Collapsed:=XMLWork.GetValue('UI/rollPages_Collapsed', True);
@@ -1346,6 +1441,8 @@ begin
   if (Source <> Nil) and (Source^.Inst <> Nil) then
   try
      if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     XMLWork.SetValue('CropMode', Integer(CropMode));
 
      XML_SavePageSettings;
      Counters.Save(XMLWork, True);
@@ -1842,7 +1939,43 @@ begin
   else Caption :='DigIt'+' - '+ExtractFileName(rProject_File);
 end;
 
-procedure TDigIt_Main.WaitForAFile(AFileName:String; ATimeOut: Integer);
+procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
+begin
+  if (ANewCropMode <> CropMode) then
+  begin
+    { #todo -oMaxM : Code when switching from one mode to another }
+    Case ANewCropMode of
+      diCropFull: begin
+        actCrop.Visible:= False;
+        imgManipulation.clearCropAreas;
+        rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
+
+        { #todo -oMaxM : Make a Panel }
+        cbCounterList.Enabled:= False; btCounter_Add.Enabled:= False; btCounter_Del.Enabled:= False;
+
+        if (Counters.Count = 0)
+        then Counters.Add('Counter 0')
+        else begin { #todo -oMaxM : Delete all but 0 } end;
+        UI_FillCounter(Counters[0]);
+      end;
+      diCropPersonalized: begin
+        actCrop.Visible:= False;
+        rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
+
+        { #todo -oMaxM : Make a Panel }
+        cbCounterList.Enabled:= True; btCounter_Add.Enabled:= True; btCounter_Del.Enabled:= True;
+      end;
+      diCropAdvanced: begin
+        actCrop.Visible:= True;
+      end;
+    end;
+   end;
+
+  CropMode:= ANewCropMode;
+  tbCropMode.ImageIndex:= Integer(CropMode);
+end;
+
+function TDigIt_Main.WaitForAFile(AFileName:String; ATimeOut: Integer): Boolean;
 var
    timeStart, timeCur:DWord;
 
@@ -1850,10 +1983,13 @@ begin
   if (AFileName='') then exit;
 
   timeStart :=GetTickCount;
-  repeat
+  Result:= FileExists(AFileName);
+  while not(Result) and ((timeCur-timeStart) < ATimeOut) do
+  begin
     Application.ProcessMessages;
     timeCur :=GetTickCount;
-  until FileExists(AFileName) or ((timeCur-timeStart)>=ATimeOut);
+    Result:= FileExists(AFileName);
+  end;
 end;
 
 function TDigIt_Main.GetCurrentCropArea: TCropArea;
@@ -1874,7 +2010,7 @@ procedure TDigIt_Main.UI_FillSource;
 begin
   actPreview.Enabled:= (Source<>nil);
   actTake.Enabled:= (Source<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
-  actReTake.Enabled:= actTake.Enabled;
+  actCrop.Enabled:= actTake.Enabled;
   actTimerTake.Enabled:= actTake.Enabled;
 (*  if (Source<>nil)
   then lbSourceSummary.Caption:=Source^.Inst.UI_Title+':'+#13#10+Source^.Inst.UI_Params_Summary

@@ -20,7 +20,7 @@ uses
 
 const
   DigIt_Source_WIA_Name = 'WIA Device';
-  WIA_TakeFileName = 'wia_take.bmp';
+  WIA_TakeFileName = 'wia_take';
 
 resourcestring
   DigIt_Source_WIA_NameL = 'WIA Device';
@@ -40,6 +40,8 @@ type
     DeviceItem: PWiaItem;
     WIACap: TWIAParamsCapabilities;
     WIAParams: TArrayWIAParams;
+    ResMin,
+    ResMax: Integer;
     AcquireFileName: String;
     rEnabled: Boolean;
 
@@ -48,13 +50,10 @@ type
     function DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
                                  lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
 
-(*
-    function ParamsGet(var WIACap:TWIAParamsCapabilities):Boolean;
-
-    procedure WIAAcquireNative(Sender: TObject; const Index: Integer;
-                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
     function internalTake(isPreview:Boolean; var AFileName: String): DWord;
-*)
+
+    procedure SelectSourceItem(ASource: TWIADevice; AIndex: Integer);
+
   public
     //IDigIt_Params Implementation
     function GetFromUser: Boolean; stdcall;
@@ -77,7 +76,8 @@ type
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileName
-    function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    //function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    function Take(takeAction: DigIt_Source_TakeAction; out aData): DWord; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -134,48 +134,17 @@ begin
   end;
 end;
 
-(*
-function TDigIt_Source_WIA.ParamsGet(var WIACap: TWIAParamsCapabilities): Boolean;
-var
-   WIASource: TWIASource;
-   capRet:TCapabilityRet;
-   bitCurrent: Integer;
-   paperCurrent: TWIAPaperSize;
-   pixelCurrent:TWIAPixelType;
-   resolutionCurrent:Single;
-
-begin
-  Result:= False;
-  WIASource:= GetWIASource(True);
-  if (WIASource <> nil) then
-  begin
-    WIACap.PaperFeedingSet:=WIASource.GetPaperFeeding;
-    capRet :=WIASource.GetPaperSizeSet(paperCurrent, WIACap.PaperSizeDefault, WIACap.PaperSizeSet);
-    capRet :=WIASource.GetIBitDepth(bitCurrent, WIACap.BitDepthDefault, WIACap.BitDepthArray);
-    WIACap.BitDepthArraySize :=Length(WIACap.BitDepthArray);
-    capRet :=WIASource.GetIPixelType(pixelCurrent, WIACap.PixelTypeDefault, WIACap.PixelType);
-    capRet :=WIASource.GetIXResolution(resolutionCurrent, WIACap.ResolutionDefault, WIACap.ResolutionArray);
-    WIACap.ResolutionArraySize :=Length(WIACap.ResolutionArray);
-
-    Result:= True;
-  end;
-end;
-
-procedure TDigIt_Source_WIA.WIAAcquireNative(Sender: TObject; const Index: Integer;
-                                                nativeHandle: TW_UINT32; var Cancel: Boolean);
-begin
-  WriteBitmapToFile(AcquireFileName, nativeHandle);
-end;
-
 function TDigIt_Source_WIA.internalTake(isPreview: Boolean; var AFileName: String): DWord;
 var
-   capRet:TCapabilityRet;
-   resTake:Boolean;
-   WIASource: TWIASource;
+   aExt: String;
+   aFormat: TWIAImageFormat;
+   capRet: Boolean;
+   DownloadedFiles: TStringArray;
 
 begin
   try
      Result:= 0;
+     AFileName:= '';
    //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
      try
@@ -188,67 +157,58 @@ begin
 
      AcquireFileName:= Path_Temp+WIA_TakeFileName;
 
-     if rDeviceInfo.FromAddList
+     if WIAParams[DeviceItemIndex].NativeUI
      then begin
-            resTake :=IPC_ParamsSet;
-
-            if isPreview
-            then resTake :=IPC_Preview(AcquireFileName)
-            else resTake :=IPC_Take(AcquireFileName);
-
-            if resTake then
-            begin
-              AFileName:= AcquireFileName;
-              Result:= Length(AcquireFileName);
-            end;
+            Result:= rWiaSource.DownloadNativeUI(Application.ActiveFormHandle, False,
+                                        Path_Temp, WIA_TakeFileName, DownloadedFiles);
+            if (Result > 0)
+            then begin
+                   AFileName:= DownloadedFiles[0];
+                   //Result:= Length(AcquireFileName);
+                 end
+            else begin
+                   //NO Files Downloaded
+                 end;
           end
      else begin
-            WIASource:= GetWIASource(True);
-            if (WIASource <> nil) then
-            begin
-//              WIASource.Loaded :=True;
-              with rParams do
-              begin
-              //Set Parameters, (after a capture the scanner reset it to default???)
-              capRet :=WIASource.SetPaperFeeding(PaperFeed);
-              capRet :=WIASource.SetDuplexEnabled(False);
-              capRet :=WIASource.SetPaperSize(PaperSize);
-              capRet :=WIASource.SetIPixelType(PixelType);
+            rWIASource.SetParams(WIAParams[DeviceItemIndex]);
 
-              if isPreview
-              then begin
-                     capRet :=WIASource.SetIXResolution(75);
-                     capRet :=WIASource.SetIYResolution(75);
-                   end
-              else begin
-                     capRet :=WIASource.SetIXResolution(Resolution);
-                     capRet :=WIASource.SetIYResolution(Resolution);
-                   end;
-              capRet :=WIASource.SetContrast(Contrast);
-              capRet :=WIASource.SetBrightness(Brightness);
-              end;
+            { #todo 5 -oMaxM : Move To Download? }
+            if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
+            then capRet:= rWIASource.SetImageFormat(wifRAW)
+            else capRet:= rWIASource.SetImageFormat(wifBMP);
+            //if not(capRet) then raise Exception.Create('SetImageFormat');
 
-              WIASource.SetIndicators(True);
+            if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
+            then begin
+                   aFormat:= wifRAW;
+                   aExt:= '.raw'
+                 end
+            else begin
+                   aFormat:= wifBMP;
+                   aExt:= '.bmp';
+                 end;
 
-              { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-              WIASource.TransferMode:=ttmNative; //ttmFile;
-              //WIASource.SetupFileTransfer(AcquireFileName, tfBMP);
-              WIA.OnWIAAcquireNative:=@WIAAcquireNative;
-              WIASource.EnableSource(False, False, Application.ActiveFormHandle);
-              //WIASource.EnableSource(rUserInterface); if in Future we want in the Options
+            Result:= rWIASource.Download(Path_Temp, WIA_TakeFileName, aExt,
+                                         aFormat (*, WIAParams[DeviceItemIndex].DocHandling*));
 
-              AFileName:= AcquireFileName;
-              Result:= Length(AcquireFileName);
-            end;
+            if (Result > 0)
+            then begin
+                   AFileName:= Path_Temp+WIA_TakeFileName+aExt;
+                   //Result:= Length(AcquireFileName);
+                 end
+            else begin
+                   //NO Files Downloaded
+                 end;
           end;
 
      Application.BringToFront;
 
   finally
-   // FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
+    //FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
+    DownloadedFiles:= nil;
   end;
 end;
-*)
 
 constructor TDigIt_Source_WIA.Create;
 begin
@@ -274,6 +234,36 @@ begin
   end;
 
   inherited Destroy;
+end;
+
+procedure TDigIt_Source_WIA.SelectSourceItem(ASource: TWIADevice; AIndex: Integer);
+begin
+  if (ASource <> nil)
+  then begin
+         rWIASource:= ASource;
+         rWIASource.SelectedItemIndex:= AIndex;
+         DeviceID:= rWIASource.ID;
+         DeviceItemIndex:= AIndex;
+         DeviceItem:= rWIASource.SelectedItem;
+
+         if (DeviceItem <> nil)
+         then DeviceItemName:= DeviceItem^.Name
+         else DeviceItemName:= '';
+
+         DeviceManufacturer:= rWIASource.Manufacturer;
+         DeviceName:= rWIASource.Name;
+         rWIASource.GetResolutionsLimit(ResMin, ResMax);
+       end
+  else begin
+         DeviceID:= '';
+         DeviceItemIndex:= -1;
+         DeviceItem:= nil;
+         DeviceItemName:= '';
+         DeviceManufacturer:= '';
+         DeviceName:= '';
+         ResMin:= 0;
+         ResMax:= 0;
+       end;
 end;
 
 function TDigIt_Source_WIA.GetFromUser: Boolean; stdcall;
@@ -310,21 +300,9 @@ begin
 
        //Select Scanner Item and Settings to use
        Result:= TWIASettingsSource.Execute(newWIASource, newItemIndex, initParams, WIAParams);
-       if Result then
-       begin
-         rWIASource:= newWIASource;
-         rWIASource.SelectedItemIndex:= newItemIndex;
-         DeviceID:= rWIASource.ID;
-         DeviceItemIndex:= newItemIndex;
-         DeviceItem:= rWIASource.SelectedItem;
+       if Result
+       then SelectSourceItem(newWIASource, newItemIndex);
 
-         if (DeviceItem <> nil)
-         then DeviceItemName:= DeviceItem^.Name
-         else DeviceItemName:= '';
-
-         DeviceManufacturer:= rWIASource.Manufacturer;
-         DeviceName:= rWIASource.Name;
-       end;
      end;
   finally
   end;
@@ -411,20 +389,7 @@ begin
 
     if (aIndex = -1)
     then Result:= GetFromUser //User has selected Abort, Get Another Device from List
-    else begin
-           rWIASource:= curSource;
-           rWIASource.SelectedItemIndex:= aIndex;
-           DeviceID:= rWIASource.ID;
-           DeviceItemIndex:= aIndex;
-           DeviceItem:= rWIASource.SelectedItem;
-
-           if (DeviceItem <> nil)
-           then DeviceItemName:= DeviceItem^.Name
-           else DeviceItemName:= '';
-
-           DeviceManufacturer:= rWIASource.Manufacturer;
-           DeviceName:= rWIASource.Name;
-         end;
+    else SelectSourceItem(curSource, aIndex);
 
   finally
   end;
@@ -591,17 +556,16 @@ begin
   Result:= 2;
 end;
 
-function TDigIt_Source_WIA.Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+function TDigIt_Source_WIA.Take(takeAction: DigIt_Source_TakeAction; out aData): DWord; stdcall;
 var
    AFileName: String;
 
 begin
-  (*
   Result:= internalTake((takeAction=takeActPreview), AFileName);
 
-  StrPLCopy(PChar(AData), AFileName, MaxDataSize);
-  *)
-  Result:= Length(AFileName);
+  //StrPLCopy(PChar(AData), AFileName, MaxDataSize);
+
+  //Result:= Length(AFileName);
 end;
 
 initialization

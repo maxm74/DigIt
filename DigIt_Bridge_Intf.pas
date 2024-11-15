@@ -16,7 +16,7 @@ interface
 
 const
   DigIt_Source_Kind         = $0000000F;
-  DigIt_Source_TakeDataType = $000000F0;
+  DigIt_Source_TakeDataType = $00000FF0;
 
   //
   //DigIt_Sources_Kind constants
@@ -29,12 +29,15 @@ const
   //DigIt_Source_TakeDataType constants
   //
 
+  //Source return a Filename in Preview/Take/ReTake as a PChar
+  TakeData_FileName = $00000000;
+
   //Source return a Filename in Preview/Take/ReTake as a PChar (IDigIt_Settings.GetMaxPCharSize maximum size)
-  DigIt_Source_TakeData_PICTUREFILE = $00000000;
+  TakeData_ARRAY = $00000001;
 
   (* Maybe Tomorrow
   //Source return a Pointer to a Bitmap in Preview/Take/ReTake as a Pointer (IDigIt_Settings.GetMaxBufferSize maximum size)
-  DigIt_Source_TakeData_BITMAP   = $00000010;
+  DigIt_Source_TakeData_BITMAP   = $00000002;
   *)
 
   //Default Max PChar Size when passing/receiving parameters to the interface
@@ -46,6 +49,18 @@ const
   DigIt_PluginReleaseProcName = 'DigIt_Plugin_Release';
 
 type
+  //Interface Kind
+  TDigItInterfaceKind = (
+    diSourceStd, //Standard Source
+    diDestinationStd
+  );
+
+  //Data Type
+  TDigItDataType = (
+    diDataType_FileName, //Filename as a PChar
+    diDataType_Bitmap    //Pointer to a Bitmap
+  );
+
   IDigIt_Bridge =interface;
 
   TDigIt_PluginInfo = packed record
@@ -66,8 +81,21 @@ type
 
 
 
-  // ans this to "GetDisplayName"
-  TDigIt_PluginNameProc = function :PChar; stdcall;
+    //   "GetDisplayName"
+    TDigIt_PluginNameProc = function :PChar; stdcall;
+
+  IDigIt_ROArray = Interface
+  ['{D101CADE-C69C-4929-A8DF-1386A8BF4D21}']
+    function GetCount: DWord; stdcall;
+    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+  end;
+
+  IDigIt_RWArray = Interface
+  ['{D101CADE-C69C-4929-A8DF-1386A8BF4D22}']
+    function GetCount: DWord; stdcall;
+    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+    function Put(const aIndex: DWord; var aData: Pointer): Boolean; stdcall;
+  end;
 
   IDigIt_Params = Interface
   ['{D101CADE-C69C-4929-A8DF-4E30A587BCB3}']
@@ -81,7 +109,7 @@ type
   end;
 
   IDigIt_Interface = Interface
-    function Flags: DWord; stdcall;
+    function Flags: TDigItInterfaceKind; stdcall;
     function Init: Boolean; stdcall;
     function Release: Boolean; stdcall;
     function Enabled: Boolean; stdcall;
@@ -99,8 +127,11 @@ type
 
   IDigIt_Source = Interface(IDigIt_Interface)
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE00}']
-     //Take a Picture and returns it on AData according with DigIt_Source_TakeDataType (Result is the AData size)
-    function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+     { #todo 11 -oMaxM : Change to support a file array (for example from a Feeder) }
+    (*//Take a Picture and returns it on AData according with DigIt_Source_TakeDataType (Result is the AData size)
+    function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall; overload;
+    *)
+    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
   end;
 
   IDigIt_Sources = Interface

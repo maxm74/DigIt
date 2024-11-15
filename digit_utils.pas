@@ -310,7 +310,7 @@ begin
   //Add SaveAsFile Destination
   newItem:= TMenuItem.Create(AOwner);
   newItem.Caption:= DigIt_Destination_Default;
-  newItem.ImageIndex:= 3;
+  newItem.ImageIndex:= 6;
   newItem.Tag:= -1;
   newItem.OnClick:= menuOnClick;
   menuDestinations.Items.Add(newItem);

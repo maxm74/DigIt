@@ -42,7 +42,7 @@ type
     WIAParams: TArrayWIAParams;
     ResMin,
     ResMax: Integer;
-    AcquireFileName: String;
+    DownloadedFiles: TStringArray;
     rEnabled: Boolean;
 
     function getWIA: TWIAManager;
@@ -50,7 +50,7 @@ type
     function DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
                                  lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
 
-    function internalTake(isPreview:Boolean; var AFileName: String): DWord;
+    function internalTake(isPreview:Boolean; var aDataType: TDigItDataType; var aData: Pointer): DWord;
 
     procedure SelectSourceItem(ASource: TWIADevice; AIndex: Integer);
 
@@ -65,7 +65,7 @@ type
     function OnSet: Boolean; stdcall;
 
     //IDigIt_Source Implementation
-    function Flags: DWord; stdcall;
+    function Flags: TDigItInterfaceKind; stdcall;
     function Init: Boolean; stdcall;
     function Release: Boolean; stdcall;
     function Enabled: Boolean; stdcall;
@@ -75,9 +75,8 @@ type
     function UI_Title(const AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
-     //Take a Picture and returns FileName
-    //function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-    function Take(takeAction: DigIt_Source_TakeAction; out aData): DWord; stdcall;
+     //Take a Picture and returns FileNames
+    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -134,44 +133,42 @@ begin
   end;
 end;
 
-function TDigIt_Source_WIA.internalTake(isPreview: Boolean; var AFileName: String): DWord;
+function TDigIt_Source_WIA.internalTake(isPreview: Boolean; var aDataType: TDigItDataType; var aData: Pointer): DWord;
 var
    aExt: String;
    aFormat: TWIAImageFormat;
    capRet: Boolean;
-   DownloadedFiles: TStringArray;
+   curParams: TWIAParams;
+   curDownloadedFiles: TStringArray;
+   oldLength, i: Integer;
 
 begin
   try
      Result:= 0;
-     AFileName:= '';
-   //  TFormAnimAcquiring.Execute; Application.ProcessMessages;
+     aData:= nil;
+     aDataType:= diDataType_FileName;
 
-     try
-        //Delete previous scanned file
-        (*if FileExists(Path_Temp+WIA_TakeFileName)
-        then*) DeleteFile(Path_Temp+WIA_TakeFileName);
-     except
-        //Sometimes FileExists will raise and Exception (?)
-     end;
-
-     AcquireFileName:= Path_Temp+WIA_TakeFileName;
+     //TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
      if WIAParams[DeviceItemIndex].NativeUI
      then begin
             Result:= rWiaSource.DownloadNativeUI(Application.ActiveFormHandle, False,
-                                        Path_Temp, WIA_TakeFileName, DownloadedFiles);
-            if (Result > 0)
-            then begin
-                   AFileName:= DownloadedFiles[0];
-                   //Result:= Length(AcquireFileName);
-                 end
-            else begin
-                   //NO Files Downloaded
-                 end;
+                                        Path_Temp, WIA_TakeFileName, curDownloadedFiles);
           end
      else begin
-            rWIASource.SetParams(WIAParams[DeviceItemIndex]);
+            curParams:= WIAParams[DeviceItemIndex];
+
+            if isPreview
+            then begin
+                   //Take only 1 page
+                   capRet:= rWIASource.SetPages(1); //ignore Result
+
+                   //Set minimum Resolution
+                   curParams.Resolution:= ResMin;
+                 end
+            else capRet:= rWIASource.SetPages(0); //all Pages
+
+            rWIASource.SetParams(curParams);
 
             { #todo 5 -oMaxM : Move To Download? }
             if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
@@ -190,23 +187,24 @@ begin
                  end;
 
             Result:= rWIASource.Download(Path_Temp, WIA_TakeFileName, aExt,
-                                         aFormat (*, WIAParams[DeviceItemIndex].DocHandling*));
-
-            if (Result > 0)
-            then begin
-                   AFileName:= Path_Temp+WIA_TakeFileName+aExt;
-                   //Result:= Length(AcquireFileName);
-                 end
-            else begin
-                   //NO Files Downloaded
-                 end;
+                                         aFormat, curDownloadedFiles);
           end;
+
+     if (Result > 0) then
+     begin
+       //Copy new Downloaded files to end of Array DownloadedFiles
+       oldLength:= Length(DownloadedFiles);
+       SetLength(DownloadedFiles, oldLength+Result);
+       for i:=0 to Result-1 do DownloadedFiles[oldLength+i]:= curDownloadedFiles[i];
+
+       aData:= Self as IDigIt_ROArray;
+     end;
 
      Application.BringToFront;
 
   finally
     //FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
-    DownloadedFiles:= nil;
+    curDownloadedFiles:= nil;
   end;
 end;
 
@@ -513,9 +511,9 @@ begin
   Result:= 0;
 end;
 
-function TDigIt_Source_WIA.Flags: DWord; stdcall;
+function TDigIt_Source_WIA.Flags: TDigItInterfaceKind; stdcall;
 begin
-  Result:= DigIt_Source_TakeData_PICTUREFILE;
+  Result:= diSourceStd;
 end;
 
 function TDigIt_Source_WIA.Init: Boolean; stdcall;
@@ -556,12 +554,12 @@ begin
   Result:= 2;
 end;
 
-function TDigIt_Source_WIA.Take(takeAction: DigIt_Source_TakeAction; out aData): DWord; stdcall;
+function TDigIt_Source_WIA.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 var
    AFileName: String;
 
 begin
-  Result:= internalTake((takeAction=takeActPreview), AFileName);
+  Result:= internalTake((takeAction=takeActPreview), aDataType, aData);
 
   //StrPLCopy(PChar(AData), AFileName, MaxDataSize);
 

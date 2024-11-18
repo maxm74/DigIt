@@ -2,6 +2,9 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+	18 Added CropNext/Prev/All actions;
+	   Deleted diCropAdvanced mode, take only Custom;
+	   Re Added WIA Source with new Take params (must be tested);
         15 Added CropMode;
 	   Added Array Interfaces;
 	   Preview return a Single Filename and Take returns Array Interfaces;

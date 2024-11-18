@@ -62,8 +62,7 @@ type
     function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
 
     //IDigIt_Source
-    //Take a Picture and returns FileName
-    //function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
+    //Take a Picture and returns FileNames
     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
  end;
 
@@ -328,6 +327,7 @@ function TDigIt_Source_Folder.Take(takeAction: DigIt_Source_TakeAction; out aDat
                                    out aData: Pointer): DWord; stdcall;
 begin
   Result:= 0;
+  aData:= nil;
   aDataType:= diDataType_FileName;
 
   if (lastFolder <> Folder) then xFiles.Clear;

@@ -25,6 +25,8 @@ type
   { TDigIt_Main }
 
   TDigIt_Main = class(TForm)
+    actCropPrev: TAction;
+    actCropAll: TAction;
     actTimerTake: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
@@ -35,7 +37,7 @@ type
     actProjectOpen: TAction;
     actProjectSave: TAction;
     actProjectNew: TAction;
-    actCrop: TAction;
+    actCropNext: TAction;
     actTake: TAction;
     ActionListMain: TActionList;
     BCLabel1: TBCLabel;
@@ -51,18 +53,21 @@ type
     BCLabel6: TBCLabel;
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
+    panelCounterList: TBCPanel;
+    btCounter_Add: TBGRASpeedButton;
+    btCounter_Del: TBGRASpeedButton;
     btPFlipH: TSpeedButton;
     btPRotateLeft: TSpeedButton;
     btPRotateRight: TSpeedButton;
     btPFlipV: TSpeedButton;
     btPRotate180: TSpeedButton;
+    cbCounterList: TComboBox;
     imgListImgActions: TImageList;
     Label10: TLabel;
     Label9: TLabel;
     menuDestinations: TPopupMenu;
     itemCropModeFull: TMenuItem;
-    itemCropModePersonalized: TMenuItem;
-    itemCropModeAdvanced: TMenuItem;
+    itemCropModeCustom: TMenuItem;
     panelPageRotate: TBCPanel;
     btBox_Add: TBGRASpeedButton;
     btBox_Del: TBGRASpeedButton;
@@ -70,8 +75,6 @@ type
     btCFlipHRight: TSpeedButton;
     btCFlipVDown: TSpeedButton;
     btCFlipVUp: TSpeedButton;
-    btCounter_Add: TBGRASpeedButton;
-    btCounter_Del: TBGRASpeedButton;
     btCropCounter_Add: TBGRASpeedButton;
     btCropCounter_Del: TBGRASpeedButton;
     btCropDuplicate: TSpeedButton;
@@ -86,7 +89,6 @@ type
     btZFront: TSpeedButton;
     btZUp: TSpeedButton;
     cbBoxList: TComboBox;
-    cbCounterList: TComboBox;
     cbCropCounterList: TComboBox;
     edCounterName: TEdit;
     edCounterValue: TSpinEdit;
@@ -146,9 +148,11 @@ type
     SelectDirectory: TSelectDirectoryDialog;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
+    tbCropAll: TToolButton;
+    tbCropPrev: TToolButton;
     tbMain: TToolBar;
     tbTake: TToolButton;
-    tbReTake: TToolButton;
+    tbCropNext: TToolButton;
     tbTest1: TToolButton;
     tbTest2: TToolButton;
     tbCropMode: TToolButton;
@@ -160,7 +164,7 @@ type
     tbSep2: TToolButton;
     ToolButton1: TToolButton;
     tbTimerTake: TToolButton;
-    ToolButton2: TToolButton;
+    tbDestination: TToolButton;
     ToolButton3: TToolButton;
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
@@ -171,8 +175,10 @@ type
     procedure actRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
-    procedure actCropExecute(Sender: TObject);
     procedure actTimerTakeExecute(Sender: TObject);
+    procedure actCropNextExecute(Sender: TObject);
+    procedure actCropPrevExecute(Sender: TObject);
+    procedure actCropAllExecute(Sender: TObject);
     procedure btCFlipHLeftClick(Sender: TObject);
     procedure btCFlipHRightClick(Sender: TObject);
     procedure btCFlipVDownClick(Sender: TObject);
@@ -414,7 +420,6 @@ begin
   XMLWork:=nil;
   XMLProject:=nil;
   Project_File:='';
-  CropMode:= diCropNull;
 
   Counters :=TDigIt_CounterList.Create('Counters');
 
@@ -437,6 +442,8 @@ begin
   DestinationName:= '';
   DestinationParams:= Nil;
   BuildDestinationsMenu(Self, menuDestinations, @DestinationMenuClick);
+
+  CropMode:= diCropNull; //setCropMode works only if there are changes
 
   {$ifopt D+}
   tbTest1.Visible:= True;
@@ -562,30 +569,27 @@ begin
           if (res > 1)
           then curArray:= IDigIt_ROArray(curData);
 
-          if (CropMode = diCropAdvanced)
-          then begin
-               end
-          else begin
-                 for i:=0 to curArray.GetCount-1 do
-                 begin
-                   Application.ProcessMessages;
+          Case CropMode of
+            diCropFull: begin
+              for i:=0 to curArray.GetCount-1 do
+              begin
+                Application.ProcessMessages;
 
-                   if not(curArray.Get(i, curImageFile))
-                   then curImageFile:= '';
+                if not(curArray.Get(i, curImageFile))
+                then curImageFile:= '';
 
-                   if (curImageFile <> '') and LoadImage(curImageFile) then
-                   begin
-                     Counters.CopyValuesToPrevious;
-
-                     if (CropMode = diCropFull)
-                     then SaveCallBack(imgManipulation.Bitmap, nil, 0)
-                     else imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
-
-                     StrDispose(curImageFile);
-                   end;
-                 end;
-                 Application.ProcessMessages;
-               end;
+                if (curImageFile <> '') and LoadImage(curImageFile) then
+                begin
+                  Counters.CopyValuesToPrevious;
+                  SaveCallBack(imgManipulation.Bitmap, nil, 0);
+                  StrDispose(curImageFile);
+                end;
+              end;
+              Application.ProcessMessages;
+            end;
+            diCropCustom: begin
+            end;
+          end;
 
           XML_SaveWork;
         end;
@@ -598,7 +602,12 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actCropExecute(Sender: TObject);
+procedure TDigIt_Main.actTimerTakeExecute(Sender: TObject);
+begin
+  //
+end;
+
+procedure TDigIt_Main.actCropNextExecute(Sender: TObject);
 var
   curImageFile: PChar;
   res: Integer;
@@ -632,7 +641,12 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actTimerTakeExecute(Sender: TObject);
+procedure TDigIt_Main.actCropPrevExecute(Sender: TObject);
+begin
+  //
+end;
+
+procedure TDigIt_Main.actCropAllExecute(Sender: TObject);
 begin
   //
 end;
@@ -1415,7 +1429,11 @@ begin
 
     XML_LoadPageSettings;
     Counters.Load(XMLWork, True);
-    imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
+
+    CropMode:= TDigItCropMode(XMLWork.GetValue('CropMode', 0));
+    if (CropMode <> diCropFull) then imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
+    setCropMode(CropMode);
+
     XML_LoadCapturedFiles;
 
     UI_MenuItemsChecks(newSourceI, newDestinationI);
@@ -1423,8 +1441,6 @@ begin
     cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
 
-    CropMode:= TDigItCropMode(XMLWork.GetValue('CropMode', 0));
-    setCropMode(CropMode);
 
     //User Interface
     rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', False);
@@ -1447,7 +1463,8 @@ begin
      XML_SavePageSettings;
      Counters.Save(XMLWork, True);
      XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
-     imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
+
+     if (CropMode <> diCropFull) then imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
 
      //User Interface
      XMLWork.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
@@ -1617,9 +1634,12 @@ begin
   DestinationName:= '';
   SaveExt:= 'jpg';
   SavePath:= Path_Pictures;
+  (*
   rollCrops.Collapsed:=False;
-  rollPages.Collapsed:=True;
-  rollCounters.Collapsed:=True;
+
+  rollCounters.Collapsed:=True;*)
+  setCropMode(diCropFull);
+  rollPages.Collapsed:= False;
 end;
 
 procedure TDigIt_Main.Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
@@ -1946,27 +1966,28 @@ begin
     { #todo -oMaxM : Code when switching from one mode to another }
     Case ANewCropMode of
       diCropFull: begin
-        actCrop.Visible:= False;
+        actCropNext.Visible:= False;
+        actCropPrev.Visible:= False;
+        actCropAll.Visible:= False;
         imgManipulation.clearCropAreas;
+        imgManipulation.Opacity:= 0;
         rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
 
-        { #todo -oMaxM : Make a Panel }
-        cbCounterList.Enabled:= False; btCounter_Add.Enabled:= False; btCounter_Del.Enabled:= False;
+        panelCounterList.Enabled:= False;
 
         if (Counters.Count = 0)
         then Counters.Add('Counter 0')
         else begin { #todo -oMaxM : Delete all but 0 } end;
         UI_FillCounter(Counters[0]);
       end;
-      diCropPersonalized: begin
-        actCrop.Visible:= False;
+      diCropCustom: begin
+        actCropNext.Visible:= True;
+        actCropPrev.Visible:= True;
+        actCropAll.Visible:= True;
+        imgManipulation.Opacity:= 128;
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
 
-        { #todo -oMaxM : Make a Panel }
-        cbCounterList.Enabled:= True; btCounter_Add.Enabled:= True; btCounter_Del.Enabled:= True;
-      end;
-      diCropAdvanced: begin
-        actCrop.Visible:= True;
+        panelCounterList.Enabled:= True;
       end;
     end;
    end;
@@ -2010,11 +2031,12 @@ procedure TDigIt_Main.UI_FillSource;
 begin
   actPreview.Enabled:= (Source<>nil);
   actTake.Enabled:= (Source<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
-  actCrop.Enabled:= actTake.Enabled;
   actTimerTake.Enabled:= actTake.Enabled;
-(*  if (Source<>nil)
-  then lbSourceSummary.Caption:=Source^.Inst.UI_Title+':'+#13#10+Source^.Inst.UI_Params_Summary
-  else lbSourceSummary.Caption:='';  *)
+
+  { #todo 10 -oMaxM : Decide whether Take crops the first page when in Custom mode }
+  actCropNext.Enabled:= actTake.Enabled;
+  actCropPrev.Enabled:= actCropNext.Enabled;
+  actCropAll.Enabled:= actCropNext.Enabled;
 end;
 
 procedure TDigIt_Main.UI_FillDestination;

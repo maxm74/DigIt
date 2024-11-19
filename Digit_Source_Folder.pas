@@ -64,6 +64,8 @@ type
     //IDigIt_Source
     //Take a Picture and returns FileNames
     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
+
+    procedure Clear; stdcall;
  end;
 
 
@@ -379,6 +381,12 @@ begin
     Result:= xFiles.Count;
   end;
   end;
+end;
+
+procedure TDigIt_Source_Folder.Clear; stdcall;
+begin
+  LastTaked:= '';
+  xFiles.Clear;
 end;
 
 initialization

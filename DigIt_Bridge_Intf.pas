@@ -90,10 +90,8 @@ type
     function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
   end;
 
-  IDigIt_RWArray = Interface
+  IDigIt_RWArray = Interface(IDigIt_ROArray)
   ['{D101CADE-C69C-4929-A8DF-1386A8BF4D22}']
-    function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
     function Put(const aIndex: DWord; var aData: Pointer): Boolean; stdcall;
   end;
 
@@ -127,11 +125,12 @@ type
 
   IDigIt_Source = Interface(IDigIt_Interface)
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE00}']
-     { #todo 11 -oMaxM : Change to support a file array (for example from a Feeder) }
-    (*//Take a Picture and returns it on AData according with DigIt_Source_TakeDataType (Result is the AData size)
-    function Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall; overload;
-    *)
+    //Take a Picture and returns it on aData according with aDataType
+    // (if Result is > 1 then aData is a IDigIt_ROArray interface)
     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
+
+    //Clear internal Data, usually used when we finish processing files
+    procedure Clear; stdcall;
   end;
 
   IDigIt_Sources = Interface

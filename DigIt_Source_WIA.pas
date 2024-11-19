@@ -28,7 +28,7 @@ resourcestring
 type
 
   { TDigIt_Source_WIA }
-  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source)
+  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source)
   private
     rWIA: TWIAManager;
     rWIASource: TWIADevice;
@@ -41,7 +41,8 @@ type
     WIACap: TWIAParamsCapabilities;
     WIAParams: TArrayWIAParams;
     ResMin,
-    ResMax: Integer;
+    ResMax,
+    countTakes: Integer;
     DownloadedFiles: TStringArray;
     rEnabled: Boolean;
 
@@ -49,8 +50,6 @@ type
 
     function DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
                                  lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
-
-    function internalTake(isPreview:Boolean; var aDataType: TDigItDataType; var aData: Pointer): DWord;
 
     procedure SelectSourceItem(ASource: TWIADevice; AIndex: Integer);
 
@@ -78,6 +77,12 @@ type
      //Take a Picture and returns FileNames
     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 
+    procedure Clear; stdcall;
+
+    //IDigIt_ROArray
+    function GetCount: DWord; stdcall;
+    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+
     constructor Create;
     destructor Destroy; override;
   end;
@@ -89,7 +94,8 @@ uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes, Laz2_XMLCfg, Digit_
   ;
 
 var
-   Source_WIA : TDigIt_Source_WIA = nil;
+   WIAPath_Temp: String;
+   Source_WIA: TDigIt_Source_WIA = nil;
 
 
 { TDigIt_Source_WIA }
@@ -133,81 +139,6 @@ begin
   end;
 end;
 
-function TDigIt_Source_WIA.internalTake(isPreview: Boolean; var aDataType: TDigItDataType; var aData: Pointer): DWord;
-var
-   aExt: String;
-   aFormat: TWIAImageFormat;
-   capRet: Boolean;
-   curParams: TWIAParams;
-   curDownloadedFiles: TStringArray;
-   oldLength, i: Integer;
-
-begin
-  try
-     Result:= 0;
-     aData:= nil;
-     aDataType:= diDataType_FileName;
-
-     //TFormAnimAcquiring.Execute; Application.ProcessMessages;
-
-     if WIAParams[DeviceItemIndex].NativeUI
-     then begin
-            Result:= rWiaSource.DownloadNativeUI(Application.ActiveFormHandle, False,
-                                        Path_Temp, WIA_TakeFileName, curDownloadedFiles);
-          end
-     else begin
-            curParams:= WIAParams[DeviceItemIndex];
-
-            if isPreview
-            then begin
-                   //Take only 1 page
-                   capRet:= rWIASource.SetPages(1); //ignore Result
-
-                   //Set minimum Resolution
-                   curParams.Resolution:= ResMin;
-                 end
-            else capRet:= rWIASource.SetPages(0); //all Pages
-
-            rWIASource.SetParams(curParams);
-
-            { #todo 5 -oMaxM : Move To Download? }
-            if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
-            then capRet:= rWIASource.SetImageFormat(wifRAW)
-            else capRet:= rWIASource.SetImageFormat(wifBMP);
-            //if not(capRet) then raise Exception.Create('SetImageFormat');
-
-            if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
-            then begin
-                   aFormat:= wifRAW;
-                   aExt:= '.raw'
-                 end
-            else begin
-                   aFormat:= wifBMP;
-                   aExt:= '.bmp';
-                 end;
-
-            Result:= rWIASource.Download(Path_Temp, WIA_TakeFileName, aExt,
-                                         aFormat, curDownloadedFiles);
-          end;
-
-     if (Result > 0) then
-     begin
-       //Copy new Downloaded files to end of Array DownloadedFiles
-       oldLength:= Length(DownloadedFiles);
-       SetLength(DownloadedFiles, oldLength+Result);
-       for i:=0 to Result-1 do DownloadedFiles[oldLength+i]:= curDownloadedFiles[i];
-
-       aData:= Self as IDigIt_ROArray;
-     end;
-
-     Application.BringToFront;
-
-  finally
-    //FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
-    curDownloadedFiles:= nil;
-  end;
-end;
-
 constructor TDigIt_Source_WIA.Create;
 begin
   inherited Create;
@@ -217,19 +148,14 @@ begin
   rWIA:= nil;
   rWIASource:= nil;
   rEnabled:= True;
+  countTakes:= -1;
+  DownloadedFiles:= nil;
 end;
 
 destructor TDigIt_Source_WIA.Destroy;
 begin
   if (rWIA<>nil) then rWIA.Free;
-
-  try
-     //Delete previous scanned file
-     (*if FileExists(Path_Temp+WIA_TakeFileName)
-     then*) DeleteFile(Path_Temp+WIA_TakeFileName);
-  except
-    //Strange Windows Error when closing the Application and deleting files
-  end;
+  DownloadedFiles:= nil;
 
   inherited Destroy;
 end;
@@ -415,15 +341,15 @@ begin
      DeviceItemName:= XMLWork.GetValue(xml_RootPath+'/Item', '');
      DeviceManufacturer:= XMLWork.GetValue(xml_RootPath+'/Manufacturer', '');
      DeviceName:= XMLWork.GetValue(xml_RootPath+'/ProductName', '');
+     countTakes:= XMLWork.GetValue(xml_RootPath+'/CountTakes', 0);
 
      curPath:= xml_RootPath+'/WIAParams/';
      iCount:= XMLWork.GetValue(curPath+'Count', 0);
 
-
      WIAParams:= nil; //Avoid possible data overlaps by eliminating any existing array
      SetLength(WIAParams, iCount);
 
-     for i:=0 to Length(WIAParams)-1 do
+     for i:=0 to iCount-1 do
      with (WIAParams[i]) do
      begin
        curItemPath :=curPath+'Item' + IntToStr(i)+'/';
@@ -473,6 +399,7 @@ begin
      XMLWork.SetValue(xml_RootPath+'/Item', DeviceItemName);
      XMLWork.SetValue(xml_RootPath+'/Manufacturer', DeviceManufacturer);
      XMLWork.SetValue(xml_RootPath+'/ProductName', DeviceName);
+     XMLWork.SetValue(xml_RootPath+'/CountTakes', countTakes);
 
      curPath:= xml_RootPath+'/WIAParams/';
      XMLWork.DeletePath(curPath);
@@ -551,23 +478,110 @@ end;
 
 function TDigIt_Source_WIA.UI_ImageIndex: Integer; stdcall;
 begin
-  Result:= 2;
+  Result:= 5;
 end;
 
 function TDigIt_Source_WIA.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 var
-   AFileName: String;
+   aExt,
+   curPath: String;
+   aFormat: TWIAImageFormat;
+   capRet: Boolean;
+   curParams: TWIAParams;
 
 begin
-  Result:= internalTake((takeAction=takeActPreview), aDataType, aData);
+  try
+     Result:= 0;
+     aData:= nil;
+     aDataType:= diDataType_FileName;
 
-  //StrPLCopy(PChar(AData), AFileName, MaxDataSize);
+     //TFormAnimAcquiring.Execute; Application.ProcessMessages;
 
-  //Result:= Length(AFileName);
+     DownloadedFiles:= nil;
+     inc(countTakes);
+     curPath:= WIAPath_Temp+IntToStr(countTakes)+DirectorySeparator;
+
+     if WIAParams[DeviceItemIndex].NativeUI
+     then begin
+            Result:= rWiaSource.DownloadNativeUI(Application.ActiveFormHandle, False,
+                                        curPath, WIA_TakeFileName, DownloadedFiles);
+          end
+     else begin
+            curParams:= WIAParams[DeviceItemIndex];
+
+            if (takeAction = takeActPreview)
+            then begin
+                   //Take only 1 page
+                   capRet:= rWIASource.SetPages(1); //ignore Result
+
+                   //Set minimum Resolution
+                   curParams.Resolution:= ResMin;
+                 end
+            else capRet:= rWIASource.SetPages(0); //all Pages
+
+            rWIASource.SetParams(curParams);
+
+            { #todo 5 -oMaxM : Move To Download? }
+            if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
+            then capRet:= rWIASource.SetImageFormat(wifRAW)
+            else capRet:= rWIASource.SetImageFormat(wifBMP);
+            //if not(capRet) then raise Exception.Create('SetImageFormat');
+
+            if WIAParams[DeviceItemIndex].DataType in [wdtRAW_RGB..wdtRAW_CMYK]
+            then begin
+                   aFormat:= wifRAW;
+                   aExt:= '.raw'
+                 end
+            else begin
+                   aFormat:= wifBMP;
+                   aExt:= '.bmp';
+                 end;
+
+            Result:= rWIASource.Download(curPath, WIA_TakeFileName, aExt,
+                                         aFormat, DownloadedFiles);
+          end;
+
+     if (Result > 0)
+     then if (Result = 1 )
+          then aData:= StrNew(PChar(DownloadedFiles[0]))
+          else aData:= Self as IDigIt_ROArray;
+
+     Application.BringToFront;
+
+  finally
+    //FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
+  end;
+end;
+
+procedure TDigIt_Source_WIA.Clear; stdcall;
+var
+   i: Integer;
+
+begin
+  for i:=0 to countTakes do
+    DeleteFile(WIAPath_Temp+IntToStr(i)+DirectorySeparator);
+
+  countTakes:= -1;
+  DownloadedFiles:= nil;
+end;
+
+function TDigIt_Source_WIA.GetCount: DWord; stdcall;
+begin
+  Result:= Length(DownloadedFiles);
+end;
+
+function TDigIt_Source_WIA.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+begin
+  Result:= (aIndex < Length(DownloadedFiles));
+  if Result
+  then aData:= StrNew(PChar(DownloadedFiles[aIndex]))
+  else aData:= nil;
 end;
 
 initialization
   try
+     WIAPath_Temp:= Path_Temp+'wia'+DirectorySeparator;
+
      Source_WIA:= TDigIt_Source_WIA.Create;
      theBridge.Sources.Register(DigIt_Source_WIA_Name, Source_WIA);
   except

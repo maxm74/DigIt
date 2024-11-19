@@ -263,7 +263,9 @@ type
     SaveExt,
     SavePath,
     rProject_File: String;
-    testI: Integer;
+    testI,
+    iSourceFiles: Integer;
+    SourceFiles: TStringArray;
 
     function GetCurrentCropArea: TCropArea;
     function GetCurrentCounter: TDigIt_Counter;
@@ -300,6 +302,11 @@ type
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
     function WaitForAFile(AFileName: String; ATimeOut: Integer): Boolean;
+
+    function SourceFiles_Add(AArray: IDigIt_ROArray): Integer;
+
+    function CropFile_Full(AFileName: String): Boolean; overload;
+    procedure CropFile_Full(AStartIndex: Integer); overload;
 
     property Project_File:String read rProject_File write setProject_File;
   public
@@ -433,14 +440,16 @@ begin
   TStringList(cbBoxList.Items).OwnsObjects:=False;
   TStringList(cbCounterList.Items).OwnsObjects:=False;
 
-  Source:= Nil;
+  Source:= nil;
   SourceName:= '';;
-  SourceParams:= Nil;
+  SourceParams:= nil;
+  SourceFiles:= nil;
+  iSourceFiles:= -1;
   BuildSourcesMenu(Self, menuSources, @SourceMenuClick);
 
-  Destination:= Nil;
+  Destination:= nil;
   DestinationName:= '';
-  DestinationParams:= Nil;
+  DestinationParams:= nil;
   BuildDestinationsMenu(Self, menuDestinations, @DestinationMenuClick);
 
   CropMode:= diCropNull; //setCropMode works only if there are changes
@@ -458,6 +467,7 @@ begin
   if (XMLProject<>nil) then XMLProject.Free;
   Counters.Free;
   theBridge.Free;
+  SourceFiles:= nil;
 end;
 
 procedure TDigIt_Main.FormShow(Sender: TObject);
@@ -508,10 +518,9 @@ begin
         begin
           if (res = 1)
           then curImageFile:= PChar(curData)
-          else
-          if (res > 1)  //This is really strange, preview should return only one file
-          then if not(IDigIt_ROArray(curData).Get(0, curImageFile))
-               then curImageFile:= '';
+          else if (res > 1)
+               then if not(IDigIt_ROArray(curData).Get(0, curImageFile))
+                    then curImageFile:= '';
 
           if (curImageFile <> '') then
           begin
@@ -538,7 +547,7 @@ var
 
 begin
   try
-    if (Source <> Nil) and (Source^.Inst <> Nil) and not(imgManipulation.Empty) then
+    if (Source <> Nil) and (Source^.Inst <> Nil) (*and not(imgManipulation.Empty)*) then
     begin
 (*      //curImageFile:= AllocPChar;
 
@@ -565,32 +574,29 @@ begin
         begin
           if (res = 1)
           then curImageFile:= PChar(curData)
-          else
-          if (res > 1)
-          then curArray:= IDigIt_ROArray(curData);
+          else if (res > 1) then curArray:= IDigIt_ROArray(curData);
 
           Case CropMode of
             diCropFull: begin
-              for i:=0 to curArray.GetCount-1 do
-              begin
-                Application.ProcessMessages;
-
-                if not(curArray.Get(i, curImageFile))
-                then curImageFile:= '';
-
-                if (curImageFile <> '') and LoadImage(curImageFile) then
-                begin
-                  Counters.CopyValuesToPrevious;
-                  SaveCallBack(imgManipulation.Bitmap, nil, 0);
-                  StrDispose(curImageFile);
-                end;
-              end;
-              Application.ProcessMessages;
+              if (res = 1 )
+              then begin
+                     CropFile_Full(curImageFile);
+                     StrDispose(curImageFile);
+                   end
+              else begin
+                     //Add files to the array instead of processing them directly,
+                     //so if the user closes the application before the end when he reopens it we restart
+                     SourceFiles_Add(curArray);
+                     { #todo 5 -oMaxM : Check User Cancel the Operation }
+                     CropFile_Full(0);
+                   end;
+              SourceFiles:= nil; iSourceFiles:= -1;
             end;
             diCropCustom: begin
             end;
           end;
 
+          Application.ProcessMessages;
           XML_SaveWork;
         end;
 
@@ -1372,6 +1378,7 @@ procedure TDigIt_Main.XML_LoadWork;
 var
    newSourceName,
    newDestinationName: String;
+   i, iCount,
    newSourceI,
    newDestinationI: Integer;
    newSource: PSourceInfo =nil;
@@ -1403,6 +1410,14 @@ begin
       else newSourceName:= '';
     end;
     Source_SelectWithParams(newSourceName, newSource, newSourceParams);
+
+    //Load SourceFiles
+    SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
+    iCount:= XMLWork.GetValue('SourceFiles/Count', 0);
+    iSourceFiles:= XMLWork.GetValue('SourceFiles/iSourceFiles', 0);
+    SetLength(SourceFiles, iCount);
+    for i:=0 to iCount-1 do
+      SourceFiles[i]:= XMLWork.GetValue('SourceFiles/Item' + IntToStr(i), '');
 
     //Load Destination and its Params
     newDestinationParams:= nil;
@@ -1453,6 +1468,9 @@ begin
 end;
 
 procedure TDigIt_Main.XML_SaveWork;
+var
+   i: Integer;
+
 begin
   if (Source <> Nil) and (Source^.Inst <> Nil) then
   try
@@ -1474,6 +1492,12 @@ begin
      //Save Source and its Params
      XMLWork.SetValue('Source/Name', SourceName);
      XMLWork.DeletePath('Source/Params/');
+
+     XMLWork.DeletePath('SourceFiles/');
+     XMLWork.SetValue('SourceFiles/Count', Length(SourceFiles));
+     XMLWork.SetValue('SourceFiles/iSourceFiles', iSourceFiles);
+     for i:=0 to Length(SourceFiles)-1 do
+       XMLWork.SetValue('SourceFiles/Item' + IntToStr(i), SourceFiles[i]);
 
      //Save Destination and its Params
      XMLWork.SetValue('Destination/Name', DestinationName);
@@ -1966,6 +1990,13 @@ begin
     { #todo -oMaxM : Code when switching from one mode to another }
     Case ANewCropMode of
       diCropFull: begin
+        if (CropMode = diCropCustom) then
+        begin
+          if (imgManipulation.CropAreas.Count > 0)
+          then if (MessageDlg('DigIt', 'Clear Crop Areas ?', mtConfirmation, mbYesNo, 0) = mrNo)
+               then exit;
+        end;
+
         actCropNext.Visible:= False;
         actCropPrev.Visible:= False;
         actCropAll.Visible:= False;
@@ -1994,6 +2025,7 @@ begin
 
   CropMode:= ANewCropMode;
   tbCropMode.ImageIndex:= Integer(CropMode);
+  UI_FillSource;
 end;
 
 function TDigIt_Main.WaitForAFile(AFileName:String; ATimeOut: Integer): Boolean;
@@ -2010,6 +2042,53 @@ begin
     Application.ProcessMessages;
     timeCur :=GetTickCount;
     Result:= FileExists(AFileName);
+  end;
+end;
+
+function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ROArray): Integer;
+var
+   oldLength, i: Integer;
+   curImageFile: PChar;
+
+begin
+  Result:= 0;
+  if (AArray <> nil) then
+  begin
+    //Add files to end of Array SourceFiles
+    oldLength:= Length(SourceFiles);
+    Result:= AArray.GetCount;
+    SetLength(SourceFiles, oldLength+Result);
+    for i:=0 to Result-1 do
+    begin
+      if AArray.Get(i, curImageFile) then
+      begin
+        SourceFiles[oldLength+i]:= curImageFile;
+        StrDispose(curImageFile);
+        end;
+    end;
+  end;
+end;
+
+function TDigIt_Main.CropFile_Full(AFileName: String): Boolean;
+begin
+  Result:= (AFileName <> '') and LoadImage(AFileName);
+  if Result then
+  begin
+    Counters.CopyValuesToPrevious;
+    SaveCallBack(imgManipulation.Bitmap, nil, 0);
+  end;
+end;
+
+procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer);
+var
+   i: Integer;
+
+begin
+  for i:=AStartIndex to Length(SourceFiles)-1 do
+  begin
+    Application.ProcessMessages;
+    CropFile_Full(SourceFiles[i]);
+    iSourceFiles:= i;
   end;
 end;
 
@@ -2030,7 +2109,12 @@ end;
 procedure TDigIt_Main.UI_FillSource;
 begin
   actPreview.Enabled:= (Source<>nil);
-  actTake.Enabled:= (Source<>nil) and not(imgManipulation.Empty) and DirectoryExists(SavePath);
+
+  if (CropMode = diCropCustom)
+  then actTake.Enabled:= (Source<>nil) and not(imgManipulation.Empty)
+  else actTake.Enabled:= (Source<>nil);
+  actTake.Enabled:= actTake.Enabled and DirectoryExists(SavePath);
+
   actTimerTake.Enabled:= actTake.Enabled;
 
   { #todo 10 -oMaxM : Decide whether Take crops the first page when in Custom mode }

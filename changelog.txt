@@ -2,6 +2,11 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+	19 Added SourceFiles_Add, CropFile_Full methods;
+	   Added SourceFiles Array (also in Load/Save XML Work);
+	   Rewrite of Form Take method to use SourceFiles Array;
+	   Changed Enabled of Take always to True when CropMode is FullArea;
+	   Rewrite of Wia Source Take to use DownloadedFiles and IDigIt_ROArray;
 	18 Added CropNext/Prev/All actions;
 	   Deleted diCropAdvanced mode, take only Custom;
 	   Re Added WIA Source with new Take params (must be tested);

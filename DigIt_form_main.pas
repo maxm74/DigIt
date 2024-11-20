@@ -1,7 +1,7 @@
 (*******************************************************************************
 **                                  DigIt                                     **
 **                                                                            **
-**          (s) 2023 Massimo Magnano                                          **
+**          (s) 2024 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
 **   Main Form                                                                **
@@ -154,7 +154,7 @@ type
     tbTake: TToolButton;
     tbCropNext: TToolButton;
     tbTest1: TToolButton;
-    tbTest2: TToolButton;
+    tbCapturedPDF: TToolButton;
     tbCropMode: TToolButton;
     tbWorkSave: TToolButton;
     tbSep1: TToolButton;
@@ -162,7 +162,7 @@ type
     tbSource: TToolButton;
     tbPreview: TToolButton;
     tbSep2: TToolButton;
-    ToolButton1: TToolButton;
+    tbCapturedRotateRight: TToolButton;
     tbTimerTake: TToolButton;
     tbDestination: TToolButton;
     ToolButton3: TToolButton;
@@ -239,7 +239,7 @@ type
 
     procedure TestClick(Sender: TObject);
     procedure TestRClick(Sender: TObject);
-    procedure tbTest2Click(Sender: TObject);
+    procedure tbCapturedPDFClick(Sender: TObject);
   private
     { private declarations }
     lastNewBoxNum: Word;
@@ -271,10 +271,10 @@ type
     function GetCurrentCounter: TDigIt_Counter;
     procedure UI_FillBox(ABox :TCropArea);
     procedure UI_FillCounter(ACounter :TDigIt_Counter);
+    procedure UI_FillCounters;
     procedure UI_FillPageSizes;
     procedure UI_FillSource;
     procedure UI_FillDestination;
-    procedure UI_Load;
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure DestinationMenuClick(Sender: TObject);
     procedure SourceMenuClick(Sender: TObject);
@@ -457,7 +457,7 @@ begin
   {$ifopt D+}
   tbTest1.Visible:= True;
   tbWorkSave.Visible:= True;
-  tbTest2.Visible:= True;
+  tbCapturedPDF.Visible:= True;
   {$endif}
 end;
 
@@ -1445,22 +1445,25 @@ begin
     XML_LoadPageSettings;
     Counters.Load(XMLWork, True);
 
-    CropMode:= TDigItCropMode(XMLWork.GetValue('CropMode', 0));
-    if (CropMode <> diCropFull) then imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
-    setCropMode(CropMode);
+    setCropMode(TDigItCropMode(XMLWork.GetValue('CropMode', 0)));
+    if (CropMode <> diCropFull) then
+    begin
+      imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
+      cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
+      UI_FillCounter(GetCurrentCounter);
+      UI_FillCounters;
+    end;
 
     XML_LoadCapturedFiles;
 
     UI_MenuItemsChecks(newSourceI, newDestinationI);
-    UI_Load;
-    cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', -1);
-    UI_FillCounter(GetCurrentCounter);
-
 
     //User Interface
     rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', False);
     rollPages.Collapsed:=XMLWork.GetValue('UI/rollPages_Collapsed', True);
     rollCounters.Collapsed:=XMLWork.GetValue('UI/rollCounters_Collapsed', True);
+
+    UI_FillSource;
 
   finally
     XMLWork.Free; XMLWork:= Nil;
@@ -1573,9 +1576,11 @@ begin
 
     Counters.Load(XMLProject, False);
     imgManipulation.CropAreas.Load(XMLProject, 'CropAreas');
-    UI_Load;
+    UI_FillCounters;
     cbCounterList.ItemIndex :=XMLProject.GetValue(Counters.Name+'/Selected', -1);
     UI_FillCounter(GetCurrentCounter);
+    UI_FillSource;
+
   finally
   end;
 end;
@@ -1965,7 +1970,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.tbTest2Click(Sender: TObject);
+procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
 var
    tt:TListItem;
 
@@ -2002,6 +2007,7 @@ begin
         actCropAll.Visible:= False;
         imgManipulation.clearCropAreas;
         imgManipulation.Opacity:= 0;
+        imgManipulation.Enabled:= False;
         rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
 
         panelCounterList.Enabled:= False;
@@ -2016,16 +2022,19 @@ begin
         actCropPrev.Visible:= True;
         actCropAll.Visible:= True;
         imgManipulation.Opacity:= 128;
+        imgManipulation.Enabled:= True;
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
 
         panelCounterList.Enabled:= True;
       end;
     end;
+
+    UI_FillCounters;
+    UI_FillSource;
    end;
 
   CropMode:= ANewCropMode;
   tbCropMode.ImageIndex:= Integer(CropMode);
-  UI_FillSource;
 end;
 
 function TDigIt_Main.WaitForAFile(AFileName:String; ATimeOut: Integer): Boolean;
@@ -2128,32 +2137,6 @@ begin
   //
 end;
 
-procedure TDigIt_Main.UI_Load;
-var
-   i:Integer;
-   curCounter:TDigIt_Counter;
-   curCropArea:TCropArea;
-
-begin
-  UI_FillSource;
-
-  //UI for Crop Areas is filled in Events
-
-  //Fill Counters related UI
-  cbCounterList.Clear;
-  cbCropCounterList.Clear;
-  for i:=0 to Counters.Count-1 do
-  begin
-    curCounter :=Counters.items[i];
-    cbCounterList.AddItem(curCounter.Name, curCounter);
-    cbCropCounterList.AddItem(curCounter.Name, curCounter);
-  end;
-  curCropArea :=GetCurrentCropArea;
-  if (curCropArea=nil)
-  then cbCropCounterList.ItemIndex:=-1
-  else cbCropCounterList.ItemIndex:=curCropArea.UserData;
-end;
-
 procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
 var
    curItem: TMenuItem;
@@ -2234,6 +2217,28 @@ begin
            inFillCounterUI :=False;
         end
    else panelCounter.Enabled :=False;
+end;
+
+procedure TDigIt_Main.UI_FillCounters;
+var
+   i:Integer;
+   curCounter:TDigIt_Counter;
+   curCropArea:TCropArea;
+
+begin
+  //Fill Counters related UI
+  cbCounterList.Clear;
+  cbCropCounterList.Clear;
+  for i:=0 to Counters.Count-1 do
+  begin
+    curCounter :=Counters.items[i];
+    cbCounterList.AddItem(curCounter.Name, curCounter);
+    cbCropCounterList.AddItem(curCounter.Name, curCounter);
+  end;
+  curCropArea :=GetCurrentCropArea;
+  if (curCropArea=nil)
+  then cbCropCounterList.ItemIndex:=-1
+  else cbCropCounterList.ItemIndex:=curCropArea.UserData;
 end;
 
 procedure TDigIt_Main.UI_FillPageSizes;

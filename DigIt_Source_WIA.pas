@@ -28,7 +28,7 @@ resourcestring
 type
 
   { TDigIt_Source_WIA }
-  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source)
+  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source, IDigIt_ProgressCallback)
   private
     rWIA: TWIAManager;
     rWIASource: TWIADevice;
@@ -44,7 +44,9 @@ type
     ResMax,
     countTakes: Integer;
     DownloadedFiles: TStringArray;
-    rEnabled: Boolean;
+    rEnabled,
+    UserCancel: Boolean;
+    Progress: IDigIt_Progress;
 
     function getWIA: TWIAManager;
 
@@ -83,6 +85,9 @@ type
     function GetCount: DWord; stdcall;
     function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
 
+    //IDigIt_ProgressCallback
+    procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
+
     constructor Create;
     destructor Destroy; override;
   end;
@@ -115,18 +120,32 @@ end;
 function TDigIt_Source_WIA.DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice; lFlags: LONG;
                                                pWiaTransferParams: PWiaTransferParams): Boolean;
 begin
-  Result:= True;
+  Result:= not(UserCancel);
 
   if (pWiaTransferParams <> nil) then
   Case pWiaTransferParams^.lMessage of
   WIA_TRANSFER_MSG_STATUS: begin
-//    progressBar.Position:= pWiaTransferParams^.lPercentComplete;
-//    lbProgress.Caption:= 'Downloading '+AWiaDevice.Download_FileName+AWiaDevice.Download_Ext+'  : '+IntToStr(AWiaDevice.Download_Count)+' file';
+      if (Progress <> nil) then
+      begin
+        Progress.SetCurrentCaption(PChar('Downloading Image '+IntToStr(AWiaDevice.Download_Count+1)));
+        Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
+        Application.ProcessMessages;
+      end;
   end;
   WIA_TRANSFER_MSG_END_OF_STREAM: begin
-//    lbProgress.Caption:= 'Downloaded '+AWiaDevice.Download_FileName+AWiaDevice.Download_Ext+'  : '+IntToStr(AWiaDevice.Download_Count)+' file';
+      if (Progress <> nil) then
+      begin
+        Progress.SetCurrentCaption(PChar('Downloaded Image '+IntToStr(AWiaDevice.Download_Count+1)));
+        Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
+        Application.ProcessMessages;
+      end;
   end;
   WIA_TRANSFER_MSG_END_OF_TRANSFER: begin
+      if (Progress <> nil) then
+      begin
+        Progress.SetTotal(0, 100, 100, False);
+        Application.ProcessMessages;
+      end;
   end;
   WIA_TRANSFER_MSG_DEVICE_STATUS: begin
   end;
@@ -507,12 +526,27 @@ begin
                                         curPath, WIA_TakeFileName, DownloadedFiles);
           end
      else begin
+            UserCancel:= False;
+            Progress:= theBridge.Progress;
+            if (Progress <> nil) then
+            begin
+              Progress.SetTotalLabel(PChar('Acquiring from '+DeviceItemName));
+              Progress.SetTotal(0, 100, 0, True);
+              Progress.SetCurrentCaption(nil);
+              Progress.SetCurrent(0, 100, 0, False);
+              Progress.SetEventCallBack(Self as IDigIt_ProgressCallback);
+              Progress.Show(PChar('Acquiring from '+DeviceName));
+            end;
+
             curParams:= WIAParams[DeviceItemIndex];
 
             if (takeAction = takeActPreview)
             then begin
                    //Take only 1 page
-                   capRet:= rWIASource.SetPages(1); //ignore Result
+ { #todo 10 -oMaxM : When switching from pages=1 to pages=all my Brother scanner returns an image
+              shrunk by a factor N within the correct sized page.
+              N= (Resolution when pages=0) / (Resolution when pages=1). I'm stumped. }
+ //                  capRet:= rWIASource.SetPages(1); //ignore Result
 
                    //Set minimum Resolution
                    curParams.Resolution:= ResMin;
@@ -539,6 +573,8 @@ begin
 
             Result:= rWIASource.Download(curPath, WIA_TakeFileName, aExt,
                                          aFormat, DownloadedFiles);
+
+            if (Progress <> nil) then Progress.Hide;
           end;
 
      if (Result > 0)
@@ -576,6 +612,11 @@ begin
   if Result
   then aData:= StrNew(PChar(DownloadedFiles[aIndex]))
   else aData:= nil;
+end;
+
+procedure TDigIt_Source_WIA.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
+begin
+  UserCancel:= True;
 end;
 
 initialization

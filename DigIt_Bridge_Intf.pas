@@ -163,7 +163,6 @@ type
     //function UnRegister(const aClass : IDigIt_Destination) :Boolean; stdcall; { #note 5 -oMaxM : Implementer unregist the Class}
   end;
 
-
   IDigIt_Settings = Interface
   ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
     //Buffers Limits Variables
@@ -176,11 +175,36 @@ type
     function Path_Application: PChar; stdcall;
   end;
 
+  IDigIt_ProgressCallback = Interface
+  ['{D101CADE-C69C-4929-A8DF-2344BF2350B0}']
+    procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
+  end;
+
+  IDigIt_Progress = Interface
+  ['{D101CADE-C69C-4929-A8DF-2344BF2350B1}']
+    procedure SetTotalVisible(AVisible: Boolean); stdcall;
+    procedure SetTotalLabel(const ALabel: PChar); stdcall;
+    procedure SetTotal(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
+    procedure SetTotalCaption(const ACaption: PChar); stdcall;
+    procedure SetTotalValue(AValue: Integer); stdcall;
+
+    procedure SetCurrentVisible(AVisible: Boolean); stdcall;
+    procedure SetCurrent(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
+    procedure SetCurrentCaption(const ACaption: PChar); stdcall;
+    procedure SetCurrentValue(AValue: Integer); stdcall;
+
+    procedure SetEventCallBack(const AEventCallBack: IDigIt_ProgressCallback); stdcall;
+
+    procedure Show(const ACaption: PChar); stdcall;
+    procedure Hide; stdcall;
+  end;
+
   IDigIt_Bridge = Interface
   ['{D101CADE-C69C-4929-A8DF-C779BE1D5762}']
     function Sources: IDigIt_Sources; stdcall;
     function Destinations: IDigIt_Destinations; stdcall;
     function Settings: IDigIt_Settings; stdcall;
+    function Progress: IDigIt_Progress; stdcall;
     //ToolBar, Menù, PostProcessing Image, etc... { #todo -oMaxM : Maybe Tomorrow }
 
     (*

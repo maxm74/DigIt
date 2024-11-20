@@ -5,7 +5,7 @@ unit DigIt_Form_Templates;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Buttons, ComCtrls, ExtCtrls, BCPanel, BCListBox;
+  Classes, SysUtils, Forms, Controls, Buttons, ComCtrls, ExtCtrls, BCPanel, BCListBox;
 
 type
 

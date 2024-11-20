@@ -2,6 +2,11 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+        20
+	   Adjusted UI Enable,Fill,etc in Main Form;
+	   Added Progress Interface in Bridge;
+	   Implemented Progress Interface in new Form_Progress;
+	   Commented Source_WIA Set Pages=1 in preview (strange Brother Scanner behaviour)
 	19 Added SourceFiles_Add, CropFile_Full methods;
 	   Added SourceFiles Array (also in Load/Save XML Work);
 	   Rewrite of Form Take method to use SourceFiles Array;

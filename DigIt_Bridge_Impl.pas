@@ -125,6 +125,7 @@ type
     function Sources: IDigIt_Sources; stdcall;
     function Destinations: IDigIt_Destinations; stdcall;
     function Settings: IDigIt_Settings; stdcall;
+    function Progress: IDigIt_Progress; stdcall;
 
     (*function Register(const aDisplayName: PChar;
                       const InitProc: TDigIt_PluginInitProc;
@@ -146,7 +147,7 @@ function AllocPChar: PChar;
 
 implementation
 
-uses DigIt_Types, dynlibs, Masks;
+uses dynlibs, Masks, DigIt_Types, DigIt_Form_Progress;
 
 function AllocPChar: PChar;
 begin
@@ -590,17 +591,22 @@ end;
 
 function TDigIt_Bridge.Sources: IDigIt_Sources; stdcall;
 begin
-  Result:= rSources;
+  Result:= rSources as IDigIt_Sources;
 end;
 
 function TDigIt_Bridge.Destinations: IDigIt_Destinations; stdcall;
 begin
-  Result:= rDestinations;
+  Result:= rDestinations as IDigIt_Destinations;
 end;
 
 function TDigIt_Bridge.Settings: IDigIt_Settings; stdcall;
 begin
-  Result:= rSettings;
+  Result:= rSettings as IDigIt_Settings;
+end;
+
+function TDigIt_Bridge.Progress: IDigIt_Progress; stdcall;
+begin
+  Result:= DigIt_Progress as IDigIt_Progress;
 end;
 
 function TDigIt_Bridge.SourcesImpl: TDigIt_Sources;

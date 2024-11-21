@@ -68,9 +68,9 @@ end;
 initialization
    Path_Application :=ExtractFilePath(ParamStr(0));
    Path_Config :=GetAppConfigDir(False);
-   Path_Temp :=GetTempDir(False)+'DigIt'+DirectorySeparator;
-   Path_Pictures :=GetUserDir+'Pictures\';
-   ForceDirectories(Path_Config);
+   Path_Temp :=Path_Config+'tmp'+DirectorySeparator; //GetTempDir(False)+'DigIt'+DirectorySeparator;
+   Path_Pictures :=GetUserDir+'Pictures'+DirectorySeparator;
+   //ForceDirectories(Path_Config);
    ForceDirectories(Path_Temp);
 
 end.

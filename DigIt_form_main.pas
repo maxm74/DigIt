@@ -308,6 +308,8 @@ type
     function CropFile_Full(AFileName: String): Boolean; overload;
     procedure CropFile_Full(AStartIndex: Integer); overload;
 
+    procedure ProgressImagesShow(TotalMin, TotalMax: Integer);
+
     property Project_File:String read rProject_File write setProject_File;
   public
     procedure ItemSizesClick(Sender: TObject);
@@ -325,7 +327,8 @@ uses
   {$ifopt D+}
   lazlogger,
   {$endif}
-  LCLIntf, DigIt_Form_Templates, Digit_Destinations;
+  LCLIntf,
+  Digit_Destinations, DigIt_Form_Progress, DigIt_Form_Templates;
 
 
 { TDigIt_Main }
@@ -457,7 +460,6 @@ begin
   {$ifopt D+}
   tbTest1.Visible:= True;
   tbWorkSave.Visible:= True;
-  tbCapturedPDF.Visible:= True;
   {$endif}
 end;
 
@@ -525,11 +527,12 @@ begin
           if (curImageFile <> '') then
           begin
             LoadImage(curImageFile);
-            XML_SaveWork;
             StrDispose(curImageFile);
+            //XML_SaveWork;
           end;
         end;
-      end;
+      end
+      else MessageDlg('NO Files Downloaded ', mtError, [mbOk], 0);
 
       UI_FillSource;
     end;
@@ -566,6 +569,9 @@ begin
 
       UI_FillSource;
 *)
+      if (CropMode = diCropCustom)
+      then begin MessageDlg('Implementing Tomorrow', mtInformation, [mbOk], 0); exit; end;
+
       curData:= nil;
       res:= Source^.Inst.Take(takeActTake, curDataType, curData);
       if (res > 0) and (curData <> nil) then
@@ -578,6 +584,8 @@ begin
 
           Case CropMode of
             diCropFull: begin
+              ProgressImagesShow(1, res);
+
               if (res = 1 )
               then begin
                      CropFile_Full(curImageFile);
@@ -591,6 +599,7 @@ begin
                      CropFile_Full(0);
                    end;
               SourceFiles:= nil; iSourceFiles:= -1;
+              Source^.Inst.Clear;
             end;
             diCropCustom: begin
             end;
@@ -600,11 +609,14 @@ begin
           XML_SaveWork;
         end;
 
+        UI_FillCounter(nil);
         UI_FillSource;
-      end;
-
+      end
+      else MessageDlg('NO Files Downloaded ', mtError, [mbOk], 0);
     end;
+
   finally
+    DigIt_Progress.Hide;
   end;
 end;
 
@@ -1971,12 +1983,8 @@ begin
 end;
 
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
-var
-   tt:TListItem;
-
 begin
-  //tt :=lvCaptured.Items.Add;
-  //tt.Caption:='Test Image.jpg';
+  //Maybe Tomorrow
 end;
 
 procedure TDigIt_Main.setProject_File(AValue: String);
@@ -2014,7 +2022,8 @@ begin
 
         if (Counters.Count = 0)
         then Counters.Add('Counter 0')
-        else begin { #todo -oMaxM : Delete all but 0 } end;
+        else Counters.RemoveAllButFirst;
+
         UI_FillCounter(Counters[0]);
       end;
       diCropCustom: begin
@@ -2026,10 +2035,11 @@ begin
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
 
         panelCounterList.Enabled:= True;
-      end;
+        UI_FillCounters;
+    end;
     end;
 
-    UI_FillCounters;
+//    UI_FillCounters;
     UI_FillSource;
    end;
 
@@ -2090,14 +2100,43 @@ end;
 
 procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer);
 var
-   i: Integer;
+   i,
+   c: Integer;
+   cStr: String;
 
 begin
-  for i:=AStartIndex to Length(SourceFiles)-1 do
+  c:= Length(SourceFiles);
+  cStr:= IntToStr(c);
+  DigIt_Progress.progressTotal.Min:= AStartIndex;
+  DigIt_Progress.progressTotal.Max:= c;
+
+  for i:=AStartIndex to c-1 do
   begin
+    DigIt_Progress.progressTotal.Position:= i;
+    DigIt_Progress.capTotal.Caption:= 'Processing '+IntToStr(i)+' / '+cStr;
     Application.ProcessMessages;
+
     CropFile_Full(SourceFiles[i]);
     iSourceFiles:= i;
+
+    DigIt_Progress.progressTotal.Position:= i+1;
+    DigIt_Progress.capTotal.Caption:= 'Processed '+IntToStr(i)+' / '+cStr;
+    Application.ProcessMessages;
+  end;
+end;
+
+procedure TDigIt_Main.ProgressImagesShow(TotalMin, TotalMax: Integer);
+begin
+  with DigIt_Progress do
+  begin
+    labTotal.Caption:= '';
+    capTotal.Caption:= '';
+    progressTotal.Style:= pbstNormal;
+    progressTotal.Min:= TotalMin;
+    progressTotal.Max:= TotalMax;
+    progressTotal.Position:= TotalMin;
+    panelCurrent.Visible:= False;
+    Show('Processing Images');
   end;
 end;
 
@@ -2110,9 +2149,15 @@ end;
 
 function TDigIt_Main.GetCurrentCounter: TDigIt_Counter;
 begin
-  if (cbCounterList.ItemIndex<0)
-  then Result :=nil
-  else Result :=TDigIt_Counter(cbCounterList.Items.Objects[cbCounterList.ItemIndex]);
+  Result:= nil;
+
+  Case CropMode of
+    diCropFull: begin
+      Result:= Counters[0];
+    end;
+  else if (cbCounterList.ItemIndex > -1)
+       then Result:= TDigIt_Counter(cbCounterList.Items.Objects[cbCounterList.ItemIndex]);
+  end;
 end;
 
 procedure TDigIt_Main.UI_FillSource;
@@ -2203,7 +2248,8 @@ end;
 
 procedure TDigIt_Main.UI_FillCounter(ACounter: TDigIt_Counter);
 begin
-   if (ACounter<>nil)
+   if (ACounter = nil) then ACounter:= GetCurrentCounter;
+   if (ACounter <> nil)
    then begin
            inFillCounterUI :=True;
            panelCounter.Enabled :=True;

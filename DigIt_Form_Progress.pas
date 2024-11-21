@@ -90,8 +90,14 @@ end;
 procedure TDigIt_Progress.SetTotal(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
 begin
   if isMarquee
-  then progressTotal.Style:= pbstMarquee
-  else progressTotal.Style:= pbstNormal;
+  then begin
+         progressTotal.Smooth:= False;
+         progressTotal.Style:= pbstMarquee;
+       end
+  else begin
+         progressTotal.Smooth:= True;
+         progressTotal.Style:= pbstNormal;
+       end;
 
   progressTotal.Min:= AMin;
   progressTotal.Max:= AMax;
@@ -120,8 +126,14 @@ end;
 procedure TDigIt_Progress.SetCurrent(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
 begin
   if isMarquee
-  then progressCurrent.Style:= pbstMarquee
-  else progressCurrent.Style:= pbstNormal;
+  then begin
+         progressCurrent.Smooth:= False;
+         progressCurrent.Style:= pbstMarquee;
+       end
+  else begin
+         progressCurrent.Smooth:= True;
+         progressCurrent.Style:= pbstNormal;
+       end;
 
   progressCurrent.Min:= AMin;
   progressCurrent.Max:= AMax;

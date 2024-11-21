@@ -94,9 +94,8 @@ type
 
 implementation
 
-uses Controls, Forms, Dialogs, Digit_Types, BGRABitmapTypes, Laz2_XMLCfg, Digit_Bridge_Impl
- // ,DigIt_Form_AnimAcquiring
-  ;
+uses Controls, Forms, Dialogs, FileUtil, BGRABitmapTypes, Laz2_XMLCfg,
+     Digit_Types, Digit_Bridge_Impl;
 
 var
    WIAPath_Temp: String;
@@ -127,7 +126,7 @@ begin
   WIA_TRANSFER_MSG_STATUS: begin
       if (Progress <> nil) then
       begin
-        Progress.SetCurrentCaption(PChar('Downloading Image '+IntToStr(AWiaDevice.Download_Count+1)));
+        Progress.SetCurrentCaption(PChar('Acquiring Page '+IntToStr(AWiaDevice.Download_Count+1)));
         Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
         Application.ProcessMessages;
       end;
@@ -135,7 +134,7 @@ begin
   WIA_TRANSFER_MSG_END_OF_STREAM: begin
       if (Progress <> nil) then
       begin
-        Progress.SetCurrentCaption(PChar('Downloaded Image '+IntToStr(AWiaDevice.Download_Count+1)));
+        Progress.SetCurrentCaption(PChar('Acquired Pages '+IntToStr(AWiaDevice.Download_Count)));
         Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
         Application.ProcessMessages;
       end;
@@ -527,16 +526,6 @@ begin
           end
      else begin
             UserCancel:= False;
-            Progress:= theBridge.Progress;
-            if (Progress <> nil) then
-            begin
-              Progress.SetTotalLabel(PChar('Acquiring from '+DeviceItemName));
-              Progress.SetTotal(0, 100, 0, True);
-              Progress.SetCurrentCaption(nil);
-              Progress.SetCurrent(0, 100, 0, False);
-              Progress.SetEventCallBack(Self as IDigIt_ProgressCallback);
-              Progress.Show(PChar('Acquiring from '+DeviceName));
-            end;
 
             curParams:= WIAParams[DeviceItemIndex];
 
@@ -552,6 +541,17 @@ begin
                    curParams.Resolution:= ResMin;
                  end
             else capRet:= rWIASource.SetPages(0); //all Pages
+
+            Progress:= theBridge.Progress;
+            if (Progress <> nil) then
+            begin
+              Progress.SetTotalLabel(PChar('Acquiring from '+DeviceItemName+' at '+IntToStr(curParams.Resolution)+' dpi'));
+              Progress.SetTotal(0, 100, 0, True);
+              Progress.SetCurrentCaption(nil);
+              Progress.SetCurrent(0, 100, 0, False);
+              Progress.SetEventCallBack(Self as IDigIt_ProgressCallback);
+              Progress.Show(PChar('Acquiring from '+DeviceName));
+            end;
 
             rWIASource.SetParams(curParams);
 
@@ -573,19 +573,21 @@ begin
 
             Result:= rWIASource.Download(curPath, WIA_TakeFileName, aExt,
                                          aFormat, DownloadedFiles);
-
-            if (Progress <> nil) then Progress.Hide;
           end;
 
      if (Result > 0)
      then if (Result = 1 )
           then aData:= StrNew(PChar(DownloadedFiles[0]))
-          else aData:= Self as IDigIt_ROArray;
+          else aData:= Self as IDigIt_ROArray
+     else begin
+            DeleteDirectory(curPath, False);
+            dec(countTakes);
+          end;
 
      Application.BringToFront;
 
   finally
-    //FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
+    if (Progress <> nil) then Progress.Hide;
   end;
 end;
 
@@ -595,7 +597,7 @@ var
 
 begin
   for i:=0 to countTakes do
-    DeleteFile(WIAPath_Temp+IntToStr(i)+DirectorySeparator);
+    DeleteDirectory(WIAPath_Temp+IntToStr(i)+DirectorySeparator, False);
 
   countTakes:= -1;
   DownloadedFiles:= nil;

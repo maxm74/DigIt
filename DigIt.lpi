@@ -170,6 +170,7 @@
         <Filename Value="DigIt_Form_Progress.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Progress"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit12>
     </Units>

@@ -53,8 +53,12 @@ type
       procedure Notify(Ptr: Pointer; Action: TListNotification); override;
     public
       constructor Create(AName:String; AOwnsObjects:Boolean=True);
+
       function add(aCounter: TDigIt_Counter): integer; overload;
       function add(AName:String; AValue:Integer=-1): integer; overload;
+
+      //Remove all Items except the First
+      procedure RemoveAllButFirst;
 
       //Create List From File/Stream/XML
       procedure Load(const XMLConf: TXMLConfig; LoadValues:Boolean);
@@ -177,6 +181,16 @@ var
 begin
   newCounter:= TDigIt_Counter.Create(AName, AValue);
   Result := inherited Add(newCounter);
+end;
+
+procedure TDigIt_CounterList.RemoveAllButFirst;
+var
+   i, c: Integer;
+
+begin
+  c:= Count;
+  if (c > 1)
+  then for i:=1 to c-1 do Delete(1);
 end;
 
 procedure TDigIt_CounterList.Load(const XMLConf: TXMLConfig; LoadValues: Boolean);

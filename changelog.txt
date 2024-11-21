@@ -2,8 +2,12 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
-        20
-	   Adjusted UI Enable,Fill,etc in Main Form;
+        21 Added Counters RemoveAllButFirst;
+	   Changed GetCurrentCounter to work with CropMode;
+	   Changed Temp Path Location to Path_Config\tmp;
+	   Added Progress to Crop_Full;
+	   Use of DeleteDirectory to Delete Temp Files in Source_WIA.
+        20 Adjusted UI Enable,Fill,etc in Main Form;
 	   Added Progress Interface in Bridge;
 	   Implemented Progress Interface in new Form_Progress;
 	   Commented Source_WIA Set Pages=1 in preview (strange Brother Scanner behaviour)

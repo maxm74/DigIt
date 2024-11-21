@@ -1261,9 +1261,8 @@ object DigIt_Main: TDigIt_Main
       object tbCapturedPDF: TToolButton
         Left = 1
         Top = 54
-        Caption = 'Test'
+        Caption = 'Export to PDF'
         ImageIndex = 2
-        Visible = False
         OnClick = tbCapturedPDFClick
       end
     end

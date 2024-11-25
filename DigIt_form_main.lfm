@@ -1353,7 +1353,7 @@ object DigIt_Main: TDigIt_Main
     Animated = False
     object panelCounter: TBCPanel
       Left = 27
-      Height = 375
+      Height = 249
       Top = 39
       Width = 172
       Background.Color = clBtnFace

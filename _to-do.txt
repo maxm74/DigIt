@@ -1,9 +1,8 @@
 Main:
-  Aggiornare il valore dei Counter nella UI subito dopo il Take
+  Lasciare una sola ComboBox dei contatori (legata al Crop Selezionato)
   CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
   Salvare la sessione più spesso
   (risolto, testare di più) Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
-  Animazione durante la scansione?
   Take attivo con nessuna Crop Area?
   riprendi sessione : barra di captured alla fine
   

@@ -596,8 +596,10 @@ var
    i: Integer;
 
 begin
+  {$ifopt D-}
   for i:=0 to countTakes do
     DeleteDirectory(WIAPath_Temp+IntToStr(i)+DirectorySeparator, False);
+  {$endif}
 
   countTakes:= -1;
   DownloadedFiles:= nil;

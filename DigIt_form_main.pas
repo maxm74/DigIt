@@ -27,6 +27,9 @@ type
   TDigIt_Main = class(TForm)
     actCropPrev: TAction;
     actCropAll: TAction;
+    actCrop: TAction;
+    actTakeFrontBack: TAction;
+    actTakeAgain: TAction;
     actTimerTake: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
@@ -53,6 +56,9 @@ type
     BCLabel6: TBCLabel;
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
+    itemTake: TMenuItem;
+    itemTakeAgain: TMenuItem;
+    panelTop: TPanel;
     panelCounterList: TBCPanel;
     btCounter_Add: TBGRASpeedButton;
     btCounter_Del: TBGRASpeedButton;
@@ -131,6 +137,7 @@ type
     panelPageSize: TBCPanel;
     menuTimerTake: TPopupMenu;
     menuCropMode: TPopupMenu;
+    menuTake: TPopupMenu;
     rgCropAspect: TRadioGroup;
     rollCounters: TBCExpandPanel;
     rollCrops: TBCExpandPanel;
@@ -148,25 +155,26 @@ type
     SelectDirectory: TSelectDirectoryDialog;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
-    tbCropAll: TToolButton;
-    tbCropPrev: TToolButton;
-    tbMain: TToolBar;
-    tbTake: TToolButton;
-    tbCropNext: TToolButton;
-    tbTest1: TToolButton;
     tbCapturedPDF: TToolButton;
-    tbCropMode: TToolButton;
-    tbWorkSave: TToolButton;
-    tbSep1: TToolButton;
-    tbMenu: TToolButton;
-    tbSource: TToolButton;
-    tbPreview: TToolButton;
-    tbSep2: TToolButton;
     tbCapturedRotateRight: TToolButton;
-    tbTimerTake: TToolButton;
-    tbDestination: TToolButton;
+    tbCropAll: TToolButton;
+    tbCropMode: TToolButton;
+    tbCropNext: TToolButton;
+    tbCropPrev: TToolButton;
     tbCropSummary: TToolButton;
-    tbCropSep: TToolButton;
+    tbDestination: TToolButton;
+    tbMain: TToolBar;
+    tbMenu: TToolButton;
+    tbPreview: TToolButton;
+    tbSepCrop: TToolButton;
+    tbSepMenu: TToolButton;
+    tbSepTake: TToolButton;
+    tbSource: TToolButton;
+    tbTake: TToolButton;
+    tbTakeAgain: TToolButton;
+    tbTimerTake: TToolButton;
+    tbCrop: TToolBar;
+
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
@@ -269,19 +277,20 @@ type
     rProject_File,
     LoadedFile: String;
     testI,
+    flagReCrop,
     iSourceFiles: Integer;
     SourceFiles: TStringArray;
 
     function GetCurrentCropArea: TCropArea;
-    function GetCurrentCounter: TDigIt_Counter;
+    function Counters_GetCurrent: TDigIt_Counter;
+    procedure Counters_Dec;
     procedure UI_FillBox(ABox :TCropArea);
     procedure UI_FillCounter(ACounter :TDigIt_Counter);
     procedure UI_FillCounters;
     procedure UI_FillPageSizes;
-    procedure UI_FillSource;
-    procedure UI_FillDestination;
-    procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
+    procedure UI_ToolBar;
     procedure UI_ToolBarAddShortcuts;
+    procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure DestinationMenuClick(Sender: TObject);
     procedure SourceMenuClick(Sender: TObject);
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
@@ -345,7 +354,7 @@ var
    curCounter :TDigIt_Counter;
 
 begin
-  curCounter :=GetCurrentCounter;
+  curCounter :=Counters_GetCurrent;
   if (curCounter<>nil) then
   begin
     curCounter.Name :=edCounterName.Text;
@@ -360,7 +369,7 @@ var
 begin
   if inFillCounterUI then exit;
 
-  curCounter :=GetCurrentCounter;
+  curCounter :=Counters_GetCurrent;
   if (curCounter<>nil)
   then curCounter.Value :=edCounterValue.Value;
 end;
@@ -372,7 +381,7 @@ var
 begin
   if inFillCounterUI then exit;
 
-  curCounter :=GetCurrentCounter;
+  curCounter :=Counters_GetCurrent;
   if (curCounter<>nil) then
   begin
     curCounter.Value_StringDigits :=edCounterValueStringDigits.Value;
@@ -385,7 +394,7 @@ var
    curCounter :TDigIt_Counter;
 
 begin
-  curCounter :=GetCurrentCounter;
+  curCounter :=Counters_GetCurrent;
   if (curCounter<>nil) then
   begin
     curCounter.Value_StringPre :=edCounterValueStringPre.Text;
@@ -398,7 +407,7 @@ var
    curCounter :TDigIt_Counter;
 
 begin
-  curCounter :=GetCurrentCounter;
+  curCounter :=Counters_GetCurrent;
   if (curCounter<>nil) then
   begin
     curCounter.Value_StringPost :=edCounterValueStringPost.Text;
@@ -447,6 +456,7 @@ begin
   inFillCounterUI :=False;
   inFillBoxUI :=False;
   inFillPagesUI :=False;
+  flagReCrop:= 0;
 
   lastNewBoxNum :=0;
   TStringList(cbBoxList.Items).OwnsObjects:=False;
@@ -469,8 +479,6 @@ begin
   CropMode:= diCropNull; //setCropMode works only if there are changes
 
   {$ifopt D+}
-  tbTest1.Visible:= True;
-  tbWorkSave.Visible:= True;
   {$endif}
 end;
 
@@ -506,8 +514,7 @@ begin
          UI_MenuItemsChecks(-1, -1);
        end;
 
-  UI_FillSource;
-  UI_FillDestination;
+  UI_ToolBar;
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
@@ -541,7 +548,7 @@ begin
       end
       else MessageDlg('NO Files Downloaded ', mtError, [mbOk], 0);
 
-      UI_FillSource;
+      UI_ToolBar;
 
   finally
   end;
@@ -558,23 +565,6 @@ var
 
 begin
   try
-(*      //curImageFile:= AllocPChar;
-
-      ///res:= Source^.Inst.Take(takeActTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
-      res:= Source^.Inst.Take(takeActTake, curImageFile);
-      if (res>0) and (curImageFile<>'') then
-      begin
-           WaitForAFile(curImageFile, 30000);
-           LoadImage(curImageFile);
-           Counters.CopyValuesToPrevious;
-           imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
-           XML_SaveWork;
-       end;
-
-      StrDispose(curImageFile);
-
-      UI_FillSource;
-*)
       UserCancel:= False;
       curData:= nil;
       res:= Source^.Inst.Take(takeActTake, curDataType, curData);
@@ -605,7 +595,7 @@ begin
               SourceFiles:= nil; iSourceFiles:= -1;
               Source^.Inst.Clear;
 
-              UI_FillSource;
+              UI_ToolBar;
             end;
             diCropCustom: begin
               //Add files to the queue array
@@ -618,16 +608,22 @@ begin
               else SourceFiles_Add(curArray);
 
               //The queue was empty, Start from the first file
-              if (oldLength = 0) and (Length(SourceFiles) > 0) then iSourceFiles:= 0;
+              if (oldLength = 0) and (Length(SourceFiles) > 0) then
+              begin
+                iSourceFiles:= 0;
+                LoadImage(SourceFiles[0]);
+              end;
 
-              UI_FillSource;
+              UI_ToolBar;
 
+              (*
               //Crop directly the first File,
               //  I don't use iSourceFiles because the user could be here having done Next and then Prev
               if (oldLength = 0) and (Length(SourceFiles) > 0) then
               begin
                 if LoadImage(SourceFiles[0]) then actCropNext.Execute;
               end;
+              *)
             end;
           end;
 
@@ -652,13 +648,12 @@ end;
 
 procedure TDigIt_Main.actCropNextExecute(Sender: TObject);
 var
-  curImageFile: PChar;
-  res: Integer;
+   lenSources: Integer;
 
   function CheckEndOfFiles: Boolean;
   begin
-    Result:= (iSourceFiles >= Length(SourceFiles));
-    if Result then
+    Result:= (iSourceFiles >= lenSources);
+    if Result and (lenSources > 1) then
     begin
       //User Confirmation
       if (MessageDlg('DigIt', 'There are no more files to process, should I clear the queue?', mtConfirmation,
@@ -673,36 +668,23 @@ var
 
 begin
   try
-(*      //curImageFile:= AllocPChar;
-
-      //res:= Source^.Inst.Take(takeActReTake, theBridge.Settings.GetMaxPCharSize, curImageFile);
-      res:= Source^.Inst.Take(takeActReTake, curImageFile);
-      if (res>0) and (curImageFile<>'') then
-      begin
-           WaitForAFile(curImageFile, 30000);
-           LoadImage(curImageFile);
-           Counters.CopyPreviousToValues;
-           //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
-           imgManipulation.getAllBitmaps(@SaveCallBack, 1, True);
-           //lvCaptured.Refresh;
-           //lvCaptured.EndUpdate;
-           XML_SaveWork;
-      end;
-
-      StrDispose(curImageFile);
-
-      UI_FillSource;
-*)
+    lenSources:= Length(SourceFiles);
     if (iSourceFiles = -1) then iSourceFiles:= 0;
-    if CheckEndOfFiles then exit;
+//    if CheckEndOfFiles then exit;
 
 //    if LoadImage(SourceFiles[iSourceFiles]) then
     begin
-      //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
-      imgManipulation.getAllBitmaps(@SaveCallBack, 1, True);
-      //lvCaptured.Refresh;
-      //lvCaptured.EndUpdate;
-      inc(iSourceFiles);
+      if (iSourceFiles >= lenSources)
+      then begin
+             //Re Crop, dec the Counters
+             Counters_Dec;
+             imgManipulation.getAllBitmaps(@SaveCallBack, 1, True)
+           end
+      else begin
+             imgManipulation.getAllBitmaps(@SaveCallBack, flagReCrop, True);
+             flagReCrop:= 0;
+             inc(iSourceFiles);
+           end;
 
       if not(CheckEndOfFiles)
       then if (iSourceFiles > -1) and (iSourceFiles < Length(SourceFiles))
@@ -712,7 +694,7 @@ begin
                      end;
 
       UI_FillCounter(nil);
-      UI_FillSource;
+      UI_ToolBar;
       XML_SaveWork;
     end;
 
@@ -722,9 +704,7 @@ end;
 
 procedure TDigIt_Main.actCropPrevExecute(Sender: TObject);
 var
-   i, new_iSourceFiles: Integer;
-   cropCounter :TDigIt_Counter;
-   cropArea: TCropArea;
+   new_iSourceFiles: Integer;
 
 begin
   try
@@ -734,18 +714,12 @@ begin
        dec(new_iSourceFiles);
        if LoadImage(SourceFiles[new_iSourceFiles]) then
        begin
-         for i:= 0 to imgManipulation.CropAreas.Count-1 do
-         begin
-           cropArea:= imgManipulation.CropAreas[i];
-           //Decrement the Counter Value
-           cropCounter :=TDigIt_Counter(Counters.items[cropArea.UserData]);
-           cropCounter.Value:=cropCounter.Value-1;
-         end;
-
+         Counters_Dec;
+         flagReCrop:= 1;
          iSourceFiles:= new_iSourceFiles;
 
          UI_FillCounter(nil);
-         UI_FillSource;
+         UI_ToolBar;
          XML_SaveWork;
        end;
      end;
@@ -805,7 +779,7 @@ begin
                 end;
 
       UI_FillCounter(nil);
-      UI_FillSource;
+      UI_ToolBar;
       XML_SaveWork;
 
       DigIt_Progress.progressTotal.Position:= iSourceFiles+1;
@@ -1258,8 +1232,7 @@ begin
            newDestinationName:= theBridge.DestinationsImpl.Key[TMenuItem(Sender).Tag];
          end;
     Destination_SelectUserParams(newDestinationName, newDestination);
-    //TMenuItem(Sender).Default:= True;
-    UI_FillDestination;
+    TMenuItem(Sender).Default:= True;
   end;
 end;
 
@@ -1275,7 +1248,7 @@ begin
     newSourceName:= theBridge.SourcesImpl.Key[TMenuItem(Sender).Tag];
     Source_SelectUserParams(newSourceName, newSource);
     TMenuItem(Sender).Default:= True;
-    UI_FillSource;
+    UI_ToolBar;
   end;
 end;
 
@@ -1480,7 +1453,7 @@ end;
 procedure TDigIt_Main.CounterSelect(AIndex: Integer);
 begin
   cbCounterList.ItemIndex:=AIndex;
-  UI_FillCounter(GetCurrentCounter);
+  UI_FillCounter(Counters_GetCurrent);
 end;
 
 function TDigIt_Main.LoadImage(AImageFile: String): Boolean;
@@ -1740,8 +1713,8 @@ begin
     imgManipulation.CropAreas.Load(XMLProject, 'CropAreas');
     UI_FillCounters;
     cbCounterList.ItemIndex :=XMLProject.GetValue(Counters.Name+'/Selected', -1);
-    UI_FillCounter(GetCurrentCounter);
-    UI_FillSource;
+    UI_FillCounter(Counters_GetCurrent);
+    UI_ToolBar;
 
   finally
   end;
@@ -2067,7 +2040,7 @@ begin
    if not(XML_Loading) then
    begin
      UI_FillBox(CropArea);
-     UI_FillSource;
+     UI_ToolBar;
    end;
 end;
 
@@ -2083,7 +2056,7 @@ begin
          then cbBoxList.Items.Delete(delIndex);
          panelCropArea.Enabled:=(cbBoxList.Items.Count>0);
 
-         if not(XML_Loading) then UI_FillSource;
+         if not(XML_Loading) then UI_ToolBar;
     end;
   except
   end;
@@ -2165,11 +2138,14 @@ begin
                then exit;
         end;
 
-        tbCropSep.Visible:= False;
+       (* tbSepCrop.Visible:= False;
+        actCrop.Visible:= False;
         actCropNext.Visible:= False;
         actCropPrev.Visible:= False;
         actCropAll.Visible:= False;
         tbCropSummary.Visible:= False;
+        *)
+        tbCrop.Visible:= False;
         imgManipulation.clearCropAreas;
         imgManipulation.Opacity:= 0;
         imgManipulation.Enabled:= False;
@@ -2190,10 +2166,14 @@ begin
         tbCropMode.Caption:= 'Full Area';
       end;
       diCropCustom: begin
-        tbCropSep.Visible:= True;
+        (*
+        tbSepCrop.Visible:= True;
+        actCrop.Visible:= True;
         actCropNext.Visible:= True;
         actCropPrev.Visible:= True;
         actCropAll.Visible:= True;
+        *)
+        tbCrop.Visible:= True;
         imgManipulation.Opacity:= 128;
         imgManipulation.Enabled:= True;
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
@@ -2204,7 +2184,7 @@ begin
         if not(XML_Loading) then
         begin
           UI_FillCounters;
-          UI_FillCounter(GetCurrentCounter);
+          UI_FillCounter(Counters_GetCurrent);
         end;
         *)
 
@@ -2214,7 +2194,7 @@ begin
 
     CropMode:= ANewCropMode;
 
-    if not(XML_Loading) then UI_FillSource;
+    if not(XML_Loading) then UI_ToolBar;
    end;
   tbCropMode.ImageIndex:= Integer(CropMode);
 end;
@@ -2342,7 +2322,7 @@ begin
   else Result :=TCropArea(cbBoxList.Items.Objects[cbBoxList.ItemIndex]);
 end;
 
-function TDigIt_Main.GetCurrentCounter: TDigIt_Counter;
+function TDigIt_Main.Counters_GetCurrent: TDigIt_Counter;
 begin
   Result:= nil;
 
@@ -2355,7 +2335,23 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.UI_FillSource;
+procedure TDigIt_Main.Counters_Dec;
+var
+   i: Integer;
+   cropCounter :TDigIt_Counter;
+   cropArea: TCropArea;
+
+begin
+  for i:= 0 to imgManipulation.CropAreas.Count-1 do
+  begin
+    cropArea:= imgManipulation.CropAreas[i];
+    //Decrement the Counter Value
+    cropCounter :=TDigIt_Counter(Counters.items[cropArea.UserData]);
+    cropCounter.Value:=cropCounter.Value-1;
+  end;
+end;
+
+procedure TDigIt_Main.UI_ToolBar;
 var
    bCommonCond: Boolean;
    cropSumStr: String;
@@ -2374,9 +2370,16 @@ begin
                        DirectoryExists(SavePath);
 
          actTake.Enabled:= bCommonCond;
-         actCropNext.Enabled:= bCommonCond and (iSourceFiles >= 0) and (iSourceFiles <= lenSources);
-         actCropPrev.Enabled:= bCommonCond and (iSourceFiles > 0) and (iSourceFiles <= lenSources);
-         actCropAll.Enabled:= actCropNext.Enabled;
+         actCrop.Enabled:= bCommonCond and
+                           ((lenSources = 1) or (iSourceFiles >= 0) and (iSourceFiles >= lenSources));
+         actCropNext.Enabled:= bCommonCond and (lenSources > 1) and (iSourceFiles >= 0) and (iSourceFiles < lenSources);
+         actCropPrev.Enabled:= bCommonCond and (lenSources > 1) and (iSourceFiles > 0) and (iSourceFiles <= lenSources);
+         actCropAll.Enabled:= actCropNext.Enabled and not(actCrop.Enabled);
+
+         if actCrop.Enabled
+         then tbCropNext.Action:= actCrop
+         else tbCropNext.Action:= actCropNext;
+
          tbCropSummary.Visible:= bCommonCond and (lenSources > 0);
          if tbCropSummary.Visible then
          begin
@@ -2388,24 +2391,6 @@ begin
   else actTake.Enabled:= bCommonCond and DirectoryExists(SavePath);
 
   actTimerTake.Enabled:= actTake.Enabled;
-end;
-
-procedure TDigIt_Main.UI_FillDestination;
-begin
-  //
-end;
-
-procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
-var
-   curItem: TMenuItem;
-   i: Integer;
-
-begin
-  curItem:= FindMenuItemByTag(menuSources, newSourceI);
-  if (curItem <> Nil) then curItem.Default:= True;
-
-  curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
-  if (curItem <> Nil) then curItem.Default:= True;
 end;
 
 procedure TDigIt_Main.UI_ToolBarAddShortcuts;
@@ -2422,6 +2407,28 @@ begin
     then curBtn.Caption:= curBtn.Caption+' ('+ShortCutToText(TAction(curBtn.Action).ShortCut)+')';
   end;
   tbMain.AdjustSize;
+
+  for i:=0 to tbCrop.ButtonCount-1 do
+  begin
+    curBtn:= tbCrop.Buttons[i];
+    if (curBtn.Action <> nil) and (TAction(curBtn.Action).ShortCut <> 0)
+    then curBtn.Caption:= curBtn.Caption+' ('+ShortCutToText(TAction(curBtn.Action).ShortCut)+')';
+  end;
+  tbCrop.AdjustSize;
+  tbCrop.Left:= tbMain.Left+tbMain.Width+40;
+end;
+
+procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
+var
+   curItem: TMenuItem;
+   i: Integer;
+
+begin
+  curItem:= FindMenuItemByTag(menuSources, newSourceI);
+  if (curItem <> Nil) then curItem.Default:= True;
+
+  curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
+  if (curItem <> Nil) then curItem.Default:= True;
 end;
 
 procedure TDigIt_Main.UI_FillBox(ABox: TCropArea);
@@ -2476,7 +2483,7 @@ end;
 
 procedure TDigIt_Main.UI_FillCounter(ACounter: TDigIt_Counter);
 begin
-   if (ACounter = nil) then ACounter:= GetCurrentCounter;
+   if (ACounter = nil) then ACounter:= Counters_GetCurrent;
    if (ACounter <> nil)
    then begin
            inFillCounterUI :=True;

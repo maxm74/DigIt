@@ -2,6 +2,9 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+        26 Added a separate Crop Toolbar (minchia alignments when using ToolButton.Visible);
+	   Finished Custom Crop logic;
+	   Added Take Again and Take Front Back (to write)
         25 Several UI adjustments;
 	   Completed write of Custom Crop (to be tested thoroughly)
 	22 Several UI adjustments;

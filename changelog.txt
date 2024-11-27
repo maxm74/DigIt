@@ -2,6 +2,12 @@ DigIt CHANGE LOG
 ======================
 
 2024/11/
+        27 Changed the SourceFiles array to Record TSourceFile (added the Crop field);
+	   Added CropGoNext (without Cropping), ClearQueue, BuildDuplex  actions;
+	   Writed TakeAgain action;
+	   Check of put it in the middle Crop (to write);
+	   Adjustments in Custom Crop logic;
+	   Added BuildDuplex  Wizard (to write).
         26 Added a separate Crop Toolbar (minchia alignments when using ToolButton.Visible);
 	   Finished Custom Crop logic;
 	   Added Take Again and Take Front Back (to write)

@@ -2714,7 +2714,7 @@ object DigIt_Main: TDigIt_Main
       OnExecute = actTimerTakeExecute
     end
     object actTakeBuildDuplex: TAction
-      Caption = 'Take and Build Duplex'
+      Caption = 'Take and Build Front/Back'
       Enabled = False
       ImageIndex = 10
       OnExecute = actTakeExecute

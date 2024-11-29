@@ -277,13 +277,13 @@ type
     XMLWork,
     XMLProject: TXMLConfig;
 
-    Source: PSourceInfo;
-    SourceName: String;
-    SourceParams: IDigIt_Params;
+    rSource: PSourceInfo;
+    rSourceName: String;
+    rSourceParams: IDigIt_Params;
 
-    Destination: PDestinationInfo;
-    DestinationName: String;
-    DestinationParams: IDigIt_Params;
+    rDestination: PDestinationInfo;
+    rDestinationName: String;
+    rDestinationParams: IDigIt_Params;
 
     CropMode: TDigItCropMode;
     SaveExt,
@@ -348,6 +348,15 @@ type
   public
     procedure ItemSizesClick(Sender: TObject);
     procedure PageSizesClick(Sender: TObject);
+
+    property Source: PSourceInfo read rSource;
+    property SourceName: String read rSourceName;
+    property SourceParams: IDigIt_Params read rSourceParams;
+
+    property Destination: PDestinationInfo read rDestination;
+    property DestinationName: String read rDestinationName;
+    property DestinationParams: IDigIt_Params read rDestinationParams;
+
   end;
 
 var
@@ -479,18 +488,18 @@ begin
   TStringList(cbBoxList.Items).OwnsObjects:=False;
   TStringList(cbCounterList.Items).OwnsObjects:=False;
 
-  Source:= nil;
-  SourceName:= '';;
-  SourceParams:= nil;
+  rSource:= nil;
+  rSourceName:= '';;
+  rSourceParams:= nil;
   SourceFiles:= nil;
   iSourceFiles:= -1;
   lastCropped:= -1;
   lastLenTaked:= 0;
   BuildSourcesMenu(Self, menuSources, @SourceMenuClick);
 
-  Destination:= nil;
-  DestinationName:= '';
-  DestinationParams:= nil;
+  rDestination:= nil;
+  rDestinationName:= '';
+  rDestinationParams:= nil;
   BuildDestinationsMenu(Self, menuDestinations, @DestinationMenuClick);
 
   UI_ToolBarAddShortcuts;
@@ -546,7 +555,7 @@ var
 begin
   try
       curData:= nil;
-      res:= Source^.Inst.Take(takeActPreview, curDataType, curData);
+      res:= rSource^.Inst.Take(takeActPreview, curDataType, curData);
       if (res > 0) and (curData <> nil) then
       begin
         if (curDataType = diDataType_FileName) then
@@ -605,16 +614,13 @@ begin
   try
       UserCancel:= False;
       curData:= nil;
+      res:= 0;
 
       if (Sender = actTake)
-      then res:= Source^.Inst.Take(takeActTake, curDataType, curData)
+      then res:= rSource^.Inst.Take(takeActTake, curDataType, curData)
       else
       if (Sender = actTakeBuildDuplex)
-      then begin
-             { #todo 8 -oMaxM : Create a Dialog that returns me an IDigIt_ROArray }
-             res:= WizardBuildDuplexExecute(Source, curDataType, curData);
-           end
-      else res:= 0;
+      then res:= WizardBuildDuplexExecute(curDataType, curData);
 
       if (res > 0) and (curData <> nil) then
       begin
@@ -641,7 +647,7 @@ begin
                      CropFile_Full(0);
                    end;
               SourceFiles:= nil; iSourceFiles:= -1;
-              Source^.Inst.Clear;
+              rSource^.Inst.Clear;
 
               UI_ToolBar;
             end;
@@ -710,7 +716,7 @@ var
       then begin
              iSourceFiles:= -1;
              SourceFiles:= nil;
-             Source^.Inst.Clear;
+             rSource^.Inst.Clear;
            end;
     end;
   end;
@@ -839,7 +845,7 @@ var
        then begin
               iSourceFiles:= -1;
               SourceFiles:= nil;
-              Source^.Inst.Clear;
+              rSource^.Inst.Clear;
             end;
      end;
    end;
@@ -896,7 +902,7 @@ begin
          lastCropped:= -1;
          lastLenTaked:= 0;
          SourceFiles:= nil;
-         Source^.Inst.Clear;
+         rSource^.Inst.Clear;
 
          UI_ToolBar;
          XML_SaveWork;
@@ -1333,7 +1339,7 @@ begin
   begin
     if (TMenuItem(Sender).Tag = -1)
     then begin
-           // SaveAsFile Destination
+           // SaveAsFile rDestination
            newDestination:= nil;
            newDestinationName:= '';
          end
@@ -1635,7 +1641,7 @@ begin
 
     XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-    //Load Source and its Params
+    //Load rSource and its Params
     newSourceParams:= nil;
     newSourceName:= XMLWork.GetValue('Source/Name', '');
     if (newSourceName<>'') then
@@ -1668,7 +1674,7 @@ begin
       SourceFiles[i].fName:= XMLWork.GetValue(curItemPath+'fName', '');
     end;
 
-    //Load Destination and its Params
+    //Load rDestination and its Params
     newDestinationParams:= nil;
     newDestinationName:= XMLWork.GetValue('Destination/Name', '');
     if (newDestinationName = '')
@@ -1725,7 +1731,7 @@ var
    curItemPath: String;
 
 begin
-  if (Source <> Nil) and (Source^.Inst <> Nil) then
+  if (rSource <> Nil) and (rSource^.Inst <> Nil) then
   try
      if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
@@ -1743,8 +1749,8 @@ begin
      XMLWork.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
      XMLWork.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
 
-     //Save Source and its Params
-     XMLWork.SetValue('Source/Name', SourceName);
+     //Save rSource and its Params
+     XMLWork.SetValue('Source/Name', rSourceName);
      XMLWork.DeletePath('Source/Params/');
 
      //Save SourceFiles array
@@ -1761,9 +1767,9 @@ begin
        XMLWork.SetValue(curItemPath+'fName', SourceFiles[i].fName);
      end;
 
-     //Save Destination and its Params
-     XMLWork.SetValue('Destination/Name', DestinationName);
-     if (Destination = nil) then
+     //Save rDestination and its Params
+     XMLWork.SetValue('Destination/Name', rDestinationName);
+     if (rDestination = nil) then
      begin
        XMLWork.DeletePath('Destination/Params/');
        XMLWork.SetValue('Destination/Params/Format', SaveExt);
@@ -1774,11 +1780,11 @@ begin
      XMLWork.Free; XMLWork:= Nil;
 
      //FPC Bug?
-     //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
+     //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
      //So we do it after destroying XMLWork.
 
-     if (Source <> nil) then Source^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
-     if (Destination <> nil) then Destination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
+     if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
+     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
   finally
   end;
 end;
@@ -1919,7 +1925,7 @@ end;
 
 procedure TDigIt_Main.Default_Work;
 begin
-  DestinationName:= '';
+  rDestinationName:= '';
   SaveExt:= 'jpg';
   SavePath:= Path_Pictures;
   (*
@@ -1934,16 +1940,16 @@ procedure TDigIt_Main.Source_SelectUserParams(newSourceName: String; newSource: 
 begin
   if (newSource <> Nil) then
   begin
-    if (newSource <> Source) then
+    if (newSource <> rSource) then
     begin
-         { #note -oMaxM : Source Switched...Do something? }
+         { #note -oMaxM : rSource Switched...Do something? }
     end;
 
-    Source:= newSource;
-    SourceName:= newSourceName;
-    SourceParams:= Source^.Inst.Params;
-    if (SourceParams <> Nil)
-    then SourceParams.GetFromUser; { #todo 2 -oMaxM : if False? }
+    rSource:= newSource;
+    rSourceName:= newSourceName;
+    rSourceParams:= rSource^.Inst.Params;
+    if (rSourceParams <> Nil)
+    then rSourceParams.GetFromUser; { #todo 2 -oMaxM : if False? }
   end;
 end;
 
@@ -1951,16 +1957,16 @@ procedure TDigIt_Main.Source_SelectWithParams(newSourceName: String; newSource: 
 begin
   if (newSource <> nil) then
   begin
-    if (newSource <> Source) then
+    if (newSource <> rSource) then
     begin
-         { #note -oMaxM : Source Switched...Do something? }
+         { #note -oMaxM : rSource Switched...Do something? }
     end;
 
-    Source:= newSource;
-    SourceName:= newSourceName;
-    SourceParams:= newParams;
-    if (SourceParams <> Nil)
-    then SourceParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
+    rSource:= newSource;
+    rSourceName:= newSourceName;
+    rSourceParams:= newParams;
+    if (rSourceParams <> Nil)
+    then rSourceParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
   end;
 end;
 
@@ -1969,25 +1975,25 @@ begin
   if (newDestination = Nil)
   then begin
          { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-         //SaveAsFiles destination
+         //SaveAsFiles rDestination
          if Destination_SaveFiles_Settings_Execute(SaveExt, SavePath) then
          begin
          end;
-         DestinationParams:= nil;
+         rDestinationParams:= nil;
        end
   else begin
-         if (newDestination <> Destination) then
+         if (newDestination <> rDestination) then
          begin
-           { #note -oMaxM : Destination Switched...Do something? }
+           { #note -oMaxM : rDestination Switched...Do something? }
          end;
 
-         DestinationParams:= Destination^.Inst.Params;
-         if (DestinationParams <> Nil)
-         then DestinationParams.GetFromUser; { #todo 2 -oMaxM : if False? }
+         rDestinationParams:= rDestination^.Inst.Params;
+         if (rDestinationParams <> Nil)
+         then rDestinationParams.GetFromUser; { #todo 2 -oMaxM : if False? }
        end;
 
-  Destination:= newDestination;
-  DestinationName:= newDestinationName;
+  rDestination:= newDestination;
+  rDestinationName:= newDestinationName;
 end;
 
 procedure TDigIt_Main.Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo;
@@ -1995,9 +2001,9 @@ procedure TDigIt_Main.Destination_SelectWithParams(newDestinationName: String; n
 begin
   if (newDestination <> nil)
   then begin
-         if (newDestination <> Destination) then
+         if (newDestination <> rDestination) then
          begin
-           { #note -oMaxM : Destination Switched...Do something? }
+           { #note -oMaxM : rDestination Switched...Do something? }
          end;
 
          if (newParams <> Nil)
@@ -2005,9 +2011,9 @@ begin
        end
   else newParams:= nil;
 
-  Destination:= newDestination;
-  DestinationName:= newDestinationName;
-  DestinationParams:= newParams;
+  rDestination:= newDestination;
+  rDestinationName:= newDestinationName;
+  rDestinationParams:= newParams;
 end;
 
 procedure TDigIt_Main.edNameChange(Sender: TObject);
@@ -2516,7 +2522,7 @@ var
    remSources: Integer;
 
 begin
-  bCommonCond:= (Source<>nil) and (Source^.Inst <> nil);
+  bCommonCond:= (rSource<>nil) and (rSource^.Inst <> nil);
   actPreview.Enabled:= bCommonCond;
 
   if (CropMode = diCropCustom)

@@ -73,7 +73,7 @@ type
     function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     function Params: IDigIt_Params; stdcall;
-    function UI_Title(const AUI_Title: PChar): Integer; stdcall;
+    function UI_Title(out AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
      //Take a Picture and returns FileNames
@@ -488,9 +488,9 @@ begin
   Result:= Self;
 end;
 
-function TDigIt_Source_WIA.UI_Title(const AUI_Title: PChar): Integer; stdcall;
+function TDigIt_Source_WIA.UI_Title(out AUI_Title: PChar): Integer; stdcall;
 begin
-  StrPCopy(AUI_Title, DigIt_Source_WIA_NameL);
+  AUI_Title:= StrNew(PChar(DigIt_Source_WIA_NameL));
   Result:= Length(AUI_Title);
 end;
 

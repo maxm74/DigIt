@@ -114,7 +114,7 @@ type
     function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     function Params: IDigIt_Params; stdcall;
-    function UI_Title(const AUI_Title: PChar): Integer; stdcall;
+    function UI_Title(out AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
   end;
 
@@ -165,10 +165,6 @@ type
 
   IDigIt_Settings = Interface
   ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
-    //Buffers Limits Variables
-    function GetMaxPCharSize: DWord; stdcall;
-    function SetMaxPCharSize(NewSize: DWord): DWord; stdcall;
-
     //Path consts
     function Path_Temp: PChar; stdcall;
     function Path_Config: PChar; stdcall;

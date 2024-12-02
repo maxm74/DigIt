@@ -1,6 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
+2024/12/
+        02 Moved Select of Source/Destination from MainForm to Bridge Implementation;
+	   Deleted our creation of strings in Bridge (callers create the PChar);
+	   Modified Params of UI_Title const to out;
+	   First PDF write tests;
+
 2024/11/
         29 Added Source and Destination properties to Main Form;
 	   Writed BuildDuplex Wizard.

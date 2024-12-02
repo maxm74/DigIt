@@ -69,7 +69,25 @@ type
   TDigIt_Sources = class(specialize TOpenArrayList<TSourceInfo, String>, IDigIt_Sources)
     function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
   protected
+    rSelected: PSourceInfo;
+    rSelectedName: String;
+    rSelectedIndex: Integer;
+    rSelectedParams: IDigIt_Params;
+
     function FreeElement(var aData: TSourceInfo): Boolean; override;
+
+  public
+    constructor Create;
+
+    function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
+    function Select(SourceIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
+
+    function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
+
+    property Selected: PSourceInfo read rSelected;
+    property SelectedIndex: Integer read rSelectedIndex;
+    property SelectedName: String read rSelectedName;
+    property SelectedParams: IDigIt_Params read rSelectedParams;
   end;
 
   { TDigIt_Destinations }
@@ -83,7 +101,25 @@ type
   TDigIt_Destinations = class(specialize TOpenArrayList<TDestinationInfo, String>, IDigIt_Destinations)
     function Register(const aName: PChar; const aClass: IDigIt_Destination): Boolean; stdcall;
   protected
+    rSelected: PDestinationInfo;
+    rSelectedName: String;
+    rSelectedIndex: Integer;
+    rSelectedParams: IDigIt_Params;
+
     function FreeElement(var aData: TDestinationInfo): Boolean; override;
+
+  public
+    constructor Create;
+
+    function Select(DestinationName: String; GetUserParams: Boolean=False): Boolean; overload;
+    function Select(DestinationIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
+
+    function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
+
+    property Selected: PDestinationInfo read rSelected;
+    property SelectedIndex: Integer read rSelectedIndex;
+    property SelectedName: String read rSelectedName;
+    property SelectedParams: IDigIt_Params read rSelectedParams;
   end;
 
   { TDigIt_Settings }
@@ -143,17 +179,9 @@ type
 var
    theBridge: TDigIt_Bridge = nil;
 
-function AllocPChar: PChar;
-
 implementation
 
 uses dynlibs, Masks, DigIt_Types, DigIt_Form_Progress;
-
-function AllocPChar: PChar;
-begin
-  Result:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
-  Result^:= #0;
-end;
 
 { TDigIt_Plugins }
 
@@ -384,6 +412,88 @@ begin
   end;
 end;
 
+constructor TDigIt_Sources.Create;
+begin
+  inherited Create;
+
+  rSelected:= nil;
+  rSelectedName:= '';
+  rSelectedIndex:= -1;
+  rSelectedParams:= nil;
+end;
+
+function TDigIt_Sources.Select(SourceName: String; GetUserParams: Boolean): Boolean;
+var
+   newSourceI: Integer;
+   newSource: PSourceInfo =nil;
+
+begin
+  Result:= False;
+
+  if (SourceName <> '') then
+  try
+     newSourceI:= FindByKey(SourceName);
+     newSource:= Data[newSourceI];
+
+     if (newSource <> nil) then
+     begin
+       if GetUserParams and
+          not((newSource^.Inst.Params = nil) or newSource^.Inst.Params.GetFromUser)
+       then exit;
+
+       rSelected:= newSource;
+       rSelectedParams :=newSource^.Inst.Params;
+       rSelectedName:= SourceName;
+       rSelectedIndex:= newSourceI;
+       Result:= True;
+      end;
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Sources.Select(SourceIndex: Integer; GetUserParams: Boolean): Boolean;
+var
+   newSource: PSourceInfo =nil;
+
+begin
+  Result:= False;
+
+  try
+     newSource:= Data[SourceIndex];
+
+     if (newSource <> nil) then
+     begin
+       if GetUserParams and
+          not((newSource^.Inst.Params = nil) or newSource^.Inst.Params.GetFromUser)
+       then exit;
+
+       rSelected:= newSource;
+       rSelectedParams :=newSource^.Inst.Params;
+       rSelectedName:= rList[SourceIndex].Key;
+       rSelectedIndex:= SourceIndex;
+       Result:= True;
+      end;
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Sources.LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
+begin
+  Result:= False;
+  if (rSelectedParams <> nil) and (XMLFileName <> '') and (XMLPath <> '') then
+  try
+     Result:= rSelectedParams.Load(PChar(XMLFileName), PChar(XMLPath));
+     if Result then Result:= rSelectedParams.OnSet;
+
+  except
+    Result:= False;
+  end;
+end;
+
 function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
 var
    newData: TSourceInfo;
@@ -453,6 +563,88 @@ begin
     //MaxM: When the open array is freed the compiler frees the contents of the record using rtti,
     //      a very dangerous thing for us.
     FillChar(aData, SizeOf(aData), 0);
+  end;
+end;
+
+constructor TDigIt_Destinations.Create;
+begin
+  inherited Create;
+
+  rSelected:= nil;
+  rSelectedName:= '';
+  rSelectedIndex:= -1;
+  rSelectedParams:= nil;
+end;
+
+function TDigIt_Destinations.Select(DestinationName: String; GetUserParams: Boolean): Boolean;
+var
+   newDestinationI: Integer;
+   newDestination: PDestinationInfo =nil;
+
+begin
+  Result:= False;
+
+  if (DestinationName <> '') then
+  try
+     newDestinationI:= FindByKey(DestinationName);
+     newDestination:= Data[newDestinationI];
+
+     if (newDestination <> nil) then
+     begin
+       if GetUserParams and
+          not((newDestination^.Inst.Params = nil) or newDestination^.Inst.Params.GetFromUser)
+       then exit;
+
+       rSelected:= newDestination;
+       rSelectedParams :=newDestination^.Inst.Params;
+       rSelectedName:= DestinationName;
+       rSelectedIndex:= newDestinationI;
+       Result:= True;
+      end;
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Destinations.Select(DestinationIndex: Integer; GetUserParams: Boolean): Boolean;
+var
+   newDestination: PDestinationInfo =nil;
+
+begin
+  Result:= False;
+
+  try
+     newDestination:= Data[DestinationIndex];
+
+     if (newDestination <> nil) then
+     begin
+       if GetUserParams and
+          not((newDestination^.Inst.Params = nil) or newDestination^.Inst.Params.GetFromUser)
+       then exit;
+
+       rSelected:= newDestination;
+       rSelectedParams :=newDestination^.Inst.Params;
+       rSelectedName:= rList[DestinationIndex].Key;
+       rSelectedIndex:= DestinationIndex;
+       Result:= True;
+      end;
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Destinations.LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
+begin
+  Result:= False;
+  if (rSelectedParams <> nil) and (XMLFileName <> '') and (XMLPath <> '') then
+  try
+     Result:= rSelectedParams.Load(PChar(XMLFileName), PChar(XMLPath));
+     if Result then Result:= rSelectedParams.OnSet;
+
+  except
+    Result:= False;
   end;
 end;
 

@@ -45,7 +45,7 @@ type
 
     //function RegisterName: PChar; stdcall;
     function Params: IDigIt_Params; stdcall;
-    function UI_Title(const AUI_Title: PChar): Integer; stdcall;
+    function UI_Title(out AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
     //IDigIt_Params
@@ -262,9 +262,9 @@ begin
   Result:= Self;
 end;
 
-function TDigIt_Source_Folder.UI_Title(const AUI_Title: PChar): Integer; stdcall;
+function TDigIt_Source_Folder.UI_Title(out AUI_Title: PChar): Integer; stdcall;
 begin
-  StrPCopy(AUI_Title, DigIt_Source_Folder_NameL);
+  AUI_Title:= StrNew(PChar(DigIt_Source_Folder_NameL));
   Result:= Length(AUI_Title);
 end;
 

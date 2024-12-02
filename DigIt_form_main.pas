@@ -295,6 +295,7 @@ type
     lastLenTaked,     //Used in Take Again
     iSourceFiles: Integer;
     SourceFiles: TSourcesArray;
+    DestinationFiles: TStringArray; { #todo 10 -oMaxM : Use this array and not ListItems }
 
     function GetCurrentCropArea: TCropArea;
     function Counters_GetCurrent: TDigIt_Counter;
@@ -324,10 +325,8 @@ type
     procedure XML_LoadPageSettings;
     procedure XML_SavePageSettings;
     procedure Default_Work;
-    procedure Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
-    procedure Source_SelectWithParams(newSourceName: String; newSource: PSourceInfo; newParams:IDigIt_Params);
-    procedure Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
-    procedure Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo; newParams:IDigIt_Params);
+    function Source_Select(newSourceIndex: Integer): Boolean;
+    function Destination_Select(newDestinationIndex: Integer): Boolean;
 
     procedure setProject_File(AValue: String);
     procedure setCropMode(ANewCropMode: TDigItCropMode);
@@ -370,7 +369,7 @@ uses
   {$ifopt D+}
   lazlogger,
   {$endif}
-  LCLIntf, LCLProc,
+  LCLIntf, LCLProc, fppdf,
   Digit_Destinations, DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
 
@@ -1330,41 +1329,26 @@ begin
 end;
 
 procedure TDigIt_Main.DestinationMenuClick(Sender: TObject);
-var
-   newDestination: PDestinationInfo;
-   newDestinationName: String;
-
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
-    if (TMenuItem(Sender).Tag = -1)
-    then begin
-           // SaveAsFile rDestination
-           newDestination:= nil;
-           newDestinationName:= '';
-         end
-    else begin
-           newDestination:= theBridge.DestinationsImpl.Data[TMenuItem(Sender).Tag];
-           newDestinationName:= theBridge.DestinationsImpl.Key[TMenuItem(Sender).Tag];
-         end;
-    Destination_SelectUserParams(newDestinationName, newDestination);
-    TMenuItem(Sender).Default:= True;
+    if Destination_Select(TMenuItem(Sender).Tag) then
+    begin
+      TMenuItem(Sender).Default:= True;
+      UI_ToolBar;
+    end;
   end;
 end;
 
 procedure TDigIt_Main.SourceMenuClick(Sender: TObject);
-var
-   newSource: PSourceInfo;
-   newSourceName: String;
-
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
-    newSource:= theBridge.SourcesImpl.Data[TMenuItem(Sender).Tag];
-    newSourceName:= theBridge.SourcesImpl.Key[TMenuItem(Sender).Tag];
-    Source_SelectUserParams(newSourceName, newSource);
-    TMenuItem(Sender).Default:= True;
-    UI_ToolBar;
+    if Source_Select(TMenuItem(Sender).Tag) then
+    begin
+      TMenuItem(Sender).Default:= True;
+      UI_ToolBar;
+    end;
   end;
 end;
 
@@ -1620,44 +1604,28 @@ end;
 
 procedure TDigIt_Main.XML_LoadWork;
 var
-   newSourceName,
    newDestinationName,
    curItemPath: String;
    i, iCount,
-   newSourceI,
    newDestinationI: Integer;
-   newSource: PSourceInfo =nil;
-   newDestination: PDestinationInfo =nil;
-   newSourceParams,
-   newDestinationParams: IDigIt_Params;
    newCropMode: TDigItCropMode;
 
 begin
   try
     XML_Loading:= True;
 
-    newSourceI:= -1;
     newDestinationI:= -1;
 
     XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
     //Load rSource and its Params
-    newSourceParams:= nil;
-    newSourceName:= XMLWork.GetValue('Source/Name', '');
-    if (newSourceName<>'') then
+    if theBridge.SourcesImpl.Select(XMLWork.GetValue('Source/Name', '')) then
     begin
-      newSourceI:= theBridge.SourcesImpl.FindByKey(newSourceName);
-      newSource:= theBridge.SourcesImpl.Data[newSourceI];
-      if (newSource <> nil)
-      then begin
-             //Read Params
-             newSourceParams :=newSource^.Inst.Params;
-             if (newSourceParams <> nil)
-             then newSourceParams.Load(PChar(Path_Config+Config_XMLWork), 'Source/Params');
-           end
-      else newSourceName:= '';
+      rSource:= theBridge.SourcesImpl.Selected;
+      rSourceName:= theBridge.SourcesImpl.SelectedName;
+      rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+      theBridge.SourcesImpl.LoadSelectedParams(Path_Config+Config_XMLWork, 'Source/Params');
     end;
-    Source_SelectWithParams(newSourceName, newSource, newSourceParams);
 
     //Load SourceFiles
     LoadImage(XMLWork.GetValue('SourceFiles/LoadedFile', ''));
@@ -1675,27 +1643,26 @@ begin
     end;
 
     //Load rDestination and its Params
-    newDestinationParams:= nil;
     newDestinationName:= XMLWork.GetValue('Destination/Name', '');
     if (newDestinationName = '')
     then begin
+           rDestination:= nil;
+           rDestinationName:= '';
+           rDestinationParams:= nil;
            SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
            SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
+           newDestinationI:= -1;
          end
     else begin
-           newDestinationI:= theBridge.DestinationsImpl.FindByKey(newDestinationName);
-           newDestination:= theBridge.DestinationsImpl.Data[newDestinationI];
-           if (newDestination <> nil)
-           then begin
-                  //Read Params
-                  newDestinationParams :=newDestination^.Inst.Params;
-                  if (newDestinationParams <> nil)
-                  then newDestinationParams.Load(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
-
-                end
-           else newDestinationName:= '';
+           if theBridge.DestinationsImpl.Select(newDestinationName) then
+           begin
+             rDestination:= theBridge.DestinationsImpl.Selected;
+             rDestinationName:= theBridge.DestinationsImpl.SelectedName;
+             rDestinationParams:= theBridge.DestinationsImpl.SelectedParams;
+             theBridge.DestinationsImpl.LoadSelectedParams(Path_Config+Config_XMLWork, 'Destination/Params');
+             newDestinationI:= theBridge.DestinationsImpl.SelectedIndex;
+           end;
          end;
-    Destination_SelectWithParams(newDestinationName, newDestination, newDestinationParams);
 
     XML_LoadPageSettings;
 
@@ -1712,7 +1679,7 @@ begin
 
     XML_LoadCapturedFiles;
 
-    UI_MenuItemsChecks(newSourceI, newDestinationI);
+    UI_MenuItemsChecks(theBridge.SourcesImpl.SelectedIndex, newDestinationI);
 
     //User Interface
     rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', False);
@@ -1936,84 +1903,60 @@ begin
   rollPages.Collapsed:= False;
 end;
 
-procedure TDigIt_Main.Source_SelectUserParams(newSourceName: String; newSource: PSourceInfo);
+function TDigIt_Main.Source_Select(newSourceIndex: Integer): Boolean;
 begin
-  if (newSource <> Nil) then
-  begin
-    if (newSource <> rSource) then
-    begin
+  Result:= False;
+  try
+     if theBridge.SourcesImpl.Select(newSourceIndex, True) then
+     begin
+       if (theBridge.SourcesImpl.Selected <> rSource) then
+       begin
          { #note -oMaxM : rSource Switched...Do something? }
-    end;
-
-    rSource:= newSource;
-    rSourceName:= newSourceName;
-    rSourceParams:= rSource^.Inst.Params;
-    if (rSourceParams <> Nil)
-    then rSourceParams.GetFromUser; { #todo 2 -oMaxM : if False? }
-  end;
-end;
-
-procedure TDigIt_Main.Source_SelectWithParams(newSourceName: String; newSource: PSourceInfo; newParams: IDigIt_Params);
-begin
-  if (newSource <> nil) then
-  begin
-    if (newSource <> rSource) then
-    begin
-         { #note -oMaxM : rSource Switched...Do something? }
-    end;
-
-    rSource:= newSource;
-    rSourceName:= newSourceName;
-    rSourceParams:= newParams;
-    if (rSourceParams <> Nil)
-    then rSourceParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
-  end;
-end;
-
-procedure TDigIt_Main.Destination_SelectUserParams(newDestinationName: String; newDestination: PDestinationInfo);
-begin
-  if (newDestination = Nil)
-  then begin
-         { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-         //SaveAsFiles rDestination
-         if Destination_SaveFiles_Settings_Execute(SaveExt, SavePath) then
-         begin
-         end;
-         rDestinationParams:= nil;
-       end
-  else begin
-         if (newDestination <> rDestination) then
-         begin
-           { #note -oMaxM : rDestination Switched...Do something? }
-         end;
-
-         rDestinationParams:= rDestination^.Inst.Params;
-         if (rDestinationParams <> Nil)
-         then rDestinationParams.GetFromUser; { #todo 2 -oMaxM : if False? }
        end;
 
-  rDestination:= newDestination;
-  rDestinationName:= newDestinationName;
+       rSource:= theBridge.SourcesImpl.Selected;
+       rSourceName:= theBridge.SourcesImpl.SelectedName;
+       rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+       Result:= True;
+     end;
+
+  except
+    Result:= False;
+  end;
 end;
 
-procedure TDigIt_Main.Destination_SelectWithParams(newDestinationName: String; newDestination: PDestinationInfo;
-  newParams: IDigIt_Params);
+function TDigIt_Main.Destination_Select(newDestinationIndex: Integer): Boolean;
 begin
-  if (newDestination <> nil)
-  then begin
-         if (newDestination <> rDestination) then
-         begin
-           { #note -oMaxM : rDestination Switched...Do something? }
-         end;
+  Result:= False;
+  try
+     if (newDestinationIndex = -1)
+     then begin
+            { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
+            if Destination_SaveFiles_Settings_Execute(SaveExt, SavePath) then
+            begin
+            end;
+            rDestination:= nil;
+            rDestinationName:= '';
+            rDestinationParams:= nil;
+          end
+     else begin
+            if theBridge.DestinationsImpl.Select(newDestinationIndex, True) then
+            begin
+              if (theBridge.DestinationsImpl.Selected <> rDestination) then
+              begin
+                { #note -oMaxM : rDestination Switched...Do something? }
+             end;
 
-         if (newParams <> Nil)
-         then newParams.OnSet; { #todo 2 -oMaxM : if OnSet = False ? Error }
-       end
-  else newParams:= nil;
+             rDestination:= theBridge.DestinationsImpl.Selected;
+             rDestinationName:= theBridge.DestinationsImpl.SelectedName;
+             rDestinationParams:= theBridge.DestinationsImpl.SelectedParams;
+             Result:= True;
+            end;
+          end;
 
-  rDestination:= newDestination;
-  rDestinationName:= newDestinationName;
-  rDestinationParams:= newParams;
+  except
+    Result:= False;
+  end;
 end;
 
 procedure TDigIt_Main.edNameChange(Sender: TObject);
@@ -2241,8 +2184,115 @@ begin
 end;
 
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
+Var
+  PDF: TPDFDocument;
+  P: TPDFPage;
+  S: TPDFSection;
+  paper: TPDFPaper;
+  lOpts: TPDFOptions;
+  FtTitle: integer;
+  IDX, IDX_Diamond: Integer;
+  i, W, H: Integer;
+  curFileName: String;
+  captItem: TFileListItem;  { #todo 10 -oMaxM : Use DestinationFiles array intestead }
+
 begin
-  //Maybe Tomorrow
+  try
+     PDF:= TPDFDocument.Create(Nil);
+     // set global props
+     PDF.Infos.Title := Application.Title;
+     PDF.Infos.Author := 'MaxM';
+     PDF.Infos.Producer := Application.Title;
+     PDF.Infos.ApplicationName := ApplicationName;
+     PDF.Infos.CreationDate := Now;
+//     PDF.Infos.KeyWords:='fcl-pdf demo PDF support Free Pascal';
+     lOpts := [poPageOriginAtTop];
+(*
+    if FFontCompression then
+      Include(lOpts, poCompressFonts);
+    if FTextCompression then
+      Include(lOpts,poCompressText);
+    if FImageCompression then
+      Include(lOpts,poCompressImages);
+    if FImageTransparency then
+      Include(lOpts,poUseImageTransparency);
+    if FRawJPEG then
+      Include(lOpts,poUseRawJPEG);
+    if FAddMetadata then
+      Include(lOpts,poMetadataEntry);
+*)
+    PDF.Options := lOpts;
+
+    // add content
+    PDF.StartDocument;
+    S := PDF.Sections.AddSection; // we always need at least one section
+
+
+//    for i := 0 to lvCaptured.Items.Count-1 do
+    begin
+     (* captItem:= TFileListItem(lvCaptured.Items[i]);
+      curFileName:= captItem.FileName;  *)
+      curFileName:= 'c:\tmp\Acquisitions Book 1.03.01, Byzantine.jpg';
+      if FileExists(curFileName) then
+      begin
+        P := PDF.Pages.AddPage;
+        P.PaperType := ptCustom; //ptCustom; //ptA4;
+        P.UnitOfMeasure := uomPixels;//uomMillimeters;
+
+        IDX := PDF.Images.AddFromFile(curFileName, False); //False
+        W := PDF.Images[IDX].Width;
+        H := PDF.Images[IDX].Height;
+        paper.W:=W;
+        paper.H:=H;
+        P.Paper:=paper;
+        { full size image }
+        //P.DrawImage(0, 0, W, H, IDX);  // left-bottom coordinate of image
+        P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
+
+        S.AddPage(P); // Add the Page to the Section
+      end;
+    end;
+    PDF.SaveToStream(TFileStream.Create('test.pdf', fmCreate));
+
+  finally
+    PDF.Free;
+  end;
+(*
+  P := D.Pages[APage];
+  // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
+  FtTitle := D.AddFont('Helvetica');
+
+  { Page title }
+  P.SetFont(FtTitle,23);
+  P.SetColor(clBlack, false);
+  P.WriteText(25, 20, 'Sample Image Support');
+
+  P.SetFont(FtTitle,10);
+  P.SetColor(clBlack, false);
+
+  IDX := D.Images.AddFromFile('poppy.jpg',False);
+  W := D.Images[IDX].Width;
+  H := D.Images[IDX].Height;
+  { full size image }
+  P.DrawImageRawSize(25, 130, W, H, IDX);  // left-bottom coordinate of image
+  P.WriteText(145, 90, '[Full size (defined in pixels)]');
+  P.WriteText(145, 95, '+alpha-transparent overlay (if enabled)');
+
+  IDX_Diamond := D.Images.AddFromFile('diamond.png',False);
+  P.DrawImageRawSize(30, 125, D.Images[IDX_Diamond].Width, D.Images[IDX_Diamond].Height, IDX_Diamond);
+
+  { quarter size image }
+  P.DrawImageRawSize(25, 190, W shr 1, H shr 1, IDX); // could also have used: Integer(W div 2), Integer(H div 2)
+  P.WriteText(85, 180, '[Quarter size (defined in pixels)]');
+  { rotated image }
+  P.DrawImageRawSize(150, 190, W shr 1, H shr 1, IDX, 30);
+
+  { scalled image to 2x2 centimeters }
+  P.DrawImage(25, 230, 20.0, 20.0, IDX); // left-bottom coordinate of image
+  P.WriteText(50, 220, '[2x2 cm scaled image]');
+  { rotatedd image }
+  P.DrawImage(120, 230, 20.0, 20.0, IDX, 30);
+  *)
 end;
 
 procedure TDigIt_Main.setProject_File(AValue: String);

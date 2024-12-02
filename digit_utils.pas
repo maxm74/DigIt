@@ -274,18 +274,20 @@ var
    curTitle:PChar;
 
 begin
-  curTitle:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
-
   for i:=0 to theBridge.SourcesImpl.Count-1 do
   begin
     curSource:= theBridge.SourcesImpl.Data[i];
     if (curSource<>nil) then
     begin
+      curTitle:= '';
       newItem:= TMenuItem.Create(AOwner);
 
       res:= curSource^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
-      then newItem.Caption:= curTitle
+      then begin
+             newItem.Caption:= curTitle;
+             StrDispose(curTitle);
+           end
       else newItem.Caption:= theBridge.SourcesImpl.Key[i];
 
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
@@ -295,8 +297,6 @@ begin
       menuSources.Items.Add(newItem);
     end;
   end;
-
-  StrDispose(curTitle);
 end;
 
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
@@ -315,18 +315,20 @@ begin
   newItem.OnClick:= menuOnClick;
   menuDestinations.Items.Add(newItem);
 
-  curTitle:= StrAlloc(theBridge.Settings.GetMaxPCharSize);
-
   for i:=0 to theBridge.DestinationsImpl.Count-1 do
   begin
     curDestination:= theBridge.DestinationsImpl.Data[i];
     if (curDestination<>nil) then
     begin
+      curTitle:= '';
       newItem:= TMenuItem.Create(AOwner);
 
       res:= curDestination^.Inst.UI_Title(curTitle);
       if (res >0 ) and (curTitle <> '')
-      then newItem.Caption:= curTitle
+      then begin
+             newItem.Caption:= curTitle;
+             StrDispose(curTitle);
+           end
       else newItem.Caption:= theBridge.DestinationsImpl.Key[i];
 
       newItem.ImageIndex:= curDestination^.Inst.UI_ImageIndex;
@@ -336,8 +338,6 @@ begin
       menuDestinations.Items.Add(newItem);
     end;
   end;
-
-  StrDispose(curTitle);
 end;
 
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;

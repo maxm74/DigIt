@@ -2670,9 +2670,9 @@ object DigIt_Main: TDigIt_Main
     Left = 424
     Top = 86
   end
-  object SaveCropList: TSaveDialog
+  object SavePDF: TSaveDialog
     DefaultExt = '.clf'
-    Filter = 'Crop List File (*.clf)|*.clf|All Files (*.*)|*.*'
+    Filter = 'Portable Document Format (*.pdf)|*.pdf|All Files (*.*)|*.*'
     Left = 341
     Top = 264
   end

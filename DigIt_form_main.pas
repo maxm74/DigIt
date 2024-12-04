@@ -158,7 +158,7 @@ type
     OpenCropList: TOpenDialog;
     OpenPicture: TOpenPictureDialog;
     MenuMain: TPopupMenu;
-    SaveCropList: TSaveDialog;
+    SavePDF: TSaveDialog;
     SavePicture: TSavePictureDialog;
     SelectDirectory: TSelectDirectoryDialog;
     tbCaptured: TToolBar;
@@ -2186,113 +2186,89 @@ end;
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
 Var
   PDF: TPDFDocument;
+  PDF_File: TFileStream;
   P: TPDFPage;
   S: TPDFSection;
   paper: TPDFPaper;
-  lOpts: TPDFOptions;
-  FtTitle: integer;
-  IDX, IDX_Diamond: Integer;
+  IDX,
   i, W, H: Integer;
+  cStr,
   curFileName: String;
   captItem: TFileListItem;  { #todo 10 -oMaxM : Use DestinationFiles array intestead }
 
 begin
+  if SavePDF.Execute then
   try
+     with DigIt_Progress do
+     begin
+       labTotal.Caption:= '';
+       capTotal.Caption:= '';
+       progressTotal.Style:= pbstNormal;
+       progressTotal.Min:= 0;
+       progressTotal.Max:= lvCaptured.Items.Count-1;
+       progressTotal.Position:= 0;
+       panelCurrent.Visible:= False;
+       Show('Converting Images to PDF...');
+       cStr:= IntToStr(progressTotal.Max);
+     end;
+
      PDF:= TPDFDocument.Create(Nil);
-     // set global props
+
      PDF.Infos.Title := Application.Title;
      PDF.Infos.Author := 'MaxM';
      PDF.Infos.Producer := Application.Title;
      PDF.Infos.ApplicationName := ApplicationName;
      PDF.Infos.CreationDate := Now;
-//     PDF.Infos.KeyWords:='fcl-pdf demo PDF support Free Pascal';
-     lOpts := [poPageOriginAtTop];
-(*
-    if FFontCompression then
-      Include(lOpts, poCompressFonts);
-    if FTextCompression then
-      Include(lOpts,poCompressText);
-    if FImageCompression then
-      Include(lOpts,poCompressImages);
-    if FImageTransparency then
-      Include(lOpts,poUseImageTransparency);
-    if FRawJPEG then
-      Include(lOpts,poUseRawJPEG);
-    if FAddMetadata then
-      Include(lOpts,poMetadataEntry);
-*)
-    PDF.Options := lOpts;
+     PDF.Options := [poCompressImages, poUseRawJPEG];
 
-    // add content
-    PDF.StartDocument;
-    S := PDF.Sections.AddSection; // we always need at least one section
+     PDF.StartDocument;
+     S := PDF.Sections.AddSection;
 
+     for i := 0 to lvCaptured.Items.Count-1 do
+     begin
+       DigIt_Progress.progressTotal.Position:= i;
+       DigIt_Progress.capTotal.Caption:= 'Processing '+IntToStr(i)+' / '+cStr;
+       Application.ProcessMessages;
 
-//    for i := 0 to lvCaptured.Items.Count-1 do
-    begin
-     (* captItem:= TFileListItem(lvCaptured.Items[i]);
-      curFileName:= captItem.FileName;  *)
-      curFileName:= 'c:\tmp\Acquisitions Book 1.03.01, Byzantine.jpg';
-      if FileExists(curFileName) then
-      begin
-        P := PDF.Pages.AddPage;
-        P.PaperType := ptCustom; //ptCustom; //ptA4;
-        P.UnitOfMeasure := uomPixels;//uomMillimeters;
+       captItem:= TFileListItem(lvCaptured.Items[i]);
+       curFileName:= captItem.FileName;
+       if FileExists(curFileName) then
+       begin
+         P := PDF.Pages.AddPage;
+         P.PaperType := ptCustom; //ptCustom; //ptA4;
+         P.UnitOfMeasure := uomPixels;//uomMillimeters;
 
-        IDX := PDF.Images.AddFromFile(curFileName, False); //False
-        W := PDF.Images[IDX].Width;
-        H := PDF.Images[IDX].Height;
-        paper.W:=W;
-        paper.H:=H;
-        P.Paper:=paper;
-        { full size image }
-        //P.DrawImage(0, 0, W, H, IDX);  // left-bottom coordinate of image
-        P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
+         IDX := PDF.Images.AddFromFile(curFileName, False);
+         if (IDX >= 0) then
+         begin
+           W := PDF.Images[IDX].Width;
+           H := PDF.Images[IDX].Height;
 
-        S.AddPage(P); // Add the Page to the Section
-      end;
-    end;
-    PDF.SaveToStream(TFileStream.Create('test.pdf', fmCreate));
+           //Set Paper to Full image size
+           paper.W:=W;
+           paper.H:=H;
+           P.Paper:=paper;
+
+           P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
+
+           S.AddPage(P);
+         end;
+       end;
+
+       DigIt_Progress.progressTotal.Position:= i+1;
+       DigIt_Progress.capTotal.Caption:= 'Processed '+IntToStr(i)+' / '+cStr;
+       Application.ProcessMessages;
+     end;
+
+     PDF_File:= TFileStream.Create(SavePDF.FileName, fmCreate);
+     PDF.SaveToStream(PDF_File);
 
   finally
-    PDF.Free;
+     DigIt_Progress.Hide;
+
+     PDF.Free;
+     PDF_File.Free;
   end;
-(*
-  P := D.Pages[APage];
-  // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-  FtTitle := D.AddFont('Helvetica');
-
-  { Page title }
-  P.SetFont(FtTitle,23);
-  P.SetColor(clBlack, false);
-  P.WriteText(25, 20, 'Sample Image Support');
-
-  P.SetFont(FtTitle,10);
-  P.SetColor(clBlack, false);
-
-  IDX := D.Images.AddFromFile('poppy.jpg',False);
-  W := D.Images[IDX].Width;
-  H := D.Images[IDX].Height;
-  { full size image }
-  P.DrawImageRawSize(25, 130, W, H, IDX);  // left-bottom coordinate of image
-  P.WriteText(145, 90, '[Full size (defined in pixels)]');
-  P.WriteText(145, 95, '+alpha-transparent overlay (if enabled)');
-
-  IDX_Diamond := D.Images.AddFromFile('diamond.png',False);
-  P.DrawImageRawSize(30, 125, D.Images[IDX_Diamond].Width, D.Images[IDX_Diamond].Height, IDX_Diamond);
-
-  { quarter size image }
-  P.DrawImageRawSize(25, 190, W shr 1, H shr 1, IDX); // could also have used: Integer(W div 2), Integer(H div 2)
-  P.WriteText(85, 180, '[Quarter size (defined in pixels)]');
-  { rotated image }
-  P.DrawImageRawSize(150, 190, W shr 1, H shr 1, IDX, 30);
-
-  { scalled image to 2x2 centimeters }
-  P.DrawImage(25, 230, 20.0, 20.0, IDX); // left-bottom coordinate of image
-  P.WriteText(50, 220, '[2x2 cm scaled image]');
-  { rotatedd image }
-  P.DrawImage(120, 230, 20.0, 20.0, IDX, 30);
-  *)
 end;
 
 procedure TDigIt_Main.setProject_File(AValue: String);

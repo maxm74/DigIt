@@ -19,13 +19,17 @@ uses
   Classes, SysUtils, Forms, Controls, Dialogs, ComCtrls, ExtCtrls, Buttons, StdCtrls,
   Digit_Bridge_Intf, Digit_Bridge_Impl, BGRAAnimatedGif;
 
-const
+resourcestring
      CAPTION_PREV ='&Back';
      CAPTION_NEXT ='&Next';
      CAPTION_END ='&End';
      CAPTION_CANCEL ='&Cancel';
      MSG_CONFIRM_CANCELSTEP ='Cancel the Operation?';
      MSG_ERR_CANCELSTEP ='Operation aborted by User';
+
+     rsCancelFront = 'Do I cancel the Front Side acquisition I just made?';
+     rsCancelBack = 'Do I cancel the Back Side acquisition I just made?';
+     rsNoPages = 'No Pages in Front or Back Side';
 
 type
   { TWizardBuildDuplex }
@@ -354,7 +358,7 @@ begin
      2:begin
          if (Length(FrontFiles) > 0) then
          begin
-            Case MessageDlg('DigIt', 'Do I cancel the Front Side acquisition I just made?',
+            Case MessageDlg('DigIt', rsCancelFront,
                             mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
               mrYes: begin
                        FrontFiles:= nil;
@@ -367,7 +371,7 @@ begin
      3:begin
          if (Length(BackFiles) > 0) then
          begin
-           Case MessageDlg('DigIt', 'Do I cancel the Back Side acquisition I just made?',
+           Case MessageDlg('DigIt', rsCancelBack,
                            mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
              mrYes: begin
                       BackFiles:= nil;
@@ -406,8 +410,7 @@ end;
 function TWizardBuildDuplex.EndStep: Boolean;
 var
    i,
-   iOver,
-   last,
+   iAll,
    lenFront,
    lenBack,
    len,
@@ -417,8 +420,8 @@ begin
   try
      {$ifdef Test}
      OneSided:= False;
-     SetLength(FrontFiles, 7);
-     SetLength(BackFiles, 4);
+     SetLength(FrontFiles, 4);
+     SetLength(BackFiles, 7);
      for i:=0 to Length(FrontFiles)-1 do FrontFiles[i]:=IntToStr(i)+' front';
      for i:=0 to Length(BackFiles)-1 do BackFiles[i]:=IntToStr(Length(BackFiles)-i-1)+' back';
      {$endif}
@@ -426,8 +429,9 @@ begin
      AllFiles:= nil;
      lenFront:= Length(FrontFiles);
      lenBack:= Length(BackFiles);
-     if (lenFront=0) or (lenBack=0) then raise Exception.Create('No Pages in Front or Back Side');
+     if (lenFront=0) or (lenBack=0) then raise Exception.Create(rsNoPages);
 
+     //Take the smallest length in len and the difference with the largest in lenOver
      if (lenFront <= lenBack)
      then begin
             len:= lenFront;
@@ -438,32 +442,41 @@ begin
             lenOver:= lenFront-lenBack;
           end;
 
+     //Allocates space for two pages at a time plus any extra pages
      SetLength(AllFiles, (len*2)+lenOver);
 
      if OneSided
      then begin
+            //Take Front and Back in the same order
+            iAll:= 0;
             for i:=0 to len-1 do
             begin
-              AllFiles[i*2]:= FrontFiles[i];
-              AllFiles[(i*2)+1]:= BackFiles[i];
+              AllFiles[iAll]:= FrontFiles[i];
+              inc(iAll);
+              AllFiles[iAll]:= BackFiles[i];
+              inc(iAll);
             end;
-            last:= (i+1)*2;
 
+            //Take Extra Pages
             if (lenFront < lenBack)
-            then for iOver:=0 to lenOver-1 do AllFiles[last+iOver]:= BackFiles[len+iOver]
-            else for iOver:=0 to lenOver-1 do AllFiles[last+iOver]:= FrontFiles[len+iOver];
+            then for i:=0 to lenOver-1 do AllFiles[iAll+i]:= BackFiles[len+i]
+            else for i:=0 to lenOver-1 do AllFiles[iAll+i]:= FrontFiles[len+i];
           end
      else begin
+            //Take Front in the Same order, Back in reverse order
+            iAll:= 0;
             for i:=0 to len-1 do
             begin
-              AllFiles[i*2]:= FrontFiles[i];
-              AllFiles[(i*2)+1]:= BackFiles[lenBack-i-1];
+              AllFiles[iAll]:= FrontFiles[i];
+              inc(iAll);
+              AllFiles[iAll]:= BackFiles[lenBack-i-1];
+              inc(iAll);
             end;
-            last:= (i+1)*2;
 
+            //Take Extra Pages, Front in the Same order, Back in reverse order
             if (lenFront < lenBack)
-            then for iOver:=1 to lenOver do AllFiles[last+iOver-1]:= BackFiles[lenOver-iOver]
-            else for iOver:=0 to lenOver-1 do AllFiles[last+iOver]:= FrontFiles[len+iOver];
+            then for i:=1 to lenOver do AllFiles[iAll+i-1]:= BackFiles[lenOver-i]
+            else for i:=0 to lenOver-1 do AllFiles[iAll+i]:= FrontFiles[len+i];
           end;
 
      Result :=True;

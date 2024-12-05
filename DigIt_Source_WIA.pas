@@ -23,7 +23,14 @@ const
   WIA_TakeFileName = 'wia_take';
 
 resourcestring
-  DigIt_Source_WIA_NameL = 'WIA Device';
+  rsWIAName = 'WIA Device';
+  rsWIAAcquiring = 'Acquiring Page %d';
+  rsWIAAcquiringTitle = 'Acquiring from %s';
+  rsWIAAcquiringTotal = 'Acquiring from %s at %d dpi';
+  rsWIAAcquired = 'Acquired %d Pages';
+  rsWIADevItemSel = 'Device found '#13#10'%s %s'#13#10'but Item %s not...'#13#10'Select the First Item %s ?';
+  rsWIAExcConnect = 'Error Connecting Device';
+  rsWIAExcNotFound = 'Device not found...';
 
 type
 
@@ -126,7 +133,7 @@ begin
   WIA_TRANSFER_MSG_STATUS: begin
       if (Progress <> nil) then
       begin
-        Progress.SetCurrentCaption(PChar('Acquiring Page '+IntToStr(AWiaDevice.Download_Count+1)));
+        Progress.SetCurrentCaption(PChar(Format(rsWIAAcquiring, [AWiaDevice.Download_Count+1])));
         Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
         Application.ProcessMessages;
       end;
@@ -134,7 +141,7 @@ begin
   WIA_TRANSFER_MSG_END_OF_STREAM: begin
       if (Progress <> nil) then
       begin
-        Progress.SetCurrentCaption(PChar('Acquired Pages '+IntToStr(AWiaDevice.Download_Count)));
+        Progress.SetCurrentCaption(PChar(Format(rsWIAAcquired, [AWiaDevice.Download_Count])));
         Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
         Application.ProcessMessages;
       end;
@@ -229,7 +236,7 @@ begin
        //Select the Device
        rWia.SelectedDeviceIndex:= newDeviceIndex;
        newWIASource:= rWia.SelectedDevice;
-       if (newWIASource = nil) then raise Exception.Create('Error Connecting Device');
+       if (newWIASource = nil) then raise Exception.Create(rsWIAExcConnect);
 
        //if not(newWIASource.GetParamsCapabilities(WIACap) then raise Exception.Create('Error Get Params Capabilities');;
 
@@ -288,11 +295,9 @@ begin
                               aIndex:= -1;
                               curItem:= curSource.Items[0];
                               if (curItem <> nil) then
-                              Case MessageDlg('DigIt WIA', 'Device found '#13#10+
-                                      DeviceName+' '+DeviceManufacturer+#13#10+
-                                      'but Item '+DeviceItemName+' not...'#13#10+
-                                      'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
-                                      [mbYes, mbRetry, mbAbort], 0) of
+                              Case MessageDlg('DigIt WIA',
+                                              Format(rsWIADevItemSel, [DeviceName, DeviceManufacturer, DeviceItemName, curItem^.Name]),
+                                              mtConfirmation, [mbYes, mbRetry, mbAbort], 0) of
                               mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
                               mrAbort: break;
                               end;
@@ -301,13 +306,13 @@ begin
                 else begin
                        //We have some Error connecting Device ask the user what to do
                        aIndex:= -1;
-                       if (MessageDlg('DigIt WIA', 'Error connecting Device'#13#10+
-                                      DeviceName+' '+DeviceManufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
+                       if (MessageDlg('DigIt WIA', rsWIAExcConnect+#13#10+DeviceName+' '+DeviceManufacturer,
+                                      mtError, [mbRetry, mbAbort], 0)=mrAbort)
                        then break;
                      end;
               end
-              else if (MessageDlg('DigIt WIA', 'Device not found...'#13#10+
-                       DeviceName+' '+DeviceManufacturer, mtError, [mbRetry, mbAbort], 0)=mrAbort)
+              else if (MessageDlg('DigIt WIA', rsWIAExcNotFound+#13#10+DeviceName+' '+DeviceManufacturer,
+                       mtError, [mbRetry, mbAbort], 0)=mrAbort)
                    then break;
             end
        else begin
@@ -317,11 +322,9 @@ begin
                 //We have finded the Device but not the Item, ask the user what to do
                 curItem:= curSource.Items[0];
                 if (curItem <> nil) then
-                Case MessageDlg('DigIt WIA', 'Device found '#13#10+
-                                DeviceName+' '+DeviceManufacturer+#13#10+
-                                'but Item '+DeviceItemName+' not...'#13#10+
-                                'Select the First Item '+curItem^.Name+' ?', mtConfirmation,
-                                [mbYes, mbRetry, mbAbort], 0) of
+                Case MessageDlg('DigIt WIA',
+                                Format(rsWIADevItemSel, [DeviceName, DeviceManufacturer, DeviceItemName, curItem^.Name]),
+                                mtConfirmation, [mbYes, mbRetry, mbAbort], 0) of
                 mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
                 mrAbort: break;
                 end;
@@ -490,7 +493,7 @@ end;
 
 function TDigIt_Source_WIA.UI_Title(out AUI_Title: PChar): Integer; stdcall;
 begin
-  AUI_Title:= StrNew(PChar(DigIt_Source_WIA_NameL));
+  AUI_Title:= StrNew(PChar(rsWIAName));
   Result:= Length(AUI_Title);
 end;
 
@@ -545,12 +548,12 @@ begin
             Progress:= theBridge.Progress;
             if (Progress <> nil) then
             begin
-              Progress.SetTotalLabel(PChar('Acquiring from '+DeviceItemName+' at '+IntToStr(curParams.Resolution)+' dpi'));
+              Progress.SetTotalLabel(PChar(Format(rsWIAAcquiringTotal, [DeviceItemName, curParams.Resolution])));
               Progress.SetTotal(0, 100, 0, True);
               Progress.SetCurrentCaption(nil);
               Progress.SetCurrent(0, 100, 0, False);
               Progress.SetEventCallBack(Self as IDigIt_ProgressCallback);
-              Progress.Show(PChar('Acquiring from '+DeviceName));
+              Progress.Show(PChar(Format(rsWIAAcquiringTitle, [DeviceName])));
             end;
 
             rWIASource.SetParams(curParams);

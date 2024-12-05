@@ -20,6 +20,26 @@ uses
   FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
   BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters, LCLType;
 
+resourcestring
+  rsContinue = 'Continue from last Work Session?';
+  rsNoFilesDownloaded = 'NO Files Downloaded ';
+  rsTakeAgain = 'Replace the last %d taked files with a new Take?';
+  rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
+  rsMiddlePage = 'The page is within the already processed range'#13#10'Should I put it in the middle?';
+  rsProcessingImages = 'Processing Images';
+  rsProcessing = 'Processing %d / %s';
+  rsProcessed = 'Processed %d / %s';
+  rsClearQueue = 'Clear the Work Queue?';
+  rsExcCreateCounter = 'Failed to Create the Counter';
+  rsNotImpl = 'Not yet implemented';
+  rsSaveProject = 'Save Current Project?';
+  rsConvertPDF = 'Converting Images to PDF...';
+  rsClearCrops = 'Clear Crop Areas ?';
+  rsCropFull = 'Full Area';
+  rsCropCust = 'Custom';
+  rsCropToDo = '%d files to do';
+  rsCounterPrev = 'Value Previous: %d';
+
 type
   TSourceFile = packed record
     fCrop: Boolean;
@@ -36,7 +56,7 @@ type
     actClearQueue: TAction;
     actCropGoNext: TAction;
     actTakeBuildDuplex: TAction;
-    actTakeAgain: TAction;
+    actTakeRe: TAction;
     actTimerTake: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
@@ -194,7 +214,7 @@ type
     procedure actRotateLeftExecute(Sender: TObject);
     procedure actRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
-    procedure actTakeAgainExecute(Sender: TObject);
+    procedure actTakeReExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
     procedure actTimerTakeExecute(Sender: TObject);
     procedure actCropNextExecute(Sender: TObject);
@@ -528,7 +548,7 @@ begin
 
   if FileExists(Path_Config+Config_XMLWork)
      {$ifopt D-}
-      and (MessageDlg('DigIt', 'Continue from last Session?', mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+      and (MessageDlg('DigIt', rsContinue, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      {$endif}
   then begin
          XML_LoadWork;
@@ -573,7 +593,7 @@ begin
           end;
         end;
       end
-      else MessageDlg('NO Files Downloaded ', mtError, [mbOk], 0);
+      else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
       UI_ToolBar;
 
@@ -581,13 +601,13 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actTakeAgainExecute(Sender: TObject);
+procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 var
    lenSources: Integer;
 
 begin
   if (SourceFiles <> nil) and
-     (MessageDlg('DigIt', 'Replace the last '+IntToStr(lastLenTaked)+' taked files with a new Take?',
+     (MessageDlg('DigIt', Format(rsTakeAgain, [lastLenTaked]),
                  mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
     lenSources:= Length(SourceFiles);
@@ -686,7 +706,7 @@ begin
 
         UI_FillCounter(nil);
       end
-      else MessageDlg('NO Files Downloaded ', mtError, [mbOk], 0);
+      else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
     DigIt_Progress.Hide;
@@ -710,7 +730,7 @@ var
     if Result and (lenSources > 1) then
     begin
       //User Confirmation
-      if (MessageDlg('DigIt', 'There are no more files to process, should I clear the queue?', mtConfirmation,
+      if (MessageDlg('DigIt', rsNoMoreFiles, mtConfirmation,
                      [mbYes, mbNo], 0) = mrYes)
       then begin
              iSourceFiles:= -1;
@@ -740,8 +760,7 @@ begin
              else begin  //(lastCropped < iSourceFiles)
                     if (lastCropped > iSourceFiles) then
                     begin
-                      if (MessageDlg('DigIt', 'The page is within the already processed range'+#13#10+
-                                    'Should I put it in the middle?', mtConfirmation, [mbYes, mbCancel], 0) = mrCancel)
+                      if (MessageDlg('DigIt', rsMiddlePage, mtConfirmation, [mbYes, mbCancel], 0) = mrCancel)
                       then exit
                       else begin Pages_InsertMiddle(iSourceFiles); exit; end;
                      end;
@@ -839,8 +858,7 @@ var
      if Result then
      begin
        //User Confirmation
-       if (MessageDlg('DigIt', 'There are no more files to process, should I clear the queue?', mtConfirmation,
-                      [mbYes, mbNo], 0) = mrYes)
+       if (MessageDlg('DigIt', rsNoMoreFiles, mtConfirmation, [mbYes, mbNo], 0) = mrYes)
        then begin
               iSourceFiles:= -1;
               SourceFiles:= nil;
@@ -859,7 +877,7 @@ begin
 
     repeat
       DigIt_Progress.progressTotal.Position:= iSourceFiles;
-      DigIt_Progress.capTotal.Caption:= 'Processing '+IntToStr(iSourceFiles)+' / '+cStr;
+      DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [iSourceFiles, cStr]);
       Application.ProcessMessages;
 
       //lvCaptured.BeginUpdate; { #todo 2 -oMaxM : Refresh only new captured Images not all the list }
@@ -882,7 +900,7 @@ begin
       XML_SaveWork;
 
       DigIt_Progress.progressTotal.Position:= iSourceFiles+1;
-      DigIt_Progress.capTotal.Caption:= 'Processed '+IntToStr(iSourceFiles-1)+' / '+cStr;
+      DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [iSourceFiles-1, cStr]);
       Application.ProcessMessages;
     Until Finished or UserCancel;
 
@@ -894,8 +912,7 @@ end;
 
 procedure TDigIt_Main.actClearQueueExecute(Sender: TObject);
 begin
-  if (MessageDlg('DigIt', 'Should I clear the queue?', mtConfirmation,
-                 [mbYes, mbNo], 0) = mrYes)
+  if (MessageDlg('DigIt', rsClearQueue, mtConfirmation, [mbYes, mbNo], 0) = mrYes)
   then begin
          iSourceFiles:= -1;
          lastCropped:= -1;
@@ -1165,7 +1182,7 @@ begin
   if (newIndex<0)
   then begin
          newCounter.Free;
-         raise Exception.Create('Failed to Create the Counter');
+         raise Exception.Create(rsExcCreateCounter);
        end
   else begin
          newCounter.Name:='Counter '+IntToStr(newIndex);
@@ -1373,7 +1390,7 @@ procedure TDigIt_Main.actProjectOpenExecute(Sender: TObject);
 begin
   try
      if (Project_File<>'') then
-     case MessageDlg('DigIt Project', 'Save Current Project?', mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
+     case MessageDlg('DigIt Project', rsSaveProject, mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
      mrYes : actProjectSave.Execute;
      mrCancel: exit;
      end;
@@ -2208,7 +2225,7 @@ begin
        progressTotal.Max:= lvCaptured.Items.Count-1;
        progressTotal.Position:= 0;
        panelCurrent.Visible:= False;
-       Show('Converting Images to PDF...');
+       Show(PChar(rsConvertPDF));
        cStr:= IntToStr(progressTotal.Max);
      end;
 
@@ -2227,7 +2244,7 @@ begin
      for i := 0 to lvCaptured.Items.Count-1 do
      begin
        DigIt_Progress.progressTotal.Position:= i;
-       DigIt_Progress.capTotal.Caption:= 'Processing '+IntToStr(i)+' / '+cStr;
+       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
        Application.ProcessMessages;
 
        captItem:= TFileListItem(lvCaptured.Items[i]);
@@ -2256,7 +2273,7 @@ begin
        end;
 
        DigIt_Progress.progressTotal.Position:= i+1;
-       DigIt_Progress.capTotal.Caption:= 'Processed '+IntToStr(i)+' / '+cStr;
+       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
        Application.ProcessMessages;
      end;
 
@@ -2290,7 +2307,7 @@ begin
         if (CropMode = diCropCustom) then
         begin
           if (imgManipulation.CropAreas.Count > 0)
-          then if (MessageDlg('DigIt', 'Clear Crop Areas ?', mtConfirmation, mbYesNo, 0) = mrNo)
+          then if (MessageDlg('DigIt', rsClearCrops, mtConfirmation, mbYesNo, 0) = mrNo)
                then exit;
         end;
 
@@ -2319,7 +2336,7 @@ begin
           UI_FillCounter(Counters[0]);
         end;
 
-        tbCropMode.Caption:= 'Full Area';
+        tbCropMode.Caption:= rsCropFull;
       end;
       diCropCustom: begin
         (*
@@ -2344,7 +2361,7 @@ begin
         end;
         *)
 
-        tbCropMode.Caption:= 'Custom';
+        tbCropMode.Caption:= rsCropCust;
       end;
     end;
 
@@ -2448,7 +2465,7 @@ begin
      for i:=AStartIndex to c-1 do
      begin
        DigIt_Progress.progressTotal.Position:= i;
-       DigIt_Progress.capTotal.Caption:= 'Processing '+IntToStr(i)+' / '+cStr;
+       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
        Application.ProcessMessages;
 
        CropFile_Full(SourceFiles[i].fName);
@@ -2458,7 +2475,7 @@ begin
        iSourceFiles:= i;
 
        DigIt_Progress.progressTotal.Position:= i+1;
-       DigIt_Progress.capTotal.Caption:= 'Processed '+IntToStr(i)+' / '+cStr;
+       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
        Application.ProcessMessages;
      end;
 
@@ -2478,14 +2495,14 @@ begin
     progressTotal.Max:= TotalMax;
     progressTotal.Position:= TotalMin;
     panelCurrent.Visible:= False;
-    Show('Processing Images');
+    Show(PChar(rsProcessingImages));
   end;
 end;
 
 procedure TDigIt_Main.Pages_InsertMiddle(ASourceFileIndex: Integer);
 begin
   { #todo 5 -oMaxM : Re index the crops starting from the lastCropped }
-  MessageDlg('Not yet implemented', mtInformation, [mbOk], 0);
+  MessageDlg(rsNotImpl, mtInformation, [mbOk], 0);
 end;
 
 function TDigIt_Main.GetCurrentCropArea: TCropArea;
@@ -2579,7 +2596,7 @@ begin
          if tbCropSummary.Visible then
          begin
            remSources:= lenSources-iSourceFiles;
-           tbCropSummary.Caption:= IntToStr(remSources)+' files to do';
+           tbCropSummary.Caption:= Format(rsCropToDo, [remSources]);
          end;
 
        end
@@ -2587,7 +2604,7 @@ begin
 
   actTimerTake.Enabled:= actTake.Enabled;
   actTakeBuildDuplex.Enabled:= actTake.Enabled;
-  actTakeAgain.Enabled:= actTake.Enabled and (lastLenTaked > 0);
+  actTakeRe.Enabled:= actTake.Enabled and (lastLenTaked > 0);
 end;
 
 procedure TDigIt_Main.UI_ToolBarAddShortcuts;
@@ -2690,7 +2707,7 @@ begin
            edCounterValueStringDigits.Value:=ACounter.Value_StringDigits;
            edCounterValueStringPre.Text:=ACounter.Value_StringPre;
            edCounterValueStringPost.Text:=ACounter.Value_StringPost;
-           lbPrevious.Caption:='Value Previous:'+IntToStr(ACounter.Value_Previous);
+           lbPrevious.Caption:=Format(rsCounterPrev, [ACounter.Value_Previous]);
            UpdateCounterExampleLabel(ACounter);
            inFillCounterUI :=False;
         end

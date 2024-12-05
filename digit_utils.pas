@@ -18,7 +18,9 @@ uses
   FPImage, Menus, DigIt_types, BGRAPapers;
 
 resourcestring
-  DigIt_Destination_Default = 'Save as Files';
+  rsDestination_Default = 'Save as Files';
+  rsVertical = '   Vertical';
+  rsHorizontal = '    Horizontal';
 
 function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
 function CreateXMLReader(ADoc: TDOMDocument; const Path: string; var DestroyDriver: boolean): TReader;
@@ -172,7 +174,7 @@ begin
 
   //Vertical
   newItem :=TMenuItem.Create(AOwner);
-  newItem.Caption:='   Vertical';
+  newItem.Caption:= rsVertical;
   newItem.ImageIndex:=VImageIndex;
   menuPaperSizes.Items.Add(newItem);
   for p:=Low(curPapers) to High(curPapers) do
@@ -204,7 +206,7 @@ begin
 
   //Horizontal
   newItem :=TMenuItem.Create(AOwner);
-  newItem.Caption:='    Horizontal';
+  newItem.Caption:= rsHorizontal;
   newItem.ImageIndex:=HImageIndex;
   menuPaperSizes.Items.Add(newItem);
   for p:=Low(curPapers) to High(curPapers) do
@@ -309,7 +311,7 @@ var
 begin
   //Add SaveAsFile Destination
   newItem:= TMenuItem.Create(AOwner);
-  newItem.Caption:= DigIt_Destination_Default;
+  newItem.Caption:= rsDestination_Default;
   newItem.ImageIndex:= 6;
   newItem.Tag:= -1;
   newItem.OnClick:= menuOnClick;

@@ -44,7 +44,7 @@ object WizardBuildDuplex: TWizardBuildDuplex
         Height = 40
         Top = 16
         Width = 100
-        Caption = '&Avanti'
+        Caption = '&Next'
         Glyph.Data = {
           36200000424D3620000000000000360000002800000040000000200000000100
           2000000000000020000064000000640000000000000000000000000000000000
@@ -314,7 +314,7 @@ object WizardBuildDuplex: TWizardBuildDuplex
         Height = 40
         Top = 16
         Width = 100
-        Caption = '&Indietro'
+        Caption = '&Back'
         Enabled = False
         Glyph.Data = {
           36200000424D3620000000000000360000002800000040000000200000000100

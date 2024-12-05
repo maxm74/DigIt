@@ -1,7 +1,7 @@
 {"version":1,"strings":[
 {"hash":204452414,"name":"twizardbuildduplex.caption","sourcebytes":[66,117,105,108,100,32,70,114,111,110,116,47,66,97,99,107,46,46,46],"value":"Build Front/Back..."},
-{"hash":176981385,"name":"twizardbuildduplex.btnext.caption","sourcebytes":[38,65,118,97,110,116,105],"value":"&Avanti"},
-{"hash":78635151,"name":"twizardbuildduplex.btprev.caption","sourcebytes":[38,73,110,100,105,101,116,114,111],"value":"&Indietro"},
+{"hash":2837748,"name":"twizardbuildduplex.btnext.caption","sourcebytes":[38,78,101,120,116],"value":"&Next"},
+{"hash":2787227,"name":"twizardbuildduplex.btprev.caption","sourcebytes":[38,66,97,99,107],"value":"&Back"},
 {"hash":177752476,"name":"twizardbuildduplex.btcancel.caption","sourcebytes":[38,67,97,110,99,101,108],"value":"&Cancel"},
 {"hash":132189988,"name":"twizardbuildduplex.tbwizard.caption","sourcebytes":[116,98,87,105,122,97,114,100],"value":"tbWizard"},
 {"hash":210320238,"name":"twizardbuildduplex.tbsource.caption","sourcebytes":[83,111,117,114,99,101,46,46,46],"value":"Source..."},

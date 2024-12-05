@@ -1,0 +1,715 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+#: digit_form_buildduplex.caption_cancel
+msgctxt "digit_form_buildduplex.caption_cancel"
+msgid "&Cancel"
+msgstr "A&nnulla"
+
+#: digit_form_buildduplex.caption_end
+msgid "&End"
+msgstr "&Fine"
+
+#: digit_form_buildduplex.caption_next
+msgctxt "digit_form_buildduplex.caption_next"
+msgid "&Next"
+msgstr "&Avanti"
+
+#: digit_form_buildduplex.caption_prev
+msgctxt "digit_form_buildduplex.caption_prev"
+msgid "&Back"
+msgstr "&Indietro"
+
+#: digit_form_buildduplex.msg_confirm_cancelstep
+msgid "Cancel the Operation?"
+msgstr "Annulla l'Operazione?"
+
+#: digit_form_buildduplex.msg_err_cancelstep
+msgid "Operation aborted by User"
+msgstr "Operazione interrotta dall'Utente"
+
+#: digit_form_buildduplex.rscancelback
+msgid "Do I cancel the Back Side acquisition I just made?"
+msgstr "Annullo l'acquisizione del Lato Posteriore appena effettuata?"
+
+#: digit_form_buildduplex.rscancelfront
+msgid "Do I cancel the Front Side acquisition I just made?"
+msgstr "Annullo l'acquisizione del Lato Frontale appena effettuata?"
+
+#: digit_form_buildduplex.rsnopages
+msgid "No Pages in Front or Back Side"
+msgstr "Nessuna Pagina sul lato Frontale o Posteriore"
+
+#: digit_form_main.rsclearcrops
+msgid "Clear Crop Areas ?"
+msgstr "Cancello le aree di taglio?"
+
+#: digit_form_main.rsclearqueue
+msgid "Clear the Work Queue?"
+msgstr "Cancello la Coda di Lavoro?"
+
+#: digit_form_main.rscontinue
+msgid "Continue from last Work Session?"
+msgstr "Continuo dall'ultima Sessione di Lavoro?"
+
+#: digit_form_main.rsconvertpdf
+msgid "Converting Images to PDF..."
+msgstr "Convertendo le Immagini in PDF..."
+
+#: digit_form_main.rscounterprev
+#, object-pascal-format
+msgid "Value Previous: %d"
+msgstr "Valore Precedente: %d"
+
+#: digit_form_main.rscropcust
+msgctxt "digit_form_main.rscropcust"
+msgid "Custom"
+msgstr "Personalizzata"
+
+#: digit_form_main.rscropfull
+msgctxt "digit_form_main.rscropfull"
+msgid "Full Area"
+msgstr "Area Intera"
+
+#: digit_form_main.rscroptodo
+#, object-pascal-format
+msgid "%d files to do"
+msgstr "%d files da fare"
+
+#: digit_form_main.rsexccreatecounter
+msgid "Failed to Create the Counter"
+msgstr "Impossibile Creare il Contatore"
+
+#: digit_form_main.rsmiddlepage
+msgid ""
+"The page is within the already processed range\n"
+"Should I put it in the middle?"
+msgstr ""
+"La pagina rientra nell'intervallo già elaborato\n"
+"Dovrei metterla al centro?"
+
+#: digit_form_main.rsnofilesdownloaded
+msgid "NO Files Downloaded "
+msgstr "NESSUN File Scaricato "
+
+#: digit_form_main.rsnomorefiles
+msgid "There are no more files to process, should I clear the Work Queue?"
+msgstr "Non ci sono più file da elaborare, devo cancellare la Coda di Lavoro?"
+
+#: digit_form_main.rsnotimpl
+msgid "Not yet implemented"
+msgstr "Non ancora implementato"
+
+#: digit_form_main.rsprocessed
+#, object-pascal-format
+msgid "Processed %d / %s"
+msgstr "Elaborato %d / %s"
+
+#: digit_form_main.rsprocessing
+#, object-pascal-format
+msgid "Processing %d / %s"
+msgstr "Elaborando %d / %s"
+
+#: digit_form_main.rsprocessingimages
+msgid "Processing Images"
+msgstr "Elaborando le Immagini"
+
+#: digit_form_main.rssaveproject
+msgid "Save Current Project?"
+msgstr "Salvo il Progetto Attuale?"
+
+#: digit_form_main.rstakeagain
+#, object-pascal-format
+msgid "Replace the last %d taked files with a new Take?"
+msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
+
+#: digit_source_folder.digit_source_folder_namel
+msgid "Folder Pictures"
+msgstr "Cartella di Immagini"
+
+#: digit_source_wia.rswiaacquired
+#, object-pascal-format
+msgid "Acquired %d Pages"
+msgstr "Acquisito %d Pagine"
+
+#: digit_source_wia.rswiaacquiring
+#, object-pascal-format
+msgid "Acquiring Page %d"
+msgstr "Acquisendo la pagina %d"
+
+#: digit_source_wia.rswiaacquiringtitle
+#, object-pascal-format
+msgid "Acquiring from %s"
+msgstr "Acquisizione da %s"
+
+#: digit_source_wia.rswiaacquiringtotal
+#, object-pascal-format
+msgid "Acquiring from %s at %d dpi"
+msgstr "Acquisizione da %s a %d dpi"
+
+#: digit_source_wia.rswiadevitemsel
+#, object-pascal-format
+msgid ""
+"Device found \n"
+"%s %s\n"
+"but Item %s not...\n"
+"Select the First Item %s ?"
+msgstr ""
+"Dispositivo trovato\n"
+"%s %s\n"
+"ma l'Elemento %s no...\n"
+"Selezionare il primo Elemento %s?"
+
+#: digit_source_wia.rswiaexcconnect
+msgid "Error Connecting Device"
+msgstr "Errore Connettendo al Dispositivo"
+
+#: digit_source_wia.rswiaexcnotfound
+msgid "Device not found..."
+msgstr "Dispositivo non trovato..."
+
+#: digit_source_wia.rswianame
+msgid "WIA Device"
+msgstr "Dispositivo WIA"
+
+#: digit_utils.rsdestination_default
+msgid "Save as Files"
+msgstr "Salva come Files"
+
+#: digit_utils.rshorizontal
+msgid "    Horizontal"
+msgstr "    Orizzontale"
+
+#: digit_utils.rsvertical
+msgid "   Vertical"
+msgstr "   Verticale"
+
+#: tdigit_main.actclearqueue.caption
+msgid "Clear Work Queue"
+msgstr "Cancella Coda Lavoro"
+
+#: tdigit_main.actcrop.caption
+msgid "Crop"
+msgstr "Taglia"
+
+#: tdigit_main.actcropall.caption
+msgid "Crop All"
+msgstr "Taglia Tutti"
+
+#: tdigit_main.actcropgoback.caption
+msgid "Back"
+msgstr "Indietro"
+
+#: tdigit_main.actcropgonext.caption
+msgid "Next"
+msgstr "Avanti"
+
+#: tdigit_main.actcropnext.caption
+#, fuzzy
+#| msgid "Crop + Go Next"
+msgid "Crop + Next"
+msgstr "Taglia + Avanti"
+
+#: tdigit_main.actoptions.caption
+msgid "Options ..."
+msgstr "Opzioni ..."
+
+#: tdigit_main.actpreview.caption
+msgid "Preview"
+msgstr "Anteprima"
+
+#: tdigit_main.actprojectnew.caption
+msgid "New Project ..."
+msgstr "Nuovo Progetto ..."
+
+#: tdigit_main.actprojectopen.caption
+msgctxt "tdigit_main.actprojectopen.caption"
+msgid "Open Project ..."
+msgstr "Apri Progetto ..."
+
+#: tdigit_main.actprojectsave.caption
+msgid "Save Project"
+msgstr "Salva Progetto"
+
+#: tdigit_main.actprojectsaveas.caption
+msgid "Save Project As ..."
+msgstr "Salva Progetto Come ..."
+
+#: tdigit_main.actrotateleft.caption
+msgctxt "tdigit_main.actrotateleft.caption"
+msgid "Rotate Left"
+msgstr "Ruota a Sinistra"
+
+#: tdigit_main.actrotateright.caption
+msgctxt "tdigit_main.actrotateright.caption"
+msgid "Rotate Right"
+msgstr "Ruota a Destra"
+
+#: tdigit_main.acttake.caption
+msgid "Take"
+msgstr "Cattura"
+
+#: tdigit_main.acttakebuildduplex.caption
+msgid "Take and Build Front/Back"
+msgstr "Cattura e Costruisci Fronte/Retro"
+
+#: tdigit_main.acttakere.caption
+msgid "Re-Take"
+msgstr "Ri-Cattura"
+
+#: tdigit_main.acttimertake.caption
+msgid "Timer Take"
+msgstr "Timer Cattura"
+
+#: tdigit_main.bclabel1.caption
+msgid "Left :"
+msgstr "Sinistra :"
+
+#: tdigit_main.bclabel10.caption
+msgctxt "tdigit_main.bclabel10.caption"
+msgid "Width :"
+msgstr "Larghezza :"
+
+#: tdigit_main.bclabel11.caption
+msgctxt "tdigit_main.bclabel11.caption"
+msgid "Height :"
+msgstr "Altezza :"
+
+#: tdigit_main.bclabel12.caption
+msgctxt "tdigit_main.bclabel12.caption"
+msgid "Name :"
+msgstr "Nome :"
+
+#: tdigit_main.bclabel13.caption
+msgid "Before :"
+msgstr "Prima :"
+
+#: tdigit_main.bclabel14.caption
+msgid "After :"
+msgstr "Dopo :"
+
+#: tdigit_main.bclabel2.caption
+msgid "Top :"
+msgstr "Sopra :"
+
+#: tdigit_main.bclabel3.caption
+msgctxt "tdigit_main.bclabel3.caption"
+msgid "Width :"
+msgstr "Larghezza :"
+
+#: tdigit_main.bclabel4.caption
+msgctxt "tdigit_main.bclabel4.caption"
+msgid "Height :"
+msgstr "Altezza :"
+
+#: tdigit_main.bclabel5.caption
+msgid "Unit :"
+msgstr "Unità :"
+
+#: tdigit_main.bclabel6.caption
+msgctxt "tdigit_main.bclabel6.caption"
+msgid "Name :"
+msgstr "Nome :"
+
+#: tdigit_main.bclabel7.caption
+msgid "Value :"
+msgstr "Valore :"
+
+#: tdigit_main.bclabel8.caption
+msgid "Digits :"
+msgstr "Cifre :"
+
+#: tdigit_main.btbox_add.caption
+msgctxt "tdigit_main.btbox_add.caption"
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btbox_add.hint
+msgid "Add a Crop Area"
+msgstr "Aggiungi un'Area di Taglio"
+
+#: tdigit_main.btbox_del.caption
+msgctxt "tdigit_main.btbox_del.caption"
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btbox_del.hint
+msgid "Remove this Crop Area"
+msgstr "Rimuovi questa Area di Taglio"
+
+#: tdigit_main.btcfliphleft.hint
+msgid "Flip Horizzontal Left"
+msgstr "Ribalta Orizzontalmente a Sinistra"
+
+#: tdigit_main.btcfliphright.hint
+msgid "Flip Horizzontal Right"
+msgstr "Ribalta Orizzontalmente a Destra"
+
+#: tdigit_main.btcflipvdown.hint
+msgid "Flip Vertical Down"
+msgstr "Ribalta Verticalmente in Giù"
+
+#: tdigit_main.btcflipvup.hint
+msgid "Flip Vertical Up"
+msgstr "Ribalta Verticalmente in Su"
+
+#: tdigit_main.btcounter_add.caption
+msgctxt "tdigit_main.btcounter_add.caption"
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btcounter_add.hint
+msgctxt "tdigit_main.btcounter_add.hint"
+msgid "Add a Counter"
+msgstr "Aggiungi un Contatore"
+
+#: tdigit_main.btcounter_del.caption
+msgctxt "tdigit_main.btcounter_del.caption"
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btcounter_del.hint
+msgctxt "tdigit_main.btcounter_del.hint"
+msgid "Remove this Counter"
+msgstr "Rimuovi questo Contatore"
+
+#: tdigit_main.btcropcounter_add.caption
+msgctxt "tdigit_main.btcropcounter_add.caption"
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btcropcounter_add.hint
+msgctxt "tdigit_main.btcropcounter_add.hint"
+msgid "Add a Counter"
+msgstr "Aggiungi un Contatore"
+
+#: tdigit_main.btcropcounter_del.caption
+msgctxt "tdigit_main.btcropcounter_del.caption"
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btcropcounter_del.hint
+msgctxt "tdigit_main.btcropcounter_del.hint"
+msgid "Remove this Counter"
+msgstr "Rimuovi questo Contatore"
+
+#: tdigit_main.btcropduplicate.hint
+msgid "Duplicate this Area"
+msgstr "Duplica quest'Area"
+
+#: tdigit_main.btcropduplicateop.hint
+msgid "Duplicate when Rotate/Flip"
+msgstr "Duplica quando Ruota/Ribalta"
+
+#: tdigit_main.btcrotateleft.hint
+msgctxt "tdigit_main.btcrotateleft.hint"
+msgid "Rotate Left"
+msgstr "Ruota a Sinistra"
+
+#: tdigit_main.btcrotateright.hint
+msgctxt "tdigit_main.btcrotateright.hint"
+msgid "Rotate Right"
+msgstr "Ruota a Destra"
+
+#: tdigit_main.btpfliph.hint
+msgid "Flip Horizzontal"
+msgstr "Ribalta Orizzontalmente"
+
+#: tdigit_main.btpflipv.hint
+msgid "Flip Vertical"
+msgstr "Ribalta Verticalmente"
+
+#: tdigit_main.btprotate180.hint
+msgid "Rotate 180°"
+msgstr "Ruota di 180°"
+
+#: tdigit_main.btprotateleft.hint
+msgctxt "tdigit_main.btprotateleft.hint"
+msgid "Rotate Left"
+msgstr "Ruota a Sinistra"
+
+#: tdigit_main.btprotateright.hint
+msgctxt "tdigit_main.btprotateright.hint"
+msgid "Rotate Right"
+msgstr "Ruota a Destra"
+
+#: tdigit_main.btzback.hint
+msgid "To Back"
+msgstr "In Fondo"
+
+#: tdigit_main.btzdown.hint
+msgid "Down"
+msgstr "Giù"
+
+#: tdigit_main.btzfront.hint
+msgid "To Front"
+msgstr "In Alto"
+
+#: tdigit_main.btzup.hint
+msgid "Up"
+msgstr "Su"
+
+#: tdigit_main.caption
+msgid "DigIt"
+msgstr "DigIt"
+
+#: tdigit_main.edcropunit_type.text
+msgid "pixels"
+msgstr "pixels"
+
+#: tdigit_main.edpage_unittype.text
+msgid "not defined"
+msgstr "non definita"
+
+#: tdigit_main.itemcropmodecustom.caption
+msgctxt "tdigit_main.itemcropmodecustom.caption"
+msgid "Custom"
+msgstr "Personalizzata"
+
+#: tdigit_main.itemcropmodefull.caption
+msgctxt "tdigit_main.itemcropmodefull.caption"
+msgid "Full Area"
+msgstr "Area Intera"
+
+#: tdigit_main.label1.caption
+msgid "Z Order :"
+msgstr "Ordine Z :"
+
+#: tdigit_main.label10.caption
+msgctxt "tdigit_main.label10.caption"
+msgid "Flip :"
+msgstr "Ribalta :"
+
+#: tdigit_main.label2.caption
+msgctxt "tdigit_main.label2.caption"
+msgid "Rotate :"
+msgstr "Ruota :"
+
+#: tdigit_main.label3.caption
+msgctxt "tdigit_main.label3.caption"
+msgid "Flip :"
+msgstr "Ribalta :"
+
+#: tdigit_main.label4.caption
+msgid "Example :"
+msgstr "Esempio :"
+
+#: tdigit_main.label5.caption
+msgid "Counter :"
+msgstr "Contatore :"
+
+#: tdigit_main.label7.caption
+msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr "Aree Taglio ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+
+#: tdigit_main.label8.caption
+msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr "Pagina ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+
+#: tdigit_main.label9.caption
+msgctxt "tdigit_main.label9.caption"
+msgid "Rotate :"
+msgstr "Ruota :"
+
+#: tdigit_main.lbcounterexample.caption
+msgid ".ext"
+msgstr ".ext"
+
+#: tdigit_main.lbprevious.caption
+msgid "Value Previous: "
+msgstr "Valore Precedente: "
+
+#: tdigit_main.menuprojectsave.caption
+msgid "Save Project ..."
+msgstr "Salva Progetto ..."
+
+#: tdigit_main.menutimertakeconfig.caption
+msgid "Config Timer"
+msgstr "Configura Timer"
+
+#: tdigit_main.menutimertakestop.caption
+msgid "Stop Timer"
+msgstr "Ferma Timer"
+
+#: tdigit_main.openpicture.title
+msgid "Open an existing image"
+msgstr "Apri una immagine esistente"
+
+#: tdigit_main.rgcropaspect.caption
+msgid "Aspect Ratio"
+msgstr "Proporzioni"
+
+#: tdigit_main.rollcounters.button.caption
+msgid "Page Counters"
+msgstr "Contatori Pagina"
+
+#: tdigit_main.rollcrops.button.caption
+msgid "Crop Areas"
+msgstr "Aree di Taglio"
+
+#: tdigit_main.rollpages.button.caption
+msgid "Captured Pages"
+msgstr "Pagine Catturate"
+
+#: tdigit_main.savepicture.title
+msgid "Save image as"
+msgstr "Salva immagini come"
+
+#: tdigit_main.tbcaptured.caption
+msgid "tbCaptured"
+msgstr ""
+
+#: tdigit_main.tbcapturedpdf.caption
+msgid "Export to PDF"
+msgstr "Esporta in PDF"
+
+#: tdigit_main.tbcrop.caption
+msgid "tbCrop"
+msgstr ""
+
+#: tdigit_main.tbcropmode.caption
+msgid "Crop Mode"
+msgstr "Modo Taglio"
+
+#: tdigit_main.tbdestination.caption
+msgctxt "tdigit_main.tbdestination.caption"
+msgid "Destination..."
+msgstr "Destinazione..."
+
+#: tdigit_main.tbmain.caption
+msgid "tbMain"
+msgstr ""
+
+#: tdigit_main.tbmenu.caption
+msgid "Menù"
+msgstr ""
+
+#: tdigit_main.tbsepclear.caption
+msgid "tbSepClear"
+msgstr ""
+
+#: tdigit_main.tbsepcrop.caption
+msgid "tbSepCrop"
+msgstr ""
+
+#: tdigit_main.tbsepmenu.caption
+msgid "tbSepMenu"
+msgstr ""
+
+#: tdigit_main.tbseptake.caption
+msgid "tbSepTake"
+msgstr ""
+
+#: tdigit_main.tbsource.caption
+msgctxt "tdigit_main.tbsource.caption"
+msgid "Source..."
+msgstr "Sorgente..."
+
+#: tdigit_progress.caption
+msgid "DigIt_Progress"
+msgstr ""
+
+#: tdigit_templates.bcpanel1.caption
+msgid "BCPanel1"
+msgstr ""
+
+#: tdigit_templates.caption
+msgid "DigIt_Templates"
+msgstr ""
+
+#: twizardbuildduplex.btcancel.caption
+msgctxt "twizardbuildduplex.btcancel.caption"
+msgid "&Cancel"
+msgstr "A&nnulla"
+
+#: twizardbuildduplex.btnext.caption
+msgctxt "twizardbuildduplex.btnext.caption"
+msgid "&Next"
+msgstr "&Avanti"
+
+#: twizardbuildduplex.btprev.caption
+msgctxt "twizardbuildduplex.btprev.caption"
+msgid "&Back"
+msgstr "&Indietro"
+
+#: twizardbuildduplex.caption
+msgid "Build Front/Back..."
+msgstr "Costruisci Fronte/Retro..."
+
+#: twizardbuildduplex.label1.caption
+msgid "Insert Front Side Pages"
+msgstr "Inserisci le Pagine Frontali"
+
+#: twizardbuildduplex.label2.caption
+msgctxt "twizardbuildduplex.label2.caption"
+msgid "Click Next when ready"
+msgstr "Clicca Avanti quando si è pronti"
+
+#: twizardbuildduplex.label4.caption
+msgctxt "twizardbuildduplex.label4.caption"
+msgid "Click Next when ready"
+msgstr "Clicca Avanti quando si è pronti"
+
+#: twizardbuildduplex.label5.caption
+msgid "Finished... Click End to Build Front/Back Pages"
+msgstr "Finito... Clicca Fine per Costruire le pagine Fronte/Retro"
+
+#: twizardbuildduplex.label6.caption
+msgid "Select what type of collage you want to make"
+msgstr "Seleziona che tipo di collage vuoi realizzare"
+
+#: twizardbuildduplex.lbbackside.caption
+msgid "Turn all the Pages over so the Back Side is visible"
+msgstr "Gira tutte le pagine in modo che il Retro sia visibile"
+
+#: twizardbuildduplex.lbbackside1.caption
+msgid "Insert Back Side Pages"
+msgstr "Inserisci le Pagine Posteriori"
+
+#: twizardbuildduplex.rbonesided.caption
+msgid "One-sided to Two-sided pages"
+msgstr "Pagine da Una facciata a Due facciate"
+
+#: twizardbuildduplex.rbtwosided.caption
+msgid "Two-sided to Two-sided pages"
+msgstr "Pagine da Due facciate a Due facciate"
+
+#: twizardbuildduplex.tabsheet1.caption
+msgid "TabSheet1"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet2.caption
+msgid "TabSheet2"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet3.caption
+msgid "TabSheet3"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet4.caption
+msgid "TabSheet4"
+msgstr ""
+
+#: twizardbuildduplex.tbdestination.caption
+msgctxt "twizardbuildduplex.tbdestination.caption"
+msgid "Destination..."
+msgstr "Destinazione..."
+
+#: twizardbuildduplex.tbsource.caption
+msgctxt "twizardbuildduplex.tbsource.caption"
+msgid "Source..."
+msgstr "Sorgente..."
+
+#: twizardbuildduplex.tbwizard.caption
+msgid "tbWizard"
+msgstr ""

@@ -17,15 +17,21 @@ type
       rValue_StringPost: String;
       rValue_StringPre: String;
       rValue_StringDigits: Byte;
+
+      function GetValueNext: Integer;
+      procedure SetValueNext(AValue: Integer);
+
     public
       constructor Create(AName:String; AValue:Integer=-1); overload;
-      function GetValue: String;
+      function GetValue(nextValue: Boolean=False): String;
 
       procedure Load(const XMLConf: TXMLConfig; APath: String; LoadValues:Boolean);
       procedure Save(const XMLConf: TXMLConfig; APath: String; SaveValues:Boolean);
+
     published
       property Name: String read rName write rName;
       property Value: Integer read rValue write rValue;
+      property Value_Next: Integer read GetValueNext write SetValueNext;
       property Value_Previous: Integer read rValue_Previous write rValue_Previous;
       property Value_StringDigits: Byte read rValue_StringDigits write rValue_StringDigits;
       property Value_StringPre: String read rValue_StringPre write rValue_StringPre;
@@ -93,6 +99,18 @@ implementation
 
 { TDigIt_Counter }
 
+function TDigIt_Counter.GetValueNext: Integer;
+begin
+  Result:= rValue+1;
+end;
+
+procedure TDigIt_Counter.SetValueNext(AValue: Integer);
+begin
+  if (AValue >= 0)
+  then rValue:= AValue-1
+  else rValue:= -1;
+end;
+
 constructor TDigIt_Counter.Create(AName: String; AValue: Integer);
 begin
   inherited Create;
@@ -102,9 +120,11 @@ begin
   rValue_StringDigits:=2;
 end;
 
-function TDigIt_Counter.GetValue: String;
+function TDigIt_Counter.GetValue(nextValue: Boolean): String;
 begin
-  Result :=rValue_StringPre+Format('%.'+IntToStr(rValue_StringDigits)+'d', [rValue])+rValue_StringPost;
+  if nextValue
+  then Result :=rValue_StringPre+Format('%.'+IntToStr(rValue_StringDigits)+'d', [GetValueNext])+rValue_StringPost
+  else Result :=rValue_StringPre+Format('%.'+IntToStr(rValue_StringDigits)+'d', [rValue])+rValue_StringPost;
 end;
 
 procedure TDigIt_Counter.Load(const XMLConf: TXMLConfig; APath: String; LoadValues: Boolean);

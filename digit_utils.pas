@@ -305,7 +305,7 @@ procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; men
 var
    i, res  :Integer;
    newItem :TMenuItem;
-   curDestination:PDestinationInfo;
+   //curDestination:PDestinationInfo;
    curTitle:PChar;
 
 begin
@@ -317,6 +317,8 @@ begin
   newItem.OnClick:= menuOnClick;
   menuDestinations.Items.Add(newItem);
 
+  { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+  (*
   for i:=0 to theBridge.DestinationsImpl.Count-1 do
   begin
     curDestination:= theBridge.DestinationsImpl.Data[i];
@@ -340,6 +342,7 @@ begin
       menuDestinations.Items.Add(newItem);
     end;
   end;
+  *)
 end;
 
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;

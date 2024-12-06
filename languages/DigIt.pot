@@ -503,7 +503,7 @@ msgid "Rotate :"
 msgstr ""
 
 #: tdigit_main.lbcounterexample.caption
-msgid ".ext"
+msgid "00"
 msgstr ""
 
 #: tdigit_main.lbprevious.caption

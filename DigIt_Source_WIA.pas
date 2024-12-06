@@ -628,7 +628,7 @@ end;
 
 initialization
   try
-     WIAPath_Temp:= Path_Temp+'wia'+DirectorySeparator;
+     WIAPath_Temp:= theBridge.Settings.Path_Temp+'wia'+DirectorySeparator;
 
      Source_WIA:= TDigIt_Source_WIA.Create;
      theBridge.Sources.Register(DigIt_Source_WIA_Name, Source_WIA);

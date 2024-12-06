@@ -55,7 +55,7 @@
 {"hash":131777658,"name":"tdigit_main.bclabel14.caption","sourcebytes":[65,102,116,101,114,32,58],"value":"After :"},
 {"hash":138898394,"name":"tdigit_main.label4.caption","sourcebytes":[69,120,97,109,112,108,101,32,58],"value":"Example :"},
 {"hash":266383770,"name":"tdigit_main.bclabel8.caption","sourcebytes":[68,105,103,105,116,115,32,58],"value":"Digits :"},
-{"hash":216308,"name":"tdigit_main.lbcounterexample.caption","sourcebytes":[46,101,120,116],"value":".ext"},
+{"hash":816,"name":"tdigit_main.lbcounterexample.caption","sourcebytes":[48,48],"value":"00"},
 {"hash":127301168,"name":"tdigit_main.lbprevious.caption","sourcebytes":[86,97,108,117,101,32,80,114,101,118,105,111,117,115,58,32],"value":"Value Previous: "},
 {"hash":265173442,"name":"tdigit_main.btcounter_add.hint","sourcebytes":[65,100,100,32,97,32,67,111,117,110,116,101,114],"value":"Add a Counter"},
 {"hash":43,"name":"tdigit_main.btcounter_add.caption","sourcebytes":[43],"value":"+"},

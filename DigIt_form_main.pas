@@ -301,9 +301,11 @@ type
     rSourceName: String;
     rSourceParams: IDigIt_Params;
 
-    rDestination: PDestinationInfo;
-    rDestinationName: String;
+    { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+    (*    rDestination: PDestinationInfo;
     rDestinationParams: IDigIt_Params;
+    *)
+    rDestinationName: String;
 
     CropMode: TDigItCropMode;
     SaveExt,
@@ -326,14 +328,13 @@ type
     procedure UI_FillCounters;
     procedure UI_FillPageSizes;
     procedure UI_ToolBar;
-    procedure UI_ToolBarAddShortcuts;
+    procedure UI_ToolBarMods;
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure DestinationMenuClick(Sender: TObject);
     procedure SourceMenuClick(Sender: TObject);
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
-    procedure UpdateCounterExampleLabel(ACounter :TDigIt_Counter);
     procedure CounterSelect(AIndex:Integer);
     function LoadImage(AImageFile: String): Boolean;
     procedure XML_LoadWork;
@@ -372,9 +373,11 @@ type
     property SourceName: String read rSourceName;
     property SourceParams: IDigIt_Params read rSourceParams;
 
+    (*
     property Destination: PDestinationInfo read rDestination;
-    property DestinationName: String read rDestinationName;
     property DestinationParams: IDigIt_Params read rDestinationParams;
+    *)
+    property DestinationName: String read rDestinationName;
 
   end;
 
@@ -416,8 +419,11 @@ begin
   if inFillCounterUI then exit;
 
   curCounter :=Counters_GetCurrent;
-  if (curCounter<>nil)
-  then curCounter.Value :=edCounterValue.Value;
+  if (curCounter<>nil) then
+  begin
+    curCounter.Value_Next :=edCounterValue.Value;
+    lbCounterExample.Caption:=curCounter.GetValue(True);
+  end;
 end;
 
 procedure TDigIt_Main.edCounterValueStringDigitsChange(Sender: TObject);
@@ -431,7 +437,7 @@ begin
   if (curCounter<>nil) then
   begin
     curCounter.Value_StringDigits :=edCounterValueStringDigits.Value;
-    UpdateCounterExampleLabel(curCounter);
+    lbCounterExample.Caption:=curCounter.GetValue(True);
   end;
 end;
 
@@ -444,7 +450,7 @@ begin
   if (curCounter<>nil) then
   begin
     curCounter.Value_StringPre :=edCounterValueStringPre.Text;
-    UpdateCounterExampleLabel(curCounter);
+    lbCounterExample.Caption:=curCounter.GetValue(True);
   end;
 end;
 
@@ -457,7 +463,7 @@ begin
   if (curCounter<>nil) then
   begin
     curCounter.Value_StringPost :=edCounterValueStringPost.Text;
-    UpdateCounterExampleLabel(curCounter);
+    lbCounterExample.Caption:=curCounter.GetValue(True);
   end;
 end;
 
@@ -516,12 +522,10 @@ begin
   lastLenTaked:= 0;
   BuildSourcesMenu(Self, menuSources, @SourceMenuClick);
 
-  rDestination:= nil;
+//  rDestination:= nil;
+//  rDestinationParams:= nil;
   rDestinationName:= '';
-  rDestinationParams:= nil;
   BuildDestinationsMenu(Self, menuDestinations, @DestinationMenuClick);
-
-  UI_ToolBarAddShortcuts;
 
   CropMode:= diCropNull; //setCropMode works only if there are changes
 
@@ -543,8 +547,7 @@ var
    i:Integer;
 
 begin
-  for i:=0 to tbCaptured.ButtonCount-1 do
-     tbCaptured.Buttons[i].Hint:=tbCaptured.Buttons[i].Caption;
+  UI_ToolBarMods;
 
   if FileExists(Path_Config+Config_XMLWork)
      {$ifopt D-}
@@ -552,15 +555,18 @@ begin
      {$endif}
   then begin
          XML_LoadWork;
-         {$ifopt D-}
+        (* {$ifopt D-}
          actPreview.Execute;
-         {$endif}
+         {$endif} *)
        end
   else begin
          Default_Work;
          UI_MenuItemsChecks(-1, -1);
        end;
 
+  //Crop Areas are done when adding it
+  UI_FillCounters;
+  UI_FillCounter(Counters_GetCurrent);
   UI_ToolBar;
 end;
 
@@ -1558,15 +1564,6 @@ begin
   //
 end;
 
-procedure TDigIt_Main.UpdateCounterExampleLabel(ACounter: TDigIt_Counter);
-begin
-  if (ACounter.Value=-1)
-  then lbCounterExample.Caption:=ACounter.Value_StringPre+
-                            Format('%.'+IntToStr(ACounter.Value_StringDigits)+'d', [1])+
-                            ACounter.Value_StringPost
-  else lbCounterExample.Caption:=ACounter.GetValue;
-end;
-
 procedure TDigIt_Main.CounterSelect(AIndex: Integer);
 begin
   cbCounterList.ItemIndex:=AIndex;
@@ -1659,16 +1656,20 @@ begin
       SourceFiles[i].fName:= XMLWork.GetValue(curItemPath+'fName', '');
     end;
 
-    //Load rDestination and its Params
+    //Load Destination and its Params
+    { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+(*
     newDestinationName:= XMLWork.GetValue('Destination/Name', '');
     if (newDestinationName = '')
     then begin
            rDestination:= nil;
-           rDestinationName:= '';
            rDestinationParams:= nil;
+*)
+           rDestinationName:= '';
            SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
            SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
            newDestinationI:= -1;
+(*
          end
     else begin
            if theBridge.DestinationsImpl.Select(newDestinationName) then
@@ -1680,6 +1681,7 @@ begin
              newDestinationI:= theBridge.DestinationsImpl.SelectedIndex;
            end;
          end;
+*)
 
     XML_LoadPageSettings;
 
@@ -1752,13 +1754,14 @@ begin
      end;
 
      //Save rDestination and its Params
-     XMLWork.SetValue('Destination/Name', rDestinationName);
+(*     XMLWork.SetValue('Destination/Name', rDestinationName);
      if (rDestination = nil) then
      begin
+*)
        XMLWork.DeletePath('Destination/Params/');
        XMLWork.SetValue('Destination/Params/Format', SaveExt);
        XMLWork.SetValue('Destination/Params/Path', SavePath);
-     end;
+//     end;
 
      XMLWork.Flush;
      XMLWork.Free; XMLWork:= Nil;
@@ -1768,7 +1771,7 @@ begin
      //So we do it after destroying XMLWork.
 
      if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
-     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
+//     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
   finally
   end;
 end;
@@ -1946,16 +1949,18 @@ function TDigIt_Main.Destination_Select(newDestinationIndex: Integer): Boolean;
 begin
   Result:= False;
   try
+    (*
      if (newDestinationIndex = -1)
      then begin
+    *)
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
             if Destination_SaveFiles_Settings_Execute(SaveExt, SavePath) then
             begin
             end;
-            rDestination:= nil;
+            //rDestination:= nil;
+            //rDestinationParams:= nil;
             rDestinationName:= '';
-            rDestinationParams:= nil;
-          end
+     (*     end
      else begin
             if theBridge.DestinationsImpl.Select(newDestinationIndex, True) then
             begin
@@ -1970,6 +1975,7 @@ begin
              Result:= True;
             end;
           end;
+     *)
 
   except
     Result:= False;
@@ -2311,13 +2317,6 @@ begin
                then exit;
         end;
 
-       (* tbSepCrop.Visible:= False;
-        actCrop.Visible:= False;
-        actCropNext.Visible:= False;
-        actCropGoBack.Visible:= False;
-        actCropAll.Visible:= False;
-        tbCropSummary.Visible:= False;
-        *)
         tbCrop.Visible:= False;
         imgManipulation.clearCropAreas;
         imgManipulation.Opacity:= 0;
@@ -2330,22 +2329,15 @@ begin
         then Counters.Add('Counter 0')
         else Counters.RemoveAllButFirst;
 
-        if not(XML_Loading) then
+       (* if not(XML_Loading) then
         begin
           UI_FillCounters;
           UI_FillCounter(Counters[0]);
-        end;
+        end; *)
 
         tbCropMode.Caption:= rsCropFull;
       end;
       diCropCustom: begin
-        (*
-        tbSepCrop.Visible:= True;
-        actCrop.Visible:= True;
-        actCropNext.Visible:= True;
-        actCropGoBack.Visible:= True;
-        actCropAll.Visible:= True;
-        *)
         tbCrop.Visible:= True;
         imgManipulation.Opacity:= 128;
         imgManipulation.Enabled:= True;
@@ -2353,13 +2345,11 @@ begin
 
         panelCounterList.Enabled:= True;
 
-        (*
-        if not(XML_Loading) then
+       (* if not(XML_Loading) then
         begin
           UI_FillCounters;
           UI_FillCounter(Counters_GetCurrent);
-        end;
-        *)
+        end; *)
 
         tbCropMode.Caption:= rsCropCust;
       end;
@@ -2367,7 +2357,12 @@ begin
 
     CropMode:= ANewCropMode;
 
-    if not(XML_Loading) then UI_ToolBar;
+    if not(XML_Loading) then
+    begin
+      UI_FillCounters;
+      UI_FillCounter(Counters_GetCurrent);
+      UI_ToolBar;
+    end;
    end;
   tbCropMode.ImageIndex:= Integer(CropMode);
 end;
@@ -2607,13 +2602,15 @@ begin
   actTakeRe.Enabled:= actTake.Enabled and (lastLenTaked > 0);
 end;
 
-procedure TDigIt_Main.UI_ToolBarAddShortcuts;
+procedure TDigIt_Main.UI_ToolBarMods;
 var
    i: Integer;
    curBtn: TToolButton;
+   curAct: TAction;
    st:String;
 
 begin
+  (*
   for i:=0 to tbMain.ButtonCount-1 do
   begin
     curBtn:= tbMain.Buttons[i];
@@ -2629,7 +2626,22 @@ begin
     then curBtn.Caption:= curBtn.Caption+' ('+ShortCutToText(TAction(curBtn.Action).ShortCut)+')';
   end;
   tbCrop.AdjustSize;
+  *)
+  for i:=0 to ActionListMain.ActionCount-1 do
+  begin
+    curAct:= TAction(ActionListMain.Actions[i]);
+    if (curAct <> nil) and (curAct.ShortCut <> 0)
+    then curAct.Caption:= curAct.Caption+' ('+ShortCutToText(curAct.ShortCut)+')';
+  end;
+  tbMain.AdjustSize;
+  tbCrop.AdjustSize;
   tbCrop.Left:= tbMain.Left+tbMain.Width+40;
+
+  for i:=0 to tbCaptured.ButtonCount-1 do
+  begin
+    curBtn:= tbCaptured.Buttons[i];
+    if (curBtn <> nil) then curBtn.Hint:= curBtn.Caption;
+  end;
 end;
 
 procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
@@ -2703,12 +2715,12 @@ begin
            inFillCounterUI :=True;
            panelCounter.Enabled :=True;
            edCounterName.Text:=ACounter.Name;
-           edCounterValue.Value:=ACounter.Value;
+           edCounterValue.Value:=ACounter.Value_Next;
            edCounterValueStringDigits.Value:=ACounter.Value_StringDigits;
            edCounterValueStringPre.Text:=ACounter.Value_StringPre;
            edCounterValueStringPost.Text:=ACounter.Value_StringPost;
            lbPrevious.Caption:=Format(rsCounterPrev, [ACounter.Value_Previous]);
-           UpdateCounterExampleLabel(ACounter);
+           lbCounterExample.Caption:=ACounter.GetValue(True);
            inFillCounterUI :=False;
         end
    else panelCounter.Enabled :=False;

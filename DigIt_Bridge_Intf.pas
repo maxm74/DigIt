@@ -32,17 +32,13 @@ const
   //Source return a Filename in Preview/Take/ReTake as a PChar
   TakeData_FileName = $00000000;
 
-  //Source return a Filename in Preview/Take/ReTake as a PChar (IDigIt_Settings.GetMaxPCharSize maximum size)
+  //Source return a Filename in Preview/Take/ReTake as a PChar
   TakeData_ARRAY = $00000001;
 
   (* Maybe Tomorrow
   //Source return a Pointer to a Bitmap in Preview/Take/ReTake as a Pointer (IDigIt_Settings.GetMaxBufferSize maximum size)
   DigIt_Source_TakeData_BITMAP   = $00000002;
   *)
-
-  //Default Max PChar Size when passing/receiving parameters to the interface
-  //use SetMaxPCharSize to increase the value
-  DigIt_MaxPCharSize = 512;
 
   DigIt_PluginInfoProcName = 'DigIt_Plugin_Info';
   DigIt_PluginInitProcName = 'DigIt_Plugin_Init';
@@ -148,10 +144,12 @@ type
       rValue_StringDigits: Byte;
     end;
 
+  { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+  (*
   IDigIt_Destination = Interface(IDigIt_Interface)
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE10}']
     //Put cropped image (stored in the temporary file AFileName) and
-    //return a preview File name in APreviewFileName (Result is the String size)
+    //return a preview File name in APreviewFileName (Result is the String size) ??
     { #todo 5 -oMaxM : should also return a value to refer to this cropped area in future operations such as rotate/etc  }
     function Put(counterValue: TDigit_CounterData;
                  MaxDataSize: DWord; const AFileName, APreviewFileName: PChar): DWord; stdcall;
@@ -162,6 +160,7 @@ type
     function Register(const aName: PChar; const aClass: IDigIt_Destination) :Boolean; stdcall;
     //function UnRegister(const aClass : IDigIt_Destination) :Boolean; stdcall; { #note 5 -oMaxM : Implementer unregist the Class}
   end;
+  *)
 
   IDigIt_Settings = Interface
   ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
@@ -198,18 +197,14 @@ type
   IDigIt_Bridge = Interface
   ['{D101CADE-C69C-4929-A8DF-C779BE1D5762}']
     function Sources: IDigIt_Sources; stdcall;
-    function Destinations: IDigIt_Destinations; stdcall;
+
+    { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+    //function Destinations: IDigIt_Destinations; stdcall;
+
     function Settings: IDigIt_Settings; stdcall;
     function Progress: IDigIt_Progress; stdcall;
-    //ToolBar, Menù, PostProcessing Image, etc... { #todo -oMaxM : Maybe Tomorrow }
 
-    (*
-    //General Register/Unregister, inside the InitProc/ReleaseProc you can Register/UnRegister in Sources, etc...
-    function Register(const aDisplayName: PChar;
-                      const InitProc: TDigIt_PluginInitProc;
-                      const ReleaseProc: TDigIt_PluginInitProc) :Boolean; stdcall;
-    //function UnRegister(const aDisplayName :PChar) :Boolean; stdcall; { #note 5 -oMaxM : This way each library can uninstall  the others ???? }
-    *)
+    //ToolBar, Menù, Pre/PostProcessing Image, etc... { #todo -oMaxM : Maybe Tomorrow }
   end;
 
 implementation

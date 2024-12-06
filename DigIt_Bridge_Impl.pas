@@ -90,6 +90,9 @@ type
     property SelectedParams: IDigIt_Params read rSelectedParams;
   end;
 
+  { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+  (*
+
   { TDigIt_Destinations }
 
   TDestinationInfo = record
@@ -122,22 +125,14 @@ type
     property SelectedParams: IDigIt_Params read rSelectedParams;
   end;
 
+  *)
+
   { TDigIt_Settings }
 
   TDigIt_Settings = class(TNoRefCountObject, IDigIt_Settings)
-  protected
-    rMaxPCharSize: DWord;
-    rPath_Temp,
-    rPath_Config,
-    rPath_Application: PChar;
-
   public
     constructor Create;
     destructor Destroy; override;
-
-    //Buffers Limits Variables
-    function GetMaxPCharSize: DWord; stdcall;
-    function SetMaxPCharSize(NewSize: DWord): DWord; stdcall;
 
     //Path consts
     function Path_Temp: PChar; stdcall;
@@ -151,7 +146,7 @@ type
   protected
     rSettings: TDigIt_Settings;
     rSources: TDigIt_Sources;
-    rDestinations: TDigIt_Destinations;
+    //rDestinations: TDigIt_Destinations;
     rPlugins: TDigIt_Plugins;
 
   public
@@ -159,19 +154,13 @@ type
     destructor Destroy; override;
 
     function Sources: IDigIt_Sources; stdcall;
-    function Destinations: IDigIt_Destinations; stdcall;
+    //function Destinations: IDigIt_Destinations; stdcall;
     function Settings: IDigIt_Settings; stdcall;
     function Progress: IDigIt_Progress; stdcall;
 
-    (*function Register(const aDisplayName: PChar;
-                      const InitProc: TDigIt_PluginInitProc;
-                      const ReleaseProc: TDigIt_PluginInitProc) :Boolean; stdcall;
-    //function UnRegister(const aDisplayName: PChar) :Boolean; stdcall;
-    *)
-
     //Internal Use only
     function SourcesImpl: TDigIt_Sources;
-    function DestinationsImpl: TDigIt_Destinations;
+    //function DestinationsImpl: TDigIt_Destinations;
     function SettingsImpl: TDigIt_Settings;
     function Plugins: TDigIt_Plugins;
   end;
@@ -548,6 +537,9 @@ begin
 end;
 *)
 
+{ #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+(*
+
 { TDigIt_Destinations }
 
 function TDigIt_Destinations.FreeElement(var aData: TDestinationInfo): Boolean;
@@ -702,61 +694,33 @@ begin
   end;
 end;
 *)
+*)
 
 { TDigIt_Settings }
 
 constructor TDigIt_Settings.Create;
 begin
   inherited Create;
-
-  rMaxPCharSize:= DigIt_MaxPCharSize;
-  rPath_Temp:= Nil;
-  rPath_Config:= Nil;
-  rPath_Application:= Nil;
 end;
 
 destructor TDigIt_Settings.Destroy;
 begin
-  StrDispose(rPath_Temp);
-  StrDispose(rPath_Config);
-  StrDispose(rPath_Application);
-
   inherited Destroy;
-end;
-
-function TDigIt_Settings.GetMaxPCharSize: DWord; stdcall;
-begin
-  Result:= rMaxPCharSize;
-end;
-
-function TDigIt_Settings.SetMaxPCharSize(NewSize: DWord): DWord; stdcall;
-begin
-  if (NewSize > rMaxPCharSize) then rMaxPCharSize:= NewSize;
-  Result:= rMaxPCharSize;
 end;
 
 function TDigIt_Settings.Path_Temp: PChar; stdcall;
 begin
-  if (rPath_Temp = Nil) then rPath_Temp:= StrAlloc(rMaxPCharSize);
-
-  StrPLCopy(rPath_Temp, DigIt_Types.Path_Temp, rMaxPCharSize);
-  Result:= rPath_Temp;  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
+  Result:= PChar(DigIt_Types.Path_Temp);  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
 end;
 
 function TDigIt_Settings.Path_Config: PChar; stdcall;
 begin
-  if (rPath_Config = Nil) then rPath_Config:= StrAlloc(rMaxPCharSize);
-
-  StrPLCopy(rPath_Config, DigIt_Types.Path_Config, rMaxPCharSize);
-  Result:= rPath_Config;  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
+  Result:= PChar(DigIt_Types.Path_Config);  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
 end;
 
 function TDigIt_Settings.Path_Application: PChar; stdcall;
 begin
-  if (rPath_Application = Nil) then rPath_Application:= StrAlloc(rMaxPCharSize);
-
-  StrPLCopy(rPath_Application, DigIt_Types.Path_Application, rMaxPCharSize);
-  Result:= rPath_Application;  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
+  Result:= PChar(DigIt_Types.Path_Application);  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
 end;
 
 { TDigIt_Bridge }
@@ -768,7 +732,7 @@ begin
   rPlugins:= TDigIt_Plugins.Create;
   rSettings:= TDigIt_Settings.Create;
   rSources:= TDigIt_Sources.Create;
-  rDestinations:= TDigIt_Destinations.Create;
+  //rDestinations:= TDigIt_Destinations.Create;
 end;
 
 destructor TDigIt_Bridge.Destroy;
@@ -776,7 +740,7 @@ begin
   rSources.Free;
   rSettings.Free;
   rPlugins.Free;
-  rDestinations.free;
+  //rDestinations.free;
 
   inherited Destroy;
 end;
@@ -786,10 +750,12 @@ begin
   Result:= rSources as IDigIt_Sources;
 end;
 
+(*
 function TDigIt_Bridge.Destinations: IDigIt_Destinations; stdcall;
 begin
   Result:= rDestinations as IDigIt_Destinations;
 end;
+*)
 
 function TDigIt_Bridge.Settings: IDigIt_Settings; stdcall;
 begin
@@ -806,10 +772,12 @@ begin
   Result:= rSources;
 end;
 
+(*
 function TDigIt_Bridge.DestinationsImpl: TDigIt_Destinations;
 begin
   Result:= rDestinations;
 end;
+*)
 
 function TDigIt_Bridge.SettingsImpl: TDigIt_Settings;
 begin

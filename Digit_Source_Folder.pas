@@ -273,58 +273,6 @@ begin
   Result:= 6;
 end;
 
-(*
-function TDigIt_Source_Folder.Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
-begin
-  Result:= 0;
-  if (lastFolder<>Folder)
-  then xFiles.Clear;
-
-  if (xFiles.Count=0) then
-  begin
-    SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-    lastFolder:= Folder;
-    lastFile :=xFiles.IndexOf(LastTaked);
-
-    if (takeAction = takeActReTake) and
-       (lastFile=-1) then
-    begin
-      lastFile:=0;
-      LastTaked :=xFiles[lastFile];
-    end;
-  end;
-
-  Case takeAction of
-  takeActPreview: begin
-    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-    then Result:= 0
-    else begin
-          StrPLCopy(PChar(AData), Folder+DirectorySeparator+xFiles[lastFile+1], MaxDataSize);
-          Result:= Length(PChar(AData));
-         end;
-  end;
-  takeActTake: begin
-    if (xFiles.Count=0) or ((lastFile+1)>=xFiles.Count)
-    then Result :=0
-    else begin
-           Inc(lastFile);
-           LastTaked:=xFiles[lastFile];
-
-           StrPLCopy(PChar(AData), Folder+DirectorySeparator+LastTaked, MaxDataSize);
-           Result:= Length(PChar(AData));
-         end;
-  end;
-  takeActReTake: begin
-    if (xFiles.Count=0) or (lastFile=xFiles.Count)
-    then Result :=0
-    else begin
-           StrPLCopy(PChar(AData), Folder+DirectorySeparator+LastTaked, MaxDataSize);
-           Result:= Length(PChar(AData));
-         end;
-  end;
-  end;
-end;
-*)
 function TDigIt_Source_Folder.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType;
                                    out aData: Pointer): DWord; stdcall;
 begin

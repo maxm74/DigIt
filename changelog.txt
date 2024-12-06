@@ -2,6 +2,11 @@ DigIt CHANGE LOG
 ======================
 
 2024/12/
+        06 Commented Destinations (until I think how);
+	   Deleted all code with my allocation of PChars in the interfaces;
+	   Added Value_Next in Counter and use it in MainForm;
+	   Cleaning residual code;
+	   UI adjustments due to longer Italian words.
         05 Use resourcestring for Languages support; Some UI adjustments
         04 Added PDF Export
         02 Moved Select of Source/Destination from MainForm to Bridge Implementation;

@@ -140,7 +140,7 @@ msgstr "Cartella di Immagini"
 #: digit_source_wia.rswiaacquired
 #, object-pascal-format
 msgid "Acquired %d Pages"
-msgstr "Acquisito %d Pagine"
+msgstr "Acquisite %d Pagine"
 
 #: digit_source_wia.rswiaacquiring
 #, object-pascal-format

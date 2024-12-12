@@ -306,12 +306,12 @@ begin
                 else begin
                        //We have some Error connecting Device ask the user what to do
                        aIndex:= -1;
-                       if (MessageDlg('DigIt WIA', rsWIAExcConnect+#13#10+DeviceName+' '+DeviceManufacturer,
+                       if (MessageDlg('DigIt WIA', rsWIAExcConnect+#13#10+DeviceName+#13#10+DeviceManufacturer,
                                       mtError, [mbRetry, mbAbort], 0)=mrAbort)
                        then break;
                      end;
               end
-              else if (MessageDlg('DigIt WIA', rsWIAExcNotFound+#13#10+DeviceName+' '+DeviceManufacturer,
+              else if (MessageDlg('DigIt WIA', rsWIAExcNotFound+#13#10+DeviceName+#13#10+DeviceManufacturer,
                        mtError, [mbRetry, mbAbort], 0)=mrAbort)
                    then break;
             end

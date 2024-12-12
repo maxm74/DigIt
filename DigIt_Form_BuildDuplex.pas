@@ -221,6 +221,7 @@ begin
        end;
 
      4:try
+        animTurn.Visible:= False;
         res:= DigIt_Main.Source^.Inst.Take(takeActTake, curDataType, curData);
         Result:= (res > 0) and (curData <> nil);
         if Result then
@@ -379,6 +380,11 @@ begin
                     end;
              mrCancel: Result:= False;
            end;
+         end;
+         if Result then
+         begin
+           animTurn.Visible:= not(OneSided);
+           lbBackSide.Visible:= not(OneSided);
          end;
         end;
      4:begin

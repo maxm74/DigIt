@@ -1182,8 +1182,6 @@ object DigIt_Main: TDigIt_Main
       ShowHint = True
       TabOrder = 1
       ViewStyle = vsIcon
-      OnCreateItemClass = lvCapturedCreateItemClass
-      OnCustomDrawItem = lvCapturedCustomDrawItem
       OnDblClick = lvCapturedDblClick
       OnShowHint = lvCapturedShowHint
     end
@@ -3311,6 +3309,7 @@ object DigIt_Main: TDigIt_Main
   object imgListThumb: TBGRAImageList
     Height = 132
     Width = 132
+    UseBGRADraw = False
     Left = 960
     Top = 600
     Bitmap = {

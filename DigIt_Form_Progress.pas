@@ -67,6 +67,9 @@ implementation
 procedure TDigIt_Progress.FormCreate(Sender: TObject);
 begin
   curEventCallBack:= nil;
+  {$ifopt D+}
+    FormStyle:= fsNormal;
+  {$endif}
 end;
 
 procedure TDigIt_Progress.btCancelClick(Sender: TObject);

@@ -43,8 +43,6 @@ function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
                           var newWidth, newHeight:Integer);
 
-function FindFileListItem(AList:TListItems; AFileName:String):TFileListItem;
-
 implementation
 
 uses Digit_Bridge_Intf, Digit_Bridge_Impl;
@@ -384,20 +382,6 @@ begin
          newHeight := thumbHeight;
        end;
 end;
-
-function FindFileListItem(AList: TListItems; AFileName: String): TFileListItem;
-var
-   i:Integer;
-
-begin
-  Result:=nil;
-  for i:=AList.Count-1 downto 0 do
-  begin
-    if (TFileListItem(AList[i]).FileName=AFileName)
-    then begin Result:=TFileListItem(AList[i]); break; end;
-  end;
-end;
-
 
 end.
 

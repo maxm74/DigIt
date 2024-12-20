@@ -20,7 +20,6 @@ uses
 
 const
   DigIt_Source_Twain_Name = 'Twain Device';
-  Twain_TakeFileName = 'twain_take.bmp';
 
 resourcestring
   rsTwainName = 'Twain Device';
@@ -28,11 +27,15 @@ resourcestring
 
 type
   { TDigIt_Source_Twain }
-  TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source)
+  TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source)
   private
+    rTwain:TCustomDelphiTwain;
+    TwainSource:TTwainSource;
     rScannerInfo: TTwainDeviceInfo;
     rParams: TTwainParams;
-    rTwain:TCustomDelphiTwain;
+    TwainCapGetted: Boolean;
+    TwainCap: TTwainParamsCapabilities;
+    rUserInterface: TW_USERINTERFACE;
 
     ipcProcess:TProcess;
     rCommsClient:TSyncIPCClient;
@@ -40,28 +43,26 @@ type
     countTwain_Source,
     countIPC_Source,
     countTakes: Integer;
-    AcquireFileName: String;
-    rEnabled: Boolean;
     DownloadedFiles: TStringArray;
+    rEnabled: Boolean;
 
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
 
-    function IPC_GetDevicesList:Integer;
+    function IPC_GetDevicesList: Integer;
     function IPC_FindSource(AManufacturer, AProductFamily, AProductName: TW_STR32): Integer;
-    function IPC_OpenDevice(AManufacturer, AProductFamily, AProductName: TW_STR32):Boolean;
-    function IPC_ParamsSet:Boolean;
-    function IPC_ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
-    function IPC_Preview(AFileName:String):Boolean;
-    function IPC_Take(AFileName:String):Boolean;
+    function IPC_OpenDevice(AManufacturer, AProductFamily, AProductName: TW_STR32): Boolean;
+    function IPC_ParamsSet: Boolean;
+    function IPC_CapabilitiesGet: Boolean;
+    function IPC_Preview(APath: String): Integer;
+    function IPC_Take(APath: String): Integer;
 
     function GetTwainSource(Load: Boolean): TTwainSource;
 
-    function ParamsGet(var TwainCap:TTwainParamsCapabilities):Boolean;
+    function TwainProcessMessages(Sender: TObject; const Index: Integer): Boolean;
 
     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
                                  nativeHandle: TW_UINT32; var Cancel: Boolean);
-    function internalTake(isPreview:Boolean; var AFileName: String): DWord;
 
     procedure FreeCommsClient;
 
@@ -91,10 +92,14 @@ type
     function UI_Title(out AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
 
-     //Take a Picture and returns FileName
-     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
+    //Take a Picture and returns FileName
+    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 
-     procedure Clear; stdcall;
+    procedure Clear; stdcall;
+
+    //IDigIt_ROArray
+    function GetCount: DWord; stdcall;
+    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
 
     constructor Create;
     destructor Destroy; override;
@@ -189,9 +194,12 @@ begin
   if (rTwain = nil) then
   begin
     rTwain := TCustomDelphiTwain.Create;
+    rTwain.OnProcessMessages:= @TwainProcessMessages;
 
     //Load Twain Library dynamically
     rTwain.LoadLibrary;
+
+    TwainCapGetted:= False;
   end;
 
   Result :=rTwain;
@@ -295,7 +303,7 @@ begin
   Result := (resType = mtData_Integer) and (res = True);
 end;
 
-function TDigIt_Source_Twain.IPC_ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
+function TDigIt_Source_Twain.IPC_CapabilitiesGet: Boolean;
 var
    recStream:TMemoryStream=nil;
    recSize, i:Integer;
@@ -304,9 +312,10 @@ var
    curBufInteger, recBufInteger:PInteger;
 
 begin
-  Result:=False;
+  Result:= False;
+
   FillChar(TwainCap, Sizeof(TwainCap), 0);
-  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PARAMS_GET, mtData_Null, i, 0, recStream, recSize);
+  resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_CAPABILITIES_GET, mtData_Null, i, 0, recStream, recSize);
   if (resType=mtData_Stream) and (recStream<>nil) then
   try
     recStream.Position:=0;
@@ -352,18 +361,20 @@ begin
   finally
     recStream.Free;
   end;
+
+  TwainCapGetted:= Result;
 end;
 
-function TDigIt_Source_Twain.IPC_Preview(AFileName: String): Boolean;
+function TDigIt_Source_Twain.IPC_Preview(APath: String): Integer;
 var
-   recSize:Longint;
-   recBuf:Boolean;
-   resType:TMessageType;
+   recSize: Longint;
+   recBuf: Integer;
+   resType: TMessageType;
 
 begin
-  Result :=False;
+  Result :=0;
   try
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PREVIEW, mtData_String, AFileName, 0, recBuf, recSize);
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_PREVIEW, mtData_String, APath, 0, recBuf, recSize);
      if (resType=mtData_Integer)
      then Result:=recBuf;
 
@@ -371,16 +382,16 @@ begin
   end;
 end;
 
-function TDigIt_Source_Twain.IPC_Take(AFileName: String): Boolean;
+function TDigIt_Source_Twain.IPC_Take(APath: String): Integer;
 var
-   recSize:Longint;
-   recBuf:Boolean;
-   resType:TMessageType;
+   recSize: Longint;
+   recBuf: Integer;
+   resType: TMessageType;
 
 begin
-  Result :=False;
+  Result :=0;
   try
-     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_TAKE, mtData_String, AFileName, 0, recBuf, recSize);
+     resType :=CommsClient.SendSyncMessage(30000, MSG_TWAIN32_TAKE, mtData_String, APath, 0, recBuf, recSize);
      if (resType=mtData_Integer)
      then Result:=recBuf;
 
@@ -397,110 +408,28 @@ begin
                                    rScannerInfo.ProductFamily,
                                    rScannerInfo.ProductName, Load)
   else if Load then Result.Loaded:= True;
+
+  TwainSource:= Result;
 end;
 
-function TDigIt_Source_Twain.ParamsGet(var TwainCap: TTwainParamsCapabilities): Boolean;
-var
-   TwainSource: TTwainSource;
-   capRet:TCapabilityRet;
-   bitCurrent: Integer;
-   paperCurrent: TTwainPaperSize;
-   pixelCurrent:TTwainPixelType;
-   resolutionCurrent:Single;
-
+function TDigIt_Source_Twain.TwainProcessMessages(Sender: TObject; const Index: Integer): Boolean;
 begin
-  Result:= False;
-  TwainSource:= GetTwainSource(True);
-  if (TwainSource <> nil) then
-  begin
-    TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
-    capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
-    capRet :=TwainSource.GetIBitDepth(bitCurrent, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
-    TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
-    capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
-    capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
-    TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
-
-    Result:= True;
-  end;
+  Application.ProcessMessages;
+  Result:= True;
 end;
 
 procedure TDigIt_Source_Twain.TwainAcquireNative(Sender: TObject; const Index: Integer;
                                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
 begin
-  WriteBitmapToFile(AcquireFileName, nativeHandle);
-end;
-
-function TDigIt_Source_Twain.internalTake(isPreview: Boolean; var AFileName: String): DWord;
-var
-   capRet:TCapabilityRet;
-   resTake:Boolean;
-   TwainSource: TTwainSource;
-
-begin
+  with TCustomDelphiTwain(Sender).Source[Index] do
   try
-     Result:= 0;
+    if (Download_Count = 0)
+    then WriteBitmapToFile(Download_Path+Download_FileName+Download_Ext, nativeHandle)
+    else WriteBitmapToFile(Download_Path+Download_FileName+
+                           '-'+IntToStr(Download_Count)+Download_Ext, nativeHandle);
 
-     AcquireFileName:= TwainPath_Temp+Twain_TakeFileName;
-
-     if rScannerInfo.FromAddList
-     then begin
-            resTake :=IPC_ParamsSet;
-
-            if isPreview
-            then resTake :=IPC_Preview(AcquireFileName)
-            else resTake :=IPC_Take(AcquireFileName);
-
-            if resTake then
-            begin
-              AFileName:= AcquireFileName;
-              Result:= Length(AcquireFileName);
-            end;
-          end
-     else begin
-            TwainSource:= GetTwainSource(True);
-            if (TwainSource <> nil) then
-            begin
-//              TwainSource.Loaded :=True;
-              with rParams do
-              begin
-              //Set Parameters, (after a capture the scanner reset it to default???)
-              capRet :=TwainSource.SetPaperFeeding(PaperFeed);
-              capRet :=TwainSource.SetDuplexEnabled(False);
-              capRet :=TwainSource.SetPaperSize(PaperSize);
-              capRet :=TwainSource.SetIPixelType(PixelType);
-
-              if isPreview
-              then begin
-                     capRet :=TwainSource.SetIXResolution(100);
-                     capRet :=TwainSource.SetIYResolution(100);
-                   end
-              else begin
-                     capRet :=TwainSource.SetIXResolution(Resolution);
-                     capRet :=TwainSource.SetIYResolution(Resolution);
-                   end;
-              capRet :=TwainSource.SetContrast(Contrast);
-              capRet :=TwainSource.SetBrightness(Brightness);
-              end;
-
-              TwainSource.SetIndicators(True);
-
-              { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-              TwainSource.TransferMode:=ttmNative; //ttmFile;
-              //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
-              Twain.OnTwainAcquireNative:=@TwainAcquireNative;
-              TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
-              //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
-
-              AFileName:= AcquireFileName;
-              Result:= Length(AcquireFileName);
-            end;
-          end;
-
-     Application.BringToFront;
-
-  finally
-   // FormAnimAcquiring.Free; FormAnimAcquiring:= Nil;
+    Cancel := False;
+  except
   end;
 end;
 
@@ -536,6 +465,10 @@ end;
 destructor TDigIt_Source_Twain.Destroy;
 begin
   if (rTwain<>nil) then rTwain.Free;
+
+  TwainCap.BitDepthArray:= nil;
+  TwainCap.ResolutionArray:= nil;
+
   FreeCommsClient;
 
   DownloadedFiles:= nil;
@@ -557,7 +490,6 @@ end;
 function TDigIt_Source_Twain.GetFromUser: Boolean; stdcall;
 var
   newSelectedInfo: TTwainDeviceInfo;
-  TwainCap: TTwainParamsCapabilities;
   useScannerDefault: Boolean;
 
 begin
@@ -598,8 +530,11 @@ begin
        begin
            rScannerInfo:= newSelectedInfo;
            if rScannerInfo.FromAddList
-           then IPC_ParamsGet(TwainCap)
-           else ParamsGet(TwainCap);
+           then IPC_CapabilitiesGet
+           else begin
+                  Result:= (GetTwainSource(True)<>nil) and TwainSource.GetParamsCapabilities(TwainCap);
+                  TwainCapGetted:= Result;
+                end;
 
            TTwainSettingsSource.Execute(useScannerDefault, TwainCap, rParams);
        end;
@@ -691,7 +626,6 @@ end;
 function TDigIt_Source_Twain.OnSet: Boolean; stdcall;
 var
    dlgRes: TModalResult;
-   TwainSource: TTwainSource;
    aIndex: Integer;
 
 begin
@@ -774,7 +708,7 @@ end;
 
 function TDigIt_Source_Twain.UI_ImageIndex: Integer; stdcall;
 begin
-  Result:= 2;
+  Result:= 5;
 end;
 
 function TDigIt_Source_Twain.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
@@ -783,8 +717,7 @@ function TDigIt_Source_Twain.Take(takeAction: DigIt_Source_TakeAction; out aData
 var
    curPath: String;
    capRet: TCapabilityRet;
-   resTake: Boolean;
-   TwainSource: TTwainSource;
+   i: Integer;
 
 begin
   try
@@ -792,32 +725,21 @@ begin
      aData:= nil;
      aDataType:= diDataType_FileName;
 
-     //TFormAnimAcquiring.Execute; Application.ProcessMessages;
-
      DownloadedFiles:= nil;
      inc(countTakes);
      curPath:= TwainPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
-     { #todo 10 -oMaxM : In Feeder only the first file is returned. Resolve in DelphiTwain Package }
-     AcquireFileName:= curPath+Twain_TakeFileName;
-
      if rScannerInfo.FromAddList
      then begin
-            resTake :=IPC_ParamsSet;
-
-            if (takeAction = takeActPreview)
-            then resTake :=IPC_Preview(AcquireFileName)
-            else resTake :=IPC_Take(AcquireFileName);
-                { #todo 10 -oMaxM : When Feeder can return multiple files change with Path and file schema, Result=NumFiles }
-
-            if resTake then
+            if IPC_ParamsSet then
             begin
-              Result:= 1;
+              if (takeAction = takeActPreview)
+              then Result :=IPC_Preview(curPath)
+              else Result :=IPC_Take(curPath);
             end;
           end
      else begin
-            TwainSource:= GetTwainSource(True);
-            if (TwainSource <> nil) then
+            if (GetTwainSource(True) <> nil) then
             begin
               with rParams do
               begin
@@ -829,13 +751,23 @@ begin
 
                 if (takeAction = takeActPreview)
                 then begin
-                       capRet :=TwainSource.SetIXResolution(100);
-                       capRet :=TwainSource.SetIYResolution(100);
+                       if not(TwainCapGetted) then TwainCapGetted:= TwainSource.GetParamsCapabilities(TwainCap);
+
+                       if TwainCapGetted
+                       then begin
+                              capRet :=TwainSource.SetIXResolution(TwainCap.ResolutionMin);
+                              capRet :=TwainSource.SetIYResolution(TwainCap.ResolutionMin);
+                            end
+                       else begin
+                              capRet :=TwainSource.SetIXResolution(100);
+                              capRet :=TwainSource.SetIYResolution(100);
+                            end;
                      end
                 else begin
                        capRet :=TwainSource.SetIXResolution(Resolution);
                        capRet :=TwainSource.SetIYResolution(Resolution);
                      end;
+
                 capRet :=TwainSource.SetContrast(Contrast);
                 capRet :=TwainSource.SetBrightness(Brightness);
               end;
@@ -843,21 +775,29 @@ begin
               TwainSource.SetIndicators(True);
 
               { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-              TwainSource.TransferMode:=ttmNative; //ttmFile;
-              //TwainSource.SetupFileTransfer(AcquireFileName, tfBMP);
+              TwainSource.TransferMode:=ttmNative;
               Twain.OnTwainAcquireNative:=@TwainAcquireNative;
-              TwainSource.EnableSource(False, False, Application.ActiveFormHandle);
-              //TwainSource.EnableSource(rUserInterface); if in Future we want in the Options
 
-              Result:= 1;
+              rUserInterface.ModalUI:= False;
+              rUserInterface.ShowUI:= False;
+              rUserInterface.hParent:= Application.ActiveFormHandle;
+
+              Result:= TwainSource.Download(rUserInterface, curPath, TwainFileBase, '.bmp', tfBMP);
             end;
           end;
 
      if (Result > 0)
-     then (*if (Result = 1 ) //In this way when more files returned from Feeder
-          then aData:= StrNew(PChar(DownloadedFiles[0]))
-          else aData:= Self as IDigIt_ROArray*)
-          aData:= StrNew(PChar(AcquireFileName))
+     then begin
+            if (Result = 1 )
+            then aData:= StrNew(PChar(curPath+TwainFileBase+'.bmp'))
+            else begin
+                   SetLength(DownloadedFiles, Result);
+                   DownloadedFiles[0]:= curPath+TwainFileBase+'.bmp';
+                   for i:=1 to Result-1 do
+                      DownloadedFiles[i]:= curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp';
+                   aData:= Self as IDigIt_ROArray;
+                 end;
+          end
      else begin
             DeleteDirectory(curPath, False);
             dec(countTakes);
@@ -881,6 +821,19 @@ begin
 
   countTakes:= -1;
   DownloadedFiles:= nil;
+end;
+
+function TDigIt_Source_Twain.GetCount: DWord; stdcall;
+begin
+   Result:= Length(DownloadedFiles);
+end;
+
+function TDigIt_Source_Twain.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+begin
+  Result:= (aIndex < Length(DownloadedFiles));
+  if Result
+  then aData:= StrNew(PChar(DownloadedFiles[aIndex]))
+  else aData:= nil;
 end;
 
 initialization

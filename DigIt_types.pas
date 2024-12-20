@@ -22,24 +22,12 @@ type
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
 
-  { TFileListItem }
-
-  TFileListItem=class(TListItem)
-  protected
-    rFileName:String;
-
-    procedure setFileName(AValue: String);
-  public
-    constructor Create(AOwner: TListItems; AFileName:String);
-
-    property FileName:String read rFileName write setFileName;
-  end;
-
 const
   Config_XMLWork = 'digit.xml';
   Config_Options = 'digit.ini';
+  Config_CapturedThumbs = 'c_thumbs.img';
 
-  XMLWork_Captured = 'CapturedFile/';
+  XMLWork_Captured = 'CapturedFiles/';
   XMLWork_PageSettings = 'PageSettings/';
 
 var
@@ -49,21 +37,6 @@ var
    Path_Pictures: String;
 
 implementation
-
-{ TFileListItem }
-
-procedure TFileListItem.setFileName(AValue: String);
-begin
-  if rFileName=AValue then Exit;
-  rFileName:=AValue;
-  Caption:=ExtractFileName(AValue);
-end;
-
-constructor TFileListItem.Create(AOwner: TListItems; AFileName: String);
-begin
-  inherited Create(AOwner);
-  setFileName(AFileName);
-end;
 
 initialization
    Path_Application :=ExtractFilePath(ParamStr(0));

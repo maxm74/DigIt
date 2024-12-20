@@ -23,9 +23,11 @@ const
   MSG_TWAIN32_OPEN = 104; //Input=mtData_Var (TW_IDENTITY) Output=mtData_Integer (Boolean)
   MSG_TWAIN32_USERINTERFACE = 105; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
   MSG_TWAIN32_PARAMS_SET = 106; //Input=mtData_Var (TTwainParams) Output=mtData_Integer (Boolean)
-  MSG_TWAIN32_PARAMS_GET = 107; //Input=mtData_Null Output=mtData_Stream (TTwainParamsCapabilities)
-  MSG_TWAIN32_PREVIEW = 108; //Input=mtData_String  Output=mtData_Integer (Boolean)
-  MSG_TWAIN32_TAKE = 109; //Input=mtData_String  Output=mtData_Integer (Boolean)
+  MSG_TWAIN32_CAPABILITIES_GET = 107; //Input=mtData_Null Output=mtData_Stream (TTwainParamsCapabilities)
+  MSG_TWAIN32_PREVIEW = 108; //Input=mtData_String  Output=mtData_Integer
+  MSG_TWAIN32_TAKE = 109; //Input=mtData_String  Output=mtData_Integer
+
+  TwainFileBase = 'twain';  //File is a Bitmap so Ext is .bmp
 
 implementation
 

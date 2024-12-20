@@ -183,7 +183,7 @@ msgid "Clear Work Queue"
 msgstr ""
 
 #: tdigit_main.actcrop.caption
-msgid "Crop (F5)"
+msgid "Crop"
 msgstr ""
 
 #: tdigit_main.actcropall.caption
@@ -199,7 +199,7 @@ msgid "Next"
 msgstr ""
 
 #: tdigit_main.actcropnext.caption
-msgid "Crop + Next (F5)"
+msgid "Crop + Next"
 msgstr ""
 
 #: tdigit_main.actoptions.caption

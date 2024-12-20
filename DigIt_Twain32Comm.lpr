@@ -16,17 +16,21 @@ type
 
   TTwain32SyncIPCServer=class(TSyncIPCServer)
   private
+    rTwain: TCustomDelphiTwain;
+    TwainSource:TTwainSource;
     rScannerInfo: TW_IDENTITY;
     rParams: TTwainParams;
-    rTwain:TCustomDelphiTwain;
-
-    rUserInterface:TW_USERINTERFACE;
-    AcquireFileName:String;
-    AcquireResolution:Single;
+    TwainCapGetted: Boolean;
+    TwainCap: TTwainParamsCapabilities;
+    rUserInterface: TW_USERINTERFACE;
+    curTimeout: Integer;
 
     function GetTwainSource(Load: Boolean): TTwainSource;
 
-    function InternalTake(AResolution: Single; APath:String):Boolean;
+    function InternalTake(AResolution: Single; APath:String): Integer;
+
+    function TwainProcessMessages(Sender: TObject; const Index: Integer): Boolean;
+
     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
                                  nativeHandle: TW_UINT32; var Cancel: Boolean);
 
@@ -44,9 +48,9 @@ type
     function TWAIN32_OPEN(AIdentity:TW_IDENTITY):Boolean; //Input=mtData_Var (TW_IDENTITY) Output=mtData_Integer (Boolean)
     function TWAIN32_USERINTERFACE(AUserInterface:TW_USERINTERFACE):Boolean; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
     function TWAIN32_PARAMS_SET(AParams:TTwainParams):Boolean; //Input=mtData_Var (TW_USERINTERFACE) Output=mtData_Integer (Boolean)
-    function TWAIN32_PARAMS_GET:Boolean; //Input=mtData_Null Output=mtData_Var (TTwainParamsCapabilities)
-    function TWAIN32_PREVIEW(APath:String):Boolean; //Input=mtData_String  Output=mtData_Integer (Boolean)
-    function TWAIN32_TAKE(APath:String):Boolean; //Input=mtData_String  Output=mtData_Integer (Boolean)
+    function TWAIN32_CAPABILITIES_GET:Boolean; //Input=mtData_Null Output=mtData_Var (TTwainParamsCapabilities)
+    function TWAIN32_PREVIEW(APath:String):Boolean; //Input=mtData_String  Output=mtData_Integer
+    function TWAIN32_TAKE(APath:String):Boolean; //Input=mtData_String  Output=mtData_Integer
 
     function getTwain: TCustomDelphiTwain;
     procedure FreeTwain;
@@ -99,18 +103,17 @@ begin
                                      rScannerInfo.ProductName, Load);
        end
   else if Load then Result.Loaded:= True;
+
+  TwainSource:= Result;
 end;
 
-function TTwain32SyncIPCServer.InternalTake(AResolution: Single; APath: String): Boolean;
+function TTwain32SyncIPCServer.InternalTake(AResolution: Single; APath: String): Integer;
 var
-   i:Integer;
    capRet:TCapabilityRet;
-   TwainSource:TTwainSource;
 
 begin
-  Result:=False;
-  TwainSource:= GetTwainSource(True);
-  if (TwainSource <> nil) then
+  Result:= 0;
+  if (GetTwainSource(True) <> nil) then
   begin
     {$ifopt D+}
      Writeln('  InternalTake ['+IntToStr(TwainSource.Index)+'] ID:'+IntToStr(TwainSource.Id)+'-'+TwainSource.ProductName);
@@ -128,14 +131,14 @@ begin
     TwainSource.SetIndicators(True);
 
     { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
-    TwainSource.TransferMode:=ttmNative; //ttmFile;
-    //TwainSource.SetupFileTransfer(APath, tfBMP);
-    AcquireFileName :=APath;
-    AcquireResolution:=AResolution;
+    TwainSource.TransferMode:=ttmNative;
     Twain.OnTwainAcquireNative:=@TwainAcquireNative;
-    TwainSource.EnableSource(rUserInterface);
 
-    i:=0;
+    curTimeout:= 0;
+    DoStop:= False;
+    Result:= TwainSource.Download(rUserInterface, APath, TwainFileBase, '.bmp', tfBMP);
+
+(*
     repeat
        {$ifopt D+}
         Write('.');
@@ -143,18 +146,37 @@ begin
       CheckSynchronize(10);
       Application.MsgRunLoop;
       inc(i);
-      Result :=FileExists(APath);
     until Result or DoStop or (i>Timeout);
+*)
   end;
   {$ifopt D+}
-   Writeln('  InternalTake Result: '+BoolToStr(Result, True));
+   Writeln('  InternalTake Result: '+IntToStr(Result));
   {$endif}
+end;
+
+function TTwain32SyncIPCServer.TwainProcessMessages(Sender: TObject; const Index: Integer): Boolean;
+begin
+  {$ifopt D+}
+   Write('.');
+  {$endif}
+  Application.MsgRunLoop;
+  inc(curTimeout);
+  Result:= not(DoStop or (curTimeout > Timeout));
 end;
 
 procedure TTwain32SyncIPCServer.TwainAcquireNative(Sender: TObject; const Index: Integer;
                                                    nativeHandle: TW_UINT32; var Cancel: Boolean);
 begin
-  WriteBitmapToFile(AcquireFileName, nativeHandle);
+  with TCustomDelphiTwain(Sender).Source[Index] do
+  try
+    if (Download_Count = 0)
+    then WriteBitmapToFile(Download_Path+Download_FileName+Download_Ext, nativeHandle)
+    else WriteBitmapToFile(Download_Path+Download_FileName+
+                           '-'+IntToStr(Download_Count)+Download_Ext, nativeHandle);
+
+    Cancel := DoStop;
+  except
+  end;
 end;
 
 function TTwain32SyncIPCServer.MessageReceived(AMsgID: Integer): Boolean;
@@ -169,7 +191,7 @@ begin
                        DoStop:=True;
                      end;
   MSG_TWAIN32_LIST : Result:=TWAIN32_LIST;
-  MSG_TWAIN32_PARAMS_GET: Result:=TWAIN32_PARAMS_GET;
+  MSG_TWAIN32_CAPABILITIES_GET: Result:=TWAIN32_CAPABILITIES_GET;
   else begin
          {$ifopt D+}
          Writeln('MSG_Unknown:'+IntToStr(AMsgID));
@@ -360,7 +382,6 @@ end;
 function TTwain32SyncIPCServer.TWAIN32_OPEN(AIdentity:TW_IDENTITY): Boolean;
 var
    listCount: Integer;
-   TwainSource,
    oldTwainSource: TTwainSource;
 
 begin
@@ -382,8 +403,11 @@ begin
     if Result then
     begin
        //Close Current Scanner if any
-       if (oldTwainSource <> nil)
-       then oldTwainSource.Loaded:= False;
+       if (oldTwainSource <> nil) then
+       begin
+         oldTwainSource.Loaded:= False;
+         TwainCapGetted:= False;
+       end;
 
        TwainSource.Loaded:= True;
 
@@ -467,17 +491,9 @@ begin
   end;
 end;
 
-function TTwain32SyncIPCServer.TWAIN32_PARAMS_GET: Boolean;
+function TTwain32SyncIPCServer.TWAIN32_CAPABILITIES_GET: Boolean;
 var
-  Current: Integer;
-  paperCurrent: TTwainPaperSize;
-  capRet:TCapabilityRet;
-  pixelCurrent:TTwainPixelType;
-  resolutionCurrent:Single;
-  TwainSource: TTwainSource;
-  TwainCap:TTwainParamsCapabilities;
-  curResBuffer:TMemoryStream;
-
+   curResBuffer:TMemoryStream;
 
 begin
   Result :=False;
@@ -486,18 +502,10 @@ begin
       Writeln(' TWAIN32_PARAMS_GET:');
      {$endif}
 
-     TwainSource:= GetTwainSource(True);
-     Result:= (TwainSource <> nil);
-     if Result then
+     Result:= (GetTwainSource(True) <> nil);
+     if Result and TwainSource.GetParamsCapabilities(TwainCap) then
      begin
-       TwainCap.PaperFeedingSet:=TwainSource.GetPaperFeeding;
-       capRet :=TwainSource.GetPaperSizeSet(paperCurrent, TwainCap.PaperSizeDefault, TwainCap.PaperSizeSet);
-       capRet :=TwainSource.GetIBitDepth(Current, TwainCap.BitDepthDefault, TwainCap.BitDepthArray);
-       TwainCap.BitDepthArraySize :=Length(TwainCap.BitDepthArray);
-       capRet :=TwainSource.GetIPixelType(pixelCurrent, TwainCap.PixelTypeDefault, TwainCap.PixelType);
-       capRet :=TwainSource.GetIXResolution(resolutionCurrent, TwainCap.ResolutionDefault, TwainCap.ResolutionArray);
-       TwainCap.ResolutionArraySize :=Length(TwainCap.ResolutionArray);
-
+       TwainCapGetted:= True;
 (*       {$ifopt D+}
         Writeln('   Sizeof(TwainCap):'+IntToStr(Sizeof(TwainCap)));
         Writeln('   Sizeof(Single):'+IntToStr(Sizeof(Single)));
@@ -525,8 +533,6 @@ begin
        Result:=MessageResult(curResBuffer);
 
        //we can free it, is already on the ResultStream
-       SetLength(TwainCap.ResolutionArray, 0);
-       SetLength(TwainCap.BitDepthArray, 0);
        curResBuffer.Free;
      end;
 
@@ -538,8 +544,6 @@ begin
    On E:Exception do
    begin
      if (curResBuffer<>nil) then curResBuffer.Free;
-     SetLength(TwainCap.ResolutionArray, 0);
-     SetLength(TwainCap.BitDepthArray, 0);
      Result :=False;
      {$ifopt D+}
      Application.ShowException(E);
@@ -549,6 +553,9 @@ begin
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_PREVIEW(APath: String): Boolean;
+var
+   res: Integer;
+
 begin
   Result :=False;
   try
@@ -556,11 +563,19 @@ begin
       Writeln(' TWAIN32_PREVIEW: '+APath);
      {$endif}
 
-     Result:=InternalTake(75, APath);
-     Result:=MessageResult(Integer(Result));
+     if (GetTwainSource(True)<>nil) then
+     begin
+       if not(TwainCapGetted) then TwainCapGetted:= TwainSource.GetParamsCapabilities(TwainCap);
+
+       if TwainCapGetted
+       then res:= InternalTake(TwainCap.ResolutionMin, APath)
+       else res:= InternalTake(100, APath);
+
+       Result:=MessageResult(res);
+     end;
 
      {$ifopt D+}
-      Writeln(' TWAIN32_PREVIEW Result: '+BoolToStr(Result, True));
+      Writeln(' TWAIN32_PREVIEW Result: '+IntToStr(res));
      {$endif}
 
   except
@@ -575,6 +590,9 @@ begin
 end;
 
 function TTwain32SyncIPCServer.TWAIN32_TAKE(APath: String): Boolean;
+var
+   res: Integer;
+
 begin
   Result :=False;
   try
@@ -582,12 +600,12 @@ begin
       Writeln(' TWAIN32_TAKE: '+APath);
      {$endif}
 
-     Result:=InternalTake(rParams.Resolution, APath);
-     Result:=MessageResult(Integer(Result));
+     res:= InternalTake(rParams.Resolution, APath);
+     Result:=MessageResult(res);
 
      {$ifopt D+}
       Writeln;
-      Writeln(' TWAIN32_TAKE Result: '+BoolToStr(Result, True));
+      Writeln(' TWAIN32_TAKE Result: '+IntToStr(res));
      {$endif}
 
   except
@@ -607,9 +625,12 @@ begin
   if (rTwain = nil) then
   begin
     rTwain := TCustomDelphiTwain.Create;
+    rTwain.OnProcessMessages:= @TwainProcessMessages;
 
     //Load Twain Library dynamically
     rTwain.LoadLibrary;
+
+    TwainCapGetted:= False;
   end;
 
   Result :=rTwain;
@@ -617,8 +638,10 @@ end;
 
 procedure TTwain32SyncIPCServer.FreeTwain;
 begin
-  if (rTwain<>nil)
-  then rTwain.Free;
+  if (rTwain<>nil) then rTwain.Free;
+
+  TwainCap.BitDepthArray:= nil;
+  TwainCap.ResolutionArray:= nil;
 end;
 
 procedure TTwain32SyncIPCServer.Test(AIndex: Integer);
@@ -660,6 +683,7 @@ begin
   rUserInterface.ShowUI:=False;
   rUserInterface.ModalUI:=True;
   rUserInterface.hParent:=0;
+  TwainCapGetted:= False;
 
   inherited Create(AOwner);
 end;

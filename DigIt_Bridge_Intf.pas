@@ -117,7 +117,7 @@ type
   //
   //DigIt_Source_TakeAction enum
   //
-  DigIt_Source_TakeAction = (takeActPreview, takeActTake, takeActReTake);
+  DigIt_Source_TakeAction = (takeActPreview, takeActTake);
 
   IDigIt_Source = Interface(IDigIt_Interface)
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE00}']

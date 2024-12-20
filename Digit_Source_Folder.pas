@@ -280,11 +280,13 @@ begin
   aData:= nil;
   aDataType:= diDataType_FileName;
 
+  (* old code
   if (lastFolder <> Folder) then xFiles.Clear;
 
   if (xFiles.Count = 0) then
   begin
     SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
+    xFiles.Sort;
     lastFolder:= Folder;
     lastFile:= xFiles.IndexOf(LastTaked);
     if (lastFile = -1) then
@@ -328,6 +330,27 @@ begin
     aData:= Self as IDigIt_ROArray;
     Result:= xFiles.Count;
   end;
+  end; *)
+
+  if (lastFolder <> Folder) then xFiles.Clear;
+
+  if (xFiles.Count = 0) then
+  begin
+    SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
+    xFiles.Sort;
+    lastFolder:= Folder;
+  end;
+
+  if (xFiles.Count > 0) then
+  Case takeAction of
+    takeActPreview: begin
+       aData:= StrNew(PChar(Folder+DirectorySeparator+xFiles[0]));
+       Result:= 1;
+    end;
+    takeActTake: begin
+       aData:= Self as IDigIt_ROArray;
+       Result:= xFiles.Count;
+    end;
   end;
 end;
 

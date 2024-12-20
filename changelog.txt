@@ -2,6 +2,15 @@ DigIt CHANGE LOG
 ======================
 
 2024/12/
+        20 Use of CapturedFiles Array;
+	   Deleted OwnerDraw in lvCaptured;
+	   Use of ImageList Add/InsertProportionally for Thumbnails;
+	   Load/Save Thumbnails from a file;
+	   Adjustments in GoBack/SaveCallback indexes;
+	   Updated Folder Source;
+	   Updated Twain Source to use Download;
+	   Updated Twain 32bit Server to use Download;
+
         12 First Porting of Source_Twain to new interfaces structure;
 	   Added Drivers file for WSD Scanners;
         06 Commented Destinations (until I think how);

@@ -596,8 +596,20 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr ""
 
+#: tdigit_progress.capcurrent.caption
+msgid "Current"
+msgstr ""
+
 #: tdigit_progress.caption
 msgid "DigIt_Progress"
+msgstr ""
+
+#: tdigit_progress.captotal.caption
+msgid "Total"
+msgstr ""
+
+#: tdigit_progress.labtotal.caption
+msgid "TotalL"
 msgstr ""
 
 #: tdigit_templates.bcpanel1.caption

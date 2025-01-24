@@ -15,13 +15,14 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Buttons,
-  Digit_Bridge_Intf;
+  Digit_Bridge_Intf, BGRAFlashProgressBar;
 
 type
 
   { TDigIt_Progress }
 
   TDigIt_Progress = class(TForm, IDigIt_Progress)
+    progressTotal: TBGRAFlashProgressBar;
     btCancel: TBitBtn;
     capTotal: TLabel;
     labTotal: TLabel;
@@ -29,8 +30,7 @@ type
     panelCancel: TPanel;
     panelTotal: TPanel;
     panelCurrent: TPanel;
-    progressTotal: TProgressBar;
-    progressCurrent: TProgressBar;
+    progressCurrent: TBGRAFlashProgressBar;
     procedure btCancelClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
 
@@ -93,18 +93,12 @@ end;
 procedure TDigIt_Progress.SetTotal(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
 begin
   if isMarquee
-  then begin
-         progressTotal.Smooth:= False;
-         progressTotal.Style:= pbstMarquee;
-       end
-  else begin
-         progressTotal.Smooth:= True;
-         progressTotal.Style:= pbstNormal;
-       end;
+  then progressTotal.Style:= pbstMarquee
+  else progressTotal.Style:= pbstNormal;
 
-  progressTotal.Min:= AMin;
-  progressTotal.Max:= AMax;
-  progressTotal.Position:= AValue;
+  progressTotal.MinValue:= AMin;
+  progressTotal.MaxValue:= AMax;
+  progressTotal.Value:= AValue;
   Application.ProcessMessages;
 end;
 
@@ -116,7 +110,7 @@ end;
 
 procedure TDigIt_Progress.SetTotalValue(AValue: Integer); stdcall;
 begin
-  progressTotal.Position:= AValue;
+  progressTotal.Value:= AValue;
   Application.ProcessMessages;
 end;
 
@@ -129,18 +123,12 @@ end;
 procedure TDigIt_Progress.SetCurrent(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
 begin
   if isMarquee
-  then begin
-         progressCurrent.Smooth:= False;
-         progressCurrent.Style:= pbstMarquee;
-       end
-  else begin
-         progressCurrent.Smooth:= True;
-         progressCurrent.Style:= pbstNormal;
-       end;
+  then progressCurrent.Style:= pbstMarquee
+  else progressCurrent.Style:= pbstNormal;
 
-  progressCurrent.Min:= AMin;
-  progressCurrent.Max:= AMax;
-  progressCurrent.Position:= AValue;
+  progressCurrent.MinValue:= AMin;
+  progressCurrent.MaxValue:= AMax;
+  progressCurrent.Value:= AValue;
   Application.ProcessMessages;
 end;
 
@@ -152,7 +140,7 @@ end;
 
 procedure TDigIt_Progress.SetCurrentValue(AValue: Integer); stdcall;
 begin
-  progressCurrent.Position:= AValue;
+  progressCurrent.Value:= AValue;
   Application.ProcessMessages;
 end;
 
@@ -164,6 +152,9 @@ end;
 procedure TDigIt_Progress.Show(const ACaption: PChar); stdcall;
 begin
   Caption:= ACaption;
+  capTotal.Caption:= '';
+  labTotal.Caption:= '';
+  capCurrent.Caption:= '';
   Visible:= True;
   Application.ProcessMessages;
 end;

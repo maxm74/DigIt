@@ -1,65 +1,76 @@
 object DigIt_Progress: TDigIt_Progress
   Left = 420
-  Height = 161
+  Height = 229
   Top = 216
-  Width = 320
-  AutoSize = True
+  Width = 400
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'DigIt_Progress'
-  ClientHeight = 161
-  ClientWidth = 320
+  ClientHeight = 229
+  ClientWidth = 400
+  DesignTimePPI = 120
   FormStyle = fsStayOnTop
   Position = poScreenCenter
-  LCLVersion = '3.99.0.0'
   OnCreate = FormCreate
   object panelTotal: TPanel
     Left = 0
-    Height = 64
+    Height = 90
     Top = 0
-    Width = 320
+    Width = 400
     Align = alTop
     BevelOuter = bvNone
-    ClientHeight = 64
-    ClientWidth = 320
+    ClientHeight = 90
+    ClientWidth = 400
     TabOrder = 0
-    object progressTotal: TProgressBar
-      Left = 10
-      Height = 20
-      Top = 40
-      Width = 300
-      Smooth = True
-      Step = 1
-      TabOrder = 0
-    end
     object capTotal: TLabel
-      Left = 10
-      Height = 1
-      Top = 23
-      Width = 1
+      Left = 12
+      Height = 20
+      Top = 24
+      Width = 33
+      Caption = 'Total'
     end
     object labTotal: TLabel
-      Left = 10
-      Height = 1
-      Top = 4
-      Width = 1
+      Left = 12
+      Height = 20
+      Top = 2
+      Width = 40
+      Caption = 'TotalL'
+    end
+    object progressTotal: TBGRAFlashProgressBar
+      Left = 8
+      Height = 34
+      Top = 48
+      Width = 380
+      CaptionShowPercent = True
+      CaptionPercentTimerFormat = 'nn:ss.zzz'
+      MaxValue = 100
+      MaxYValue = 100
+      ValueSub = 10
+      RandSeed = 0
+      BarColor = 14852966
+      BarColorSub = 1044720
+      BackgroundColor = clNone
+      BackgroundRandomizeMinIntensity = 4000
+      BackgroundRandomizeMaxIntensity = 5000
+      BackgroundRandomize = False
+      MarqueeBounce = 2
     end
   end
   object panelCancel: TPanel
     Left = 0
     Height = 64
-    Top = 104
-    Width = 320
+    Top = 160
+    Width = 400
     Align = alTop
     BevelOuter = bvNone
     ClientHeight = 64
-    ClientWidth = 320
+    ClientWidth = 400
     TabOrder = 1
     object btCancel: TBitBtn
-      Left = 116
-      Height = 34
-      Top = 16
-      Width = 88
+      Left = 145
+      Height = 42
+      Top = 12
+      Width = 110
       Anchors = [akRight, akBottom]
       DefaultCaption = True
       Kind = bkCancel
@@ -69,28 +80,39 @@ object DigIt_Progress: TDigIt_Progress
   end
   object panelCurrent: TPanel
     Left = 0
-    Height = 40
-    Top = 64
-    Width = 320
+    Height = 70
+    Top = 90
+    Width = 400
     Align = alTop
     BevelOuter = bvNone
-    ClientHeight = 40
-    ClientWidth = 320
+    ClientHeight = 70
+    ClientWidth = 400
     TabOrder = 2
-    object progressCurrent: TProgressBar
-      Left = 10
-      Height = 20
-      Top = 17
-      Width = 300
-      Smooth = True
-      Step = 1
-      TabOrder = 0
-    end
     object capCurrent: TLabel
-      Left = 10
-      Height = 1
-      Top = 0
-      Width = 1
+      Left = 12
+      Height = 20
+      Top = 2
+      Width = 48
+      Caption = 'Current'
+    end
+    object progressCurrent: TBGRAFlashProgressBar
+      Left = 8
+      Height = 34
+      Top = 26
+      Width = 380
+      CaptionShowPercent = True
+      CaptionPercentTimerFormat = 'nn:ss.zzz'
+      MaxValue = 100
+      MaxYValue = 100
+      ValueSub = 10
+      RandSeed = 0
+      BarColor = 14852966
+      BarColorSub = 1044720
+      BackgroundColor = clNone
+      BackgroundRandomizeMinIntensity = 4000
+      BackgroundRandomizeMaxIntensity = 5000
+      BackgroundRandomize = False
+      MarqueeBounce = 2
     end
   end
 end

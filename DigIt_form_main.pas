@@ -349,12 +349,12 @@ type
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
     procedure CounterSelect(AIndex:Integer);
-    function LoadImage(AImageFile: String): Boolean;
+    function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
 
-    procedure XML_LoadWork;
-    procedure XML_SaveWork;
+    procedure XML_LoadWork(ASection: TDigItXMLSections);
+    procedure XML_SaveWork(ASection: TDigItXMLSections);
     procedure XML_LoadCapturedFiles;
-    procedure XML_SaveCapturedFile;
+    procedure XML_SaveCapturedFiles;
     procedure XML_LoadProject(AFileName:String);
     procedure XML_SaveProject(AFileName:String);
     procedure XML_LoadPageSettings;
@@ -408,6 +408,7 @@ uses
   lazlogger,
   {$endif}
   LCLIntf, LCLProc, fppdf,
+  BGRAFlashProgressBar,
   Digit_Destinations, DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
 
@@ -552,7 +553,7 @@ end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
-  XML_SaveWork;
+  XML_SaveWork(XMLAllSections);
   if (XMLProject<>nil) then XMLProject.Free;
   Counters.Free;
   theBridge.Free;
@@ -571,7 +572,7 @@ begin
       and (MessageDlg('DigIt', rsContinue, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      {$endif}
   then begin
-         XML_LoadWork;
+         XML_LoadWork(XMLAllSections);
         (* {$ifopt D-}
          actPreview.Execute;
          {$endif} *)
@@ -610,9 +611,8 @@ begin
 
           if (curImageFile <> '') then
           begin
-            LoadImage(curImageFile);
+            LoadImage(curImageFile, True);
             StrDispose(curImageFile);
-            XML_SaveWork;
           end;
         end;
       end
@@ -707,7 +707,7 @@ begin
               if (oldLength = 0) and (Length(SourceFiles) > 0) then
               begin
                 iSourceFiles:= 0;
-                LoadImage(SourceFiles[0].fName);
+                LoadImage(SourceFiles[0].fName, False);
               end;
 
               UI_ToolBar;
@@ -724,7 +724,7 @@ begin
           end;
 
           Application.ProcessMessages;
-          XML_SaveWork;
+          XML_SaveWork([xmlSourceIndexes, xmlSourceFiles]);
         end;
 
         UI_FillCounter(nil);
@@ -795,7 +795,7 @@ begin
 
     if not(CheckEndOfFiles)
     then if (iSourceFiles > -1) and (iSourceFiles < Length(SourceFiles))
-         then if not(LoadImage(SourceFiles[iSourceFiles].fName))
+         then if not(LoadImage(SourceFiles[iSourceFiles].fName, False))
               then begin
                      { #todo -oMaxM : do something if LoadImage Fails? }
                    end;
@@ -804,7 +804,7 @@ begin
 
     UI_FillCounter(nil);
     UI_ToolBar;
-    XML_SaveWork;
+    XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
 
   finally
   end;
@@ -820,7 +820,7 @@ begin
      if (new_iSourceFiles >= 0) and (new_iSourceFiles < Length(SourceFiles)-1) then
      begin
        inc(new_iSourceFiles);
-       if LoadImage(SourceFiles[new_iSourceFiles].fName) then
+       if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
        begin
          if SourceFiles[new_iSourceFiles].fCrop then Counters_Inc;
          iSourceFiles:= new_iSourceFiles;
@@ -829,7 +829,7 @@ begin
 
          UI_FillCounter(nil);
          UI_ToolBar;
-         XML_SaveWork;
+         XML_SaveWork([xmlSourceIndexes, xmlCapturedIndexes]);
        end;
      end;
 
@@ -855,7 +855,7 @@ begin
 
        dec(new_iSourceFiles);
 
-       if LoadImage(SourceFiles[new_iSourceFiles].fName) then
+       if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
        begin
          if SourceFiles[new_iSourceFiles].fCrop then Counters_Dec;
          iSourceFiles:= new_iSourceFiles;
@@ -864,7 +864,7 @@ begin
 
          UI_FillCounter(nil);
          UI_ToolBar;
-         XML_SaveWork;
+         XML_SaveWork([xmlSourceIndexes, xmlCapturedIndexes]);
        end;
      end;
 
@@ -913,7 +913,7 @@ begin
 
       Finished:= CheckEndOfFiles;
       if not(Finished)
-      then if not(LoadImage(SourceFiles[iSourceFiles].fName))
+      then if not(LoadImage(SourceFiles[iSourceFiles].fName, False))
            then begin
                   { #todo -oMaxM : do something if LoadImage Fails? }
                   UserCancel:= True;
@@ -923,7 +923,7 @@ begin
 
       UI_FillCounter(nil);
       UI_ToolBar;
-      XML_SaveWork;
+      XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
 
       DigIt_Progress.progressTotal.Position:= iSourceFiles+1;
       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [iSourceFiles-1, cStr]);
@@ -947,7 +947,7 @@ begin
     rSource^.Inst.Clear;
 
     UI_ToolBar;
-    XML_SaveWork;
+    XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes]);
   end;
 end;
 
@@ -1516,7 +1516,7 @@ begin
          captItem.Caption:= ExtractFileName(savedFile);
          captItem.ImageIndex:= CapturedFiles[iCapturedFiles].iIndex;
 
-         //XML_SaveCapturedFile; { #note -oMaxM : Maybe done with an Index }
+         //XML_SaveCapturedFiles; { #note -oMaxM : Maybe done with an Index }
        end
   else if (iCapturedFiles > -1) and (iCapturedFiles < Length(CapturedFiles)) then
        begin
@@ -1530,7 +1530,7 @@ begin
          captItem.Caption:= ExtractFileName(savedFile);
          captItem.ImageIndex:= CapturedFiles[iCapturedFiles].iIndex;
 
-         //XML_SaveCapturedFile; { #note -oMaxM : Maybe done with an Index }
+         //XML_SaveCapturedFiles; { #note -oMaxM : Maybe done with an Index }
        end;
 
   //Go to Item in Captured List
@@ -1570,7 +1570,7 @@ begin
   UI_FillCounter(Counters_GetCurrent);
 end;
 
-function TDigIt_Main.LoadImage(AImageFile: String): Boolean;
+function TDigIt_Main.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
 var
    Bitmap,
    BitmapR :TBGRABitmap;
@@ -1608,6 +1608,9 @@ begin
      else imgManipulation.Bitmap := Bitmap;
 
      LoadedFile:= AImageFile;
+
+     if saveToXML then XML_SaveWork([xmlSourceIndexes]);
+
      Result:= True;
 
   finally
@@ -1616,7 +1619,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadWork;
+procedure TDigIt_Main.XML_LoadWork(ASection: TDigItXMLSections);
 var
    newDestinationName,
    curItemPath: String;
@@ -1642,7 +1645,6 @@ begin
     end;
 
     //Load SourceFiles
-    LoadImage(XMLWork.GetValue('SourceFiles/LoadedFile', ''));
     SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
     iCount:= XMLWork.GetValue('SourceFiles/Count', 0);
     iSourceFiles:= XMLWork.GetValue('SourceFiles/iSourceFiles', -1);
@@ -1687,6 +1689,8 @@ begin
 
     XML_LoadPageSettings;
 
+    LoadImage(XMLWork.GetValue('LoadedFile', ''), False);
+
     Counters.Load(XMLWork, True);
 
     newCropMode:= TDigItCropMode(XMLWork.GetValue('CropMode', 0));
@@ -1711,7 +1715,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveWork;
+procedure TDigIt_Main.XML_SaveWork(ASection: TDigItXMLSections);
 var
    i: Integer;
    curItemPath: String;
@@ -1724,6 +1728,9 @@ begin
      XMLWork.SetValue('CropMode', Integer(CropMode));
 
      XML_SavePageSettings;
+
+     XMLWork.SetValue('LoadedFile', LoadedFile);
+
      Counters.Save(XMLWork, True);
      if (cbCounterList.ItemIndex > -1)
      then XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
@@ -1741,7 +1748,6 @@ begin
 
      //Save SourceFiles array
      XMLWork.DeletePath('SourceFiles/');
-     XMLWork.SetValue('SourceFiles/LoadedFile', LoadedFile);
      XMLWork.SetValue('SourceFiles/Count', Length(SourceFiles));
      XMLWork.SetValue('SourceFiles/iSourceFiles', iSourceFiles);
      XMLWork.SetValue('SourceFiles/lastCropped', lastCropped);
@@ -1763,7 +1769,7 @@ begin
        XMLWork.SetValue('Destination/Params/Path', SavePath);
 //     end;
 
-     XML_SaveCapturedFile;
+     XML_SaveCapturedFiles;
 
      XMLWork.Flush;
      XMLWork.Free; XMLWork:= Nil;
@@ -1853,7 +1859,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveCapturedFile;
+procedure TDigIt_Main.XML_SaveCapturedFiles;
 var
    i: Integer;
    curItemPath: String;
@@ -2261,7 +2267,7 @@ end;
 
 procedure TDigIt_Main.tbWorkSaveClick(Sender: TObject);
 begin
-  Self.XML_SaveWork;
+  Self.XML_SaveWork(XMLAllSections);
 end;
 
 procedure TDigIt_Main.TestClick(Sender: TObject);
@@ -2512,7 +2518,7 @@ end;
 
 function TDigIt_Main.CropFile_Full(AFileName: String): Boolean;
 begin
-  Result:= (AFileName <> '') and LoadImage(AFileName);
+  Result:= (AFileName <> '') and LoadImage(AFileName, False);
   if Result then
   begin
 //    Counters.CopyValuesToPrevious;
@@ -2544,6 +2550,8 @@ begin
 
        if (i > lastCropped) then lastCropped:= i;
        iSourceFiles:= i;
+
+       XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
 
        DigIt_Progress.progressTotal.Position:= i+1;
        DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);

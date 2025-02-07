@@ -58,7 +58,9 @@ msgstr "Cancello le aree di taglio?"
 msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
-#: digit_form_main.rscontinue
+#: digit_form_main.rscontinuework
+#, fuzzy
+msgctxt "digit_form_main.rscontinuework"
 msgid "Continue from last Work Session?"
 msgstr "Continuo dall'ultima Sessione di Lavoro?"
 
@@ -128,6 +130,10 @@ msgstr "Elaborando le Immagini"
 msgid "Save Current Project?"
 msgstr "Salvo il Progetto Attuale?"
 
+#: digit_form_main.rssavework
+msgid "Save the Work Session?"
+msgstr ""
+
 #: digit_form_main.rstakeagain
 #, object-pascal-format
 msgid "Replace the last %d taked files with a new Take?"
@@ -135,27 +141,27 @@ msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
 
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
-msgstr "Cartella di Immagini"
+msgstr ""
 
 #: digit_source_wia.rswiaacquired
 #, object-pascal-format
 msgid "Acquired %d Pages"
-msgstr "Acquisite %d Pagine"
+msgstr ""
 
 #: digit_source_wia.rswiaacquiring
 #, object-pascal-format
 msgid "Acquiring Page %d"
-msgstr "Acquisendo la pagina %d"
+msgstr ""
 
 #: digit_source_wia.rswiaacquiringtitle
 #, object-pascal-format
 msgid "Acquiring from %s"
-msgstr "Acquisizione da %s"
+msgstr ""
 
 #: digit_source_wia.rswiaacquiringtotal
 #, object-pascal-format
 msgid "Acquiring from %s at %d dpi"
-msgstr "Acquisizione da %s a %d dpi"
+msgstr ""
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
@@ -165,22 +171,18 @@ msgid ""
 "but Item %s not...\n"
 "Select the First Item %s ?"
 msgstr ""
-"Dispositivo trovato\n"
-"%s %s\n"
-"ma l'Elemento %s no...\n"
-"Selezionare il primo Elemento %s?"
 
 #: digit_source_wia.rswiaexcconnect
 msgid "Error Connecting Device"
-msgstr "Errore Connettendo al Dispositivo"
+msgstr ""
 
 #: digit_source_wia.rswiaexcnotfound
 msgid "Device not found..."
-msgstr "Dispositivo non trovato..."
+msgstr ""
 
 #: digit_source_wia.rswianame
 msgid "WIA Device"
-msgstr "Dispositivo WIA"
+msgstr ""
 
 #: digit_utils.rsdestination_default
 msgid "Save as Files"
@@ -531,9 +533,25 @@ msgstr "00"
 msgid "Value Previous: "
 msgstr "Valore Precedente: "
 
+#: tdigit_main.menuclearxml.caption
+msgid "Clear XML"
+msgstr ""
+
+#: tdigit_main.menudebug.caption
+msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuloadxml.caption
+msgid "Load XML"
+msgstr ""
+
 #: tdigit_main.menuprojectsave.caption
 msgid "Save Project ..."
 msgstr "Salva Progetto ..."
+
+#: tdigit_main.menusavexml.caption
+msgid "Save XML"
+msgstr ""
 
 #: tdigit_main.menutimertakeconfig.caption
 msgid "Config Timer"
@@ -617,8 +635,20 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
+#: tdigit_progress.capcurrent.caption
+msgid "Current"
+msgstr ""
+
 #: tdigit_progress.caption
 msgid "DigIt_Progress"
+msgstr ""
+
+#: tdigit_progress.captotal.caption
+msgid "Total"
+msgstr ""
+
+#: tdigit_progress.labtotal.caption
+msgid "TotalL"
 msgstr ""
 
 #: tdigit_templates.bcpanel1.caption
@@ -716,65 +746,3 @@ msgstr "Sorgente..."
 msgid "tbWizard"
 msgstr ""
 
-#: wia_selectform.rsnodevicepresent
-msgid "No Wia Devices present..."
-msgstr "Nessun Dispositivo Wia presente..."
-
-#: wia_settingsform.rsapplychanges
-#, object-pascal-format
-msgid "Apply Changes to Item %s of %s"
-msgstr "Applicare le Modifiche all'Elemento %s di %s"
-
-#: wia_settingsform.rsautosize
-msgid "Auto size"
-msgstr "Dimensione Automatica"
-
-#: wia_settingsform.rsautotype
-msgid "Auto type"
-msgstr "Tipo Automatico"
-
-#: wia_settingsform.rscustomsize
-msgid "Custom size"
-msgstr "Dimensione Personalizzata"
-
-#: wia_settingsform.rserrorselecting
-#, object-pascal-format
-msgid ""
-"Error Selecting Item %s of %s\n"
-"Try to Select another Source Item"
-msgstr ""
-"Errore Selezionando l'Elemento %s di %s\n"
-"Prova a Selezionare un altro Elemento della Sorgente"
-
-#: wia_settingsform.rserrorselectingint
-#, object-pascal-format
-msgid ""
-"Error Selecting Item [%d] of %s\n"
-"%s\n"
-"Try to Select another Source Item"
-msgstr ""
-"Errore Selezionando l'Elemento [%d] di %s\n"
-"%s\n"
-"Prova a Selezionare un altro Elemento della Sorgente"
-
-#: wia_settingsform.rsexccannotgetcapabilities
-#, object-pascal-format
-msgid "Cannot Get Capabilities for Source Item %d"
-msgstr "Impossibile ottenere le Capacità per l'Elemento %d della Sorgente"
-
-#: wia_settingsform.rsexccannotgetsourceitem
-#, object-pascal-format
-msgid "Cannot Get Source Item %d"
-msgstr "Impossibile ottenere l'Elemento %d della Sorgente"
-
-#: wia_settingsform.rsfullsize
-msgid "Full size"
-msgstr "Dimensione Intera"
-
-#: wia_settingsform.rslandscape
-msgid "Landscape"
-msgstr "Orizzontale"
-
-#: wia_settingsform.rsportrait
-msgid "Portrait"
-msgstr "Verticale"

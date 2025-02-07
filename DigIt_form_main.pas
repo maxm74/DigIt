@@ -21,7 +21,8 @@ uses
   BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters, LCLType;
 
 resourcestring
-  rsContinue = 'Continue from last Work Session?';
+  rsContinueWork = 'Continue from last Work Session?';
+  rsSaveWork = 'Save the Work Session?';
   rsNoFilesDownloaded = 'NO Files Downloaded ';
   rsTakeAgain = 'Replace the last %d taked files with a new Take?';
   rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
@@ -94,6 +95,10 @@ type
     itemTake: TMenuItem;
     itemTakeAgain: TMenuItem;
     itemBuildDuplex: TMenuItem;
+    menuDebug: TMenuItem;
+    menuClearXML: TMenuItem;
+    menuSaveXML: TMenuItem;
+    menuLoadXML: TMenuItem;
     panelTop: TPanel;
     panelCounterList: TBCPanel;
     btCounter_Add: TBGRASpeedButton;
@@ -263,10 +268,10 @@ type
     procedure edCropNameEditingDone(Sender: TObject);
     procedure edCropUnit_TypeChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure edNameChange(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormDestroy(Sender: TObject);
+    procedure edNameChange(Sender: TObject);
 
     procedure btBox_AddClick(Sender: TObject);
     procedure btBox_DelClick(Sender: TObject);
@@ -275,6 +280,7 @@ type
     procedure edCropLeftChange(Sender: TObject);
     procedure edCropTopChange(Sender: TObject);
     procedure edCropWidthChange(Sender: TObject);
+    procedure menuDebugClick(Sender: TObject);
     procedure rgCropAspectSelectionChanged(Sender: TObject);
     procedure btCropApplyAspectRatioClick(Sender: TObject);
 
@@ -353,6 +359,7 @@ type
 
     procedure XML_LoadWork(ASection: TDigItXMLSections);
     procedure XML_SaveWork(ASection: TDigItXMLSections);
+    procedure XML_ClearWork;
     procedure XML_LoadCapturedFiles;
     procedure XML_SaveCapturedFiles;
     procedure XML_LoadProject(AFileName:String);
@@ -404,12 +411,9 @@ implementation
 {$R *.lfm}
 
 uses
-  {$ifopt D+}
-  lazlogger,
-  {$endif}
   LCLIntf, LCLProc, fppdf,
   BGRAFlashProgressBar,
-  Digit_Destinations, DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
+  DigIt_Destinations, DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
 
 { TDigIt_Main }
@@ -513,6 +517,7 @@ var
 begin
   XMLWork:=nil;
   XMLProject:=nil;
+
   Project_File:='';
   LoadedFile:='';
 
@@ -547,17 +552,13 @@ begin
 
   CropMode:= diCropNull; //setCropMode works only if there are changes
 
-  {$ifopt D+}
+  {$ifdef LINUX}
+    lvCaptured.ScrollBars:=ssAutoBoth;  { #todo 10 -oMaxM : Fix Gtk2 vsIcon Style :-( }
   {$endif}
-end;
 
-procedure TDigIt_Main.FormDestroy(Sender: TObject);
-begin
-  XML_SaveWork(XMLAllSections);
-  if (XMLProject<>nil) then XMLProject.Free;
-  Counters.Free;
-  theBridge.Free;
-  SourceFiles:= nil;
+  {$ifopt D+}
+    menuDebug.Visible:= True;
+  {$endif}
 end;
 
 procedure TDigIt_Main.FormShow(Sender: TObject);
@@ -569,7 +570,7 @@ begin
 
   if FileExists(Path_Config+Config_XMLWork)
      {$ifopt D-}
-      and (MessageDlg('DigIt', rsContinue, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+      and (MessageDlg('DigIt', rsContinueWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      {$endif}
   then begin
          XML_LoadWork(XMLAllSections);
@@ -586,6 +587,25 @@ begin
   UI_FillCounters;
   UI_FillCounter(Counters_GetCurrent);
   UI_ToolBar;
+end;
+
+procedure TDigIt_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+var
+   dlgRes: TModalResult;
+
+begin
+  closing :=True;
+  dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+  if (dlgRes=mrYes) then XML_SaveWork(XMLAllSections);
+  CanClose:= not(dlgRes = mrCancel);
+end;
+
+procedure TDigIt_Main.FormDestroy(Sender: TObject);
+begin
+  if (XMLProject<>nil) then XMLProject.Free;
+  Counters.Free;
+  theBridge.Free;
+  SourceFiles:= nil;
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
@@ -1635,6 +1655,51 @@ begin
 
     XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
 
+(*    if (xmlUI in ASection) then
+    begin
+     end;
+
+    if (xmlCropMode in ASection) then
+    begin
+     end;
+
+    if (xmlPageSettings in ASection) then
+    begin
+     end;
+
+    if (xmlCropAreas in ASection) then
+    begin
+     end;
+
+    if (xmlCounters in ASection) then
+    begin
+     end;
+
+    if (xmlSource in ASection) then
+    begin
+     end;
+
+    if (xmlSourceIndexes in ASection) then
+    begin
+     end;
+
+    if (xmlSourceFiles in ASection) then
+    begin
+     end;
+
+    if (xmlDestination in ASection) then
+    begin
+     end;
+
+    if (xmlCapturedIndexes in ASection) then
+    begin
+     end;
+
+    if (xmlCapturedFiles in ASection) then
+    begin
+     end;
+*)
+
     //Load rSource and its Params
     if theBridge.SourcesImpl.Select(XMLWork.GetValue('Source/Name', '')) then
     begin
@@ -1782,6 +1847,13 @@ begin
 //     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
   finally
   end;
+end;
+
+procedure TDigIt_Main.XML_ClearWork;
+begin
+  if (XMLWork <> nil) then FreeAndNil(XMLWork);
+  DeleteFile(Path_Config+Config_XMLWork);
+  DeleteFile(Path_Config+Config_CapturedThumbs);
 end;
 
 procedure TDigIt_Main.XML_LoadCapturedFiles;
@@ -2074,13 +2146,6 @@ begin
   CropArea.Name :=edCropName.Text;
 end;
 
-procedure TDigIt_Main.FormCloseQuery(Sender: TObject;
-  var CanClose: Boolean);
-begin
-     closing :=True;
-     { #todo 1 -oMaxM : Project Save Confirmation }
-end;
-
 procedure TDigIt_Main.btBox_AddClick(Sender: TObject);
 var
    newCropArea :TCropArea;
@@ -2163,6 +2228,15 @@ begin
   then CropArea.Width:=edCropWidth.Value;
 end;
 
+procedure TDigIt_Main.menuDebugClick(Sender: TObject);
+begin
+  Case TMenuItem(Sender).Tag of
+    0: XML_LoadWork(XMLAllSections);
+    1: XML_SaveWork(XMLAllSections);
+    2: XML_ClearWork;
+  end;
+end;
+
 procedure TDigIt_Main.rgCropAspectSelectionChanged(Sender: TObject);
 begin
   if changingAspect then Exit;
@@ -2197,8 +2271,7 @@ var
 begin
    curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
 
-   if (CropArea.Name='')
-   then CropArea.Name:='Name '+IntToStr(curIndex);
+   if (CropArea.Name='') then CropArea.Name:='Name '+IntToStr(curIndex);
 
    CropArea.Icons:=[cIcoIndex];
 
@@ -2243,7 +2316,7 @@ end;
 
 procedure TDigIt_Main.ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
 begin
-  if (cbBoxList.Items.Objects[cbBoxList.ItemIndex] = CropArea) then
+  if (cbBoxList.ItemIndex > -1) and (cbBoxList.Items.Objects[cbBoxList.ItemIndex] = CropArea) then
   begin
     UI_FillBox(CropArea);
 

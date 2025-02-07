@@ -1,6 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
+2025/02/07 Added Linux Project (Gtk2);
+	   GUI Adjustments for Gtk2 support;
 2024/12/
         20 Use of CapturedFiles Array;
 	   Deleted OwnerDraw in lvCaptured;

@@ -48,7 +48,8 @@ msgstr ""
 msgid "Clear the Work Queue?"
 msgstr ""
 
-#: digit_form_main.rscontinue
+#: digit_form_main.rscontinuework
+msgctxt "digit_form_main.rscontinuework"
 msgid "Continue from last Work Session?"
 msgstr ""
 
@@ -114,6 +115,10 @@ msgstr ""
 
 #: digit_form_main.rssaveproject
 msgid "Save Current Project?"
+msgstr ""
+
+#: digit_form_main.rssavework
+msgid "Save the Work Session?"
 msgstr ""
 
 #: digit_form_main.rstakeagain
@@ -510,8 +515,24 @@ msgstr ""
 msgid "Value Previous: "
 msgstr ""
 
+#: tdigit_main.menuclearxml.caption
+msgid "Clear XML"
+msgstr ""
+
+#: tdigit_main.menudebug.caption
+msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuloadxml.caption
+msgid "Load XML"
+msgstr ""
+
 #: tdigit_main.menuprojectsave.caption
 msgid "Save Project ..."
+msgstr ""
+
+#: tdigit_main.menusavexml.caption
+msgid "Save XML"
 msgstr ""
 
 #: tdigit_main.menutimertakeconfig.caption

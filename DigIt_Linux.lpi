@@ -37,7 +37,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../Packages/DelphiTwain/units;../../Packages/MaxM/Commons"/>
+            <OtherUnitFiles Value="../../Packages/MaxM/Commons"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
           </SearchPaths>
           <BuildMacros>
@@ -80,49 +80,37 @@
     <RunParams>
       <local>
         <CommandLineParams Value="--debug-log=digit.log"/>
-        <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
-        <Mode0 Name="default">
-          <local>
-            <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
-          </local>
-        </Mode0>
+        <Mode0 Name="default"/>
         <Mode1 Name="Debug">
           <local>
             <CommandLineParams Value="--debug-log=digit.log"/>
-            <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
           </local>
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="7">
+    <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="WIAPascal_pkg"/>
+        <PackageName Value="MaxM_Commons"/>
       </Item1>
       <Item2>
-        <PackageName Value="DelphiTwain_pkg"/>
+        <PackageName Value="LazControls"/>
       </Item2>
       <Item3>
-        <PackageName Value="MaxM_Commons"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item3>
       <Item4>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="bgracontrols"/>
       </Item4>
       <Item5>
-        <PackageName Value="BGRABitmapPack"/>
-      </Item5>
-      <Item6>
-        <PackageName Value="bgracontrols"/>
-      </Item6>
-      <Item7>
         <PackageName Value="LCL"/>
-      </Item7>
+      </Item5>
     </RequiredPackages>
-    <Units Count="16">
+    <Units Count="14">
       <Unit0>
-        <Filename Value="DigIt.lpr"/>
+        <Filename Value="DigIt_Linux.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -191,14 +179,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit13>
-      <Unit14>
-        <Filename Value="Digit_Source_Folder.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="DigIt_Source_WIA.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

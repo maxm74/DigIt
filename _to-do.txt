@@ -1,4 +1,14 @@
+Bugs:
+  Area Intera
+      Icone su Captured non corrette
+      Take seguito da un altro Take non c'è Progress Current
+      cambio Valore uno in meno non sostituisce le icone su Captured
+   
+  
 Main:
+  Continua dall'ultima sessione, Salvare Sessione = NO -> Cancellare xml e thumbs
+  Aggiungere Pulsanti Delete All e Delete Selected in Captured
+
   Lasciare una sola ComboBox dei contatori (legata al Crop Selezionato)
   CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
   Salvare la sessione più spesso

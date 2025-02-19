@@ -133,9 +133,13 @@ begin
     { #note 10 -oMaxM : Switched to ttmNative Mode (my office Scanner fail if paper=tpsNone and dpi>150) see Tests}
     TwainSource.TransferMode:=ttmNative;
     Twain.OnTwainAcquireNative:=@TwainAcquireNative;
+    Twain.OnTwainAcquireBitmap:=nil;
 
     curTimeout:= 0;
     DoStop:= False;
+    {$ifopt D+}
+     Writeln('    downloading on '+APath+' '+TwainFileBase);
+    {$endif}
     Result:= TwainSource.Download(rUserInterface, APath, TwainFileBase, '.bmp', tfBMP);
 
 (*

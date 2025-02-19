@@ -11,6 +11,7 @@ object DigIt_Progress: TDigIt_Progress
   DesignTimePPI = 120
   FormStyle = fsStayOnTop
   Position = poScreenCenter
+  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
   object panelTotal: TPanel
     Left = 0
@@ -45,6 +46,7 @@ object DigIt_Progress: TDigIt_Progress
       CaptionPercentTimerFormat = 'nn:ss.zzz'
       MaxValue = 100
       MaxYValue = 100
+      Value = 30
       ValueSub = 10
       RandSeed = 0
       BarColor = 14852966
@@ -104,6 +106,7 @@ object DigIt_Progress: TDigIt_Progress
       CaptionPercentTimerFormat = 'nn:ss.zzz'
       MaxValue = 100
       MaxYValue = 100
+      Value = 30
       ValueSub = 10
       RandSeed = 0
       BarColor = 14852966

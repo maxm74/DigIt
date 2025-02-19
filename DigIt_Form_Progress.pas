@@ -99,6 +99,7 @@ begin
   progressTotal.MinValue:= AMin;
   progressTotal.MaxValue:= AMax;
   progressTotal.Value:= AValue;
+  panelTotal.Visible:= True;
   Application.ProcessMessages;
 end;
 
@@ -129,6 +130,7 @@ begin
   progressCurrent.MinValue:= AMin;
   progressCurrent.MaxValue:= AMax;
   progressCurrent.Value:= AValue;
+  panelCurrent.Visible:= True;
   Application.ProcessMessages;
 end;
 

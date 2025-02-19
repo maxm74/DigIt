@@ -14,7 +14,7 @@ object DigIt_Main: TDigIt_Main
   OnShow = FormShow
   object imgManipulation: TBGRAImageManipulation
     Left = 288
-    Height = 713
+    Height = 523
     Top = 79
     Width = 873
     Align = alClient
@@ -34,7 +34,7 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCrops: TBCExpandPanel
     Left = 0
-    Height = 713
+    Height = 523
     Top = 79
     Width = 288
     Align = alLeft
@@ -77,7 +77,7 @@ object DigIt_Main: TDigIt_Main
     ButtonPosition = akLeft
     ButtonSize = 20
     Button.Left = 0
-    Button.Height = 713
+    Button.Height = 523
     Button.Top = 0
     Button.Width = 20
     Button.Caption = 'Crop Areas'
@@ -88,11 +88,11 @@ object DigIt_Main: TDigIt_Main
     Animated = False
     object cbBoxList: TComboBox
       Left = 40
-      Height = 32
+      Height = 28
       Top = 212
       Width = 150
       AutoSize = False
-      ItemHeight = 0
+      ItemHeight = 20
       Style = csDropDownList
       TabOrder = 0
       OnChange = cbBoxListChange
@@ -160,10 +160,10 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundY = 1
       TabOrder = 1
       object BCLabel1: TBCLabel
-        Left = 38
-        Height = 23
+        Left = 42
+        Height = 20
         Top = 72
-        Width = 36
+        Width = 32
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -194,10 +194,10 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundY = 1
       end
       object BCLabel2: TBCLabel
-        Left = 38
-        Height = 23
+        Left = 42
+        Height = 20
         Top = 107
-        Width = 36
+        Width = 32
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -228,10 +228,10 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundY = 1
       end
       object BCLabel3: TBCLabel
-        Left = 21
-        Height = 23
+        Left = 27
+        Height = 20
         Top = 142
-        Width = 53
+        Width = 47
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -262,10 +262,10 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundY = 1
       end
       object BCLabel4: TBCLabel
-        Left = 15
-        Height = 23
+        Left = 22
+        Height = 20
         Top = 177
-        Width = 59
+        Width = 52
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -297,11 +297,11 @@ object DigIt_Main: TDigIt_Main
       end
       object edCropUnit_Type: TComboBox
         Left = 81
-        Height = 32
+        Height = 28
         Top = 33
         Width = 129
         AutoSize = False
-        ItemHeight = 0
+        ItemHeight = 20
         ItemIndex = 0
         Items.Strings = (
           'pixels'
@@ -314,10 +314,10 @@ object DigIt_Main: TDigIt_Main
         OnChange = edCropUnit_TypeChange
       end
       object BCLabel5: TBCLabel
-        Left = 35
-        Height = 23
+        Left = 40
+        Height = 20
         Top = 37
-        Width = 39
+        Width = 34
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -348,10 +348,10 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundY = 1
       end
       object BCLabel6: TBCLabel
-        Left = 21
-        Height = 23
+        Left = 27
+        Height = 20
         Top = 2
-        Width = 53
+        Width = 47
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -405,8 +405,8 @@ object DigIt_Main: TDigIt_Main
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 2
-        ClientHeight = 41
-        ClientWidth = 158
+        ClientHeight = 40
+        ClientWidth = 156
         Columns = 2
         Items.Strings = (
           'Parent'
@@ -418,7 +418,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edCropLeft: TFloatSpinEdit
         Left = 81
-        Height = 30
+        Height = 25
         Top = 70
         Width = 129
         Font.Color = clWindowText
@@ -430,7 +430,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edCropTop: TFloatSpinEdit
         Left = 81
-        Height = 30
+        Height = 25
         Top = 105
         Width = 129
         Font.Color = clWindowText
@@ -442,7 +442,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edCropWidth: TFloatSpinEdit
         Left = 81
-        Height = 30
+        Height = 25
         Top = 140
         Width = 129
         Font.Color = clWindowText
@@ -454,7 +454,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edCropHeight: TFloatSpinEdit
         Left = 81
-        Height = 30
+        Height = 25
         Top = 175
         Width = 129
         Font.Color = clWindowText
@@ -465,10 +465,10 @@ object DigIt_Main: TDigIt_Main
         OnChange = edCropHeightChange
       end
       object Label2: TLabel
-        Left = 16
-        Height = 23
+        Left = 23
+        Height = 20
         Top = 300
-        Width = 58
+        Width = 51
         Anchors = [akTop, akRight]
         Caption = 'Rotate :'
       end
@@ -501,10 +501,10 @@ object DigIt_Main: TDigIt_Main
         OnClick = btCRotateRightClick
       end
       object Label3: TLabel
-        Left = 40
-        Height = 23
+        Left = 43
+        Height = 20
         Top = 330
-        Width = 34
+        Width = 31
         Anchors = [akTop, akRight]
         Caption = 'Flip :'
       end
@@ -565,10 +565,10 @@ object DigIt_Main: TDigIt_Main
         OnClick = btCFlipHRightClick
       end
       object Label1: TLabel
-        Left = 9
-        Height = 23
+        Left = 16
+        Height = 20
         Top = 360
-        Width = 65
+        Width = 58
         Anchors = [akTop, akRight]
         Caption = 'Z Order :'
       end
@@ -630,11 +630,11 @@ object DigIt_Main: TDigIt_Main
       end
       object cbCropCounterList: TComboBox
         Left = 16
-        Height = 32
+        Height = 28
         Top = 416
         Width = 150
         AutoSize = False
-        ItemHeight = 0
+        ItemHeight = 20
         Style = csDropDownList
         TabOrder = 7
         OnChange = cbCropCounterListChange
@@ -665,9 +665,9 @@ object DigIt_Main: TDigIt_Main
       end
       object Label5: TLabel
         Left = 16
-        Height = 23
+        Height = 20
         Top = 395
-        Width = 70
+        Width = 59
         Caption = 'Counter :'
       end
       object edCropAspectPersonal: TEditButton
@@ -762,29 +762,29 @@ object DigIt_Main: TDigIt_Main
     end
     object Label7: TLabel
       Left = 35
-      Height = 23
+      Height = 20
       Top = 188
-      Width = 226
+      Width = 246
       Caption = 'Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object Label8: TLabel
       Left = 35
-      Height = 23
+      Height = 20
       Top = 0
-      Width = 213
+      Width = 248
       Caption = 'Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object edPage_UnitType: TComboBox
       Left = 109
-      Height = 32
+      Height = 28
       Top = 18
       Width = 129
       AutoSize = False
-      ItemHeight = 0
+      ItemHeight = 20
       ItemIndex = 0
       Items.Strings = (
         'not defined'
@@ -836,10 +836,10 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundY = 1
       TabOrder = 3
       object BCLabel10: TBCLabel
-        Left = 21
-        Height = 23
+        Left = 27
+        Height = 20
         Top = 7
-        Width = 53
+        Width = 47
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -871,7 +871,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edPageWidth: TFloatSpinEdit
         Left = 81
-        Height = 30
+        Height = 25
         Top = 5
         Width = 129
         Font.Color = clWindowText
@@ -892,7 +892,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edPageHeight: TFloatSpinEdit
         Left = 81
-        Height = 30
+        Height = 25
         Top = 40
         Width = 129
         Font.Color = clWindowText
@@ -903,10 +903,10 @@ object DigIt_Main: TDigIt_Main
         OnChange = edPageHeightChange
       end
       object BCLabel11: TBCLabel
-        Left = 15
-        Height = 23
+        Left = 22
+        Height = 20
         Top = 42
-        Width = 59
+        Width = 52
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -984,10 +984,10 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundY = 1
       TabOrder = 4
       object Label9: TLabel
-        Left = 16
-        Height = 23
+        Left = 23
+        Height = 20
         Top = 0
-        Width = 58
+        Width = 51
         Alignment = taRightJustify
         Anchors = [akTop, akRight]
         Caption = 'Rotate :'
@@ -1053,10 +1053,10 @@ object DigIt_Main: TDigIt_Main
         ParentShowHint = False
       end
       object Label10: TLabel
-        Left = 40
-        Height = 23
+        Left = 43
+        Height = 20
         Top = 22
-        Width = 34
+        Width = 31
         Alignment = taRightJustify
         Anchors = [akTop, akRight]
         Caption = 'Flip :'
@@ -1080,8 +1080,8 @@ object DigIt_Main: TDigIt_Main
   end
   object rollPages: TBCExpandPanel
     Left = 0
-    Height = 20
-    Top = 792
+    Height = 210
+    Top = 602
     Width = 1411
     Align = alBottom
     Background.Color = clBtnFace
@@ -1119,7 +1119,7 @@ object DigIt_Main: TDigIt_Main
     TabOrder = 1
     TextAlignment = taLeftJustify
     CollapseKind = akBottom
-    ExpandedSize = 200
+    ExpandedSize = 210
     ButtonPosition = akTop
     ButtonSize = 20
     Button.Left = 0
@@ -1132,11 +1132,10 @@ object DigIt_Main: TDigIt_Main
     Button.GlyphLayout = glRight
     AnimationSpeed = 20
     Animated = False
-    Collapsed = True
     object tbCaptured: TToolBar
       Left = 1
-      Height = 1
-      Top = 20
+      Height = 188
+      Top = 21
       Width = 31
       Align = alLeft
       AutoSize = True
@@ -1154,13 +1153,13 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
       end
       object tbCapturedRotateRight: TToolButton
-        Left = 31
-        Top = 2
+        Left = 1
+        Top = 32
         Action = actRotateRight
       end
       object tbCapturedPDF: TToolButton
-        Left = 61
-        Top = 2
+        Left = 1
+        Top = 62
         Caption = 'Export to PDF'
         ImageIndex = 2
         OnClick = tbCapturedPDFClick
@@ -1168,8 +1167,8 @@ object DigIt_Main: TDigIt_Main
     end
     object lvCaptured: TListView
       Left = 32
-      Height = 1
-      Top = 20
+      Height = 188
+      Top = 21
       Width = 1378
       Align = alClient
       AutoSort = False
@@ -1190,7 +1189,7 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCounters: TBCExpandPanel
     Left = 1161
-    Height = 713
+    Height = 523
     Top = 79
     Width = 250
     Align = alRight
@@ -1233,7 +1232,7 @@ object DigIt_Main: TDigIt_Main
     ButtonPosition = akLeft
     ButtonSize = 20
     Button.Left = 0
-    Button.Height = 713
+    Button.Height = 523
     Button.Top = 0
     Button.Width = 20
     Button.Caption = 'Page Counters'
@@ -1281,10 +1280,10 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundY = 1
       TabOrder = 0
       object BCLabel7: TBCLabel
-        Left = 11
-        Height = 23
+        Left = 17
+        Height = 20
         Top = 142
-        Width = 49
+        Width = 43
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -1315,10 +1314,10 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundY = 1
       end
       object BCLabel12: TBCLabel
-        Left = 8
-        Height = 23
+        Left = 14
+        Height = 20
         Top = 2
-        Width = 53
+        Width = 47
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -1359,10 +1358,10 @@ object DigIt_Main: TDigIt_Main
         OnEditingDone = edCounterNameEditingDone
       end
       object BCLabel13: TBCLabel
-        Left = 4
-        Height = 23
+        Left = 10
+        Height = 20
         Top = 37
-        Width = 57
+        Width = 51
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -1403,10 +1402,10 @@ object DigIt_Main: TDigIt_Main
         OnEditingDone = edCounterValueStringPreEditingDone
       end
       object BCLabel14: TBCLabel
-        Left = 16
-        Height = 23
+        Left = 21
+        Height = 20
         Top = 72
-        Width = 45
+        Width = 40
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -1448,16 +1447,16 @@ object DigIt_Main: TDigIt_Main
       end
       object Label4: TLabel
         Left = 10
-        Height = 23
+        Height = 20
         Top = 202
-        Width = 72
+        Width = 64
         Caption = 'Example :'
       end
       object BCLabel8: TBCLabel
-        Left = 10
-        Height = 23
+        Left = 15
+        Height = 20
         Top = 107
-        Width = 51
+        Width = 46
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -1489,14 +1488,14 @@ object DigIt_Main: TDigIt_Main
       end
       object lbCounterExample: TLabel
         Left = 10
-        Height = 23
+        Height = 20
         Top = 226
-        Width = 18
+        Width = 16
         Caption = '00'
       end
       object edCounterValueStringDigits: TSpinEdit
         Left = 69
-        Height = 30
+        Height = 25
         Top = 105
         Width = 129
         Font.Color = clWindowText
@@ -1510,7 +1509,7 @@ object DigIt_Main: TDigIt_Main
       end
       object edCounterValue: TSpinEdit
         Left = 69
-        Height = 30
+        Height = 25
         Top = 140
         Width = 129
         Font.Color = clWindowText
@@ -1522,9 +1521,9 @@ object DigIt_Main: TDigIt_Main
       end
       object lbPrevious: TLabel
         Left = 10
-        Height = 23
+        Height = 20
         Top = 176
-        Width = 118
+        Width = 102
         Caption = 'Value Previous: '
       end
     end
@@ -1567,11 +1566,11 @@ object DigIt_Main: TDigIt_Main
       TabOrder = 1
       object cbCounterList: TComboBox
         Left = 0
-        Height = 32
+        Height = 28
         Top = 10
         Width = 150
         AutoSize = False
-        ItemHeight = 0
+        ItemHeight = 20
         Style = csDropDownList
         TabOrder = 0
         OnChange = cbCounterListChange
@@ -1633,7 +1632,7 @@ object DigIt_Main: TDigIt_Main
       Transparent = True
       Wrapable = False
       object tbTake: TToolButton
-        Left = 471
+        Left = 434
         Top = 0
         Action = actTake
         DropdownMenu = menuTake
@@ -1663,26 +1662,26 @@ object DigIt_Main: TDigIt_Main
         Style = tbsButtonDrop
       end
       object tbPreview: TToolButton
-        Left = 404
+        Left = 372
         Top = 0
         Action = actPreview
       end
       object tbSepTake: TToolButton
-        Left = 291
+        Left = 267
         Height = 62
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
       end
       object tbTimerTake: TToolButton
-        Left = 613
+        Left = 574
         Top = 0
         Action = actTimerTake
         DropdownMenu = menuTimerTake
         Style = tbsDropDown
       end
       object tbDestination: TToolButton
-        Left = 170
+        Left = 160
         Top = 0
         Caption = 'Destination...'
         DropdownMenu = menuDestinations
@@ -1690,7 +1689,7 @@ object DigIt_Main: TDigIt_Main
         Style = tbsButtonDrop
       end
       object tbCropMode: TToolButton
-        Left = 299
+        Left = 275
         Top = 0
         Caption = 'Crop Mode'
         DropdownMenu = menuCropMode
@@ -1698,7 +1697,7 @@ object DigIt_Main: TDigIt_Main
         Style = tbsButtonDrop
       end
       object tbTakeAgain: TToolButton
-        Left = 548
+        Left = 511
         Top = 0
         Action = actTakeRe
       end
@@ -1728,19 +1727,19 @@ object DigIt_Main: TDigIt_Main
         Style = tbsSeparator
       end
       object tbCropPrev: TToolButton
-        Left = 168
+        Left = 161
         Top = 0
         Action = actCropGoBack
         AutoSize = True
       end
       object tbCropAll: TToolButton
-        Left = 230
+        Left = 223
         Top = 0
         Action = actCropAll
         AutoSize = True
       end
       object tbCropSummary: TToolButton
-        Left = 297
+        Left = 286
         Top = 0
         AutoSize = True
         Visible = False
@@ -1752,20 +1751,20 @@ object DigIt_Main: TDigIt_Main
         AutoSize = True
       end
       object tbSepClear: TToolButton
-        Left = 359
+        Left = 348
         Height = 62
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator
       end
       object tbClearQueue: TToolButton
-        Left = 367
+        Left = 356
         Top = 0
         Action = actClearQueue
         AutoSize = True
       end
       object ToolButton1: TToolButton
-        Left = 106
+        Left = 99
         Top = 0
         Action = actCropGoNext
       end

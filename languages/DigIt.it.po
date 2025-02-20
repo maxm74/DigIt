@@ -112,6 +112,10 @@ msgstr "Non ci sono più file da elaborare, devo cancellare la Coda di Lavoro?"
 msgid "Not yet implemented"
 msgstr "Non ancora implementato"
 
+#: digit_form_main.rsopensavedpdf
+msgid "Conversion to PDF completed, do i Open it?"
+msgstr ""
+
 #: digit_form_main.rsprocessed
 #, object-pascal-format
 msgid "Processed %d / %s"

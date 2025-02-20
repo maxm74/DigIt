@@ -14,11 +14,12 @@ unit DigIt_Form_Main;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs, ExtCtrls, Menus, ComCtrls,
-  ActnList, Spin, ShellCtrls, EditBtn,
-  Digit_Bridge_Intf, Digit_Bridge_Impl,
-  FPImage, BGRAImageManipulation, BGRABitmap, BGRABitmapTypes, BGRASpeedButton, BCPanel, BCLabel, BCListBox,
-  BGRAImageList, BCExpandPanels, Laz2_XMLCfg, SpinEx, BGRAPapers, DigIt_Types, DigIt_Utils,  DigIt_Counters, LCLType;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs,
+  ExtCtrls, Menus, ComCtrls, ActnList, Spin, ShellCtrls, EditBtn, SpinEx,
+  LCLVersion, LCLType, Laz2_XMLCfg, FPImage,
+  BGRABitmap, BGRABitmapTypes, BGRAPapers,
+  BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList, BCExpandPanels,
+  DigIt_Types, DigIt_Utils, DigIt_Counters, Digit_Bridge_Intf, Digit_Bridge_Impl;
 
 resourcestring
   rsContinueWork = 'Continue from last Work Session?';
@@ -35,6 +36,7 @@ resourcestring
   rsNotImpl = 'Not yet implemented';
   rsSaveProject = 'Save Current Project?';
   rsConvertPDF = 'Converting Images to PDF...';
+  rsOpenSavedPDF = 'Conversion to PDF completed, do i Open it?';
   rsClearCrops = 'Clear Crop Areas ?';
   rsCropFull = 'Full Area';
   rsCropCust = 'Custom';
@@ -552,10 +554,6 @@ begin
 
   CropMode:= diCropNull; //setCropMode works only if there are changes
 
-  {$ifdef LINUX}
-    lvCaptured.ScrollBars:=ssAutoBoth;  { #todo 10 -oMaxM : Fix Gtk2 vsIcon Style :-( }
-  {$endif}
-
   {$ifopt D+}
     menuDebug.Visible:= True;
   {$endif}
@@ -579,6 +577,7 @@ begin
          {$endif} *)
        end
   else begin
+         XML_ClearWork;
          Default_Work;
          UI_MenuItemsChecks(-1, -1);
        end;
@@ -595,9 +594,18 @@ var
 
 begin
   closing :=True;
-  dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
-  if (dlgRes=mrYes) then XML_SaveWork(XMLAllSections);
-  CanClose:= not(dlgRes = mrCancel);
+
+  if FileExists(Path_Config+Config_XMLWork) then
+  begin
+    dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+
+    Case dlgRes of
+    mrYes: XML_SaveWork(XMLAllSections);
+    mrNo: XML_ClearWork;
+    end;
+
+    CanClose:= not(dlgRes = mrCancel);
+  end;
 end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
@@ -1520,6 +1528,8 @@ begin
          Bitmap.SaveToFile(savedFile);
        end;
 
+  captItem:= nil;
+
   if (AUserData=0)
   then begin
          //Crop, add file to Captured List and in Thumbnails
@@ -1554,7 +1564,7 @@ begin
        end;
 
   //Go to Item in Captured List
-  captItem.MakeVisible(False);
+  if (captItem <> nil) then captItem.MakeVisible(False);
 end;
 
 procedure TDigIt_Main.UpdateBoxList;
@@ -1626,6 +1636,8 @@ begin
      if (BitmapR <> Nil)
      then imgManipulation.Bitmap := BitmapR
      else imgManipulation.Bitmap := Bitmap;
+
+     imgManipulation.Bitmap.InvalidateBitmap;
 
      LoadedFile:= AImageFile;
 
@@ -1867,7 +1879,6 @@ var
    curItemPath: String;
    curItem: TListItem;
    imgListCountChanged: Boolean;
-   imglistStream: TFileStream;
 
 begin
   try
@@ -1882,15 +1893,12 @@ begin
 
      if FileExists(Path_Config+Config_CapturedThumbs)
      then try
-             imglistStream:= TFileStream.Create(Path_Config+Config_CapturedThumbs, fmOpenRead);
              imgListThumb.Clear;
-             imgListThumb.ReadData(imglistStream);
+             imgListThumb.LoadFromFile(Path_Config+Config_CapturedThumbs);
              imgListCountChanged:= ((imgListThumb.Count-1) <> newCount); //0 is reserved for No File
-             imglistStream.Free;
 
           except
             imgListCountChanged:= True;
-            imglistStream.Free;
           end
      else imgListCountChanged:= True;
 
@@ -1924,7 +1932,12 @@ begin
          curItem.ImageIndex:= CapturedFiles[i].iIndex;
      end;
 
-     if (newSelected > -1) and (newSelected < newCount) then lvCaptured.Selected:= lvCaptured.Items[newSelected];
+     if (newSelected > -1) and (newSelected < newCount)
+     then begin
+            lvCaptured.Selected:= lvCaptured.Items[newSelected];
+            lvCaptured.Selected.MakeVisible(False);
+          end
+     else if (lvCaptured.Items.Count > 0) then lvCaptured.Items[lvCaptured.Items.Count-1].MakeVisible(False);
 
      lvCaptured.EndUpdate;
   finally
@@ -1935,7 +1948,6 @@ procedure TDigIt_Main.XML_SaveCapturedFiles;
 var
    i: Integer;
    curItemPath: String;
-   imglistStream: TFileStream;
 
 begin
   try
@@ -1943,19 +1955,16 @@ begin
 
      if imgListThumb_Changed then
      try
-       imglistStream:= TFileStream.Create(Path_Config+Config_CapturedThumbs, fmCreate);
-       imgListThumb.WriteData(imglistStream);
-       imglistStream.Free;
+       imgListThumb.SaveToFile(Path_Config+Config_CapturedThumbs);
        imgListThumb_Changed:= False;
 
      except
-       imglistStream.Free;
      end;
 
      XMLWork.SetValue(XMLWork_Captured+'Count', lvCaptured.Items.Count);
 //     XMLWork.SetValue(XMLWork_Captured+'Item'+IntToStr(AItem.Index)+'/fName', AItem.FileName);
 
-     //Save SourceFiles array
+     //Save CapturedFiles array
      XMLWork.DeletePath(XMLWork_Captured);
      XMLWork.SetValue(XMLWork_Captured+'Count', Length(CapturedFiles));
      XMLWork.SetValue(XMLWork_Captured+'iCapturedFiles', iCapturedFiles);
@@ -2372,11 +2381,17 @@ Var
   IDX,
   i, W, H: Integer;
   cStr,
-  curFileName: String;
+  curFileName,
+  pdfFileName: String;
+  saved: Boolean;
 
 begin
   if SavePDF.Execute then
+  begin
   try
+     pdfFileName:= SavePDF.FileName;
+     saved:= False;
+
      with DigIt_Progress do
      begin
        labTotal.Caption:= '';
@@ -2438,14 +2453,20 @@ begin
        Application.ProcessMessages;
      end;
 
-     PDF_File:= TFileStream.Create(SavePDF.FileName, fmCreate);
+     PDF_File:= TFileStream.Create(pdfFileName, fmCreate);
      PDF.SaveToStream(PDF_File);
+     saved:= True;
 
   finally
      DigIt_Progress.Hide;
 
      PDF.Free;
      PDF_File.Free;
+  end;
+
+  if saved and FileExists(pdfFileName)
+  then if (MessageDlg('DigIt', rsOpenSavedPDF, mtConfirmation, mbYesNo, 0) = mrYes)
+       then OpenDocument(pdfFileName);
   end;
 end;
 

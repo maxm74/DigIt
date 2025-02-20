@@ -1,22 +1,20 @@
 Bugs:
   Area Intera
-      Icone su Captured non corrette
-      Take seguito da un altro Take non c'è Progress Current
       cambio Valore uno in meno non sostituisce le icone su Captured
    
   
 Main:
-  Continua dall'ultima sessione, Salvare Sessione = NO -> Cancellare xml e thumbs
-  Aggiungere Pulsanti Delete All e Delete Selected in Captured
+  Aggiungere Pulsanti Delete All e Delete Selected in Captured (elimina anche il file)
 
-  Lasciare una sola ComboBox dei contatori (legata al Crop Selezionato)
+  Lasciare una sola ComboBox dei contatori (legata al Crop Selezionato) ?
+
   CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
+
   Salvare la sessione più spesso
   (risolto, testare di più) Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
-  Take attivo con nessuna Crop Area?
+
   riprendi sessione : barra di captured alla fine
   
-  Pulsante elimina in barra captured (elimina anche il file)
   Take/Preview con Countdown
   Take automatico, Giorni della Settimana con Checkbox e Orari (eventuali notifiche via email,etc)
  
@@ -32,12 +30,8 @@ Main:
 	                      Foto-01.jpg , etc...
 
 Takers:
-WIA / Twain?
-  il metodo Take potrebbe catturare n pagine (se l'origine è il feeder ad esempio), 
-    se n > 1 i prossimi Take non catturano veramente dallo scanner ma ritornano l'[iesimo] file temporaneo,
-    incrementa un contatore interno (iPage) quando è maggiore di n cattura veramente dallo scanner e il ciclo ricomincia. 
+WIA:
 
 Twain:
-  (risolto, testare di più) Avvia con scanner spento, fai Retry..il primo Take è ok, il secondo Take usa "TWAIN2 FreeImage Software Scanner" ??
 
 

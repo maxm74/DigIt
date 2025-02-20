@@ -99,6 +99,10 @@ msgstr ""
 msgid "Not yet implemented"
 msgstr ""
 
+#: digit_form_main.rsopensavedpdf
+msgid "Conversion to PDF completed, do i Open it?"
+msgstr ""
+
 #: digit_form_main.rsprocessed
 #, object-pascal-format
 msgid "Processed %d / %s"

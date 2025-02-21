@@ -2,6 +2,8 @@ DigIt CHANGE LOG
 ======================
 
 2025/02/
+        21 Added Captured Toolbar Actions Enabled; 
+           Added Captured Toolbar Delete/DeleteAll; 
         20 UI Adjustments; Load/SaveWork Dialog=mrNo delete the xml and thumbs file
         07 Added Linux Project (Gtk2);
 	   GUI Adjustments for Gtk2 support;

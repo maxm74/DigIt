@@ -77,6 +77,14 @@ msgstr ""
 msgid "%d files to do"
 msgstr ""
 
+#: digit_form_main.rsdeleteall
+msgid "Delete All Captured Pages?"
+msgstr ""
+
+#: digit_form_main.rsdeleteallfiles
+msgid "Do I also Delete Files from the disk?"
+msgstr ""
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr ""
@@ -187,6 +195,24 @@ msgstr ""
 msgid "   Vertical"
 msgstr ""
 
+#: tdigit_main.actcaptureddelete.caption
+msgid "Delete Selected Page"
+msgstr ""
+
+#: tdigit_main.actcaptureddeleteall.caption
+msgid "Delete All Pages"
+msgstr ""
+
+#: tdigit_main.actcapturedrotateleft.caption
+msgctxt "tdigit_main.actcapturedrotateleft.caption"
+msgid "Rotate Left"
+msgstr ""
+
+#: tdigit_main.actcapturedrotateright.caption
+msgctxt "tdigit_main.actcapturedrotateright.caption"
+msgid "Rotate Right"
+msgstr ""
+
 #: tdigit_main.actclearqueue.caption
 msgid "Clear Work Queue"
 msgstr ""
@@ -233,16 +259,6 @@ msgstr ""
 
 #: tdigit_main.actprojectsaveas.caption
 msgid "Save Project As ..."
-msgstr ""
-
-#: tdigit_main.actrotateleft.caption
-msgctxt "tdigit_main.actrotateleft.caption"
-msgid "Rotate Left"
-msgstr ""
-
-#: tdigit_main.actrotateright.caption
-msgctxt "tdigit_main.actrotateright.caption"
-msgid "Rotate Right"
 msgstr ""
 
 #: tdigit_main.acttake.caption
@@ -619,6 +635,14 @@ msgstr ""
 #: tdigit_main.tbsource.caption
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
+msgstr ""
+
+#: tdigit_main.toolbutton2.caption
+msgid "ToolButton2"
+msgstr ""
+
+#: tdigit_main.toolbutton3.caption
+msgid "ToolButton3"
 msgstr ""
 
 #: tdigit_progress.capcurrent.caption

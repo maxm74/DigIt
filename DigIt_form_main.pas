@@ -42,6 +42,8 @@ resourcestring
   rsCropCust = 'Custom';
   rsCropToDo = '%d files to do';
   rsCounterPrev = 'Value Previous: %d';
+  rsDeleteAll = 'Delete All Captured Pages?';
+  rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
 type
   TSourceFile = packed record
@@ -65,13 +67,15 @@ type
     actCrop: TAction;
     actClearQueue: TAction;
     actCropGoNext: TAction;
+    actCapturedDeleteAll: TAction;
+    actCapturedDelete: TAction;
     actTakeBuildDuplex: TAction;
     actTakeRe: TAction;
     actTimerTake: TAction;
     actProjectSaveAs: TAction;
     actPreview: TAction;
-    actRotateRight: TAction;
-    actRotateLeft: TAction;
+    actCapturedRotateRight: TAction;
+    actCapturedRotateLeft: TAction;
     ActionListC: TActionList;
     actOptions: TAction;
     actProjectOpen: TAction;
@@ -219,14 +223,20 @@ type
     tbSepClear: TToolButton;
     tbClearQueue: TToolButton;
     ToolButton1: TToolButton;
+    ToolButton2: TToolButton;
+    ToolButton3: TToolButton;
+    tbCapturedDelete: TToolButton;
+    tbCapturedDeleteAll: TToolButton;
 
+    procedure actCapturedDeleteAllExecute(Sender: TObject);
+    procedure actCapturedDeleteExecute(Sender: TObject);
     procedure actOptionsExecute(Sender: TObject);
     procedure actProjectNewExecute(Sender: TObject);
     procedure actProjectOpenExecute(Sender: TObject);
     procedure actProjectSaveAsExecute(Sender: TObject);
     procedure actProjectSaveExecute(Sender: TObject);
-    procedure actRotateLeftExecute(Sender: TObject);
-    procedure actRotateRightExecute(Sender: TObject);
+    procedure actCapturedRotateLeftExecute(Sender: TObject);
+    procedure actCapturedRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
     procedure actTakeReExecute(Sender: TObject);
     procedure actTakeExecute(Sender: TObject);
@@ -363,11 +373,11 @@ type
     procedure XML_SaveWork(ASection: TDigItXMLSections);
     procedure XML_ClearWork;
     procedure XML_LoadCapturedFiles;
-    procedure XML_SaveCapturedFiles;
+    procedure XML_SaveCapturedFiles(AFlush: Boolean);
     procedure XML_LoadProject(AFileName:String);
     procedure XML_SaveProject(AFileName:String);
     procedure XML_LoadPageSettings;
-    procedure XML_SavePageSettings;
+    procedure XML_SavePageSettings(AFlush: Boolean);
 
     procedure Default_Work;
     function Source_Select(newSourceIndex: Integer): Boolean;
@@ -1389,6 +1399,83 @@ begin
   //
 end;
 
+procedure TDigIt_Main.actCapturedDeleteExecute(Sender: TObject);
+var
+   captItem: TListItem;
+   curCaptured: TCapturedFile;
+   iCur, iSelected: Integer;
+
+begin
+  (*   Rivedere il ciclo che non funziona
+  captItem:= lvCaptured.Selected;
+
+  { #todo -oMaxM : this works ONLY in FullArea Mode }
+  if (captItem <> nil) then
+  try
+     iSelected:= captItem.Index;
+
+     //Delete File and Thumb
+     DeleteFile(CapturedFiles[iSelected].fName);
+     imgListThumb.Delete(CapturedFiles[iSelected].iIndex);
+     imgListThumb_Changed:= True;
+
+     if (iSelected < Length(CapturedFiles)-1) then
+     begin
+       curCaptured:= CapturedFiles[iSelected];
+       ....
+       for iCur:=iSelected+1 to Length(CapturedFiles)-1 do
+       begin
+         RenameFile(CapturedFiles[iCur].fName, curCaptured.fName);
+
+         CapturedFiles[iCur].fName:= curCaptured.fName;
+         CapturedFiles[iCur].iIndex:= curCaptured.iIndex;
+
+         if (iCur+1 < Length(CapturedFiles)-1) then curCaptured:= CapturedFiles[iCur+1];
+       end;
+     end;
+
+     Delete(CapturedFiles, iSelected, 1);
+     lvCaptured.Items.Delete(iSelected);
+
+  finally
+  end;
+  *)
+end;
+
+procedure TDigIt_Main.actCapturedDeleteAllExecute(Sender: TObject);
+var
+   captItem: TListItem;
+   curFileName: String;
+   i: Integer;
+   nofileBMP: TBitmap;
+
+begin
+  if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0)=mrYes) then
+  try
+     nofileBMP:=TBitmap.Create;
+
+     //Delete all File in FileSystem ?
+     if (MessageDlg('DigIt', rsDeleteAllFiles, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+     then for i:=0 to Length(CapturedFiles)-1 do DeleteFile(CapturedFiles[i].fName);
+
+     //Clear Array and ListView
+     iCapturedFiles:= -1;
+     CapturedFiles:= nil;
+     lvCaptured.Clear;
+
+     //Get the Fixed Thumbnail NoFile and re-add it at position 0
+     imgListThumb.GetBitmap(0, nofileBMP);
+     imgListThumb.Clear;
+     i:= imgListThumb.Add(noFileBMP, nil);
+     imgListThumb_Changed:= True;
+
+     XML_SaveCapturedFiles(True);
+
+  finally
+    noFileBMP.Free;
+  end;
+end;
+
 procedure TDigIt_Main.actProjectNewExecute(Sender: TObject);
 begin
   try
@@ -1435,7 +1522,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actRotateLeftExecute(Sender: TObject);
+procedure TDigIt_Main.actCapturedRotateLeftExecute(Sender: TObject);
 var
    captItem: TListItem;
    sourceBitmap,
@@ -1463,7 +1550,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actRotateRightExecute(Sender: TObject);
+procedure TDigIt_Main.actCapturedRotateRightExecute(Sender: TObject);
 var
    captItem: TListItem;
    sourceBitmap,
@@ -1804,7 +1891,7 @@ begin
 
      XMLWork.SetValue('CropMode', Integer(CropMode));
 
-     XML_SavePageSettings;
+     XML_SavePageSettings(False);
 
      XMLWork.SetValue('LoadedFile', LoadedFile);
 
@@ -1846,7 +1933,7 @@ begin
        XMLWork.SetValue('Destination/Params/Path', SavePath);
 //     end;
 
-     XML_SaveCapturedFiles;
+     XML_SaveCapturedFiles(False);
 
      XMLWork.Flush;
      XMLWork.Free; XMLWork:= Nil;
@@ -1944,9 +2031,10 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveCapturedFiles;
+procedure TDigIt_Main.XML_SaveCapturedFiles(AFlush: Boolean);
 var
-   i: Integer;
+   i,
+   lenCapturedFiles: Integer;
    curItemPath: String;
 
 begin
@@ -1961,25 +2049,29 @@ begin
      except
      end;
 
-     XMLWork.SetValue(XMLWork_Captured+'Count', lvCaptured.Items.Count);
-//     XMLWork.SetValue(XMLWork_Captured+'Item'+IntToStr(AItem.Index)+'/fName', AItem.FileName);
-
      //Save CapturedFiles array
      XMLWork.DeletePath(XMLWork_Captured);
-     XMLWork.SetValue(XMLWork_Captured+'Count', Length(CapturedFiles));
-     XMLWork.SetValue(XMLWork_Captured+'iCapturedFiles', iCapturedFiles);
+     lenCapturedFiles:= Length(CapturedFiles);
 
-     if lvCaptured.Selected=nil
-     then XMLWork.DeleteValue(XMLWork_Captured+'Selected')
-     else XMLWork.SetValue(XMLWork_Captured+'Selected', lvCaptured.Selected.Index);
-
-     for i:=0 to Length(CapturedFiles)-1 do
+     if (lenCapturedFiles > 0) then
      begin
-       curItemPath :=XMLWork_Captured+'Item' + IntToStr(i)+'/';
-       XMLWork.SetValue(curItemPath+'fAge', CapturedFiles[i].fAge);
-       XMLWork.SetValue(curItemPath+'fName', CapturedFiles[i].fName);
-       XMLWork.SetValue(curItemPath+'iIndex', CapturedFiles[i].iIndex);
+       XMLWork.SetValue(XMLWork_Captured+'Count', Length(CapturedFiles));
+       XMLWork.SetValue(XMLWork_Captured+'iCapturedFiles', iCapturedFiles);
+
+       if lvCaptured.Selected=nil
+       then XMLWork.DeleteValue(XMLWork_Captured+'Selected')
+       else XMLWork.SetValue(XMLWork_Captured+'Selected', lvCaptured.Selected.Index);
+
+       for i:=0 to Length(CapturedFiles)-1 do
+       begin
+         curItemPath :=XMLWork_Captured+'Item' + IntToStr(i)+'/';
+         XMLWork.SetValue(curItemPath+'fAge', CapturedFiles[i].fAge);
+         XMLWork.SetValue(curItemPath+'fName', CapturedFiles[i].fName);
+         XMLWork.SetValue(curItemPath+'iIndex', CapturedFiles[i].iIndex);
+       end;
      end;
+
+     if AFlush then XMLWork.Flush;
 
   finally
   end;
@@ -2048,7 +2140,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SavePageSettings;
+procedure TDigIt_Main.XML_SavePageSettings(AFlush: Boolean);
 begin
   try
      if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
@@ -2069,6 +2161,8 @@ begin
      if btPFlipH.Down
      then XMLWork.SetValue(XMLWork_PageSettings+'Flip', 1)
      else XMLWork.SetValue(XMLWork_PageSettings+'Flip', -1);
+
+     if AFlush then XMLWork.Flush;
 
   finally
   end;
@@ -2735,13 +2829,15 @@ end;
 procedure TDigIt_Main.UI_ToolBar;
 var
    bCommonCond: Boolean;
-   cropSumStr: String;
    lenSources,
+   lenCaptured,
    remSources: Integer;
 
 begin
   bCommonCond:= (rSource<>nil) and (rSource^.Inst <> nil);
   actPreview.Enabled:= bCommonCond;
+
+  lenCaptured:= Length(CapturedFiles);
 
   if (CropMode = diCropCustom)
   then begin
@@ -2774,12 +2870,23 @@ begin
            tbCropSummary.Caption:= Format(rsCropToDo, [remSources]);
          end;
 
+         actCapturedDelete.Enabled:= False; { #todo 2 -oMaxM : evaluate the complexity in case of multiple crop areas}
        end
-  else actTake.Enabled:= bCommonCond and DirectoryExists(SavePath);
+  else begin
+         actTake.Enabled:= bCommonCond and DirectoryExists(SavePath);
+
+         actCapturedDelete.Enabled:= (lenCaptured > 0) and (lvCaptured.Selected <> nil);
+       end;
 
   actTimerTake.Enabled:= actTake.Enabled;
   actTakeBuildDuplex.Enabled:= actTake.Enabled;
   actTakeRe.Enabled:= actTake.Enabled and (lastLenTaked > 0);
+
+  //Captured Toolbar
+  actCapturedDeleteAll.Enabled:= (lenCaptured > 0);
+  actCapturedRotateLeft.Enabled:= (lenCaptured > 0) and (lvCaptured.Selected <> nil);
+  actCapturedRotateRight.Enabled:= actCapturedRotateLeft.Enabled;
+  tbCapturedPDF.Enabled:= (lenCaptured > 0);
 end;
 
 procedure TDigIt_Main.UI_ToolBarMods;
@@ -2790,23 +2897,6 @@ var
    st:String;
 
 begin
-  (*
-  for i:=0 to tbMain.ButtonCount-1 do
-  begin
-    curBtn:= tbMain.Buttons[i];
-    if (curBtn.Action <> nil) and (TAction(curBtn.Action).ShortCut <> 0)
-    then curBtn.Caption:= curBtn.Caption+' ('+ShortCutToText(TAction(curBtn.Action).ShortCut)+')';
-  end;
-  tbMain.AdjustSize;
-
-  for i:=0 to tbCrop.ButtonCount-1 do
-  begin
-    curBtn:= tbCrop.Buttons[i];
-    if (curBtn.Action <> nil) and (TAction(curBtn.Action).ShortCut <> 0)
-    then curBtn.Caption:= curBtn.Caption+' ('+ShortCutToText(TAction(curBtn.Action).ShortCut)+')';
-  end;
-  tbCrop.AdjustSize;
-  *)
   for i:=0 to ActionListMain.ActionCount-1 do
   begin
     curAct:= TAction(ActionListMain.Actions[i]);

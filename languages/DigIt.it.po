@@ -200,6 +200,26 @@ msgstr "    Orizzontale"
 msgid "   Vertical"
 msgstr "   Verticale"
 
+#: tdigit_main.actcaptureddelete.caption
+msgid "Delete Selected Page"
+msgstr ""
+
+#: tdigit_main.actcaptureddeleteall.caption
+msgid "Delete All Pages"
+msgstr ""
+
+#: tdigit_main.actcapturedrotateleft.caption
+#, fuzzy
+msgctxt "tdigit_main.actcapturedrotateleft.caption"
+msgid "Rotate Left"
+msgstr "Ruota a Sinistra"
+
+#: tdigit_main.actcapturedrotateright.caption
+#, fuzzy
+msgctxt "tdigit_main.actcapturedrotateright.caption"
+msgid "Rotate Right"
+msgstr "Ruota a Destra"
+
 #: tdigit_main.actclearqueue.caption
 msgid "Clear Work Queue"
 msgstr "Cancella Coda Lavoro"
@@ -252,16 +272,6 @@ msgstr "Salva Progetto"
 #: tdigit_main.actprojectsaveas.caption
 msgid "Save Project As ..."
 msgstr "Salva Progetto Come ..."
-
-#: tdigit_main.actrotateleft.caption
-msgctxt "tdigit_main.actrotateleft.caption"
-msgid "Rotate Left"
-msgstr "Ruota a Sinistra"
-
-#: tdigit_main.actrotateright.caption
-msgctxt "tdigit_main.actrotateright.caption"
-msgid "Rotate Right"
-msgstr "Ruota a Destra"
 
 #: tdigit_main.acttake.caption
 msgid "Take"
@@ -638,6 +648,14 @@ msgstr ""
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
+
+#: tdigit_main.toolbutton2.caption
+msgid "ToolButton2"
+msgstr ""
+
+#: tdigit_main.toolbutton3.caption
+msgid "ToolButton3"
+msgstr ""
 
 #: tdigit_progress.capcurrent.caption
 msgid "Current"

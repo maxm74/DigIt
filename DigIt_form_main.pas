@@ -42,6 +42,7 @@ resourcestring
   rsCropCust = 'Custom';
   rsCropToDo = '%d files to do';
   rsCounterPrev = 'Value Previous: %d';
+  rsDeleteCaptured = 'Delete Captured Page %s ?';
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
@@ -223,10 +224,10 @@ type
     tbSepClear: TToolButton;
     tbClearQueue: TToolButton;
     ToolButton1: TToolButton;
-    ToolButton2: TToolButton;
-    ToolButton3: TToolButton;
     tbCapturedDelete: TToolButton;
     tbCapturedDeleteAll: TToolButton;
+    tbCaptSep1: TToolButton;
+    tbCaptSep2: TToolButton;
 
     procedure actCapturedDeleteAllExecute(Sender: TObject);
     procedure actCapturedDeleteExecute(Sender: TObject);
@@ -271,6 +272,8 @@ type
     procedure edPage_UnitTypeChange(Sender: TObject);
     procedure itemCropModeClick(Sender: TObject);
     procedure lvCapturedDblClick(Sender: TObject);
+    procedure lvCapturedSelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
     procedure lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure edCounterNameEditingDone(Sender: TObject);
     procedure edCounterValueChange(Sender: TObject);
@@ -300,11 +303,9 @@ type
     procedure DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
-    procedure tbWorkSaveClick(Sender: TObject);
 
-    procedure TestClick(Sender: TObject);
-    procedure TestRClick(Sender: TObject);
     procedure tbCapturedPDFClick(Sender: TObject);
+
   private
     { private declarations }
     lastNewBoxNum: Word;
@@ -317,8 +318,6 @@ type
     imgListThumb_Changed,
     UserCancel: Boolean;
     Counters: TDigIt_CounterList;
-    XMLWork,
-    XMLProject: TXMLConfig;
 
     rSource: PSourceInfo;
     rSourceName: String;
@@ -369,15 +368,30 @@ type
     procedure CounterSelect(AIndex:Integer);
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
 
-    procedure XML_LoadWork(ASection: TDigItXMLSections);
-    procedure XML_SaveWork(ASection: TDigItXMLSections);
+    procedure XML_LoadWork;
+    procedure XML_SaveWork;
     procedure XML_ClearWork;
-    procedure XML_LoadCapturedFiles;
-    procedure XML_SaveCapturedFiles(AFlush: Boolean);
     procedure XML_LoadProject(AFileName:String);
     procedure XML_SaveProject(AFileName:String);
-    procedure XML_LoadPageSettings;
-    procedure XML_SavePageSettings(AFlush: Boolean);
+
+    function XML_LoadSource(aXML: TXMLConfig): Integer;
+    procedure XML_SaveSource(aXML: TXMLConfig);
+    procedure XML_LoadSourceFiles(aXML: TXMLConfig);
+    procedure XML_SaveSourceFiles(aXML: TXMLConfig);
+    function XML_LoadDestination(aXML: TXMLConfig): Integer;
+    procedure XML_SaveDestination(aXML: TXMLConfig);
+    procedure XML_LoadCapturedFiles(aXML: TXMLConfig);
+    procedure XML_SaveCapturedFiles(aXML: TXMLConfig);
+    procedure XML_LoadLoadedImage(aXML: TXMLConfig);
+    procedure XML_SaveLoadedImage(aXML: TXMLConfig);
+    procedure XML_SaveSource_CapturedFiles(aXML: TXMLConfig);
+    procedure XML_SaveSource_CapturedIndexes(aXML: TXMLConfig);
+    procedure XML_LoadCropAreas(aXML: TXMLConfig);
+    procedure XML_SaveCropAreas(aXML: TXMLConfig);
+    procedure XML_LoadPageSettings(aXML: TXMLConfig);
+    procedure XML_SavePageSettings(aXML: TXMLConfig);
+    procedure XML_LoadUserInterface(aXML: TXMLConfig);
+    procedure XML_SaveUserInterface(aXML: TXMLConfig);
 
     procedure Default_Work;
     function Source_Select(newSourceIndex: Integer): Boolean;
@@ -527,9 +541,6 @@ var
    i :Integer;
 
 begin
-  XMLWork:=nil;
-  XMLProject:=nil;
-
   Project_File:='';
   LoadedFile:='';
 
@@ -566,6 +577,7 @@ begin
 
   {$ifopt D+}
     menuDebug.Visible:= True;
+    lbPrevious.Visible:= True;
   {$endif}
 end;
 
@@ -581,7 +593,7 @@ begin
       and (MessageDlg('DigIt', rsContinueWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      {$endif}
   then begin
-         XML_LoadWork(XMLAllSections);
+         XML_LoadWork;
         (* {$ifopt D-}
          actPreview.Execute;
          {$endif} *)
@@ -610,7 +622,7 @@ begin
     dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
 
     Case dlgRes of
-    mrYes: XML_SaveWork(XMLAllSections);
+    mrYes: XML_SaveWork;
     mrNo: XML_ClearWork;
     end;
 
@@ -620,7 +632,6 @@ end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
-  if (XMLProject<>nil) then XMLProject.Free;
   Counters.Free;
   theBridge.Free;
   SourceFiles:= nil;
@@ -656,9 +667,8 @@ begin
       end
       else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
-      UI_ToolBar;
-
   finally
+    UI_ToolBar;
   end;
 end;
 
@@ -728,8 +738,6 @@ begin
                    end;
               SourceFiles:= nil; iSourceFiles:= -1;
               rSource^.Inst.Clear;
-
-              UI_ToolBar;
             end;
             diCropCustom: begin
               //Add files to the queue array
@@ -745,10 +753,8 @@ begin
               if (oldLength = 0) and (Length(SourceFiles) > 0) then
               begin
                 iSourceFiles:= 0;
-                LoadImage(SourceFiles[0].fName, False);
+                LoadImage(SourceFiles[0].fName, True);
               end;
-
-              UI_ToolBar;
 
               (*
               //Crop directly the first File,
@@ -760,16 +766,15 @@ begin
               *)
             end;
           end;
-
-          Application.ProcessMessages;
-          XML_SaveWork([xmlSourceIndexes, xmlSourceFiles]);
         end;
-
-        UI_FillCounter(nil);
       end
       else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
+    XML_SaveSource_CapturedFiles(nil);
+    UI_ToolBar;
+    UI_FillCounter(nil);
+
     DigIt_Progress.Hide;
     FreeAndNil(WizardBuildDuplex);
     UserCancel:= False;
@@ -840,11 +845,10 @@ begin
 
     lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
 
+  finally
+    XML_SaveSource_CapturedFiles(nil);
     UI_FillCounter(nil);
     UI_ToolBar;
-    XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
-
-  finally
   end;
 end;
 
@@ -865,9 +869,10 @@ begin
 
          lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
 
+         //XML_SaveWork([xmlSourceIndexes, xmlCapturedIndexes]);
+         XML_SaveSource_CapturedFiles(nil);
          UI_FillCounter(nil);
          UI_ToolBar;
-         XML_SaveWork([xmlSourceIndexes, xmlCapturedIndexes]);
        end;
      end;
 
@@ -900,9 +905,10 @@ begin
 
          lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
 
+         //XML_SaveWork([xmlSourceIndexes, xmlCapturedIndexes]);
+         XML_SaveSource_CapturedFiles(nil);
          UI_FillCounter(nil);
          UI_ToolBar;
-         XML_SaveWork([xmlSourceIndexes, xmlCapturedIndexes]);
        end;
      end;
 
@@ -959,16 +965,17 @@ begin
 
       lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
 
-      UI_FillCounter(nil);
-      UI_ToolBar;
-      XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
-
       DigIt_Progress.progressTotal.Position:= iSourceFiles+1;
       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [iSourceFiles-1, cStr]);
       Application.ProcessMessages;
     Until Finished or UserCancel;
 
   finally
+    //XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
+    XML_SaveSource_CapturedFiles(nil);
+    UI_FillCounter(nil);
+    UI_ToolBar;
+
     DigIt_Progress.Hide;
     UserCancel:= False;
   end;
@@ -984,8 +991,9 @@ begin
     SourceFiles:= nil;
     rSource^.Inst.Clear;
 
+    //XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes]);
+    XML_SaveSource_CapturedFiles(nil);
     UI_ToolBar;
-    XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes]);
   end;
 end;
 
@@ -1361,6 +1369,12 @@ begin
   if (captItem <> nil) then OpenDocument(CapturedFiles[captItem.Index].fName);
 end;
 
+procedure TDigIt_Main.lvCapturedSelectItem(Sender: TObject; Item: TListItem;
+  Selected: Boolean);
+begin
+  UI_ToolBar;
+end;
+
 procedure TDigIt_Main.lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
 var
    captItem: TListItem;
@@ -1402,16 +1416,18 @@ end;
 procedure TDigIt_Main.actCapturedDeleteExecute(Sender: TObject);
 var
    captItem: TListItem;
-   curCaptured: TCapturedFile;
    iCur, iSelected: Integer;
 
 begin
-  (*   Rivedere il ciclo che non funziona
   captItem:= lvCaptured.Selected;
 
-  { #todo -oMaxM : this works ONLY in FullArea Mode }
-  if (captItem <> nil) then
+  { #todo -oMaxM : this works ONLY in FullArea Mode, in Custom? Delete only the Item?  }
+  if (captItem <> nil) and
+     (MessageDlg('DigIt', Format(rsDeleteCaptured, [captItem.Caption]),
+                 mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
+     lvCaptured.BeginUpdate;
+
      iSelected:= captItem.Index;
 
      //Delete File and Thumb
@@ -1420,26 +1436,31 @@ begin
      imgListThumb_Changed:= True;
 
      if (iSelected < Length(CapturedFiles)-1) then
-     begin
-       curCaptured:= CapturedFiles[iSelected];
-       ....
        for iCur:=iSelected+1 to Length(CapturedFiles)-1 do
        begin
-         RenameFile(CapturedFiles[iCur].fName, curCaptured.fName);
+         RenameFile(CapturedFiles[iCur].fName, CapturedFiles[iCur-1].fName);
 
-         CapturedFiles[iCur].fName:= curCaptured.fName;
-         CapturedFiles[iCur].iIndex:= curCaptured.iIndex;
-
-         if (iCur+1 < Length(CapturedFiles)-1) then curCaptured:= CapturedFiles[iCur+1];
+         CapturedFiles[iCur-1].fAge:= CapturedFiles[iCur].fAge;
        end;
+
+     //Delete Last Item
+     lvCaptured.Items.Delete(Length(CapturedFiles)-1);
+     SetLength(CapturedFiles, Length(CapturedFiles)-1);
+
+     //Select Item
+     if (iSelected < Length(CapturedFiles)-1)
+     then lvCaptured.Selected:= lvCaptured.Items[iSelected]
+     else lvCaptured.Selected:= lvCaptured.Items[Length(CapturedFiles)-1];
+
+     if (Counters[0].Value = Length(CapturedFiles)) then
+     begin
+       Counters[0].Value:= Length(CapturedFiles)-1;
+       UI_FillCounter(nil);
      end;
 
-     Delete(CapturedFiles, iSelected, 1);
-     lvCaptured.Items.Delete(iSelected);
-
   finally
+    lvCaptured.EndUpdate;
   end;
-  *)
 end;
 
 procedure TDigIt_Main.actCapturedDeleteAllExecute(Sender: TObject);
@@ -1450,7 +1471,7 @@ var
    nofileBMP: TBitmap;
 
 begin
-  if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0)=mrYes) then
+  if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
      nofileBMP:=TBitmap.Create;
 
@@ -1463,13 +1484,18 @@ begin
      CapturedFiles:= nil;
      lvCaptured.Clear;
 
+     //Reset Counters
+     Counters.Reset;
+
      //Get the Fixed Thumbnail NoFile and re-add it at position 0
      imgListThumb.GetBitmap(0, nofileBMP);
      imgListThumb.Clear;
      i:= imgListThumb.Add(noFileBMP, nil);
      imgListThumb_Changed:= True;
 
-     XML_SaveCapturedFiles(True);
+     XML_SaveCapturedFiles(nil);
+     UI_ToolBar;
+     UI_FillCounter(nil);
 
   finally
     noFileBMP.Free;
@@ -1541,6 +1567,7 @@ begin
 
      UI_ThumbnailUpdate(captItem.Index, rotatedBitmap);
 
+     //Update the Thumbnail in ListView
      lvCaptured.Selected:= nil;
      lvCaptured.Selected:= captItem;
 
@@ -1569,6 +1596,7 @@ begin
 
      UI_ThumbnailUpdate(captItem.Index, rotatedBitmap);
 
+     //Update the Thumbnail in ListView
      lvCaptured.Selected:= nil;
      lvCaptured.Selected:= captItem;
 
@@ -1632,8 +1660,6 @@ begin
          captItem:= lvCaptured.Items.Add;
          captItem.Caption:= ExtractFileName(savedFile);
          captItem.ImageIndex:= CapturedFiles[iCapturedFiles].iIndex;
-
-         //XML_SaveCapturedFiles; { #note -oMaxM : Maybe done with an Index }
        end
   else if (iCapturedFiles > -1) and (iCapturedFiles < Length(CapturedFiles)) then
        begin
@@ -1646,12 +1672,12 @@ begin
          captItem:= lvCaptured.Items[iCapturedFiles];
          captItem.Caption:= ExtractFileName(savedFile);
          captItem.ImageIndex:= CapturedFiles[iCapturedFiles].iIndex;
-
-         //XML_SaveCapturedFiles; { #note -oMaxM : Maybe done with an Index }
        end;
 
   //Go to Item in Captured List
   if (captItem <> nil) then captItem.MakeVisible(False);
+
+//  XML_SaveCapturedFiles(nil); { #note -oMaxM : Maybe done with an Index }
 end;
 
 procedure TDigIt_Main.UpdateBoxList;
@@ -1728,7 +1754,7 @@ begin
 
      LoadedFile:= AImageFile;
 
-     if saveToXML then XML_SaveWork([xmlSourceIndexes]);
+     if saveToXML then XML_SaveLoadedImage(nil);
 
      Result:= True;
 
@@ -1738,168 +1764,70 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadWork(ASection: TDigItXMLSections);
+procedure TDigIt_Main.XML_LoadWork;
 var
-   newDestinationName,
-   curItemPath: String;
-   i, iCount,
+   newSourceI,
    newDestinationI: Integer;
-   newCropMode: TDigItCropMode;
+   XMLWork: TXMLConfig;
 
 begin
   try
     XML_Loading:= True;
+    XMLWork:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-    newDestinationI:= -1;
-
-    XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
-
-(*    if (xmlUI in ASection) then
-    begin
-     end;
-
-    if (xmlCropMode in ASection) then
-    begin
-     end;
-
-    if (xmlPageSettings in ASection) then
-    begin
-     end;
-
-    if (xmlCropAreas in ASection) then
-    begin
-     end;
-
-    if (xmlCounters in ASection) then
-    begin
-     end;
-
-    if (xmlSource in ASection) then
-    begin
-     end;
-
-    if (xmlSourceIndexes in ASection) then
-    begin
-     end;
-
-    if (xmlSourceFiles in ASection) then
-    begin
-     end;
-
-    if (xmlDestination in ASection) then
-    begin
-     end;
-
-    if (xmlCapturedIndexes in ASection) then
-    begin
-     end;
-
-    if (xmlCapturedFiles in ASection) then
-    begin
-     end;
-*)
-
-    //Load rSource and its Params
-    if theBridge.SourcesImpl.Select(XMLWork.GetValue('Source/Name', '')) then
-    begin
-      rSource:= theBridge.SourcesImpl.Selected;
-      rSourceName:= theBridge.SourcesImpl.SelectedName;
-      rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-      theBridge.SourcesImpl.LoadSelectedParams(Path_Config+Config_XMLWork, 'Source/Params');
-    end;
-
-    //Load SourceFiles
-    SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
-    iCount:= XMLWork.GetValue('SourceFiles/Count', 0);
-    iSourceFiles:= XMLWork.GetValue('SourceFiles/iSourceFiles', -1);
-    lastCropped:= XMLWork.GetValue('SourceFiles/lastCropped', -1);
-    lastLenTaked:= XMLWork.GetValue('SourceFiles/lastLenTaked', 0);
-    SetLength(SourceFiles, iCount);
-    for i:=0 to iCount-1 do
-    begin
-      curItemPath :='SourceFiles/Item' + IntToStr(i)+'/';
-      SourceFiles[i].fCrop:= XMLWork.GetValue(curItemPath+'fCrop', False);
-      SourceFiles[i].fName:= XMLWork.GetValue(curItemPath+'fName', '');
-    end;
-
-    //Load Destination and its Params
-    { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
-(*
-    newDestinationName:= XMLWork.GetValue('Destination/Name', '');
-    if (newDestinationName = '')
-    then begin
-           rDestination:= nil;
-           rDestinationParams:= nil;
-*)
-           rDestinationName:= '';
-           SaveExt:= XMLWork.GetValue('Destination/Params/Format', 'jpg');
-           SavePath:= XMLWork.GetValue('Destination/Params/Path', '');
-           newDestinationI:= -1;
-(*
-         end
-    else begin
-           if theBridge.DestinationsImpl.Select(newDestinationName) then
-           begin
-             rDestination:= theBridge.DestinationsImpl.Selected;
-             rDestinationName:= theBridge.DestinationsImpl.SelectedName;
-             rDestinationParams:= theBridge.DestinationsImpl.SelectedParams;
-             theBridge.DestinationsImpl.LoadSelectedParams(Path_Config+Config_XMLWork, 'Destination/Params');
-             newDestinationI:= theBridge.DestinationsImpl.SelectedIndex;
-           end;
-         end;
-*)
-
-    XML_LoadCapturedFiles;
-
-    XML_LoadPageSettings;
-
+    newSourceI:= XML_LoadSource(XMLWork);
+    XML_LoadSourceFiles(XMLWork);
+    newDestinationI:= XML_LoadDestination(XMLWork);
+    XML_LoadCapturedFiles(XMLWork);
+    XML_LoadPageSettings(XMLWork);
     LoadImage(XMLWork.GetValue('LoadedFile', ''), False);
-
     Counters.Load(XMLWork, True);
+    XML_LoadCropAreas(XMLWork);
+    XML_LoadUserInterface(XMLWork);
 
-    newCropMode:= TDigItCropMode(XMLWork.GetValue('CropMode', 0));
-    setCropMode(newCropMode);
-    if (newCropMode = diCropCustom) then
-    begin
-      UI_FillCounters;
-      imgManipulation.CropAreas.Load(XMLWork, 'CropAreas');
-      cbCounterList.ItemIndex :=XMLWork.GetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
-    end;
-
-    UI_MenuItemsChecks(theBridge.SourcesImpl.SelectedIndex, newDestinationI);
-
-    //User Interface
-    rollCrops.Collapsed:=XMLWork.GetValue('UI/rollCrops_Collapsed', False);
-    rollPages.Collapsed:=XMLWork.GetValue('UI/rollPages_Collapsed', True);
-    rollCounters.Collapsed:=XMLWork.GetValue('UI/rollCounters_Collapsed', True);
+    UI_MenuItemsChecks(newSourceI, newDestinationI);
 
   finally
     XML_Loading:= False;
-    XMLWork.Free; XMLWork:= Nil;
+    XMLWork.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveWork(ASection: TDigItXMLSections);
+procedure TDigIt_Main.XML_SaveWork;
 var
-   i: Integer;
-   curItemPath: String;
+   XMLWork: TXMLConfig;
 
 begin
   if (rSource <> Nil) and (rSource^.Inst <> Nil) then
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+     XMLWork:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
+     XML_SaveSource(XMLWork);
+     XML_SaveSourceFiles(XMLWork);
+     XML_SaveDestination(XMLWork);
+     XML_SaveCapturedFiles(XMLWork);
+     XML_SavePageSettings(XMLWork);
+     XML_SaveLoadedImage(XMLWork);
+
+     Counters.Save(XMLWork, True);
+     if (cbCounterList.ItemIndex > -1) then XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
+
+     XML_SaveCropAreas(XMLWork);
+     XML_SaveUserInterface(XMLWork);
+
+     (* Original Sequence
      XMLWork.SetValue('CropMode', Integer(CropMode));
+     if (CropMode = diCropCustom)
+     then imgManipulation.CropAreas.Save(XMLWork, 'CropAreas')
+     else XMLWork.DeletePath('CropAreas');
 
-     XML_SavePageSettings(False);
+     XML_SavePageSettings(XMLWork);
 
      XMLWork.SetValue('LoadedFile', LoadedFile);
 
      Counters.Save(XMLWork, True);
-     if (cbCounterList.ItemIndex > -1)
-     then XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
+     if (cbCounterList.ItemIndex > -1) then XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
 
-     if (CropMode = diCropCustom) then imgManipulation.CropAreas.Save(XMLWork, 'CropAreas');
 
      //User Interface
      XMLWork.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
@@ -1911,14 +1839,14 @@ begin
      XMLWork.DeletePath('Source/Params/');
 
      //Save SourceFiles array
-     XMLWork.DeletePath('SourceFiles/');
-     XMLWork.SetValue('SourceFiles/Count', Length(SourceFiles));
-     XMLWork.SetValue('SourceFiles/iSourceFiles', iSourceFiles);
-     XMLWork.SetValue('SourceFiles/lastCropped', lastCropped);
-     XMLWork.SetValue('SourceFiles/lastLenTaked', lastLenTaked);
+     XMLWork.DeletePath(XML_SourceFiles);
+     XMLWork.SetValue(XML_SourceFiles+'Count', Length(SourceFiles));
+     XMLWork.SetValue(XML_SourceFiles+'iSourceFiles', iSourceFiles);
+     XMLWork.SetValue(XML_SourceFiles+'lastCropped', lastCropped);
+     XMLWork.SetValue(XML_SourceFiles+'lastLenTaked', lastLenTaked);
      for i:=0 to Length(SourceFiles)-1 do
      begin
-       curItemPath :='SourceFiles/Item' + IntToStr(i)+'/';
+       curItemPath :=XML_SourceFiles+'Item' + IntToStr(i)+'/';
        XMLWork.SetValue(curItemPath+'fCrop', SourceFiles[i].fCrop);
        XMLWork.SetValue(curItemPath+'fName', SourceFiles[i].fName);
      end;
@@ -1933,10 +1861,11 @@ begin
        XMLWork.SetValue('Destination/Params/Path', SavePath);
 //     end;
 
-     XML_SaveCapturedFiles(False);
+     XML_SaveCapturedFiles(XMLWork);
+*)
 
      XMLWork.Flush;
-     XMLWork.Free; XMLWork:= Nil;
+     XMLWork.Free;
 
      //FPC Bug?
      //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
@@ -1944,18 +1873,224 @@ begin
 
      if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
 //     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
+
   finally
   end;
 end;
 
 procedure TDigIt_Main.XML_ClearWork;
 begin
-  if (XMLWork <> nil) then FreeAndNil(XMLWork);
   DeleteFile(Path_Config+Config_XMLWork);
   DeleteFile(Path_Config+Config_CapturedThumbs);
 end;
 
-procedure TDigIt_Main.XML_LoadCapturedFiles;
+
+procedure TDigIt_Main.XML_LoadProject(AFileName: String);
+var
+   XMLProject: TXMLConfig;
+
+begin
+  try
+    XMLProject:= TXMLConfig.Create(AFileName);
+
+    Counters.Load(XMLProject, False);
+    imgManipulation.CropAreas.Load(XMLProject, 'CropAreas');
+    UI_FillCounters;
+    cbCounterList.ItemIndex :=XMLProject.GetValue(Counters.Name+'/Selected', -1);
+    UI_FillCounter(Counters_GetCurrent);
+    UI_ToolBar;
+
+  finally
+    XMLProject.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveProject(AFileName: String);
+var
+   XMLProject: TXMLConfig;
+
+begin
+  try
+     XMLProject:= TXMLConfig.Create(AFileName);
+
+     Counters.Save(XMLProject, False);
+     XMLProject.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
+     imgManipulation.CropAreas.Save(XMLProject, 'CropAreas');
+     XMLProject.Flush;
+
+  finally
+    XMLProject.Free;
+  end;
+end;
+
+function TDigIt_Main.XML_LoadSource(aXML: TXMLConfig): Integer;
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //Load rSource and its Params
+     Result:= -1;
+     if theBridge.SourcesImpl.Select(aXML.GetValue('Source/Name', '')) then
+     begin
+       rSource:= theBridge.SourcesImpl.Selected;
+       rSourceName:= theBridge.SourcesImpl.SelectedName;
+       rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+       Result:= theBridge.SourcesImpl.SelectedIndex;
+       theBridge.SourcesImpl.LoadSelectedParams(aXML.Filename, 'Source/Params');
+     end;
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveSource(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //Save rSource and its Params
+     aXML.SetValue('Source/Name', rSourceName);
+     aXML.DeletePath('Source/Params/');
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadSourceFiles(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+   curItemPath: String;
+   i, iCount: Integer;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //Load SourceFiles
+     SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
+     iCount:= aXML.GetValue(XML_SourceFiles+'Count', 0);
+     iSourceFiles:= aXML.GetValue(XML_SourceFiles+'iSourceFiles', -1);
+     lastCropped:= aXML.GetValue(XML_SourceFiles+'lastCropped', -1);
+     lastLenTaked:= aXML.GetValue(XML_SourceFiles+'lastLenTaked', 0);
+     SetLength(SourceFiles, iCount);
+     for i:=0 to iCount-1 do
+     begin
+       curItemPath :=XML_SourceFiles+'Item' + IntToStr(i)+'/';
+       SourceFiles[i].fCrop:= aXML.GetValue(curItemPath+'fCrop', False);
+       SourceFiles[i].fName:= aXML.GetValue(curItemPath+'fName', '');
+     end;
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveSourceFiles(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+   i: Integer;
+   curItemPath: String;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //Save SourceFiles array
+     aXML.DeletePath(XML_SourceFiles);
+     aXML.SetValue(XML_SourceFiles+'Count', Length(SourceFiles));
+     aXML.SetValue(XML_SourceFiles+'iSourceFiles', iSourceFiles);
+     aXML.SetValue(XML_SourceFiles+'lastCropped', lastCropped);
+     aXML.SetValue(XML_SourceFiles+'lastLenTaked', lastLenTaked);
+     for i:=0 to Length(SourceFiles)-1 do
+     begin
+       curItemPath :=XML_SourceFiles+'Item' + IntToStr(i)+'/';
+       aXML.SetValue(curItemPath+'fCrop', SourceFiles[i].fCrop);
+       aXML.SetValue(curItemPath+'fName', SourceFiles[i].fName);
+     end;
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+function TDigIt_Main.XML_LoadDestination(aXML: TXMLConfig): Integer;
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //Load Destination and its Params
+     { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
+ (*
+     newDestinationName:= aXML.GetValue('Destination/Name', '');
+     if (newDestinationName = '')
+     then begin
+            rDestination:= nil;
+            rDestinationParams:= nil;
+ *)
+            rDestinationName:= '';
+            SaveExt:= aXML.GetValue('Destination/Params/Format', 'jpg');
+            SavePath:= aXML.GetValue('Destination/Params/Path', '');
+            Result:= -1;
+ (*
+          end
+     else begin
+            if theBridge.DestinationsImpl.Select(newDestinationName) then
+            begin
+              rDestination:= theBridge.DestinationsImpl.Selected;
+              rDestinationName:= theBridge.DestinationsImpl.SelectedName;
+              rDestinationParams:= theBridge.DestinationsImpl.SelectedParams;
+              Result:= theBridge.DestinationsImpl.SelectedIndex;
+              theBridge.DestinationsImpl.LoadSelectedParams(aXML.Filename, 'Destination/Params');
+            end;
+          end;
+ *)
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveDestination(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //Save rDestination and its Params
+(*     aXML.SetValue('Destination/Name', rDestinationName);
+     if (rDestination = nil) then
+     begin
+*)
+       aXML.DeletePath('Destination/Params/');
+       aXML.SetValue('Destination/Params/Format', SaveExt);
+       aXML.SetValue('Destination/Params/Path', SavePath);
+//     end;
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadCapturedFiles(aXML: TXMLConfig);
 var
    i,
    imgCount,
@@ -1966,14 +2101,16 @@ var
    curItemPath: String;
    curItem: TListItem;
    imgListCountChanged: Boolean;
+   aFree: Boolean;
 
 begin
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-     newCount := XMLWork.GetValue(XMLWork_Captured+'Count', 0);
-     iCapturedFiles:= XMLWork.GetValue(XMLWork_Captured+'iCapturedFiles', -1);
-     newSelected :=XMLWork.GetValue(XMLWork_Captured+'Selected', -1);
+     newCount := aXML.GetValue(XML_CapturedFiles+'Count', 0);
+     iCapturedFiles:= aXML.GetValue(XML_CapturedFiles+'iCapturedFiles', -1);
+     newSelected :=aXML.GetValue(XML_CapturedFiles+'Selected', -1);
 
      lvCaptured.BeginUpdate;
      lvCaptured.Clear;
@@ -1992,10 +2129,10 @@ begin
      SetLength(CapturedFiles, newCount);
      for i:=0 to newCount-1 do
      begin
-         curItemPath :=XMLWork_Captured+'Item' + IntToStr(i)+'/';
-         CapturedFiles[i].fAge:= XMLWork.GetValue(curItemPath+'fAge', 0);
-         CapturedFiles[i].fName:= XMLWork.GetValue(curItemPath+'fName', '');
-         CapturedFiles[i].iIndex:= XMLWork.GetValue(curItemPath+'iIndex', 0);
+         curItemPath :=XML_CapturedFiles+'Item' + IntToStr(i)+'/';
+         CapturedFiles[i].fAge:= aXML.GetValue(curItemPath+'fAge', 0);
+         CapturedFiles[i].fName:= aXML.GetValue(curItemPath+'fName', '');
+         CapturedFiles[i].iIndex:= aXML.GetValue(curItemPath+'iIndex', 0);
 
          cuFileName:= CapturedFiles[i].fName;
          curItem:= lvCaptured.Items.Add;
@@ -2027,19 +2164,23 @@ begin
      else if (lvCaptured.Items.Count > 0) then lvCaptured.Items[lvCaptured.Items.Count-1].MakeVisible(False);
 
      lvCaptured.EndUpdate;
+
   finally
+    if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveCapturedFiles(AFlush: Boolean);
+procedure TDigIt_Main.XML_SaveCapturedFiles(aXML: TXMLConfig);
 var
    i,
    lenCapturedFiles: Integer;
    curItemPath: String;
+   aFree: Boolean;
 
 begin
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
      if imgListThumb_Changed then
      try
@@ -2050,71 +2191,165 @@ begin
      end;
 
      //Save CapturedFiles array
-     XMLWork.DeletePath(XMLWork_Captured);
+     aXML.DeletePath(XML_CapturedFiles);
      lenCapturedFiles:= Length(CapturedFiles);
 
      if (lenCapturedFiles > 0) then
      begin
-       XMLWork.SetValue(XMLWork_Captured+'Count', Length(CapturedFiles));
-       XMLWork.SetValue(XMLWork_Captured+'iCapturedFiles', iCapturedFiles);
+       aXML.SetValue(XML_CapturedFiles+'Count', Length(CapturedFiles));
+       aXML.SetValue(XML_CapturedFiles+'iCapturedFiles', iCapturedFiles);
 
        if lvCaptured.Selected=nil
-       then XMLWork.DeleteValue(XMLWork_Captured+'Selected')
-       else XMLWork.SetValue(XMLWork_Captured+'Selected', lvCaptured.Selected.Index);
+       then aXML.DeleteValue(XML_CapturedFiles+'Selected')
+       else aXML.SetValue(XML_CapturedFiles+'Selected', lvCaptured.Selected.Index);
 
        for i:=0 to Length(CapturedFiles)-1 do
        begin
-         curItemPath :=XMLWork_Captured+'Item' + IntToStr(i)+'/';
-         XMLWork.SetValue(curItemPath+'fAge', CapturedFiles[i].fAge);
-         XMLWork.SetValue(curItemPath+'fName', CapturedFiles[i].fName);
-         XMLWork.SetValue(curItemPath+'iIndex', CapturedFiles[i].iIndex);
+         curItemPath :=XML_CapturedFiles+'Item' + IntToStr(i)+'/';
+         aXML.SetValue(curItemPath+'fAge', CapturedFiles[i].fAge);
+         aXML.SetValue(curItemPath+'fName', CapturedFiles[i].fName);
+         aXML.SetValue(curItemPath+'iIndex', CapturedFiles[i].iIndex);
        end;
      end;
 
-     if AFlush then XMLWork.Flush;
-
   finally
+    if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadProject(AFileName: String);
+procedure TDigIt_Main.XML_LoadLoadedImage(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
 begin
   try
-    if (XMLProject=nil) then XMLProject:=TXMLConfig.Create(AFileName);
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-    Counters.Load(XMLProject, False);
-    imgManipulation.CropAreas.Load(XMLProject, 'CropAreas');
-    UI_FillCounters;
-    cbCounterList.ItemIndex :=XMLProject.GetValue(Counters.Name+'/Selected', -1);
-    UI_FillCounter(Counters_GetCurrent);
-    UI_ToolBar;
+     LoadImage(aXML.GetValue('LoadedFile', ''), False); //DON'T set to True, if you do not want infinite recursion
 
   finally
+    if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveProject(AFileName: String);
+procedure TDigIt_Main.XML_SaveLoadedImage(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
 begin
   try
-     if (XMLProject=nil) then XMLProject:=TXMLConfig.Create(AFileName);
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-     Counters.Save(XMLProject, False);
-     XMLProject.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
-     imgManipulation.CropAreas.Save(XMLProject, 'CropAreas');
-     XMLProject.Flush;
+     aXML.SetValue('LoadedFile', LoadedFile);
+
   finally
+    if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadPageSettings;
+procedure TDigIt_Main.XML_SaveSource_CapturedFiles(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     XML_SaveSourceFiles(aXML);
+     XML_SaveCapturedFiles(aXML);
+     aXML.SetValue('LoadedFile', LoadedFile);
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveSource_CapturedIndexes(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     if (Length(SourceFiles) > 0) then
+     begin
+       aXML.SetValue(XML_SourceFiles+'iSourceFiles', iSourceFiles);
+       aXML.SetValue(XML_SourceFiles+'lastCropped', lastCropped);
+       aXML.SetValue(XML_SourceFiles+'lastLenTaked', lastLenTaked);
+     end;
+
+     if (Length(CapturedFiles) > 0) then aXML.SetValue(XML_CapturedFiles+'iCapturedFiles', iCapturedFiles);
+
+     if lvCaptured.Selected=nil
+     then aXML.DeleteValue(XML_CapturedFiles+'Selected')
+     else aXML.SetValue(XML_CapturedFiles+'Selected', lvCaptured.Selected.Index);
+
+     aXML.SetValue('LoadedFile', LoadedFile);
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadCropAreas(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+   newCropMode: TDigItCropMode;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     newCropMode:= TDigItCropMode(aXML.GetValue('CropMode', 0));
+     setCropMode(newCropMode);
+     if (newCropMode = diCropCustom) then
+     begin
+       UI_FillCounters;
+       imgManipulation.CropAreas.Load(aXML, 'CropAreas');
+       cbCounterList.ItemIndex :=aXML.GetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
+     end;
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveCropAreas(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     aXML.SetValue('CropMode', Integer(CropMode));
+     if (CropMode = diCropCustom)
+     then imgManipulation.CropAreas.Save(aXML, 'CropAreas')
+     else aXML.DeletePath('CropAreas');
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadPageSettings(aXML: TXMLConfig);
 var
    selButton: Integer;
+   aFree: Boolean;
 
 begin
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
-     selButton := XMLWork.GetValue(XMLWork_PageSettings+'Rotate', -1);
+     selButton := aXML.GetValue(XML_PageSettings+'Rotate', -1);
      Case selButton of
      0: btPRotateLeft.Down:= True;
      1: btPRotateRight.Down:= True;
@@ -2126,7 +2361,7 @@ begin
           end;
      end;
 
-     selButton := XMLWork.GetValue(XMLWork_PageSettings+'Flip', -1);
+     selButton := aXML.GetValue(XML_PageSettings+'Flip', -1);
      Case selButton of
      0: btPFlipV.Down:= True;
      1: btPFlipH.Down:= True;
@@ -2137,34 +2372,76 @@ begin
      end;
 
   finally
+    if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SavePageSettings(AFlush: Boolean);
+procedure TDigIt_Main.XML_SavePageSettings(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
 begin
   try
-     if (XMLWork=nil) then XMLWork:=TXMLConfig.Create(Path_Config+Config_XMLWork);
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
 
      if btPRotateLeft.Down
-     then XMLWork.SetValue(XMLWork_PageSettings+'Rotate', 0)
+     then aXML.SetValue(XML_PageSettings+'Rotate', 0)
      else
      if btPRotateRight.Down
-     then XMLWork.SetValue(XMLWork_PageSettings+'Rotate', 1)
+     then aXML.SetValue(XML_PageSettings+'Rotate', 1)
      else
      if btPRotate180.Down
-     then XMLWork.SetValue(XMLWork_PageSettings+'Rotate', 2)
-     else XMLWork.SetValue(XMLWork_PageSettings+'Rotate', -1);
+     then aXML.SetValue(XML_PageSettings+'Rotate', 2)
+     else aXML.SetValue(XML_PageSettings+'Rotate', -1);
 
      if btPFlipV.Down
-     then XMLWork.SetValue(XMLWork_PageSettings+'Flip', 0)
+     then aXML.SetValue(XML_PageSettings+'Flip', 0)
      else
      if btPFlipH.Down
-     then XMLWork.SetValue(XMLWork_PageSettings+'Flip', 1)
-     else XMLWork.SetValue(XMLWork_PageSettings+'Flip', -1);
-
-     if AFlush then XMLWork.Flush;
+     then aXML.SetValue(XML_PageSettings+'Flip', 1)
+     else aXML.SetValue(XML_PageSettings+'Flip', -1);
 
   finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_LoadUserInterface(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //User Interface
+     rollCrops.Collapsed:=aXML.GetValue('UI/rollCrops_Collapsed', False);
+     rollPages.Collapsed:=aXML.GetValue('UI/rollPages_Collapsed', True);
+     rollCounters.Collapsed:=aXML.GetValue('UI/rollCounters_Collapsed', True);
+
+  finally
+    if aFree then aXML.Free;
+  end;
+end;
+
+procedure TDigIt_Main.XML_SaveUserInterface(aXML: TXMLConfig);
+var
+   aFree: Boolean;
+
+begin
+  try
+     aFree:= (aXML = nil);
+     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+
+     //User Interface
+     aXML.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
+     aXML.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
+     aXML.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
+
+  finally
+    if aFree then aXML.Free;
   end;
 end;
 
@@ -2334,8 +2611,8 @@ end;
 procedure TDigIt_Main.menuDebugClick(Sender: TObject);
 begin
   Case TMenuItem(Sender).Tag of
-    0: XML_LoadWork(XMLAllSections);
-    1: XML_SaveWork(XMLAllSections);
+    0: XML_LoadWork;
+    1: XML_SaveWork;
     2: XML_ClearWork;
   end;
 end;
@@ -2439,30 +2716,6 @@ begin
 
    cbBoxList.ItemIndex:=newIndex;
    UI_FillBox(imgManipulation.SelectedCropArea);
-end;
-
-procedure TDigIt_Main.tbWorkSaveClick(Sender: TObject);
-begin
-  Self.XML_SaveWork(XMLAllSections);
-end;
-
-procedure TDigIt_Main.TestClick(Sender: TObject);
-var
-   astr:String;
-
-begin
-  try
-     astr :=theBridge.Settings.Path_Config;
-     MessageDlg(astr, mtInformation, [mbOk], 0);
-  finally
-  end;
-end;
-
-procedure TDigIt_Main.TestRClick(Sender: TObject);
-begin
-  try
-  finally
-  end;
 end;
 
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
@@ -2577,7 +2830,6 @@ procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
 begin
   if (ANewCropMode <> CropMode) then
   begin
-    { #todo -oMaxM : Code when switching from one mode to another }
     Case ANewCropMode of
       diCropFull: begin
         if (CropMode = diCropCustom) then
@@ -2707,11 +2959,7 @@ end;
 function TDigIt_Main.CropFile_Full(AFileName: String): Boolean;
 begin
   Result:= (AFileName <> '') and LoadImage(AFileName, False);
-  if Result then
-  begin
-//    Counters.CopyValuesToPrevious;
-    SaveCallBack(imgManipulation.Bitmap, nil, 0);
-  end;
+  if Result then SaveCallBack(imgManipulation.Bitmap, nil, 0);
 end;
 
 procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer);
@@ -2738,8 +2986,6 @@ begin
 
        if (i > lastCropped) then lastCropped:= i;
        iSourceFiles:= i;
-
-       XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
 
        DigIt_Progress.progressTotal.Position:= i+1;
        DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
@@ -3007,7 +3253,7 @@ begin
            edCounterValueStringDigits.Value:=ACounter.Value_StringDigits;
            edCounterValueStringPre.Text:=ACounter.Value_StringPre;
            edCounterValueStringPost.Text:=ACounter.Value_StringPost;
-           lbPrevious.Caption:=Format(rsCounterPrev, [ACounter.Value_Previous]);
+           {$ifopt D+} lbPrevious.Caption:=Format(rsCounterPrev, [ACounter.Value_Previous]); {$endif}
            lbCounterExample.Caption:=ACounter.GetValue(True);
            inFillCounterUI :=False;
         end

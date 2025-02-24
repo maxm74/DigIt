@@ -22,27 +22,13 @@ type
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
 
-  TDigItXMLSection = (
-    xmlUI, xmlCropMode, xmlPageSettings, xmlCropAreas, xmlCounters,
-    xmlSource, xmlSourceIndexes, xmlSourceFiles,
-    xmlDestination, xmlCapturedIndexes, xmlCapturedFiles
-  );
-  TDigItXMLSections = set of TDigItXMLSection;
-
-
 const
   Config_XMLWork = 'digit.xml';
   Config_Options = 'digit.ini';
   Config_CapturedThumbs = 'c_thumbs.img';
-
-  XMLAllSections = [
-    xmlUI, xmlCropMode, xmlPageSettings, xmlCropAreas, xmlCounters,
-    xmlSource, xmlSourceIndexes, xmlSourceFiles,
-    xmlDestination, xmlCapturedIndexes, xmlCapturedFiles
-  ];
-
-  XMLWork_Captured = 'CapturedFiles/';
-  XMLWork_PageSettings = 'PageSettings/';
+  XML_SourceFiles   = 'SourceFiles/';
+  XML_CapturedFiles = 'CapturedFiles/';
+  XML_PageSettings  = 'PageSettings/';
 
 var
    Path_Application,

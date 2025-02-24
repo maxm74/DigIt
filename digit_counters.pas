@@ -88,7 +88,9 @@ type
       procedure CopyValuesToPrevious;
       procedure CopyPreviousToValues;
 
-      property items[aIndex: integer] : TDigIt_Counter read getCounter write setCounter; default;
+      procedure Reset;
+
+      property Items[aIndex: integer] : TDigIt_Counter read getCounter write setCounter; default;
       property Name:String read rName write rName;
 
       //Events
@@ -431,6 +433,19 @@ begin
   begin
     curCounter :=Items[i];
     curCounter.Value:=curCounter.Value_Previous;
+  end;
+end;
+
+procedure TDigIt_CounterList.Reset;
+var
+  i: integer;
+  curCounter: TDigIt_Counter;
+
+begin
+  for i :=0 to Count-1 do
+  begin
+    curCounter :=Items[i];
+    curCounter.Value:= -1;
   end;
 end;
 

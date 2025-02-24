@@ -58,7 +58,9 @@ msgstr "Cancello le aree di taglio?"
 msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
-#: digit_form_main.rscontinue
+#: digit_form_main.rscontinuework
+#, fuzzy
+msgctxt "digit_form_main.rscontinuework"
 msgid "Continue from last Work Session?"
 msgstr "Continuo dall'ultima Sessione di Lavoro?"
 
@@ -86,6 +88,19 @@ msgstr "Area Intera"
 msgid "%d files to do"
 msgstr "%d files da fare"
 
+#: digit_form_main.rsdeleteall
+msgid "Delete All Captured Pages?"
+msgstr "Elimino tutte le Pagine Acquisite?"
+
+#: digit_form_main.rsdeleteallfiles
+msgid "Do I also Delete Files from the disk?"
+msgstr "Elimino anche i Files dal disco?"
+
+#: digit_form_main.rsdeletecaptured
+#, object-pascal-format
+msgid "Delete Captured Page %s ?"
+msgstr "Elimino la Pagina Acquisita %s ?"
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr "Impossibile Creare il Contatore"
@@ -110,6 +125,10 @@ msgstr "Non ci sono più file da elaborare, devo cancellare la Coda di Lavoro?"
 msgid "Not yet implemented"
 msgstr "Non ancora implementato"
 
+#: digit_form_main.rsopensavedpdf
+msgid "Conversion to PDF completed, do i Open it?"
+msgstr "Conversione a PDF completata, lo Apro?"
+
 #: digit_form_main.rsprocessed
 #, object-pascal-format
 msgid "Processed %d / %s"
@@ -127,6 +146,10 @@ msgstr "Elaborando le Immagini"
 #: digit_form_main.rssaveproject
 msgid "Save Current Project?"
 msgstr "Salvo il Progetto Attuale?"
+
+#: digit_form_main.rssavework
+msgid "Save the Work Session?"
+msgstr "Salvo la sessione di Lavoro?"
 
 #: digit_form_main.rstakeagain
 #, object-pascal-format
@@ -194,6 +217,26 @@ msgstr "    Orizzontale"
 msgid "   Vertical"
 msgstr "   Verticale"
 
+#: tdigit_main.actcaptureddelete.caption
+msgid "Delete Selected Page"
+msgstr "Cancella Pagina Selezionata"
+
+#: tdigit_main.actcaptureddeleteall.caption
+msgid "Delete All Pages"
+msgstr "Cancella Tutte le Pagine"
+
+#: tdigit_main.actcapturedrotateleft.caption
+#, fuzzy
+msgctxt "tdigit_main.actcapturedrotateleft.caption"
+msgid "Rotate Left"
+msgstr "Ruota a Sinistra"
+
+#: tdigit_main.actcapturedrotateright.caption
+#, fuzzy
+msgctxt "tdigit_main.actcapturedrotateright.caption"
+msgid "Rotate Right"
+msgstr "Ruota a Destra"
+
 #: tdigit_main.actclearqueue.caption
 msgid "Clear Work Queue"
 msgstr "Cancella Coda Lavoro"
@@ -246,16 +289,6 @@ msgstr "Salva Progetto"
 #: tdigit_main.actprojectsaveas.caption
 msgid "Save Project As ..."
 msgstr "Salva Progetto Come ..."
-
-#: tdigit_main.actrotateleft.caption
-msgctxt "tdigit_main.actrotateleft.caption"
-msgid "Rotate Left"
-msgstr "Ruota a Sinistra"
-
-#: tdigit_main.actrotateright.caption
-msgctxt "tdigit_main.actrotateright.caption"
-msgid "Rotate Right"
-msgstr "Ruota a Destra"
 
 #: tdigit_main.acttake.caption
 msgid "Take"
@@ -531,9 +564,25 @@ msgstr "00"
 msgid "Value Previous: "
 msgstr "Valore Precedente: "
 
+#: tdigit_main.menuclearxml.caption
+msgid "Clear XML"
+msgstr ""
+
+#: tdigit_main.menudebug.caption
+msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuloadxml.caption
+msgid "Load XML"
+msgstr ""
+
 #: tdigit_main.menuprojectsave.caption
 msgid "Save Project ..."
 msgstr "Salva Progetto ..."
+
+#: tdigit_main.menusavexml.caption
+msgid "Save XML"
+msgstr ""
 
 #: tdigit_main.menutimertakeconfig.caption
 msgid "Config Timer"
@@ -566,6 +615,14 @@ msgstr "Pagine Catturate"
 #: tdigit_main.savepicture.title
 msgid "Save image as"
 msgstr "Salva immagini come"
+
+#: tdigit_main.tbcaptsep1.caption
+msgid "tbCaptSep1"
+msgstr ""
+
+#: tdigit_main.tbcaptsep2.caption
+msgid "tbCaptSep2"
+msgstr ""
 
 #: tdigit_main.tbcaptured.caption
 msgid "tbCaptured"
@@ -617,8 +674,20 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
+#: tdigit_progress.capcurrent.caption
+msgid "Current"
+msgstr ""
+
 #: tdigit_progress.caption
 msgid "DigIt_Progress"
+msgstr ""
+
+#: tdigit_progress.captotal.caption
+msgid "Total"
+msgstr ""
+
+#: tdigit_progress.labtotal.caption
+msgid "TotalL"
 msgstr ""
 
 #: tdigit_templates.bcpanel1.caption
@@ -715,6 +784,153 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
+
+#: twiaselectform.btrefresh.caption
+msgctxt "twiaselectform.btrefresh.caption"
+msgid "Refresh"
+msgstr "Aggiorna"
+
+#: twiaselectform.caption
+msgid "Select WIA Device"
+msgstr "Seleziona Dispositivo WIA"
+
+#: twiaselectform.lvsources.columns[0].caption
+msgctxt "twiaselectform.lvsources.columns[0].caption"
+msgid "Name"
+msgstr "Nome"
+
+#: twiaselectform.lvsources.columns[1].caption
+msgctxt "twiaselectform.lvsources.columns[1].caption"
+msgid "Manufacturer"
+msgstr "Produttore"
+
+#: twiaselectform.lvsources.columns[2].caption
+msgid "Type"
+msgstr "Tipo"
+
+#: twiasettingssource.btbrightness0.caption
+msgctxt "twiasettingssource.btbrightness0.caption"
+msgid "0"
+msgstr ""
+
+#: twiasettingssource.btbrightnessd.caption
+msgctxt "twiasettingssource.btbrightnessd.caption"
+msgid "d"
+msgstr "p"
+
+#: twiasettingssource.btcontrast0.caption
+msgctxt "twiasettingssource.btcontrast0.caption"
+msgid "0"
+msgstr ""
+
+#: twiasettingssource.btcontrastd.caption
+msgctxt "twiasettingssource.btcontrastd.caption"
+msgid "d"
+msgstr "p"
+
+#: twiasettingssource.btpaperorientation.hint
+msgctxt "twiasettingssource.btpaperorientation.hint"
+msgid "Paper Orientation"
+msgstr "Orientamento Carta"
+
+#: twiasettingssource.btrefreshcurrent.caption
+msgid "Current"
+msgstr "Attuale"
+
+#: twiasettingssource.btrefreshdefault.caption
+msgid "Default"
+msgstr "Predefinito"
+
+#: twiasettingssource.btrefreshundo.caption
+msgid "Undo"
+msgstr "Scarta"
+
+#: twiasettingssource.btresolutiond.caption
+msgctxt "twiasettingssource.btresolutiond.caption"
+msgid "d"
+msgstr "p"
+
+#: twiasettingssource.caption
+msgid "Settings of WIA Source"
+msgstr "Impostazioni della Sorgente WIA"
+
+#: twiasettingssource.cbbackfirst.caption
+msgid "Back First"
+msgstr "Prima Retro"
+
+#: twiasettingssource.cbusenativeui.caption
+msgctxt "twiasettingssource.cbusenativeui.caption"
+msgid "Use Native UI"
+msgstr "Usa UI Nativa"
+
+#: twiasettingssource.gbfeeder.caption
+msgid "Feeder"
+msgstr "Caricatore"
+
+#: twiasettingssource.gbpaperalign.caption
+msgid "Paper Align"
+msgstr "Allineamento Carta"
+
+#: twiasettingssource.gbpapersize.caption
+msgid "Paper Size"
+msgstr "Dimensione Carta"
+
+#: twiasettingssource.label2.caption
+msgid "Paper Type :"
+msgstr "Tipo Carta :"
+
+#: twiasettingssource.label3.caption
+msgctxt "twiasettingssource.label3.caption"
+msgid "Resolution :"
+msgstr "Risoluzione :"
+
+#: twiasettingssource.label4.caption
+msgctxt "twiasettingssource.label4.caption"
+msgid "Brightness :"
+msgstr "Luminosità :"
+
+#: twiasettingssource.label5.caption
+msgctxt "twiasettingssource.label5.caption"
+msgid "Contrast :"
+msgstr "Contrasto :"
+
+#: twiasettingssource.label6.caption
+msgctxt "twiasettingssource.label6.caption"
+msgid "Bit Depth :"
+msgstr "Numero Bit :"
+
+#: twiasettingssource.label7.caption
+msgctxt "twiasettingssource.label7.caption"
+msgid "Image Type :"
+msgstr "Tipo Immagine :"
+
+#: twiasettingssource.labelpapersize.caption
+msgid "X"
+msgstr ""
+
+#: twiasettingssource.rbbackonly.caption
+msgid "Back Only"
+msgstr "Solo Retro"
+
+#: twiasettingssource.rbfrontback.caption
+msgid "Front/Back"
+msgstr "Fronte/Retro"
+
+#: twiasettingssource.rbfrontonly.caption
+msgid "Front Only"
+msgstr "Solo Fronte"
+
+#: twiasettingssource.tbsource_scanner.caption
+msgid "Scanner"
+msgstr ""
+
+#: twiasettingssource.trhalign.hint
+msgid "Horizontal Align"
+msgstr "Allineamento Orizzontale"
+
+#: twiasettingssource.trvalign.hint
+msgid "Vertical Align"
+msgstr "Allineamento Verticale"
 
 #: wia_selectform.rsnodevicepresent
 msgid "No Wia Devices present..."

@@ -77,6 +77,19 @@ msgstr ""
 msgid "%d files to do"
 msgstr ""
 
+#: digit_form_main.rsdeleteall
+msgid "Delete All Captured Pages?"
+msgstr ""
+
+#: digit_form_main.rsdeleteallfiles
+msgid "Do I also Delete Files from the disk?"
+msgstr ""
+
+#: digit_form_main.rsdeletecaptured
+#, object-pascal-format
+msgid "Delete Captured Page %s ?"
+msgstr ""
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr ""
@@ -579,6 +592,14 @@ msgstr ""
 msgid "Save image as"
 msgstr ""
 
+#: tdigit_main.tbcaptsep1.caption
+msgid "tbCaptSep1"
+msgstr ""
+
+#: tdigit_main.tbcaptsep2.caption
+msgid "tbCaptSep2"
+msgstr ""
+
 #: tdigit_main.tbcaptured.caption
 msgid "tbCaptured"
 msgstr ""
@@ -627,14 +648,6 @@ msgstr ""
 #: tdigit_main.tbsource.caption
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
-msgstr ""
-
-#: tdigit_main.toolbutton2.caption
-msgid "ToolButton2"
-msgstr ""
-
-#: tdigit_main.toolbutton3.caption
-msgid "ToolButton3"
 msgstr ""
 
 #: tdigit_progress.capcurrent.caption

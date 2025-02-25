@@ -36,6 +36,8 @@ type
 
   private
     curEventCallBack: IDigIt_ProgressCallback;
+    rOnCancelClick: TNotifyEvent;
+    rCancelled: Boolean;
 
   public
     procedure SetTotalVisible(AVisible: Boolean); stdcall;
@@ -49,10 +51,14 @@ type
     procedure SetCurrentCaption(const ACaption: PChar); stdcall;
     procedure SetCurrentValue(AValue: Integer); stdcall;
 
+    function Cancelled: Boolean; stdcall;
+
     procedure SetEventCallBack(const AEventCallBack: IDigIt_ProgressCallback); stdcall;
 
     procedure Show(const ACaption: PChar); stdcall;
     procedure Hide; stdcall;
+
+    property OnCancelClick: TNotifyEvent read rOnCancelClick write rOnCancelClick;
   end;
 
 var
@@ -66,6 +72,7 @@ implementation
 
 procedure TDigIt_Progress.FormCreate(Sender: TObject);
 begin
+  rCancelled:= False;
   curEventCallBack:= nil;
   {$ifopt D+}
     FormStyle:= fsNormal;
@@ -74,8 +81,13 @@ end;
 
 procedure TDigIt_Progress.btCancelClick(Sender: TObject);
 begin
+  rCancelled:= True;
+
   if (curEventCallBack <> nil)
   then curEventCallBack.ProgressCancelClick(progressTotal.Position, progressCurrent.Position);
+
+  if Assigned(rOnCancelClick)
+  then rOnCancelClick(Self);
 end;
 
 procedure TDigIt_Progress.SetTotalVisible(AVisible: Boolean); stdcall;
@@ -146,6 +158,11 @@ begin
   Application.ProcessMessages;
 end;
 
+function TDigIt_Progress.Cancelled: Boolean; stdcall;
+begin
+  Result:= rCancelled;
+end;
+
 procedure TDigIt_Progress.SetEventCallBack(const AEventCallBack: IDigIt_ProgressCallback); stdcall;
 begin
   curEventCallBack:= AEventCallBack;
@@ -153,6 +170,7 @@ end;
 
 procedure TDigIt_Progress.Show(const ACaption: PChar); stdcall;
 begin
+  rCancelled:= False;
   Caption:= ACaption;
   capTotal.Caption:= '';
   labTotal.Caption:= '';
@@ -163,6 +181,7 @@ end;
 
 procedure TDigIt_Progress.Hide; stdcall;
 begin
+  rCancelled:= False;
   Visible:= False;
   Application.ProcessMessages;
 end;

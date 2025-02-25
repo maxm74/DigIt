@@ -46,6 +46,8 @@ resourcestring
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
+  rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
+
 type
   TSourceFile = packed record
     fCrop: Boolean;
@@ -361,6 +363,8 @@ type
     procedure DestinationMenuClick(Sender: TObject);
     procedure SourceMenuClick(Sender: TObject);
 
+    procedure ProgressCancelClick(Sender: TObject);
+
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
 
     procedure UpdateBoxList;
@@ -566,6 +570,7 @@ begin
   iCapturedFiles:= -1;
   lastCropped:= -1;
   lastLenTaked:= 0;
+
   BuildSourcesMenu(Self, menuSources, @SourceMenuClick);
 
 //  rDestination:= nil;
@@ -587,6 +592,8 @@ var
 
 begin
   UI_ToolBarMods;
+
+  DigIt_Progress.OnCancelClick:= @ProgressCancelClick;
 
   if FileExists(Path_Config+Config_XMLWork)
      {$ifopt D-}
@@ -730,10 +737,7 @@ begin
                      StrDispose(curImageFile);
                    end
               else begin
-                     //Add files to the array instead of processing them directly,
-                     //so if the user closes the application before the end when he reopens it we restart
                      SourceFiles_Add(curArray);
-                     { #todo 5 -oMaxM : Check User Cancel the Operation }
                      CropFile_Full(0);
                    end;
               SourceFiles:= nil; iSourceFiles:= -1;
@@ -1408,6 +1412,11 @@ begin
   end;
 end;
 
+procedure TDigIt_Main.ProgressCancelClick(Sender: TObject);
+begin
+  UserCancel:= True;
+end;
+
 procedure TDigIt_Main.actOptionsExecute(Sender: TObject);
 begin
   //
@@ -1446,6 +1455,7 @@ begin
      //Delete Last Item
      lvCaptured.Items.Delete(Length(CapturedFiles)-1);
      SetLength(CapturedFiles, Length(CapturedFiles)-1);
+     iCapturedFiles:= Length(CapturedFiles)-1;
 
      //Select Item
      if (iSelected < Length(CapturedFiles)-1)
@@ -1493,7 +1503,7 @@ begin
      i:= imgListThumb.Add(noFileBMP, nil);
      imgListThumb_Changed:= True;
 
-     XML_SaveCapturedFiles(nil);
+     XML_SaveWork;
      UI_ToolBar;
      UI_FillCounter(nil);
 
@@ -1814,55 +1824,6 @@ begin
 
      XML_SaveCropAreas(XMLWork);
      XML_SaveUserInterface(XMLWork);
-
-     (* Original Sequence
-     XMLWork.SetValue('CropMode', Integer(CropMode));
-     if (CropMode = diCropCustom)
-     then imgManipulation.CropAreas.Save(XMLWork, 'CropAreas')
-     else XMLWork.DeletePath('CropAreas');
-
-     XML_SavePageSettings(XMLWork);
-
-     XMLWork.SetValue('LoadedFile', LoadedFile);
-
-     Counters.Save(XMLWork, True);
-     if (cbCounterList.ItemIndex > -1) then XMLWork.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
-
-
-     //User Interface
-     XMLWork.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
-     XMLWork.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
-     XMLWork.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
-
-     //Save rSource and its Params
-     XMLWork.SetValue('Source/Name', rSourceName);
-     XMLWork.DeletePath('Source/Params/');
-
-     //Save SourceFiles array
-     XMLWork.DeletePath(XML_SourceFiles);
-     XMLWork.SetValue(XML_SourceFiles+'Count', Length(SourceFiles));
-     XMLWork.SetValue(XML_SourceFiles+'iSourceFiles', iSourceFiles);
-     XMLWork.SetValue(XML_SourceFiles+'lastCropped', lastCropped);
-     XMLWork.SetValue(XML_SourceFiles+'lastLenTaked', lastLenTaked);
-     for i:=0 to Length(SourceFiles)-1 do
-     begin
-       curItemPath :=XML_SourceFiles+'Item' + IntToStr(i)+'/';
-       XMLWork.SetValue(curItemPath+'fCrop', SourceFiles[i].fCrop);
-       XMLWork.SetValue(curItemPath+'fName', SourceFiles[i].fName);
-     end;
-
-     //Save rDestination and its Params
-(*     XMLWork.SetValue('Destination/Name', rDestinationName);
-     if (rDestination = nil) then
-     begin
-*)
-       XMLWork.DeletePath('Destination/Params/');
-       XMLWork.SetValue('Destination/Params/Format', SaveExt);
-       XMLWork.SetValue('Destination/Params/Path', SavePath);
-//     end;
-
-     XML_SaveCapturedFiles(XMLWork);
-*)
 
      XMLWork.Flush;
      XMLWork.Free;
@@ -2965,11 +2926,21 @@ end;
 procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer);
 var
    i,
-   c: Integer;
+   c,
+//   old_lastCropped,
+   old_CounterValue,
+   old_iCapturedFiles: Integer;
    cStr: String;
 
 begin
   try
+     UserCancel:= False;
+
+     //Store old Values so if user Cancel Operation we can rollback
+     old_iCapturedFiles:= iCapturedFiles;
+     old_CounterValue:= Counters[0].Value;
+     //old_lastCropped:= lastCropped;
+
      c:= Length(SourceFiles);
      cStr:= IntToStr(c);
      DigIt_Progress.progressTotal.Min:= AStartIndex;
@@ -2979,26 +2950,49 @@ begin
      begin
        DigIt_Progress.progressTotal.Position:= i;
        DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
+
        Application.ProcessMessages;
 
-       CropFile_Full(SourceFiles[i].fName);
-       SourceFiles[i].fCrop:= True;
+       UserCancel:= UserCancel or not(CropFile_Full(SourceFiles[i].fName));
+       if UserCancel then break;
 
-       if (i > lastCropped) then lastCropped:= i;
-       iSourceFiles:= i;
+       //SourceFiles[i].fCrop:= True;
+       //if (i > lastCropped) then lastCropped:= i;
+       //iSourceFiles:= i;
 
        DigIt_Progress.progressTotal.Position:= i+1;
        DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
-       Application.ProcessMessages;
+
+       Application.ProcessMessages; if UserCancel then break;
+     end;
+
+     if UserCancel and
+        (MessageDlg('DigIt', rsErrIncomplete, mtConfirmation, [mbYes, mbNo], 0)=mrNo) then
+     begin
+       for i:=old_iCapturedFiles+1 to iCapturedFiles do
+       begin
+         DeleteFile(CapturedFiles[i].fName);
+
+         if (imgListThumb.Count > 1) then imgListThumb.Delete(imgListThumb.Count-1);
+         if (lvCaptured.Items.Count > 0) then lvCaptured.Items.Delete(lvCaptured.Items.Count-1);
+       end;
+       imgListThumb_Changed:= True;
+       SetLength(CapturedFiles, old_iCapturedFiles+1);
+       iCapturedFiles:= old_iCapturedFiles;
+       Counters[0].Value:= old_CounterValue;
      end;
 
   finally
+    UI_ToolBar;
+    UI_FillCounter(nil);
+
     UserCancel:= False;
   end;
 end;
 
 procedure TDigIt_Main.ProgressImagesShow(TotalMin, TotalMax: Integer);
 begin
+  UserCancel:= False;
   with DigIt_Progress do
   begin
     labTotal.Caption:= '';

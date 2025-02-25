@@ -2,6 +2,8 @@ DigIt CHANGE LOG
 ======================
 
 2025/02/
+        25 Tested and fixed user cancel operations;
+           Added TDigIt_Progress OnCancelClick event and IDigIt_Progress.Cancelled;
         24 LoadSaveWork in separate methods;
 	   Captured Files Toolbar placed above the list horizontally;
 	   Eliminated redundant Session Saves;

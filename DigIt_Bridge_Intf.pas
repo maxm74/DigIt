@@ -188,6 +188,8 @@ type
     procedure SetCurrentCaption(const ACaption: PChar); stdcall;
     procedure SetCurrentValue(AValue: Integer); stdcall;
 
+    function Cancelled: Boolean; stdcall;
+
     procedure SetEventCallBack(const AEventCallBack: IDigIt_ProgressCallback); stdcall;
 
     procedure Show(const ACaption: PChar); stdcall;

@@ -31,6 +31,7 @@ resourcestring
   rsWIADevItemSel = 'Device found '#13#10'%s %s'#13#10'but Item %s not...'#13#10'Select the First Item %s ?';
   rsWIAExcConnect = 'Error Connecting Device';
   rsWIAExcNotFound = 'Device not found...';
+  rsWIACancelling = 'Cancelling acquisition';
 
 type
 
@@ -128,14 +129,13 @@ function TDigIt_Source_WIA.DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDev
 begin
   Result:= not(UserCancel);
 
-  if (pWiaTransferParams <> nil) then
+  if Result and (pWiaTransferParams <> nil) then
   Case pWiaTransferParams^.lMessage of
   WIA_TRANSFER_MSG_STATUS: begin
       if (Progress <> nil) then
       begin
         Progress.SetCurrentCaption(PChar(Format(rsWIAAcquiring, [AWiaDevice.Download_Count+1])));
         Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
-        Application.ProcessMessages;
       end;
   end;
   WIA_TRANSFER_MSG_END_OF_STREAM: begin
@@ -143,14 +143,12 @@ begin
       begin
         Progress.SetCurrentCaption(PChar(Format(rsWIAAcquired, [AWiaDevice.Download_Count])));
         Progress.SetCurrentValue(pWiaTransferParams^.lPercentComplete);
-        Application.ProcessMessages;
       end;
   end;
   WIA_TRANSFER_MSG_END_OF_TRANSFER: begin
       if (Progress <> nil) then
       begin
         Progress.SetTotal(0, 100, 100, False);
-        Application.ProcessMessages;
       end;
   end;
   WIA_TRANSFER_MSG_DEVICE_STATUS: begin
@@ -162,6 +160,8 @@ begin
 //    Memo2.Lines.Add('WIA_TRANSFER_MSG_'+IntToHex(pWiaTransferParams^.lMessage)+' : '+IntToStr(pWiaTransferParams^.lPercentComplete)+'% err='+IntToHex(pWiaTransferParams^.hrErrorStatus));
   end;
   end;
+
+  Application.ProcessMessages;
 end;
 
 constructor TDigIt_Source_WIA.Create;
@@ -516,8 +516,6 @@ begin
      aData:= nil;
      aDataType:= diDataType_FileName;
 
-     //TFormAnimAcquiring.Execute; Application.ProcessMessages;
-
      DownloadedFiles:= nil;
      inc(countTakes);
      curPath:= WIAPath_Temp+IntToStr(countTakes)+DirectorySeparator;
@@ -624,6 +622,7 @@ end;
 procedure TDigIt_Source_WIA.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
 begin
   UserCancel:= True;
+  if (Progress<>nil) then Progress.SetCurrentCaption(PChar(rsWIACancelling));
 end;
 
 initialization

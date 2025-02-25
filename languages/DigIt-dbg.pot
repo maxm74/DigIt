@@ -85,6 +85,15 @@ msgstr ""
 msgid "Do I also Delete Files from the disk?"
 msgstr ""
 
+#: digit_form_main.rsdeletecaptured
+#, object-pascal-format
+msgid "Delete Captured Page %s ?"
+msgstr ""
+
+#: digit_form_main.rserrincomplete
+msgid "Operation not completed, do I keep the processed files?"
+msgstr ""
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr ""
@@ -142,6 +151,15 @@ msgstr ""
 msgid "Folder Pictures"
 msgstr ""
 
+#: digit_source_twain.rstwainexcnotfound
+msgctxt "digit_source_twain.rstwainexcnotfound"
+msgid "Device not found..."
+msgstr ""
+
+#: digit_source_twain.rstwainname
+msgid "Twain Device"
+msgstr ""
+
 #: digit_source_wia.rswiaacquired
 #, object-pascal-format
 msgid "Acquired %d Pages"
@@ -162,6 +180,10 @@ msgstr ""
 msgid "Acquiring from %s at %d dpi"
 msgstr ""
 
+#: digit_source_wia.rswiacancelling
+msgid "Cancelling acquisition"
+msgstr ""
+
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
 msgid ""
@@ -176,6 +198,7 @@ msgid "Error Connecting Device"
 msgstr ""
 
 #: digit_source_wia.rswiaexcnotfound
+msgctxt "digit_source_wia.rswiaexcnotfound"
 msgid "Device not found..."
 msgstr ""
 

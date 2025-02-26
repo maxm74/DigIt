@@ -14,6 +14,12 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <MinorVersionNr Value="1"/>
+      <Attributes pvaPreRelease="True"/>
+      <StringTable CompanyName="MaxM" FileDescription="DigIt 32bit Twain Server" LegalCopyright="2025 Massimo Magnano" ProductName="DigIt"/>
+    </VersionInfo>
     <BuildModes>
       <Item Name="Debug" Default="True"/>
       <Item Name="Release">

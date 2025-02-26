@@ -1,3 +1,12 @@
+(*******************************************************************************
+**                                  DigIt                                     **
+**                                                                            **
+**          (s) 2025 Massimo Magnano                                          **
+**                                                                            **
+********************************************************************************
+**   SaveFiles Settings Form                                                  **
+*******************************************************************************)
+
 unit DigIt_Destination_SaveFiles_SettingsForm;
 
 {$mode ObjFPC}{$H+}
@@ -5,10 +14,10 @@ unit DigIt_Destination_SaveFiles_SettingsForm;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, EditBtn, Buttons, BCPanel, BCLabel;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, EditBtn, Buttons,
+  BGRABitmapTypes, BCPanel, BCLabel;
 
 type
-
   { TDest_SaveFiles_Settings }
 
   TDest_SaveFiles_Settings = class(TForm)
@@ -22,15 +31,15 @@ type
     panelButtons: TBCPanel;
     procedure cbSaveFormatChange(Sender: TObject);
     procedure dirDestinationChange(Sender: TObject);
+
   private
-    SaveExt,
+    SaveFormat: TBGRAImageFormat;
     SavePath: String;
 
-    function UI_FindSaveFormat(AExt: String):Integer;
     procedure BuildSaveFormats;
 
   public
-    class function Execute(var ASaveExt, ASavePath: String): Boolean;
+    class function Execute(var ASaveFormat: TBGRAImageFormat; var ASavePath: String): Boolean;
 
   end;
 
@@ -41,88 +50,71 @@ implementation
 
 {$R *.lfm}
 
-uses fpimage;
-
 { TDest_SaveFiles_Settings }
 
 procedure TDest_SaveFiles_Settings.BuildSaveFormats;
 var
-   i,j :Integer;
-   t,e:String;
+  iFormat: TBGRAImageFormat;
 
 begin
-  j:=0;
-  for i :=0 to ImageHandlers.Count-1 do
+  cbSaveFormat.Clear;
+
+  for iFormat:=Low(TBGRAImageFormat) to High(TBGRAImageFormat) do
   begin
-    t :=ImageHandlers.TypeNames[i];
-    e :=ImageHandlers.Extensions[t];
-    if (ImageHandlers.ImageWriter[t]<>nil) then
+    if (iFormat <> ifUnknown) and (DefaultBGRAImageWriter[iFormat] <> nil) then
     begin
-      cbSaveFormat.Items.Add(t);
-      if (Pos('jpg', e)>0) then j:=i;
+      cbSaveFormat.Items.AddObject(BGRAImageFormat[iFormat].TypeName+' ('+SuggestImageExtension(iFormat)+')',
+                                   TObject(PTRUInt(iFormat)));
     end;
   end;
-  cbSaveFormat.ItemIndex:=j-1;
-  SaveExt :='jpg';
-end;
 
-function TDest_SaveFiles_Settings.UI_FindSaveFormat(AExt: String): Integer;
-var
-   i:Integer;
-
-begin
-  Result:=-1;
-
-  if (AExt<>'') then
-  for i:=0 to cbSaveFormat.Items.Count-1 do
-  begin
-    if (Pos(AExt, ImageHandlers.Extensions[cbSaveFormat.Items[i]]) > 0) then
-    begin
-      Result :=i; break;
-    end;
-  end;
+  if (cbSaveFormat.Items.Count > 0) then cbSaveFormat.ItemIndex:= 0;
 end;
 
 procedure TDest_SaveFiles_Settings.cbSaveFormatChange(Sender: TObject);
-var
-   i:Integer;
-
 begin
-  SaveExt:=ImageHandlers.Extensions[cbSaveFormat.Items[cbSaveFormat.ItemIndex]];
-  i :=Pos(';', SaveExt);
-  if (i>0) then SaveExt :=Copy(SaveExt, 1, i-1);
+  SaveFormat:= TBGRAImageFormat(PTRUInt(cbSaveFormat.Items.Objects[cbSaveFormat.ItemIndex]));
+
+  { #to-do 5 -oMaxM : Select Page with the Format Options }
 end;
 
 procedure TDest_SaveFiles_Settings.dirDestinationChange(Sender: TObject);
 begin
   SavePath :=dirDestination.Directory;
-  //UI_FillTaker;
 end;
 
-class function TDest_SaveFiles_Settings.Execute(var ASaveExt, ASavePath: String): Boolean;
+class function TDest_SaveFiles_Settings.Execute(var ASaveFormat: TBGRAImageFormat; var ASavePath: String): Boolean;
 begin
-  if (Dest_SaveFiles_Settings=nil)
-  then Dest_SaveFiles_Settings :=TDest_SaveFiles_Settings.Create(nil);
+  try
+     Dest_SaveFiles_Settings:= TDest_SaveFiles_Settings.Create(nil);
 
-  with Dest_SaveFiles_Settings do
-  begin
-    BuildSaveFormats;
+     with Dest_SaveFiles_Settings do
+     begin
+       BuildSaveFormats;
 
-    dirDestination.Directory:=ASavePath;
-    cbSaveFormat.ItemIndex:=UI_FindSaveFormat(ASaveExt);
+       dirDestination.Directory:=ASavePath;
 
-    Result:= (ShowModal=mrOk);
+       //Select Current Format, if not found Select Jpeg
+       cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ASaveFormat)));
+       if (cbSaveFormat.ItemIndex = -1) and (cbSaveFormat.Items.Count > 0)
+       then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
 
-    if Result then
-    begin
-      ASaveExt:= SaveExt;
-      ASavePath:= SavePath;
-      //Last Char of the Path MUST be the Directory Separator
-      if (ASavePath[Length(ASavePath)] <> DirectorySeparator)
-      then ASavePath:= ASavePath+DirectorySeparator;
-    end;
+       Result:= (ShowModal=mrOk);
+
+       if Result then
+       begin
+         ASaveFormat:= SaveFormat;
+         ASavePath:= SavePath;
+         //Last Char of the Path MUST be the Directory Separator
+         if (ASavePath[Length(ASavePath)] <> DirectorySeparator)
+         then ASavePath:= ASavePath+DirectorySeparator;
+       end;
+     end;
+
+
+  finally
+    FreeAndNil(Dest_SaveFiles_Settings);
   end;
-
 end;
 
 end.

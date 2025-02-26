@@ -59,8 +59,6 @@ msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinuework
-#, fuzzy
-msgctxt "digit_form_main.rscontinuework"
 msgid "Continue from last Work Session?"
 msgstr "Continuo dall'ultima Sessione di Lavoro?"
 
@@ -165,8 +163,6 @@ msgid "Folder Pictures"
 msgstr "Cartella di Immagini"
 
 #: digit_source_twain.rstwainexcnotfound
-#, fuzzy
-msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
 msgstr "Dispositivo non trovato..."
 
@@ -216,7 +212,6 @@ msgid "Error Connecting Device"
 msgstr "Errore Connettendo al Dispositivo"
 
 #: digit_source_wia.rswiaexcnotfound
-msgctxt "digit_source_wia.rswiaexcnotfound"
 msgid "Device not found..."
 msgstr "Dispositivo non trovato..."
 
@@ -245,14 +240,10 @@ msgid "Delete All Pages"
 msgstr "Cancella Tutte le Pagine"
 
 #: tdigit_main.actcapturedrotateleft.caption
-#, fuzzy
-msgctxt "tdigit_main.actcapturedrotateleft.caption"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.actcapturedrotateright.caption
-#, fuzzy
-msgctxt "tdigit_main.actcapturedrotateright.caption"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
@@ -261,8 +252,6 @@ msgid "Clear Work Queue"
 msgstr "Cancella Coda Lavoro"
 
 #: tdigit_main.actcrop.caption
-#, fuzzy
-#| msgid "Crop (F5)"
 msgid "Crop"
 msgstr "Taglia (F5)"
 
@@ -279,8 +268,6 @@ msgid "Next"
 msgstr "Avanti"
 
 #: tdigit_main.actcropnext.caption
-#, fuzzy
-#| msgid "Crop + Next (F5)"
 msgid "Crop + Next"
 msgstr "Taglia + Avanti (F5)"
 
@@ -297,7 +284,6 @@ msgid "New Project ..."
 msgstr "Nuovo Progetto ..."
 
 #: tdigit_main.actprojectopen.caption
-msgctxt "tdigit_main.actprojectopen.caption"
 msgid "Open Project ..."
 msgstr "Apri Progetto ..."
 
@@ -330,17 +316,14 @@ msgid "Left :"
 msgstr "Sinistra :"
 
 #: tdigit_main.bclabel10.caption
-msgctxt "tdigit_main.bclabel10.caption"
 msgid "Width :"
 msgstr "Larghezza :"
 
 #: tdigit_main.bclabel11.caption
-msgctxt "tdigit_main.bclabel11.caption"
 msgid "Height :"
 msgstr "Altezza :"
 
 #: tdigit_main.bclabel12.caption
-msgctxt "tdigit_main.bclabel12.caption"
 msgid "Name :"
 msgstr "Nome :"
 
@@ -357,12 +340,10 @@ msgid "Top :"
 msgstr "Sopra :"
 
 #: tdigit_main.bclabel3.caption
-msgctxt "tdigit_main.bclabel3.caption"
 msgid "Width :"
 msgstr "Larghezza :"
 
 #: tdigit_main.bclabel4.caption
-msgctxt "tdigit_main.bclabel4.caption"
 msgid "Height :"
 msgstr "Altezza :"
 
@@ -371,7 +352,6 @@ msgid "Unit :"
 msgstr "Unità :"
 
 #: tdigit_main.bclabel6.caption
-msgctxt "tdigit_main.bclabel6.caption"
 msgid "Name :"
 msgstr "Nome :"
 
@@ -384,7 +364,6 @@ msgid "Digits :"
 msgstr "Cifre :"
 
 #: tdigit_main.btbox_add.caption
-msgctxt "tdigit_main.btbox_add.caption"
 msgid "+"
 msgstr ""
 
@@ -393,7 +372,6 @@ msgid "Add a Crop Area"
 msgstr "Aggiungi un'Area di Taglio"
 
 #: tdigit_main.btbox_del.caption
-msgctxt "tdigit_main.btbox_del.caption"
 msgid "-"
 msgstr ""
 
@@ -418,42 +396,34 @@ msgid "Flip Vertical Up"
 msgstr "Ribalta Verticalmente in Su"
 
 #: tdigit_main.btcounter_add.caption
-msgctxt "tdigit_main.btcounter_add.caption"
 msgid "+"
 msgstr ""
 
 #: tdigit_main.btcounter_add.hint
-msgctxt "tdigit_main.btcounter_add.hint"
 msgid "Add a Counter"
 msgstr "Aggiungi un Contatore"
 
 #: tdigit_main.btcounter_del.caption
-msgctxt "tdigit_main.btcounter_del.caption"
 msgid "-"
 msgstr ""
 
 #: tdigit_main.btcounter_del.hint
-msgctxt "tdigit_main.btcounter_del.hint"
 msgid "Remove this Counter"
 msgstr "Rimuovi questo Contatore"
 
 #: tdigit_main.btcropcounter_add.caption
-msgctxt "tdigit_main.btcropcounter_add.caption"
 msgid "+"
 msgstr ""
 
 #: tdigit_main.btcropcounter_add.hint
-msgctxt "tdigit_main.btcropcounter_add.hint"
 msgid "Add a Counter"
 msgstr "Aggiungi un Contatore"
 
 #: tdigit_main.btcropcounter_del.caption
-msgctxt "tdigit_main.btcropcounter_del.caption"
 msgid "-"
 msgstr ""
 
 #: tdigit_main.btcropcounter_del.hint
-msgctxt "tdigit_main.btcropcounter_del.hint"
 msgid "Remove this Counter"
 msgstr "Rimuovi questo Contatore"
 
@@ -466,12 +436,10 @@ msgid "Duplicate when Rotate/Flip"
 msgstr "Duplica quando Ruota/Ribalta"
 
 #: tdigit_main.btcrotateleft.hint
-msgctxt "tdigit_main.btcrotateleft.hint"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.btcrotateright.hint
-msgctxt "tdigit_main.btcrotateright.hint"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
@@ -488,12 +456,10 @@ msgid "Rotate 180°"
 msgstr "Ruota di 180°"
 
 #: tdigit_main.btprotateleft.hint
-msgctxt "tdigit_main.btprotateleft.hint"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.btprotateright.hint
-msgctxt "tdigit_main.btprotateright.hint"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
@@ -526,12 +492,10 @@ msgid "not defined"
 msgstr "non definita"
 
 #: tdigit_main.itemcropmodecustom.caption
-msgctxt "tdigit_main.itemcropmodecustom.caption"
 msgid "Custom"
 msgstr "Personalizzata"
 
 #: tdigit_main.itemcropmodefull.caption
-msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr "Area Intera"
 
@@ -540,17 +504,14 @@ msgid "Z Order :"
 msgstr "Ordine Z :"
 
 #: tdigit_main.label10.caption
-msgctxt "tdigit_main.label10.caption"
 msgid "Flip :"
 msgstr "Ribalta :"
 
 #: tdigit_main.label2.caption
-msgctxt "tdigit_main.label2.caption"
 msgid "Rotate :"
 msgstr "Ruota :"
 
 #: tdigit_main.label3.caption
-msgctxt "tdigit_main.label3.caption"
 msgid "Flip :"
 msgstr "Ribalta :"
 
@@ -571,7 +532,6 @@ msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗
 msgstr "Pagina ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label9.caption
-msgctxt "tdigit_main.label9.caption"
 msgid "Rotate :"
 msgstr "Ruota :"
 
@@ -660,7 +620,6 @@ msgid "Crop Mode"
 msgstr "Modo Taglio"
 
 #: tdigit_main.tbdestination.caption
-msgctxt "tdigit_main.tbdestination.caption"
 msgid "Destination..."
 msgstr "Destinazione..."
 
@@ -689,13 +648,32 @@ msgid "tbSepTake"
 msgstr ""
 
 #: tdigit_main.tbsource.caption
-msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
+#: tdigit_pdf.caption
+msgid "PDF Info"
+msgstr "PDF Info"
+
+#: tdigit_pdf.label1.caption
+msgid "Title :"
+msgstr "Titolo :"
+
+#: tdigit_pdf.label2.caption
+msgid "Author :"
+msgstr "Autore :"
+
+#: tdigit_pdf.label3.caption
+msgid "Producer :"
+msgstr "Produttore :"
+
+#: tdigit_pdf.label4.caption
+msgid "Keywords :"
+msgstr "Parole chiave :"
+
 #: tdigit_progress.capcurrent.caption
 msgid "Current"
-msgstr ""
+msgstr "Attuale"
 
 #: tdigit_progress.caption
 msgid "DigIt_Progress"
@@ -718,17 +696,14 @@ msgid "DigIt_Templates"
 msgstr ""
 
 #: twizardbuildduplex.btcancel.caption
-msgctxt "twizardbuildduplex.btcancel.caption"
 msgid "&Cancel"
 msgstr "A&nnulla"
 
 #: twizardbuildduplex.btnext.caption
-msgctxt "twizardbuildduplex.btnext.caption"
 msgid "&Next"
 msgstr "&Avanti"
 
 #: twizardbuildduplex.btprev.caption
-msgctxt "twizardbuildduplex.btprev.caption"
 msgid "&Back"
 msgstr "&Indietro"
 
@@ -741,12 +716,10 @@ msgid "Insert Front Side Pages"
 msgstr "Inserisci le Pagine Frontali"
 
 #: twizardbuildduplex.label2.caption
-msgctxt "twizardbuildduplex.label2.caption"
 msgid "Click Next when ready"
 msgstr "Clicca Avanti quando si è pronti"
 
 #: twizardbuildduplex.label4.caption
-msgctxt "twizardbuildduplex.label4.caption"
 msgid "Click Next when ready"
 msgstr "Clicca Avanti quando si è pronti"
 
@@ -791,12 +764,10 @@ msgid "TabSheet4"
 msgstr ""
 
 #: twizardbuildduplex.tbdestination.caption
-msgctxt "twizardbuildduplex.tbdestination.caption"
 msgid "Destination..."
 msgstr "Destinazione..."
 
 #: twizardbuildduplex.tbsource.caption
-msgctxt "twizardbuildduplex.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
@@ -805,7 +776,6 @@ msgid "tbWizard"
 msgstr ""
 
 #: twiaselectform.btrefresh.caption
-msgctxt "twiaselectform.btrefresh.caption"
 msgid "Refresh"
 msgstr "Aggiorna"
 
@@ -814,12 +784,10 @@ msgid "Select WIA Device"
 msgstr "Seleziona Dispositivo WIA"
 
 #: twiaselectform.lvsources.columns[0].caption
-msgctxt "twiaselectform.lvsources.columns[0].caption"
 msgid "Name"
 msgstr "Nome"
 
 #: twiaselectform.lvsources.columns[1].caption
-msgctxt "twiaselectform.lvsources.columns[1].caption"
 msgid "Manufacturer"
 msgstr "Produttore"
 
@@ -828,27 +796,22 @@ msgid "Type"
 msgstr "Tipo"
 
 #: twiasettingssource.btbrightness0.caption
-msgctxt "twiasettingssource.btbrightness0.caption"
 msgid "0"
 msgstr ""
 
 #: twiasettingssource.btbrightnessd.caption
-msgctxt "twiasettingssource.btbrightnessd.caption"
 msgid "d"
 msgstr "p"
 
 #: twiasettingssource.btcontrast0.caption
-msgctxt "twiasettingssource.btcontrast0.caption"
 msgid "0"
 msgstr ""
 
 #: twiasettingssource.btcontrastd.caption
-msgctxt "twiasettingssource.btcontrastd.caption"
 msgid "d"
 msgstr "p"
 
 #: twiasettingssource.btpaperorientation.hint
-msgctxt "twiasettingssource.btpaperorientation.hint"
 msgid "Paper Orientation"
 msgstr "Orientamento Carta"
 
@@ -865,7 +828,6 @@ msgid "Undo"
 msgstr "Scarta"
 
 #: twiasettingssource.btresolutiond.caption
-msgctxt "twiasettingssource.btresolutiond.caption"
 msgid "d"
 msgstr "p"
 
@@ -878,7 +840,6 @@ msgid "Back First"
 msgstr "Prima Retro"
 
 #: twiasettingssource.cbusenativeui.caption
-msgctxt "twiasettingssource.cbusenativeui.caption"
 msgid "Use Native UI"
 msgstr "Usa UI Nativa"
 
@@ -899,27 +860,22 @@ msgid "Paper Type :"
 msgstr "Tipo Carta :"
 
 #: twiasettingssource.label3.caption
-msgctxt "twiasettingssource.label3.caption"
 msgid "Resolution :"
 msgstr "Risoluzione :"
 
 #: twiasettingssource.label4.caption
-msgctxt "twiasettingssource.label4.caption"
 msgid "Brightness :"
 msgstr "Luminosità :"
 
 #: twiasettingssource.label5.caption
-msgctxt "twiasettingssource.label5.caption"
 msgid "Contrast :"
 msgstr "Contrasto :"
 
 #: twiasettingssource.label6.caption
-msgctxt "twiasettingssource.label6.caption"
 msgid "Bit Depth :"
 msgstr "Numero Bit :"
 
 #: twiasettingssource.label7.caption
-msgctxt "twiasettingssource.label7.caption"
 msgid "Image Type :"
 msgstr "Tipo Immagine :"
 

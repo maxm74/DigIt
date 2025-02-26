@@ -1,15 +1,5 @@
 msgid ""
-msgstr ""
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: it\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.5\n"
+msgstr "Content-Type: text/plain; charset=UTF-8"
 
 #: digit_form_buildduplex.caption_cancel
 msgctxt "digit_form_buildduplex.caption_cancel"
@@ -59,7 +49,6 @@ msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinuework
-#, fuzzy
 msgctxt "digit_form_main.rscontinuework"
 msgid "Continue from last Work Session?"
 msgstr "Continuo dall'ultima Sessione di Lavoro?"
@@ -165,7 +154,6 @@ msgid "Folder Pictures"
 msgstr "Cartella di Immagini"
 
 #: digit_source_twain.rstwainexcnotfound
-#, fuzzy
 msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
 msgstr "Dispositivo non trovato..."
@@ -245,13 +233,11 @@ msgid "Delete All Pages"
 msgstr "Cancella Tutte le Pagine"
 
 #: tdigit_main.actcapturedrotateleft.caption
-#, fuzzy
 msgctxt "tdigit_main.actcapturedrotateleft.caption"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.actcapturedrotateright.caption
-#, fuzzy
 msgctxt "tdigit_main.actcapturedrotateright.caption"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
@@ -261,7 +247,6 @@ msgid "Clear Work Queue"
 msgstr "Cancella Coda Lavoro"
 
 #: tdigit_main.actcrop.caption
-#, fuzzy
 #| msgid "Crop (F5)"
 msgid "Crop"
 msgstr "Taglia (F5)"
@@ -279,7 +264,6 @@ msgid "Next"
 msgstr "Avanti"
 
 #: tdigit_main.actcropnext.caption
-#, fuzzy
 #| msgid "Crop + Next (F5)"
 msgid "Crop + Next"
 msgstr "Taglia + Avanti (F5)"
@@ -693,9 +677,30 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
+#: tdigit_pdf.caption
+msgid "PDF Info"
+msgstr "PDF Info"
+
+#: tdigit_pdf.label1.caption
+msgid "Title :"
+msgstr "Titolo :"
+
+#: tdigit_pdf.label2.caption
+msgid "Author :"
+msgstr "Autore :"
+
+#: tdigit_pdf.label3.caption
+msgid "Producer :"
+msgstr "Produttore :"
+
+#: tdigit_pdf.label4.caption
+msgid "Keywords :"
+msgstr "Parole chiave :"
+
 #: tdigit_progress.capcurrent.caption
+msgctxt "tdigit_progress.capcurrent.caption"
 msgid "Current"
-msgstr ""
+msgstr "Attuale"
 
 #: tdigit_progress.caption
 msgid "DigIt_Progress"
@@ -804,6 +809,105 @@ msgstr "Sorgente..."
 msgid "tbWizard"
 msgstr ""
 
+#: delphitwain_selectform.rsnotwaindevicepresent
+msgid "No Twain Devices present..."
+msgstr "Nessu Dispositivo Twain presente..."
+
+#: delphitwain_settingsform.rsfeeder
+msgctxt "delphitwain_settingsform.rsfeeder"
+msgid "Feeder"
+msgstr "Caricatore"
+
+#: delphitwain_settingsform.rsflatbed
+msgid "Flatbed"
+msgstr "Piano"
+
+#: delphitwain_settingsform.rsfullsize
+msgctxt "delphitwain_settingsform.rsfullsize"
+msgid "Full size"
+msgstr "Dimensione Intera"
+
+#: delphitwain_settingsform.rslandscape
+msgctxt "delphitwain_settingsform.rslandscape"
+msgid "Landscape"
+msgstr "Orizzontale"
+
+#: delphitwain_settingsform.rsportrait
+msgctxt "delphitwain_settingsform.rsportrait"
+msgid "Portrait"
+msgstr "Verticale"
+
+#: ttwainselectsource.btrefresh.caption
+msgctxt "ttwainselectsource.btrefresh.caption"
+msgid "Refresh"
+msgstr "Aggiorna"
+
+#: ttwainselectsource.caption
+msgid "Select Twain Source"
+msgstr "Seleziona Sorgente Twain"
+
+#: ttwainselectsource.lvsources.columns[0].caption
+msgctxt "ttwainselectsource.lvsources.columns[0].caption"
+msgid "Name"
+msgstr "Nome"
+
+#: ttwainselectsource.lvsources.columns[1].caption
+msgctxt "ttwainselectsource.lvsources.columns[1].caption"
+msgid "Manufacturer"
+msgstr "Produttore"
+
+#: ttwainsettingssource.btorientation.hint
+msgctxt "ttwainsettingssource.btorientation.hint"
+msgid "Paper Orientation"
+msgstr "Orientamento Carta"
+
+#: ttwainsettingssource.btrefresh.caption
+msgctxt "ttwainsettingssource.btrefresh.caption"
+msgid "Refresh"
+msgstr "Aggiorna"
+
+#: ttwainsettingssource.caption
+msgid "Settings of Twain Source"
+msgstr "Impostazioni della Sorgente Twain"
+
+#: ttwainsettingssource.cbusenativeui.caption
+msgctxt "ttwainsettingssource.cbusenativeui.caption"
+msgid "Use Native UI"
+msgstr "Usa UI Nativa"
+
+#: ttwainsettingssource.label1.caption
+msgid "Paper feeding :"
+msgstr "Alimentazione Carta :"
+
+#: ttwainsettingssource.label2.caption
+msgid "Paper Size :"
+msgstr "Dimensione Carta :"
+
+#: ttwainsettingssource.label3.caption
+msgctxt "ttwainsettingssource.label3.caption"
+msgid "Resolution :"
+msgstr "Risoluzione :"
+
+#: ttwainsettingssource.label4.caption
+msgctxt "ttwainsettingssource.label4.caption"
+msgid "Brightness :"
+msgstr "Luminosità :"
+
+#: ttwainsettingssource.label5.caption
+msgctxt "ttwainsettingssource.label5.caption"
+msgid "Contrast :"
+msgstr "Contrasto :"
+
+#: ttwainsettingssource.label6.caption
+msgctxt "ttwainsettingssource.label6.caption"
+msgid "Bit Depth :"
+msgstr "Numero Bit :"
+
+#: ttwainsettingssource.label7.caption
+msgctxt "ttwainsettingssource.label7.caption"
+msgid "Image Type :"
+msgstr "Tipo Immagine :"
+
 #: twiaselectform.btrefresh.caption
 msgctxt "twiaselectform.btrefresh.caption"
 msgid "Refresh"
@@ -883,6 +987,7 @@ msgid "Use Native UI"
 msgstr "Usa UI Nativa"
 
 #: twiasettingssource.gbfeeder.caption
+msgctxt "twiasettingssource.gbfeeder.caption"
 msgid "Feeder"
 msgstr "Caricatore"
 
@@ -951,7 +1056,8 @@ msgstr "Allineamento Orizzontale"
 msgid "Vertical Align"
 msgstr "Allineamento Verticale"
 
-#: wia_selectform.rsnodevicepresent
+#: wia_selectform.rsnowiadevicepresent
+msgctxt "wia_selectform.rsnowiadevicepresent"
 msgid "No Wia Devices present..."
 msgstr "Nessun Dispositivo Wia presente..."
 
@@ -1003,13 +1109,16 @@ msgid "Cannot Get Source Item %d"
 msgstr "Impossibile ottenere l'Elemento %d della Sorgente"
 
 #: wia_settingsform.rsfullsize
+msgctxt "wia_settingsform.rsfullsize"
 msgid "Full size"
 msgstr "Dimensione Intera"
 
 #: wia_settingsform.rslandscape
+msgctxt "wia_settingsform.rslandscape"
 msgid "Landscape"
 msgstr "Orizzontale"
 
 #: wia_settingsform.rsportrait
+msgctxt "wia_settingsform.rsportrait"
 msgid "Portrait"
 msgstr "Verticale"

@@ -1,19 +1,20 @@
 object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
   Left = 416
-  Height = 138
+  Height = 200
   Top = 239
-  Width = 276
-  BorderIcons = []
-  BorderStyle = bsDialog
+  Width = 480
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Save as Files Settings'
-  ClientHeight = 138
-  ClientWidth = 276
-  LCLVersion = '3.99.0.0'
+  ClientHeight = 200
+  ClientWidth = 480
+  DesignTimePPI = 120
+  Position = poScreenCenter
   object BCPanel1: TBCPanel
     Left = 0
-    Height = 98
+    Height = 150
     Top = 0
-    Width = 276
+    Width = 480
     Align = alClient
     Background.Color = clBtnFace
     Background.Gradient1.StartColor = clWhite
@@ -48,29 +49,29 @@ object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
     Rounding.RoundY = 1
     TabOrder = 0
     object Label6: TLabel
-      Left = 21
-      Height = 15
-      Top = 8
-      Width = 39
+      Left = 25
+      Height = 20
+      Top = 16
+      Width = 49
       Caption = 'Folder :'
     end
     object dirDestination: TDirectoryEdit
-      Left = 71
-      Height = 23
-      Top = 8
-      Width = 190
+      Left = 81
+      Height = 28
+      Top = 16
+      Width = 391
       ShowHidden = False
-      ButtonWidth = 23
+      ButtonWidth = 29
       NumGlyphs = 1
       MaxLength = 0
       TabOrder = 0
       OnChange = dirDestinationChange
     end
     object BCLabel9: TBCLabel
-      Left = 16
-      Height = 15
-      Top = 42
-      Width = 44
+      Left = 20
+      Height = 20
+      Top = 58
+      Width = 54
       Background.Gradient1.StartColor = clWhite
       Background.Gradient1.EndColor = clBlack
       Background.Gradient1.GradientType = gtLinear
@@ -100,11 +101,11 @@ object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
       Rounding.RoundY = 1
     end
     object cbSaveFormat: TComboBox
-      Left = 71
-      Height = 23
-      Top = 40
-      Width = 190
-      ItemHeight = 15
+      Left = 81
+      Height = 28
+      Top = 56
+      Width = 391
+      ItemHeight = 20
       Style = csDropDownList
       TabOrder = 1
       OnChange = cbSaveFormatChange
@@ -112,9 +113,9 @@ object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
   end
   object panelButtons: TBCPanel
     Left = 0
-    Height = 40
-    Top = 98
-    Width = 276
+    Height = 50
+    Top = 150
+    Width = 480
     Align = alBottom
     Background.Color = clBtnFace
     Background.Gradient1.StartColor = clWhite
@@ -149,10 +150,10 @@ object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
     Rounding.RoundY = 1
     TabOrder = 1
     object btCancel: TBitBtn
-      Left = 104
-      Height = 34
-      Top = 2
-      Width = 87
+      Left = 265
+      Height = 42
+      Top = 3
+      Width = 109
       Anchors = [akRight, akBottom]
       DefaultCaption = True
       Kind = bkCancel
@@ -160,10 +161,10 @@ object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
       TabOrder = 0
     end
     object btOk: TBitBtn
-      Left = 195
-      Height = 34
-      Top = 2
-      Width = 75
+      Left = 378
+      Height = 42
+      Top = 3
+      Width = 94
       Anchors = [akRight, akBottom]
       Default = True
       DefaultCaption = True

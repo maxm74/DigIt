@@ -24,8 +24,9 @@
     </i18n>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="2"/>
+      <MinorVersionNr Value="1"/>
       <Attributes pvaPreRelease="True"/>
+      <StringTable CompanyName="MaxM" LegalCopyright="2025 Massimo Magnano" ProductName="DigIt"/>
     </VersionInfo>
     <BuildModes Count="2">
       <Item1 Name="Release" Default="True"/>
@@ -120,7 +121,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="18">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -203,6 +204,13 @@
         <Filename Value="Digit_Source_Twain.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="DigIt_Form_PDF.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DigIt_PDF"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

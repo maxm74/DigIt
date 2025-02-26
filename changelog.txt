@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/02/
+2025/02/26 Use of BGRAImageFormat Writer intestead of Ext;
+	   Updated Dest Save Files Settings Form;
+	   Added PDF Info Form;
+	   Updated Version Info and Setup;
         25 Tested and fixed user cancel operations;
            Added TDigIt_Progress OnCancelClick event and IDigIt_Progress.Cancelled;
         24 LoadSaveWork in separate methods;

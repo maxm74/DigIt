@@ -1,7 +1,7 @@
 (*******************************************************************************
 **                                  DigIt                                     **
 **                                                                            **
-**          (s) 2023 Massimo Magnano                                          **
+**          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
 **   Common Types\Consts                                                      **
@@ -13,7 +13,16 @@ unit DigIt_Types;
 
 interface
 
-uses SysUtils, ComCtrls;
+uses SysUtils;
+
+const
+  DigIt_Version = '0.1.0';
+  Config_XMLWork = 'digit.xml';
+  Config_Options = 'digit.ini';
+  Config_CapturedThumbs = 'c_thumbs.img';
+  XML_SourceFiles   = 'SourceFiles/';
+  XML_CapturedFiles = 'CapturedFiles/';
+  XML_PageSettings  = 'PageSettings/';
 
 type
   TDigItCropMode = (
@@ -21,14 +30,6 @@ type
     diCropFull,      //All captured pages are processed in bulk as they are
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
-
-const
-  Config_XMLWork = 'digit.xml';
-  Config_Options = 'digit.ini';
-  Config_CapturedThumbs = 'c_thumbs.img';
-  XML_SourceFiles   = 'SourceFiles/';
-  XML_CapturedFiles = 'CapturedFiles/';
-  XML_PageSettings  = 'PageSettings/';
 
 var
    Path_Application,

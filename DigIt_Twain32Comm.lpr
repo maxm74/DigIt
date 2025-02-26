@@ -821,6 +821,8 @@ begin
   writeln('         -s [--stop] ', 'Stop Server');
 end;
 
+{$R *.res}
+
 begin
   Application:=TDigIt_Twain32Comm.Create(nil);
   Application.Title:='DigIt_Twain32Comm';

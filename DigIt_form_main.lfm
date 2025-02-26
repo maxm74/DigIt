@@ -1149,7 +1149,6 @@ object DigIt_Main: TDigIt_Main
         Left = 61
         Top = 2
         Action = actCapturedRotateLeft
-        ShowCaption = False
       end
       object tbCapturedRotateRight: TToolButton
         Left = 87
@@ -2699,33 +2698,15 @@ object DigIt_Main: TDigIt_Main
       E3024FE1F8BCF86F81FE1F6CFEF618
     }
   end
-  object SavePicture: TSavePictureDialog
-    Title = 'Save image as'
-    DefaultExt = '.jpg'
-    Left = 426
-    Top = 490
-  end
-  object OpenPicture: TOpenPictureDialog
-    Title = 'Open an existing image'
-    DefaultExt = '.jpg'
-    Left = 426
-    Top = 420
-  end
   object SelectDirectory: TSelectDirectoryDialog
     Left = 530
     Top = 108
   end
   object SavePDF: TSaveDialog
-    DefaultExt = '.clf'
+    DefaultExt = '.pdf'
     Filter = 'Portable Document Format (*.pdf)|*.pdf|All Files (*.*)|*.*'
     Left = 426
-    Top = 330
-  end
-  object OpenCropList: TOpenDialog
-    DefaultExt = '.clf'
-    Filter = 'Crop List File (*.clf)|*.clf|All Files (*.*)|*.*'
-    Left = 426
-    Top = 260
+    Top = 256
   end
   object ActionListMain: TActionList
     Images = imgListMain
@@ -3066,14 +3047,14 @@ object DigIt_Main: TDigIt_Main
     Top = 490
   end
   object OpenProject: TOpenDialog
-    DefaultExt = '.dpf'
-    Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
+    DefaultExt = '.digp'
+    Filter = 'Digit Project (*.digp)|*.digp|Digit Session (*.digs)|*.digs|Digit Files (*.digp;*.digs)|*.digp;*.digs|All Files (*.*)|*.*'
     Left = 426
     Top = 108
   end
   object SaveProject: TSaveDialog
-    DefaultExt = '.dpf'
-    Filter = 'Digit Project File (*.dpf)|*.dpf|All Files (*.*)|*.*'
+    DefaultExt = '.digp'
+    Filter = 'Digit Project (*.digp)|*.digp|Digit Session (*.digs)|*.digs|Digit Files (*.digp;*.digs)|*.digp;*.digs|All Files (*.*)|*.*'
     Left = 426
     Top = 178
   end

@@ -73,8 +73,6 @@
 {"hash":128362848,"name":"tdigit_main.tbcrop.caption","sourcebytes":[116,98,67,114,111,112],"value":"tbCrop"},
 {"hash":163894032,"name":"tdigit_main.tbsepcrop.caption","sourcebytes":[116,98,83,101,112,67,114,111,112],"value":"tbSepCrop"},
 {"hash":206539794,"name":"tdigit_main.tbsepclear.caption","sourcebytes":[116,98,83,101,112,67,108,101,97,114],"value":"tbSepClear"},
-{"hash":183566387,"name":"tdigit_main.savepicture.title","sourcebytes":[83,97,118,101,32,105,109,97,103,101,32,97,115],"value":"Save image as"},
-{"hash":101181333,"name":"tdigit_main.openpicture.title","sourcebytes":[79,112,101,110,32,97,110,32,101,120,105,115,116,105,110,103,32,105,109,97,103,101],"value":"Open an existing image"},
 {"hash":126668695,"name":"tdigit_main.actpreview.caption","sourcebytes":[80,114,101,118,105,101,119],"value":"Preview"},
 {"hash":370709,"name":"tdigit_main.acttake.caption","sourcebytes":[84,97,107,101],"value":"Take"},
 {"hash":142780485,"name":"tdigit_main.acttakere.caption","sourcebytes":[82,101,45,84,97,107,101],"value":"Re-Take"},

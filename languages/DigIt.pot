@@ -586,10 +586,6 @@ msgstr ""
 msgid "Stop Timer"
 msgstr ""
 
-#: tdigit_main.openpicture.title
-msgid "Open an existing image"
-msgstr ""
-
 #: tdigit_main.rgcropaspect.caption
 msgid "Aspect Ratio"
 msgstr ""
@@ -604,10 +600,6 @@ msgstr ""
 
 #: tdigit_main.rollpages.button.caption
 msgid "Captured Pages"
-msgstr ""
-
-#: tdigit_main.savepicture.title
-msgid "Save image as"
 msgstr ""
 
 #: tdigit_main.tbcaptsep1.caption
@@ -666,6 +658,26 @@ msgstr ""
 #: tdigit_main.tbsource.caption
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
+msgstr ""
+
+#: tdigit_pdf.caption
+msgid "PDF Info"
+msgstr ""
+
+#: tdigit_pdf.label1.caption
+msgid "Title :"
+msgstr ""
+
+#: tdigit_pdf.label2.caption
+msgid "Author :"
+msgstr ""
+
+#: tdigit_pdf.label3.caption
+msgid "Producer :"
+msgstr ""
+
+#: tdigit_pdf.label4.caption
+msgid "Keywords :"
 msgstr ""
 
 #: tdigit_progress.capcurrent.caption

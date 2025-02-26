@@ -1,7 +1,7 @@
 (*******************************************************************************
 **                                  DigIt                                     **
 **                                                                            **
-**          (s) 2024 Massimo Magnano                                          **
+**          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
 **   Main Form                                                                **
@@ -196,11 +196,8 @@ type
     menuProjectOpen: TMenuItem;
     menuProjectSave: TMenuItem;
     menuProjectNew: TMenuItem;
-    OpenCropList: TOpenDialog;
-    OpenPicture: TOpenPictureDialog;
     MenuMain: TPopupMenu;
     SavePDF: TSaveDialog;
-    SavePicture: TSavePictureDialog;
     SelectDirectory: TSelectDirectoryDialog;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
@@ -321,6 +318,8 @@ type
     UserCancel: Boolean;
     Counters: TDigIt_CounterList;
 
+    CropMode: TDigItCropMode;
+
     rSource: PSourceInfo;
     rSourceName: String;
     rSourceParams: IDigIt_Params;
@@ -331,9 +330,11 @@ type
     *)
     rDestinationName: String;
 
-    CropMode: TDigItCropMode;
+    SaveFormat: TBGRAImageFormat;
+    SaveWriter: TFPCustomImageWriter;
     SaveExt,
-    SavePath,
+    SavePath: String;
+
     rProject_File,
     LoadedFile: String;
     testI,
@@ -443,7 +444,8 @@ implementation
 uses
   LCLIntf, LCLProc, fppdf,
   BGRAFlashProgressBar,
-  DigIt_Destinations, DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
+  DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm, DigIt_Form_PDF,
+  DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
 
 { TDigIt_Main }
@@ -642,6 +644,7 @@ begin
   Counters.Free;
   theBridge.Free;
   SourceFiles:= nil;
+  if (SaveWriter <> nil) then SaveWriter.Free;
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
@@ -954,6 +957,7 @@ begin
       DigIt_Progress.progressTotal.Position:= iSourceFiles;
       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [iSourceFiles, cStr]);
       Application.ProcessMessages;
+      if UserCancel then break;
 
       imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
       SourceFiles[iSourceFiles].fCrop:= True;
@@ -1629,7 +1633,7 @@ begin
          then begin
                 //No Counter, Save File with CropArea Name
                 savedFile:=SavePath+CropArea.Name+'.'+SaveExt;
-                Bitmap.SaveToFile(savedFile);
+                Bitmap.SaveToFile(savedFile, SaveWriter);
               end
          else begin
                 //Increment the Counter Value
@@ -1639,7 +1643,7 @@ begin
 
                 //Save File
                 savedFile:=SavePath+cropCounter.GetValue+'.'+SaveExt;
-                Bitmap.SaveToFile(savedFile);
+                Bitmap.SaveToFile(savedFile, SaveWriter);
               end;
        end
   else begin
@@ -1650,7 +1654,7 @@ begin
 
          //Save File
          savedFile:=SavePath+cropCounter.GetValue+'.'+SaveExt;
-         Bitmap.SaveToFile(savedFile);
+         Bitmap.SaveToFile(savedFile, SaveWriter);
        end;
 
   captItem:= nil;
@@ -2005,8 +2009,22 @@ begin
             rDestinationParams:= nil;
  *)
             rDestinationName:= '';
-            SaveExt:= aXML.GetValue('Destination/Params/Format', 'jpg');
             SavePath:= aXML.GetValue('Destination/Params/Path', '');
+
+            //Load Format and Create Writer
+            SaveFormat:= ifJpeg;
+            aXML.GetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
+            try
+               if (SaveWriter <> nil) then SaveWriter.Free;
+               SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
+               SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
+               { #todo 5 -oMaxM : Load Format Specific parameters, Find a way using RTI? }
+
+            except
+               SaveWriter:= nil;
+               SaveExt:= 'jpg';
+            end;
+
             Result:= -1;
  (*
           end
@@ -2042,8 +2060,11 @@ begin
      begin
 *)
        aXML.DeletePath('Destination/Params/');
-       aXML.SetValue('Destination/Params/Format', SaveExt);
        aXML.SetValue('Destination/Params/Path', SavePath);
+
+       aXML.SetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
+       { #todo 5 -oMaxM : Save Format Specific parameters, Find a way using RTI? }
+
 //     end;
 
   finally
@@ -2409,8 +2430,19 @@ end;
 procedure TDigIt_Main.Default_Work;
 begin
   rDestinationName:= '';
-  SaveExt:= 'jpg';
+  SaveFormat:= ifJpeg;
   SavePath:= Path_Pictures;
+
+  try
+     if (SaveWriter <> nil) then SaveWriter.Free;
+     SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
+     SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
+
+  except
+    SaveWriter:= nil;
+    SaveExt:= 'jpg';
+  end;
+
   (*
   rollCrops.Collapsed:=False;
 
@@ -2450,8 +2482,19 @@ begin
      then begin
     *)
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-            if Destination_SaveFiles_Settings_Execute(SaveExt, SavePath) then
+            if TDest_SaveFiles_Settings.Execute(SaveFormat, SavePath) then
             begin
+              try
+                 if (SaveWriter <> nil) then SaveWriter.Free;
+                 SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
+                 SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
+
+              except
+                SaveWriter:= nil;
+                SaveExt:= 'jpg';
+              end;
+              { #todo 5 -oMaxM : Load Specific Format Settings from Form? }
+
             end;
             //rDestination:= nil;
             //rDestinationParams:= nil;
@@ -2695,86 +2738,97 @@ Var
 
 begin
   if SavePDF.Execute then
-  begin
   try
      pdfFileName:= SavePDF.FileName;
-     saved:= False;
-
-     with DigIt_Progress do
-     begin
-       labTotal.Caption:= '';
-       capTotal.Caption:= '';
-       progressTotal.Style:= pbstNormal;
-       progressTotal.Min:= 0;
-       progressTotal.Max:= lvCaptured.Items.Count-1;
-       progressTotal.Position:= 0;
-       panelCurrent.Visible:= False;
-       Show(PChar(rsConvertPDF));
-       cStr:= IntToStr(progressTotal.Max);
-     end;
 
      PDF:= TPDFDocument.Create(Nil);
 
      PDF.Infos.Title := Application.Title;
      PDF.Infos.Author := 'MaxM';
      PDF.Infos.Producer := Application.Title;
-     PDF.Infos.ApplicationName := ApplicationName;
+     PDF.Infos.ApplicationName := Application.Title+' ver '+DigIt_Version;
      PDF.Infos.CreationDate := Now;
      PDF.Options := [poCompressImages, poUseRawJPEG];
 
-     PDF.StartDocument;
-     S := PDF.Sections.AddSection;
+     if TDigIt_PDF.Execute(PDF.Infos) then
+     try
+        UserCancel:= False;
+        saved:= False;
 
-     for i := 0 to Length(CapturedFiles)-1 do
-     begin
-       DigIt_Progress.progressTotal.Position:= i;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
-       Application.ProcessMessages;
+        with DigIt_Progress do
+        begin
+          labTotal.Caption:= '';
+          capTotal.Caption:= '';
+          progressTotal.Style:= pbstNormal;
+          progressTotal.Min:= 0;
+          progressTotal.Max:= lvCaptured.Items.Count-1;
+          progressTotal.Position:= 0;
+          panelCurrent.Visible:= False;
+          Show(PChar(rsConvertPDF));
+          cStr:= IntToStr(progressTotal.Max);
+        end;
 
-       curFileName:= CapturedFiles[i].fName;
+        PDF.StartDocument;
+        S := PDF.Sections.AddSection;
 
-       if FileExists(curFileName) then
-       begin
-         P := PDF.Pages.AddPage;
-         P.PaperType := ptCustom; //ptCustom; //ptA4;
-         P.UnitOfMeasure := uomPixels;//uomMillimeters;
+        for i := 0 to Length(CapturedFiles)-1 do
+        begin
+          DigIt_Progress.progressTotal.Position:= i;
+          DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
+          Application.ProcessMessages;
+          if UserCancel then break;
 
-         IDX := PDF.Images.AddFromFile(curFileName, False);
-         if (IDX >= 0) then
-         begin
-           W := PDF.Images[IDX].Width;
-           H := PDF.Images[IDX].Height;
+          curFileName:= CapturedFiles[i].fName;
 
-           //Set Paper to Full image size
-           paper.W:=W;
-           paper.H:=H;
-           P.Paper:=paper;
+          if FileExists(curFileName) then
+          begin
+            P := PDF.Pages.AddPage;
+            P.PaperType := ptCustom; //ptCustom; //ptA4;
+            P.UnitOfMeasure := uomPixels;//uomMillimeters;
 
-           P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
+            IDX := PDF.Images.AddFromFile(curFileName, False);
+            if (IDX >= 0) then
+            begin
+              W := PDF.Images[IDX].Width;
+              H := PDF.Images[IDX].Height;
 
-           S.AddPage(P);
-         end;
-       end;
+              //Set Paper to Full image size
+              paper.W:=W;
+              paper.H:=H;
+              P.Paper:=paper;
 
-       DigIt_Progress.progressTotal.Position:= i+1;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
-       Application.ProcessMessages;
+              P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
+
+              S.AddPage(P);
+            end;
+          end;
+
+          DigIt_Progress.progressTotal.Position:= i+1;
+          DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
+          Application.ProcessMessages;
+          if UserCancel then break;
+        end;
+
+        if not(UserCancel) then
+        begin
+          PDF_File:= TFileStream.Create(pdfFileName, fmCreate);
+          PDF.SaveToStream(PDF_File);
+          saved:= True;
+        end;
+
+     finally
+       DigIt_Progress.Hide;
+       UserCancel:= False;
+
+       if (PDF_File <> nil) then PDF_File.Free;
+
+       if saved and FileExists(pdfFileName)
+       then if (MessageDlg('DigIt', rsOpenSavedPDF, mtConfirmation, mbYesNo, 0) = mrYes)
+            then OpenDocument(pdfFileName);
      end;
 
-     PDF_File:= TFileStream.Create(pdfFileName, fmCreate);
-     PDF.SaveToStream(PDF_File);
-     saved:= True;
-
   finally
-     DigIt_Progress.Hide;
-
-     PDF.Free;
-     PDF_File.Free;
-  end;
-
-  if saved and FileExists(pdfFileName)
-  then if (MessageDlg('DigIt', rsOpenSavedPDF, mtConfirmation, mbYesNo, 0) = mrYes)
-       then OpenDocument(pdfFileName);
+    PDF.Free;
   end;
 end;
 

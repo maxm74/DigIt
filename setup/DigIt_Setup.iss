@@ -3,27 +3,30 @@
 
 #define MyAppName "DigIt"
 #define MyAppVersion "0.1"
-#define MyAppPublisher "MaxM"
+#define MyAppPublisher "Massimo Magnano"
+#define MyAppURL "https://github.com/maxm74/DigIt"
 #define MyAppExeName "DigIt.exe"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
+; NOTE: The value of AppId uniquely identifies this application.
+; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{B0FCF470-9F9B-4771-AAB0-4ABDBAA3D536}
+AppId={{D101CADE-C69C-5E55-840D-400BE35D2C59}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=C:\Programming\Lazarus\Projects\DigIt\LICENSE
-; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
 OutputDir=C:\Programming\Lazarus\Projects\DigIt\setup
 OutputBaseFilename=DigIt_Setup
+SetupIconFile=C:\Programming\Lazarus\Projects\DigIt\DigIt.ico
 Compression=lzma
 SolidCompression=yes
-WizardStyle=modern
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -31,15 +34,18 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "C:\Programming\Lazarus\Projects\DigIt\bin\x86_64-win64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Programming\Lazarus\Projects\DigIt\bin\x86_64-win64\DigIt.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Programming\Lazarus\Projects\DigIt\bin\DigIt_Twain32Comm.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Programming\Lazarus\Projects\DigIt\languages\all\*"; DestDir: "{app}\languages"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

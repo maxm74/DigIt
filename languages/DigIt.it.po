@@ -145,10 +145,6 @@ msgstr "Elaborando %d / %s"
 msgid "Processing Images"
 msgstr "Elaborando le Immagini"
 
-#: digit_form_main.rssaveproject
-msgid "Save Current Project?"
-msgstr "Salvo il Progetto Attuale?"
-
 #: digit_form_main.rssavework
 msgid "Save the Work Session?"
 msgstr "Salvo la sessione di Lavoro?"
@@ -163,6 +159,7 @@ msgid "Folder Pictures"
 msgstr "Cartella di Immagini"
 
 #: digit_source_twain.rstwainexcnotfound
+msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
 msgstr "Dispositivo non trovato..."
 
@@ -212,6 +209,7 @@ msgid "Error Connecting Device"
 msgstr "Errore Connettendo al Dispositivo"
 
 #: digit_source_wia.rswiaexcnotfound
+msgctxt "digit_source_wia.rswiaexcnotfound"
 msgid "Device not found..."
 msgstr "Dispositivo non trovato..."
 
@@ -240,10 +238,12 @@ msgid "Delete All Pages"
 msgstr "Cancella Tutte le Pagine"
 
 #: tdigit_main.actcapturedrotateleft.caption
+msgctxt "tdigit_main.actcapturedrotateleft.caption"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.actcapturedrotateright.caption
+msgctxt "tdigit_main.actcapturedrotateright.caption"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
@@ -279,21 +279,21 @@ msgstr "Opzioni ..."
 msgid "Preview"
 msgstr "Anteprima"
 
-#: tdigit_main.actprojectnew.caption
-msgid "New Project ..."
-msgstr "Nuovo Progetto ..."
+#: tdigit_main.actsessionnew.caption
+msgid "New Work Session ..."
+msgstr ""
 
-#: tdigit_main.actprojectopen.caption
-msgid "Open Project ..."
-msgstr "Apri Progetto ..."
+#: tdigit_main.actsessionopen.caption
+msgid "Open Work Session ..."
+msgstr ""
 
-#: tdigit_main.actprojectsave.caption
-msgid "Save Project"
-msgstr "Salva Progetto"
+#: tdigit_main.actsessionsave.caption
+msgid "Save Work Session"
+msgstr ""
 
-#: tdigit_main.actprojectsaveas.caption
-msgid "Save Project As ..."
-msgstr "Salva Progetto Come ..."
+#: tdigit_main.actsessionsaveas.caption
+msgid "Save Work Session as ..."
+msgstr ""
 
 #: tdigit_main.acttake.caption
 msgid "Take"
@@ -316,14 +316,17 @@ msgid "Left :"
 msgstr "Sinistra :"
 
 #: tdigit_main.bclabel10.caption
+msgctxt "tdigit_main.bclabel10.caption"
 msgid "Width :"
 msgstr "Larghezza :"
 
 #: tdigit_main.bclabel11.caption
+msgctxt "tdigit_main.bclabel11.caption"
 msgid "Height :"
 msgstr "Altezza :"
 
 #: tdigit_main.bclabel12.caption
+msgctxt "tdigit_main.bclabel12.caption"
 msgid "Name :"
 msgstr "Nome :"
 
@@ -340,10 +343,12 @@ msgid "Top :"
 msgstr "Sopra :"
 
 #: tdigit_main.bclabel3.caption
+msgctxt "tdigit_main.bclabel3.caption"
 msgid "Width :"
 msgstr "Larghezza :"
 
 #: tdigit_main.bclabel4.caption
+msgctxt "tdigit_main.bclabel4.caption"
 msgid "Height :"
 msgstr "Altezza :"
 
@@ -352,6 +357,7 @@ msgid "Unit :"
 msgstr "Unità :"
 
 #: tdigit_main.bclabel6.caption
+msgctxt "tdigit_main.bclabel6.caption"
 msgid "Name :"
 msgstr "Nome :"
 
@@ -364,6 +370,7 @@ msgid "Digits :"
 msgstr "Cifre :"
 
 #: tdigit_main.btbox_add.caption
+msgctxt "tdigit_main.btbox_add.caption"
 msgid "+"
 msgstr ""
 
@@ -372,6 +379,7 @@ msgid "Add a Crop Area"
 msgstr "Aggiungi un'Area di Taglio"
 
 #: tdigit_main.btbox_del.caption
+msgctxt "tdigit_main.btbox_del.caption"
 msgid "-"
 msgstr ""
 
@@ -396,34 +404,42 @@ msgid "Flip Vertical Up"
 msgstr "Ribalta Verticalmente in Su"
 
 #: tdigit_main.btcounter_add.caption
+msgctxt "tdigit_main.btcounter_add.caption"
 msgid "+"
 msgstr ""
 
 #: tdigit_main.btcounter_add.hint
+msgctxt "tdigit_main.btcounter_add.hint"
 msgid "Add a Counter"
 msgstr "Aggiungi un Contatore"
 
 #: tdigit_main.btcounter_del.caption
+msgctxt "tdigit_main.btcounter_del.caption"
 msgid "-"
 msgstr ""
 
 #: tdigit_main.btcounter_del.hint
+msgctxt "tdigit_main.btcounter_del.hint"
 msgid "Remove this Counter"
 msgstr "Rimuovi questo Contatore"
 
 #: tdigit_main.btcropcounter_add.caption
+msgctxt "tdigit_main.btcropcounter_add.caption"
 msgid "+"
 msgstr ""
 
 #: tdigit_main.btcropcounter_add.hint
+msgctxt "tdigit_main.btcropcounter_add.hint"
 msgid "Add a Counter"
 msgstr "Aggiungi un Contatore"
 
 #: tdigit_main.btcropcounter_del.caption
+msgctxt "tdigit_main.btcropcounter_del.caption"
 msgid "-"
 msgstr ""
 
 #: tdigit_main.btcropcounter_del.hint
+msgctxt "tdigit_main.btcropcounter_del.hint"
 msgid "Remove this Counter"
 msgstr "Rimuovi questo Contatore"
 
@@ -436,10 +452,12 @@ msgid "Duplicate when Rotate/Flip"
 msgstr "Duplica quando Ruota/Ribalta"
 
 #: tdigit_main.btcrotateleft.hint
+msgctxt "tdigit_main.btcrotateleft.hint"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.btcrotateright.hint
+msgctxt "tdigit_main.btcrotateright.hint"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
@@ -456,10 +474,12 @@ msgid "Rotate 180°"
 msgstr "Ruota di 180°"
 
 #: tdigit_main.btprotateleft.hint
+msgctxt "tdigit_main.btprotateleft.hint"
 msgid "Rotate Left"
 msgstr "Ruota a Sinistra"
 
 #: tdigit_main.btprotateright.hint
+msgctxt "tdigit_main.btprotateright.hint"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
@@ -492,10 +512,12 @@ msgid "not defined"
 msgstr "non definita"
 
 #: tdigit_main.itemcropmodecustom.caption
+msgctxt "tdigit_main.itemcropmodecustom.caption"
 msgid "Custom"
 msgstr "Personalizzata"
 
 #: tdigit_main.itemcropmodefull.caption
+msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr "Area Intera"
 
@@ -504,14 +526,17 @@ msgid "Z Order :"
 msgstr "Ordine Z :"
 
 #: tdigit_main.label10.caption
+msgctxt "tdigit_main.label10.caption"
 msgid "Flip :"
 msgstr "Ribalta :"
 
 #: tdigit_main.label2.caption
+msgctxt "tdigit_main.label2.caption"
 msgid "Rotate :"
 msgstr "Ruota :"
 
 #: tdigit_main.label3.caption
+msgctxt "tdigit_main.label3.caption"
 msgid "Flip :"
 msgstr "Ribalta :"
 
@@ -532,6 +557,7 @@ msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗
 msgstr "Pagina ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label9.caption
+msgctxt "tdigit_main.label9.caption"
 msgid "Rotate :"
 msgstr "Ruota :"
 
@@ -555,10 +581,6 @@ msgstr ""
 msgid "Load XML"
 msgstr ""
 
-#: tdigit_main.menuprojectsave.caption
-msgid "Save Project ..."
-msgstr "Salva Progetto ..."
-
 #: tdigit_main.menusavexml.caption
 msgid "Save XML"
 msgstr ""
@@ -570,10 +592,6 @@ msgstr "Configura Timer"
 #: tdigit_main.menutimertakestop.caption
 msgid "Stop Timer"
 msgstr "Ferma Timer"
-
-#: tdigit_main.openpicture.title
-msgid "Open an existing image"
-msgstr "Apri una immagine esistente"
 
 #: tdigit_main.rgcropaspect.caption
 msgid "Aspect Ratio"
@@ -590,10 +608,6 @@ msgstr "Aree di Taglio"
 #: tdigit_main.rollpages.button.caption
 msgid "Captured Pages"
 msgstr "Pagine Catturate"
-
-#: tdigit_main.savepicture.title
-msgid "Save image as"
-msgstr "Salva immagini come"
 
 #: tdigit_main.tbcaptsep1.caption
 msgid "tbCaptSep1"
@@ -620,6 +634,7 @@ msgid "Crop Mode"
 msgstr "Modo Taglio"
 
 #: tdigit_main.tbdestination.caption
+msgctxt "tdigit_main.tbdestination.caption"
 msgid "Destination..."
 msgstr "Destinazione..."
 
@@ -648,6 +663,7 @@ msgid "tbSepTake"
 msgstr ""
 
 #: tdigit_main.tbsource.caption
+msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
@@ -672,6 +688,7 @@ msgid "Keywords :"
 msgstr "Parole chiave :"
 
 #: tdigit_progress.capcurrent.caption
+msgctxt "tdigit_progress.capcurrent.caption"
 msgid "Current"
 msgstr "Attuale"
 
@@ -696,14 +713,17 @@ msgid "DigIt_Templates"
 msgstr ""
 
 #: twizardbuildduplex.btcancel.caption
+msgctxt "twizardbuildduplex.btcancel.caption"
 msgid "&Cancel"
 msgstr "A&nnulla"
 
 #: twizardbuildduplex.btnext.caption
+msgctxt "twizardbuildduplex.btnext.caption"
 msgid "&Next"
 msgstr "&Avanti"
 
 #: twizardbuildduplex.btprev.caption
+msgctxt "twizardbuildduplex.btprev.caption"
 msgid "&Back"
 msgstr "&Indietro"
 
@@ -716,10 +736,12 @@ msgid "Insert Front Side Pages"
 msgstr "Inserisci le Pagine Frontali"
 
 #: twizardbuildduplex.label2.caption
+msgctxt "twizardbuildduplex.label2.caption"
 msgid "Click Next when ready"
 msgstr "Clicca Avanti quando si è pronti"
 
 #: twizardbuildduplex.label4.caption
+msgctxt "twizardbuildduplex.label4.caption"
 msgid "Click Next when ready"
 msgstr "Clicca Avanti quando si è pronti"
 
@@ -764,10 +786,12 @@ msgid "TabSheet4"
 msgstr ""
 
 #: twizardbuildduplex.tbdestination.caption
+msgctxt "twizardbuildduplex.tbdestination.caption"
 msgid "Destination..."
 msgstr "Destinazione..."
 
 #: twizardbuildduplex.tbsource.caption
+msgctxt "twizardbuildduplex.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
@@ -775,197 +799,3 @@ msgstr "Sorgente..."
 msgid "tbWizard"
 msgstr ""
 
-#: twiaselectform.btrefresh.caption
-msgid "Refresh"
-msgstr "Aggiorna"
-
-#: twiaselectform.caption
-msgid "Select WIA Device"
-msgstr "Seleziona Dispositivo WIA"
-
-#: twiaselectform.lvsources.columns[0].caption
-msgid "Name"
-msgstr "Nome"
-
-#: twiaselectform.lvsources.columns[1].caption
-msgid "Manufacturer"
-msgstr "Produttore"
-
-#: twiaselectform.lvsources.columns[2].caption
-msgid "Type"
-msgstr "Tipo"
-
-#: twiasettingssource.btbrightness0.caption
-msgid "0"
-msgstr ""
-
-#: twiasettingssource.btbrightnessd.caption
-msgid "d"
-msgstr "p"
-
-#: twiasettingssource.btcontrast0.caption
-msgid "0"
-msgstr ""
-
-#: twiasettingssource.btcontrastd.caption
-msgid "d"
-msgstr "p"
-
-#: twiasettingssource.btpaperorientation.hint
-msgid "Paper Orientation"
-msgstr "Orientamento Carta"
-
-#: twiasettingssource.btrefreshcurrent.caption
-msgid "Current"
-msgstr "Attuale"
-
-#: twiasettingssource.btrefreshdefault.caption
-msgid "Default"
-msgstr "Predefinito"
-
-#: twiasettingssource.btrefreshundo.caption
-msgid "Undo"
-msgstr "Scarta"
-
-#: twiasettingssource.btresolutiond.caption
-msgid "d"
-msgstr "p"
-
-#: twiasettingssource.caption
-msgid "Settings of WIA Source"
-msgstr "Impostazioni della Sorgente WIA"
-
-#: twiasettingssource.cbbackfirst.caption
-msgid "Back First"
-msgstr "Prima Retro"
-
-#: twiasettingssource.cbusenativeui.caption
-msgid "Use Native UI"
-msgstr "Usa UI Nativa"
-
-#: twiasettingssource.gbfeeder.caption
-msgid "Feeder"
-msgstr "Caricatore"
-
-#: twiasettingssource.gbpaperalign.caption
-msgid "Paper Align"
-msgstr "Allineamento Carta"
-
-#: twiasettingssource.gbpapersize.caption
-msgid "Paper Size"
-msgstr "Dimensione Carta"
-
-#: twiasettingssource.label2.caption
-msgid "Paper Type :"
-msgstr "Tipo Carta :"
-
-#: twiasettingssource.label3.caption
-msgid "Resolution :"
-msgstr "Risoluzione :"
-
-#: twiasettingssource.label4.caption
-msgid "Brightness :"
-msgstr "Luminosità :"
-
-#: twiasettingssource.label5.caption
-msgid "Contrast :"
-msgstr "Contrasto :"
-
-#: twiasettingssource.label6.caption
-msgid "Bit Depth :"
-msgstr "Numero Bit :"
-
-#: twiasettingssource.label7.caption
-msgid "Image Type :"
-msgstr "Tipo Immagine :"
-
-#: twiasettingssource.labelpapersize.caption
-msgid "X"
-msgstr ""
-
-#: twiasettingssource.rbbackonly.caption
-msgid "Back Only"
-msgstr "Solo Retro"
-
-#: twiasettingssource.rbfrontback.caption
-msgid "Front/Back"
-msgstr "Fronte/Retro"
-
-#: twiasettingssource.rbfrontonly.caption
-msgid "Front Only"
-msgstr "Solo Fronte"
-
-#: twiasettingssource.tbsource_scanner.caption
-msgid "Scanner"
-msgstr ""
-
-#: twiasettingssource.trhalign.hint
-msgid "Horizontal Align"
-msgstr "Allineamento Orizzontale"
-
-#: twiasettingssource.trvalign.hint
-msgid "Vertical Align"
-msgstr "Allineamento Verticale"
-
-#: wia_selectform.rsnodevicepresent
-msgid "No Wia Devices present..."
-msgstr "Nessun Dispositivo Wia presente..."
-
-#: wia_settingsform.rsapplychanges
-#, object-pascal-format
-msgid "Apply Changes to Item %s of %s"
-msgstr "Applicare le Modifiche all'Elemento %s di %s"
-
-#: wia_settingsform.rsautosize
-msgid "Auto size"
-msgstr "Dimensione Automatica"
-
-#: wia_settingsform.rsautotype
-msgid "Auto type"
-msgstr "Tipo Automatico"
-
-#: wia_settingsform.rscustomsize
-msgid "Custom size"
-msgstr "Dimensione Personalizzata"
-
-#: wia_settingsform.rserrorselecting
-#, object-pascal-format
-msgid ""
-"Error Selecting Item %s of %s\n"
-"Try to Select another Source Item"
-msgstr ""
-"Errore Selezionando l'Elemento %s di %s\n"
-"Prova a Selezionare un altro Elemento della Sorgente"
-
-#: wia_settingsform.rserrorselectingint
-#, object-pascal-format
-msgid ""
-"Error Selecting Item [%d] of %s\n"
-"%s\n"
-"Try to Select another Source Item"
-msgstr ""
-"Errore Selezionando l'Elemento [%d] di %s\n"
-"%s\n"
-"Prova a Selezionare un altro Elemento della Sorgente"
-
-#: wia_settingsform.rsexccannotgetcapabilities
-#, object-pascal-format
-msgid "Cannot Get Capabilities for Source Item %d"
-msgstr "Impossibile ottenere le Capacità per l'Elemento %d della Sorgente"
-
-#: wia_settingsform.rsexccannotgetsourceitem
-#, object-pascal-format
-msgid "Cannot Get Source Item %d"
-msgstr "Impossibile ottenere l'Elemento %d della Sorgente"
-
-#: wia_settingsform.rsfullsize
-msgid "Full size"
-msgstr "Dimensione Intera"
-
-#: wia_settingsform.rslandscape
-msgid "Landscape"
-msgstr "Orizzontale"
-
-#: wia_settingsform.rsportrait
-msgid "Portrait"
-msgstr "Verticale"

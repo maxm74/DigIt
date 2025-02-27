@@ -165,9 +165,12 @@ type
   IDigIt_Settings = Interface
   ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
     //Path consts
-    function Path_Temp: PChar; stdcall;
-    function Path_Config: PChar; stdcall;
     function Path_Application: PChar; stdcall;
+    function Path_Config: PChar; stdcall;
+    function Path_Temp: PChar; stdcall;
+    function Path_Pictures: PChar; stdcall;
+    function Path_Session: PChar; stdcall;
+    function Path_Session_Temp: PChar; stdcall;
   end;
 
   IDigIt_ProgressCallback = Interface

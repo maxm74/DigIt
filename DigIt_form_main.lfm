@@ -2710,8 +2710,8 @@ object DigIt_Main: TDigIt_Main
   end
   object ActionListMain: TActionList
     Images = imgListMain
-    Left = 880
-    Top = 110
+    Left = 616
+    Top = 410
     object actPreview: TAction
       Caption = 'Preview'
       Enabled = False
@@ -2785,25 +2785,25 @@ object DigIt_Main: TDigIt_Main
       ImageIndex = 16
       OnExecute = actClearQueueExecute
     end
-    object actProjectNew: TAction
-      Caption = 'New Project ...'
+    object actSessionNew: TAction
+      Caption = 'New Work Session ...'
       ImageIndex = 17
-      OnExecute = actProjectNewExecute
+      OnExecute = actSessionNewExecute
     end
-    object actProjectOpen: TAction
-      Caption = 'Open Project ...'
+    object actSessionOpen: TAction
+      Caption = 'Open Work Session ...'
       ImageIndex = 18
-      OnExecute = actProjectOpenExecute
+      OnExecute = actSessionOpenExecute
     end
-    object actProjectSave: TAction
-      Caption = 'Save Project'
+    object actSessionSave: TAction
+      Caption = 'Save Work Session'
       ImageIndex = 19
-      OnExecute = actProjectSaveExecute
+      OnExecute = actSessionSaveExecute
     end
-    object actProjectSaveAs: TAction
-      Caption = 'Save Project As ...'
+    object actSessionSaveAs: TAction
+      Caption = 'Save Work Session as ...'
       ImageIndex = 20
-      OnExecute = actProjectSaveAsExecute
+      OnExecute = actSessionSaveAsExecute
     end
     object actOptions: TAction
       Caption = 'Options ...'
@@ -2817,14 +2817,16 @@ object DigIt_Main: TDigIt_Main
     Left = 530
     Top = 410
     object menuProjectNew: TMenuItem
-      Action = actProjectNew
+      Action = actSessionNew
     end
     object menuProjectOpen: TMenuItem
-      Action = actProjectOpen
+      Action = actSessionOpen
     end
     object menuProjectSave: TMenuItem
-      Action = actProjectSave
-      Caption = 'Save Project ...'
+      Action = actSessionSave
+    end
+    object menuProjectSaveAs: TMenuItem
+      Action = actSessionSaveAs
     end
     object Separator1: TMenuItem
       Caption = '-'
@@ -3047,14 +3049,14 @@ object DigIt_Main: TDigIt_Main
     Top = 490
   end
   object OpenProject: TOpenDialog
-    DefaultExt = '.digp'
-    Filter = 'Digit Project (*.digp)|*.digp|Digit Session (*.digs)|*.digs|Digit Files (*.digp;*.digs)|*.digp;*.digs|All Files (*.*)|*.*'
+    DefaultExt = '.digs'
+    Filter = 'Digit Session (*.digs)|*.digs|All Files (*.*)|*.*'
     Left = 426
     Top = 108
   end
   object SaveProject: TSaveDialog
-    DefaultExt = '.digp'
-    Filter = 'Digit Project (*.digp)|*.digp|Digit Session (*.digs)|*.digs|Digit Files (*.digp;*.digs)|*.digp;*.digs|All Files (*.*)|*.*'
+    DefaultExt = '.digs'
+    Filter = 'Digit Session (*.digs)|*.digs|All Files (*.*)|*.*'
     Left = 426
     Top = 178
   end

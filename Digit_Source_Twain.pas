@@ -727,6 +727,8 @@ begin
 
      DownloadedFiles:= nil;
      inc(countTakes);
+
+     TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
      curPath:= TwainPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
      if rScannerInfo.FromAddList
@@ -815,6 +817,7 @@ var
 
 begin
   {$ifopt D-}
+  TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
   for i:=0 to countTakes do
     DeleteDirectory(TwainPath_Temp+IntToStr(i)+DirectorySeparator, False);
   {$endif}
@@ -838,10 +841,11 @@ end;
 
 initialization
   try
-     TwainPath_Temp:= theBridge.Settings.Path_Temp+'twain'+DirectorySeparator;
+     TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
 
      Source_Twain:= TDigIt_Source_Twain.Create;
      theBridge.Sources.Register(DigIt_Source_Twain_Name, Source_Twain);
+
   except
   end;
 

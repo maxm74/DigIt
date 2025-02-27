@@ -134,10 +134,13 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    //Path consts
-    function Path_Temp: PChar; stdcall;
-    function Path_Config: PChar; stdcall;
+    //Path consts                 { #note 10 -oMaxM : Test in External LIBRARY }
     function Path_Application: PChar; stdcall;
+    function Path_Config: PChar; stdcall;
+    function Path_Temp: PChar; stdcall;
+    function Path_Pictures: PChar; stdcall;
+    function Path_Session: PChar; stdcall;
+    function Path_Session_Temp: PChar; stdcall;
   end;
 
   { TDigIt_Bridge }
@@ -708,19 +711,34 @@ begin
   inherited Destroy;
 end;
 
-function TDigIt_Settings.Path_Temp: PChar; stdcall;
+function TDigIt_Settings.Path_Application: PChar; stdcall;
 begin
-  Result:= PChar(DigIt_Types.Path_Temp);  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
+  Result:= PChar(DigIt_Types.Path_Application);
 end;
 
 function TDigIt_Settings.Path_Config: PChar; stdcall;
 begin
-  Result:= PChar(DigIt_Types.Path_Config);  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
+  Result:= PChar(DigIt_Types.Path_Config);
 end;
 
-function TDigIt_Settings.Path_Application: PChar; stdcall;
+function TDigIt_Settings.Path_Temp: PChar; stdcall;
 begin
-  Result:= PChar(DigIt_Types.Path_Application);  { #note 10 -oMaxM : Test internal plugin and LIBRARY }
+  Result:= PChar(DigIt_Types.Path_Temp);
+end;
+
+function TDigIt_Settings.Path_Pictures: PChar; stdcall;
+begin
+  Result:= PChar(DigIt_Types.Path_Pictures);
+end;
+
+function TDigIt_Settings.Path_Session: PChar; stdcall;
+begin
+  Result:= PChar(DigIt_Types.Path_Session);
+end;
+
+function TDigIt_Settings.Path_Session_Temp: PChar; stdcall;
+begin
+  Result:= PChar(DigIt_Types.Path_Session_Temp);
 end;
 
 { TDigIt_Bridge }

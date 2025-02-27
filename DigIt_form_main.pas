@@ -34,7 +34,6 @@ resourcestring
   rsClearQueue = 'Clear the Work Queue?';
   rsExcCreateCounter = 'Failed to Create the Counter';
   rsNotImpl = 'Not yet implemented';
-  rsSaveProject = 'Save Current Project?';
   rsConvertPDF = 'Converting Images to PDF...';
   rsOpenSavedPDF = 'Conversion to PDF completed, do i Open it?';
   rsClearCrops = 'Clear Crop Areas ?';
@@ -75,15 +74,15 @@ type
     actTakeBuildDuplex: TAction;
     actTakeRe: TAction;
     actTimerTake: TAction;
-    actProjectSaveAs: TAction;
+    actSessionSaveAs: TAction;
     actPreview: TAction;
     actCapturedRotateRight: TAction;
     actCapturedRotateLeft: TAction;
     ActionListC: TActionList;
     actOptions: TAction;
-    actProjectOpen: TAction;
-    actProjectSave: TAction;
-    actProjectNew: TAction;
+    actSessionOpen: TAction;
+    actSessionSave: TAction;
+    actSessionNew: TAction;
     actCropNext: TAction;
     actTake: TAction;
     ActionListMain: TActionList;
@@ -106,6 +105,7 @@ type
     itemBuildDuplex: TMenuItem;
     menuDebug: TMenuItem;
     menuClearXML: TMenuItem;
+    menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
     menuLoadXML: TMenuItem;
     panelTop: TPanel;
@@ -231,10 +231,10 @@ type
     procedure actCapturedDeleteAllExecute(Sender: TObject);
     procedure actCapturedDeleteExecute(Sender: TObject);
     procedure actOptionsExecute(Sender: TObject);
-    procedure actProjectNewExecute(Sender: TObject);
-    procedure actProjectOpenExecute(Sender: TObject);
-    procedure actProjectSaveAsExecute(Sender: TObject);
-    procedure actProjectSaveExecute(Sender: TObject);
+    procedure actSessionNewExecute(Sender: TObject);
+    procedure actSessionOpenExecute(Sender: TObject);
+    procedure actSessionSaveAsExecute(Sender: TObject);
+    procedure actSessionSaveExecute(Sender: TObject);
     procedure actCapturedRotateLeftExecute(Sender: TObject);
     procedure actCapturedRotateRightExecute(Sender: TObject);
     procedure actPreviewExecute(Sender: TObject);
@@ -321,8 +321,8 @@ type
     CropMode: TDigItCropMode;
 
     rSource: PSourceInfo;
-    rSourceName: String;
     rSourceParams: IDigIt_Params;
+    rSourceName: String;
 
     { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
     (*    rDestination: PDestinationInfo;
@@ -333,10 +333,10 @@ type
     SaveFormat: TBGRAImageFormat;
     SaveWriter: TFPCustomImageWriter;
     SaveExt,
-    SavePath: String;
-
-    rProject_File,
+    SavePath,
+    Session_File,
     LoadedFile: String;
+
     testI,
     lastCropped,
     lastLenTaked,     //Used in Take Again
@@ -375,9 +375,9 @@ type
 
     procedure XML_LoadWork;
     procedure XML_SaveWork;
-    procedure XML_ClearWork;
-    procedure XML_LoadProject(AFileName:String);
-    procedure XML_SaveProject(AFileName:String);
+    procedure XML_ClearWork(AFromStartup: Boolean);
+    procedure XML_LoadSessionFile(AFileName:String);
+    procedure XML_SaveSessionFile(AFileName:String);
 
     function XML_LoadSource(aXML: TXMLConfig): Integer;
     procedure XML_SaveSource(aXML: TXMLConfig);
@@ -398,11 +398,10 @@ type
     procedure XML_LoadUserInterface(aXML: TXMLConfig);
     procedure XML_SaveUserInterface(aXML: TXMLConfig);
 
-    procedure Default_Work;
     function Source_Select(newSourceIndex: Integer): Boolean;
     function Destination_Select(newDestinationIndex: Integer): Boolean;
 
-    procedure setProject_File(AValue: String);
+    procedure setSession_File(AValue: String);
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
 //    function WaitForAFile(AFileName: String; ATimeOut: Integer): Boolean;
@@ -417,7 +416,6 @@ type
 
     procedure Pages_InsertMiddle(ASourceFileIndex: Integer);
 
-    property Project_File:String read rProject_File write setProject_File;
   public
     procedure ItemSizesClick(Sender: TObject);
     procedure PageSizesClick(Sender: TObject);
@@ -442,7 +440,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLIntf, LCLProc, fppdf,
+  LCLIntf, LCLProc, fppdf, FileUtil,
   BGRAFlashProgressBar,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm, DigIt_Form_PDF,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
@@ -547,8 +545,9 @@ var
    i :Integer;
 
 begin
-  Project_File:='';
-  LoadedFile:='';
+  Session_File:= File_SessionDefault;
+
+  LoadedFile:= '';
 
   Counters :=TDigIt_CounterList.Create('Counters');
 
@@ -597,26 +596,12 @@ begin
 
   DigIt_Progress.OnCancelClick:= @ProgressCancelClick;
 
-  if FileExists(Path_Config+Config_XMLWork)
+  if FileExists(Path_Session+Session_File)
      {$ifopt D-}
       and (MessageDlg('DigIt', rsContinueWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      {$endif}
-  then begin
-         XML_LoadWork;
-        (* {$ifopt D-}
-         actPreview.Execute;
-         {$endif} *)
-       end
-  else begin
-         XML_ClearWork;
-         Default_Work;
-         UI_MenuItemsChecks(-1, -1);
-       end;
-
-  //Crop Areas are done when adding it
-  UI_FillCounters;
-  UI_FillCounter(Counters_GetCurrent);
-  UI_ToolBar;
+  then XML_LoadWork
+  else XML_ClearWork(True);
 end;
 
 procedure TDigIt_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -626,14 +611,11 @@ var
 begin
   closing :=True;
 
-  if FileExists(Path_Config+Config_XMLWork) then
+  if FileExists(Path_Session+Session_File) then
   begin
     dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
 
-    Case dlgRes of
-    mrYes: XML_SaveWork;
-    mrNo: XML_ClearWork;
-    end;
+    if (dlgRes = mrYes) then XML_SaveWork;
 
     CanClose:= not(dlgRes = mrCancel);
   end;
@@ -1516,7 +1498,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actProjectNewExecute(Sender: TObject);
+procedure TDigIt_Main.actSessionNewExecute(Sender: TObject);
 begin
   try
      if TDigIt_Templates.Execute then
@@ -1528,36 +1510,37 @@ begin
    end;
 end;
 
-procedure TDigIt_Main.actProjectOpenExecute(Sender: TObject);
+procedure TDigIt_Main.actSessionOpenExecute(Sender: TObject);
 begin
   try
-     if (Project_File<>'') then
-     case MessageDlg('DigIt Project', rsSaveProject, mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
-     mrYes : actProjectSave.Execute;
+     if (Path_Session <> Path_Config) then
+     case MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
+     mrYes : actSessionSave.Execute;
      mrCancel: exit;
      end;
 
-     if OpenProject.Execute then XML_LoadProject(OpenProject.FileName);
+     if OpenProject.Execute then XML_LoadSessionFile(OpenProject.FileName);
   finally
   end;
 end;
 
-procedure TDigIt_Main.actProjectSaveAsExecute(Sender: TObject);
+procedure TDigIt_Main.actSessionSaveAsExecute(Sender: TObject);
 begin
-  if SaveProject.Execute then
-  try
-    XML_SaveProject(SaveProject.FileName);
-    Project_File:=SaveProject.FileName;
-  finally
-  end;
+  if SaveProject.Execute
+  then XML_SaveSessionFile(SaveProject.FileName);
 end;
 
-procedure TDigIt_Main.actProjectSaveExecute(Sender: TObject);
+procedure TDigIt_Main.actSessionSaveExecute(Sender: TObject);
 begin
   try
-     if (Project_File='')
-     then actProjectSaveAs.Execute
-     else XML_SaveProject(Project_File);
+     if (Path_Session = Path_Config)
+     then begin
+            //Save As...
+            if SaveProject.Execute
+            then XML_SaveSessionFile(SaveProject.FileName);
+          end
+     else XML_SaveSessionFile('');
+
   finally
   end;
 end;
@@ -1787,7 +1770,7 @@ var
 begin
   try
     XML_Loading:= True;
-    XMLWork:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+    XMLWork:= TXMLConfig.Create(Path_Session+Session_File);
 
     newSourceI:= XML_LoadSource(XMLWork);
     XML_LoadSourceFiles(XMLWork);
@@ -1800,6 +1783,8 @@ begin
     XML_LoadUserInterface(XMLWork);
 
     UI_MenuItemsChecks(newSourceI, newDestinationI);
+    UI_FillCounter(Counters_GetCurrent);
+    UI_ToolBar;
 
   finally
     XML_Loading:= False;
@@ -1814,7 +1799,7 @@ var
 begin
   if (rSource <> Nil) and (rSource^.Inst <> Nil) then
   try
-     XMLWork:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     XMLWork:= TXMLConfig.Create(Path_Session+Session_File);
 
      XML_SaveSource(XMLWork);
      XML_SaveSourceFiles(XMLWork);
@@ -1836,55 +1821,113 @@ begin
      //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
      //So we do it after destroying XMLWork.
 
-     if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Source/Params');
-//     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Config+Config_XMLWork), 'Destination/Params');
+     if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File), 'Source/Params');
+//     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Session+Session_File), 'Destination/Params');
 
   finally
   end;
 end;
 
-procedure TDigIt_Main.XML_ClearWork;
-begin
-  DeleteFile(Path_Config+Config_XMLWork);
-  DeleteFile(Path_Config+Config_CapturedThumbs);
-end;
-
-
-procedure TDigIt_Main.XML_LoadProject(AFileName: String);
+procedure TDigIt_Main.XML_ClearWork(AFromStartup: Boolean);
 var
-   XMLProject: TXMLConfig;
+   i: Integer;
+   nofileBMP: TBitmap;
 
 begin
-  try
-    XMLProject:= TXMLConfig.Create(AFileName);
+  DeleteFile(Path_Config+File_SessionDefault);
+  DeleteFile(Path_Config+File_CapturedThumbs);
+  DeleteDirectory(Path_Temp, True);
 
-    Counters.Load(XMLProject, False);
-    imgManipulation.CropAreas.Load(XMLProject, 'CropAreas');
+  Path_Session:= Path_Config;
+  Path_Session_Temp:= Path_Temp;
+  Session_File:= File_SessionDefault;
+
+  rDestinationName:= '';
+  SaveFormat:= ifJpeg;
+  SavePath:= Path_Pictures;
+
+  try
+     if (SaveWriter <> nil) then SaveWriter.Free;
+     SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
+     SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
+
+  except
+    SaveWriter:= nil;
+    SaveExt:= 'jpg';
+  end;
+
+  if not(AFromStartup) then
+  try
+     //Clear Source Queque
+     iSourceFiles:= -1;
+     lastCropped:= -1;
+     lastLenTaked:= 0;
+     SourceFiles:= nil;
+     //rSource^.Inst.Clear;
+
+     nofileBMP:= TBitmap.Create;
+
+     //Clear Captured Array and ListView
+     iCapturedFiles:= -1;
+     CapturedFiles:= nil;
+     lvCaptured.Clear;
+
+     //Reset Counters
+     Counters.Reset;
+
+     //Get the Fixed Thumbnail NoFile and re-add it at position 0
+     imgListThumb.GetBitmap(0, nofileBMP);
+     imgListThumb.Clear;
+     i:= imgListThumb.Add(noFileBMP, nil);
+     imgListThumb_Changed:= True;
+
+  finally
+    noFileBMP.Free;
+
     UI_FillCounters;
-    cbCounterList.ItemIndex :=XMLProject.GetValue(Counters.Name+'/Selected', -1);
-    UI_FillCounter(Counters_GetCurrent);
-    UI_ToolBar;
+    UI_FillCounter(nil);
+  end;
+
+  setCropMode(diCropFull);
+
+  UI_ToolBar;
+end;
+
+
+procedure TDigIt_Main.XML_LoadSessionFile(AFileName: String);
+begin
+  try
+    Path_Session:= ExtractFilePath(AFileName);
+    Path_Session_Temp:= Path_Session+'tmp'+DirectorySeparator;
+    Session_File:= ExtractFileName(AFileName);
+
+    XML_LoadWork;
+
+    if (Path_Session = Path_Config)
+    then Caption :='DigIt'
+    else Caption :='DigIt'+' - '+Session_File;
 
   finally
-    XMLProject.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveProject(AFileName: String);
-var
-   XMLProject: TXMLConfig;
-
+procedure TDigIt_Main.XML_SaveSessionFile(AFileName: String);
 begin
   try
-     XMLProject:= TXMLConfig.Create(AFileName);
+     if (AFileName <> '') then
+     begin
+       //Save As, User Select a Filename
 
-     Counters.Save(XMLProject, False);
-     XMLProject.SetValue(Counters.Name+'/Selected', cbCounterList.ItemIndex);
-     imgManipulation.CropAreas.Save(XMLProject, 'CropAreas');
-     XMLProject.Flush;
+       //Copy or Move temp/thumb Files from Current Work Session to New Session
+     end;
+
+     XML_SaveWork;
+
+     if (Path_Session = Path_Config)
+     then Caption :='DigIt'
+     else Caption :='DigIt'+' - '+Session_File;
 
   finally
-    XMLProject.Free;
   end;
 end;
 
@@ -1895,7 +1938,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //Load rSource and its Params
      Result:= -1;
@@ -1920,7 +1963,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //Save rSource and its Params
      aXML.SetValue('Source/Name', rSourceName);
@@ -1940,7 +1983,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //Load SourceFiles
      SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
@@ -1970,7 +2013,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //Save SourceFiles array
      aXML.DeletePath(XML_SourceFiles);
@@ -1997,7 +2040,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //Load Destination and its Params
      { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
@@ -2052,7 +2095,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //Save rDestination and its Params
 (*     aXML.SetValue('Destination/Name', rDestinationName);
@@ -2088,7 +2131,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      newCount := aXML.GetValue(XML_CapturedFiles+'Count', 0);
      iCapturedFiles:= aXML.GetValue(XML_CapturedFiles+'iCapturedFiles', -1);
@@ -2097,10 +2140,10 @@ begin
      lvCaptured.BeginUpdate;
      lvCaptured.Clear;
 
-     if FileExists(Path_Config+Config_CapturedThumbs)
+     if FileExists(Path_Session+File_CapturedThumbs)
      then try
              imgListThumb.Clear;
-             imgListThumb.LoadFromFile(Path_Config+Config_CapturedThumbs);
+             imgListThumb.LoadFromFile(Path_Session+File_CapturedThumbs);
              imgListCountChanged:= ((imgListThumb.Count-1) <> newCount); //0 is reserved for No File
 
           except
@@ -2162,11 +2205,11 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      if imgListThumb_Changed then
      try
-       imgListThumb.SaveToFile(Path_Config+Config_CapturedThumbs);
+       imgListThumb.SaveToFile(Path_Session+File_CapturedThumbs);
        imgListThumb_Changed:= False;
 
      except
@@ -2206,7 +2249,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      LoadImage(aXML.GetValue('LoadedFile', ''), False); //DON'T set to True, if you do not want infinite recursion
 
@@ -2222,7 +2265,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      aXML.SetValue('LoadedFile', LoadedFile);
 
@@ -2238,7 +2281,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      XML_SaveSourceFiles(aXML);
      XML_SaveCapturedFiles(aXML);
@@ -2256,7 +2299,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      if (Length(SourceFiles) > 0) then
      begin
@@ -2286,7 +2329,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      newCropMode:= TDigItCropMode(aXML.GetValue('CropMode', 0));
      setCropMode(newCropMode);
@@ -2309,7 +2352,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      aXML.SetValue('CropMode', Integer(CropMode));
      if (CropMode = diCropCustom)
@@ -2329,7 +2372,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      selButton := aXML.GetValue(XML_PageSettings+'Rotate', -1);
      Case selButton of
@@ -2365,7 +2408,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      if btPRotateLeft.Down
      then aXML.SetValue(XML_PageSettings+'Rotate', 0)
@@ -2396,7 +2439,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //User Interface
      rollCrops.Collapsed:=aXML.GetValue('UI/rollCrops_Collapsed', False);
@@ -2415,7 +2458,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+Config_XMLWork);
+     if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File);
 
      //User Interface
      aXML.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
@@ -2425,30 +2468,6 @@ begin
   finally
     if aFree then aXML.Free;
   end;
-end;
-
-procedure TDigIt_Main.Default_Work;
-begin
-  rDestinationName:= '';
-  SaveFormat:= ifJpeg;
-  SavePath:= Path_Pictures;
-
-  try
-     if (SaveWriter <> nil) then SaveWriter.Free;
-     SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
-     SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
-
-  except
-    SaveWriter:= nil;
-    SaveExt:= 'jpg';
-  end;
-
-  (*
-  rollCrops.Collapsed:=False;
-
-  rollCounters.Collapsed:=True;*)
-  setCropMode(diCropFull);
-  rollPages.Collapsed:= False;
 end;
 
 function TDigIt_Main.Source_Select(newSourceIndex: Integer): Boolean;
@@ -2617,7 +2636,7 @@ begin
   Case TMenuItem(Sender).Tag of
     0: XML_LoadWork;
     1: XML_SaveWork;
-    2: XML_ClearWork;
+    2: XML_ClearWork(False);
   end;
 end;
 
@@ -2832,13 +2851,15 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.setProject_File(AValue: String);
+procedure TDigIt_Main.setSession_File(AValue: String);
 begin
-  if rProject_File=AValue then Exit;
-  rProject_File:=AValue;
-  if (rProject_File='')
+  Path_Session:= ExtractFilePath(AValue);
+  Path_Session_Temp:= Path_Session+'tmp'+DirectorySeparator;
+  Session_File:= ExtractFileName(AValue);
+
+  if (Path_Session = Path_Config)
   then Caption :='DigIt'
-  else Caption :='DigIt'+' - '+ExtractFileName(rProject_File);
+  else Caption :='DigIt'+' - '+Session_File;
 end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);

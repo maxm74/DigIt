@@ -134,10 +134,6 @@ msgstr ""
 msgid "Processing Images"
 msgstr ""
 
-#: digit_form_main.rssaveproject
-msgid "Save Current Project?"
-msgstr ""
-
 #: digit_form_main.rssavework
 msgid "Save the Work Session?"
 msgstr ""
@@ -268,20 +264,20 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
-#: tdigit_main.actprojectnew.caption
-msgid "New Project ..."
+#: tdigit_main.actsessionnew.caption
+msgid "New Work Session ..."
 msgstr ""
 
-#: tdigit_main.actprojectopen.caption
-msgid "Open Project ..."
+#: tdigit_main.actsessionopen.caption
+msgid "Open Work Session ..."
 msgstr ""
 
-#: tdigit_main.actprojectsave.caption
-msgid "Save Project"
+#: tdigit_main.actsessionsave.caption
+msgid "Save Work Session"
 msgstr ""
 
-#: tdigit_main.actprojectsaveas.caption
-msgid "Save Project As ..."
+#: tdigit_main.actsessionsaveas.caption
+msgid "Save Work Session as ..."
 msgstr ""
 
 #: tdigit_main.acttake.caption
@@ -568,10 +564,6 @@ msgstr ""
 
 #: tdigit_main.menuloadxml.caption
 msgid "Load XML"
-msgstr ""
-
-#: tdigit_main.menuprojectsave.caption
-msgid "Save Project ..."
 msgstr ""
 
 #: tdigit_main.menusavexml.caption

@@ -49,9 +49,8 @@ msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinuework
-msgctxt "digit_form_main.rscontinuework"
 msgid "Continue from last Work Session?"
-msgstr "Continuo dall'ultima Sessione di Lavoro?"
+msgstr "Continuo dall'ultima Sessione Lavoro?"
 
 #: digit_form_main.rsconvertpdf
 msgid "Converting Images to PDF..."
@@ -136,13 +135,17 @@ msgstr "Elaborando %d / %s"
 msgid "Processing Images"
 msgstr "Elaborando le Immagini"
 
-#: digit_form_main.rssaveproject
-msgid "Save Current Project?"
-msgstr "Salvo il Progetto Attuale?"
-
 #: digit_form_main.rssavework
 msgid "Save the Work Session?"
-msgstr "Salvo la sessione di Lavoro?"
+msgstr "Salvo la Sessione Lavoro?"
+
+#: digit_form_main.rssaveworkcopy
+msgid ""
+"Choose Yes to make a copy of the Work Session\n"
+"Choose No to move the Work Session"
+msgstr ""
+"Scegli Si per fare una copia della Sessione Lavoro\n"
+"Scegli No per spostare la Sessione Lavoro"
 
 #: digit_form_main.rstakeagain
 #, object-pascal-format
@@ -247,7 +250,6 @@ msgid "Clear Work Queue"
 msgstr "Cancella Coda Lavoro"
 
 #: tdigit_main.actcrop.caption
-#| msgid "Crop (F5)"
 msgid "Crop"
 msgstr "Taglia (F5)"
 
@@ -264,7 +266,6 @@ msgid "Next"
 msgstr "Avanti"
 
 #: tdigit_main.actcropnext.caption
-#| msgid "Crop + Next (F5)"
 msgid "Crop + Next"
 msgstr "Taglia + Avanti (F5)"
 
@@ -276,22 +277,21 @@ msgstr "Opzioni ..."
 msgid "Preview"
 msgstr "Anteprima"
 
-#: tdigit_main.actprojectnew.caption
-msgid "New Project ..."
-msgstr "Nuovo Progetto ..."
+#: tdigit_main.actsessionnew.caption
+msgid "New Work Session ..."
+msgstr "Nuova Sessione Lavoro ..."
 
-#: tdigit_main.actprojectopen.caption
-msgctxt "tdigit_main.actprojectopen.caption"
-msgid "Open Project ..."
-msgstr "Apri Progetto ..."
+#: tdigit_main.actsessionopen.caption
+msgid "Open Work Session ..."
+msgstr "Apri Sessione Lavoro ..."
 
-#: tdigit_main.actprojectsave.caption
-msgid "Save Project"
-msgstr "Salva Progetto"
+#: tdigit_main.actsessionsave.caption
+msgid "Save Work Session"
+msgstr "Salva Sessione Lavoro"
 
-#: tdigit_main.actprojectsaveas.caption
-msgid "Save Project As ..."
-msgstr "Salva Progetto Come ..."
+#: tdigit_main.actsessionsaveas.caption
+msgid "Save Work Session as ..."
+msgstr "Salva Sessione Lavoro come ..."
 
 #: tdigit_main.acttake.caption
 msgid "Take"
@@ -579,10 +579,6 @@ msgstr ""
 msgid "Load XML"
 msgstr ""
 
-#: tdigit_main.menuprojectsave.caption
-msgid "Save Project ..."
-msgstr "Salva Progetto ..."
-
 #: tdigit_main.menusavexml.caption
 msgid "Save XML"
 msgstr ""
@@ -594,10 +590,6 @@ msgstr "Configura Timer"
 #: tdigit_main.menutimertakestop.caption
 msgid "Stop Timer"
 msgstr "Ferma Timer"
-
-#: tdigit_main.openpicture.title
-msgid "Open an existing image"
-msgstr "Apri una immagine esistente"
 
 #: tdigit_main.rgcropaspect.caption
 msgid "Aspect Ratio"
@@ -614,10 +606,6 @@ msgstr "Aree di Taglio"
 #: tdigit_main.rollpages.button.caption
 msgid "Captured Pages"
 msgstr "Pagine Catturate"
-
-#: tdigit_main.savepicture.title
-msgid "Save image as"
-msgstr "Salva immagini come"
 
 #: tdigit_main.tbcaptsep1.caption
 msgid "tbCaptSep1"

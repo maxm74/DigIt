@@ -107,8 +107,9 @@ type
 
 implementation
 
-uses Controls, Forms, Dialogs, FileUtil, Digit_Types, BGRABitmapTypes, Laz2_XMLCfg,
-     Digit_Bridge_Impl;
+uses Controls, Forms, Dialogs, FileUtil, BGRABitmapTypes, Laz2_XMLCfg,
+     MM_StrUtils,
+     Digit_Types, Digit_Bridge_Impl;
 
 var
    TwainPath_Temp: String;
@@ -715,7 +716,9 @@ function TDigIt_Source_Twain.Take(takeAction: DigIt_Source_TakeAction; out aData
 
 //Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 var
-   curPath: String;
+   sessPath,
+   curPath,
+   curFile: String;
    capRet: TCapabilityRet;
    i: Integer;
 
@@ -728,6 +731,7 @@ begin
      DownloadedFiles:= nil;
      inc(countTakes);
 
+     sessPath:= theBridge.Settings.Path_Session;
      TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
      curPath:= TwainPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
@@ -791,12 +795,24 @@ begin
      if (Result > 0)
      then begin
             if (Result = 1 )
-            then aData:= StrNew(PChar(curPath+TwainFileBase+'.bmp'))
+            then begin
+                   curFile:= curPath+TwainFileBase+'.bmp';
+                   FullPathToRelativePath(sessPath, curFile);
+
+                   aData:= StrNew(PChar(curFile));
+                 end
             else begin
                    SetLength(DownloadedFiles, Result);
+
                    DownloadedFiles[0]:= curPath+TwainFileBase+'.bmp';
+                   FullPathToRelativePath(sessPath, DownloadedFiles[0]);
+
                    for i:=1 to Result-1 do
+                   begin
                       DownloadedFiles[i]:= curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp';
+                      FullPathToRelativePath(sessPath, DownloadedFiles[i]);
+                   end;
+
                    aData:= Self as IDigIt_ROArray;
                  end;
           end

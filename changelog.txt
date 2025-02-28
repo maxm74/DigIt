@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/02/27 Introduced use of Path based Session:
+2025/02/
+        28 Added Use of Relative Path in Sources and MainForm;
+           Writed XML_SaveSessionFile;
+           Fixed error when loading session without thumb file;
+        27 Introduced use of Path based Session:
              XML_Load/Save use Path_Session as base Path;
 	     Added Session Paths to Bridge;
 	     Sources use Path_Session_Temp as temp Path;

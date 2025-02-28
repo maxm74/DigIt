@@ -1,15 +1,5 @@
 msgid ""
-msgstr ""
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: it\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.5\n"
+msgstr "Content-Type: text/plain; charset=UTF-8"
 
 #: digit_form_buildduplex.caption_cancel
 msgctxt "digit_form_buildduplex.caption_cancel"
@@ -60,7 +50,7 @@ msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinuework
 msgid "Continue from last Work Session?"
-msgstr "Continuo dall'ultima Sessione di Lavoro?"
+msgstr "Continuo dall'ultima Sessione Lavoro?"
 
 #: digit_form_main.rsconvertpdf
 msgid "Converting Images to PDF..."
@@ -147,7 +137,15 @@ msgstr "Elaborando le Immagini"
 
 #: digit_form_main.rssavework
 msgid "Save the Work Session?"
-msgstr "Salvo la sessione di Lavoro?"
+msgstr "Salvo la Sessione Lavoro?"
+
+#: digit_form_main.rssaveworkcopy
+msgid ""
+"Choose Yes to make a copy of the Work Session\n"
+"Choose No to move the Work Session"
+msgstr ""
+"Scegli Si per fare una copia della Sessione Lavoro\n"
+"Scegli No per spostare la Sessione Lavoro"
 
 #: digit_form_main.rstakeagain
 #, object-pascal-format
@@ -281,19 +279,19 @@ msgstr "Anteprima"
 
 #: tdigit_main.actsessionnew.caption
 msgid "New Work Session ..."
-msgstr ""
+msgstr "Nuova Sessione Lavoro ..."
 
 #: tdigit_main.actsessionopen.caption
 msgid "Open Work Session ..."
-msgstr ""
+msgstr "Apri Sessione Lavoro ..."
 
 #: tdigit_main.actsessionsave.caption
 msgid "Save Work Session"
-msgstr ""
+msgstr "Salva Sessione Lavoro"
 
 #: tdigit_main.actsessionsaveas.caption
 msgid "Save Work Session as ..."
-msgstr ""
+msgstr "Salva Sessione Lavoro come ..."
 
 #: tdigit_main.acttake.caption
 msgid "Take"

@@ -103,6 +103,7 @@ type
 implementation
 
 uses Controls, Forms, Dialogs, FileUtil, BGRABitmapTypes, Laz2_XMLCfg,
+     MM_StrUtils,
      Digit_Types, Digit_Bridge_Impl;
 
 var
@@ -505,10 +506,12 @@ end;
 function TDigIt_Source_WIA.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 var
    aExt,
+   sessPath,
    curPath: String;
    aFormat: TWIAImageFormat;
    capRet: Boolean;
    curParams: TWIAParams;
+   i: Integer;
 
 begin
   try
@@ -519,6 +522,7 @@ begin
      DownloadedFiles:= nil;
      inc(countTakes);
 
+     sessPath:= theBridge.Settings.Path_Session;
      WIAPath_Temp:= theBridge.Settings.Path_Session_Temp+'wia'+DirectorySeparator;
      curPath:= WIAPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
@@ -579,9 +583,14 @@ begin
           end;
 
      if (Result > 0)
-     then if (Result = 1 )
-          then aData:= StrNew(PChar(DownloadedFiles[0]))
-          else aData:= Self as IDigIt_ROArray
+     then begin
+            for i:=0 to Length(DownloadedFiles)-1 do
+              FullPathToRelativePath(sessPath, DownloadedFiles[i]);
+
+            if (Result = 1 )
+            then aData:= StrNew(PChar(DownloadedFiles[0]))
+            else aData:= Self as IDigIt_ROArray
+          end
      else begin
             DeleteDirectory(curPath, False);
             dec(countTakes);

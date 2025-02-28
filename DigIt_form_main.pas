@@ -24,6 +24,7 @@ uses
 resourcestring
   rsContinueWork = 'Continue from last Work Session?';
   rsSaveWork = 'Save the Work Session?';
+  rsSaveWorkCopy = 'Choose Yes to make a copy of the Work Session'#13#10'Choose No to move the Work Session';
   rsNoFilesDownloaded = 'NO Files Downloaded ';
   rsTakeAgain = 'Replace the last %d taked files with a new Take?';
   rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
@@ -334,7 +335,7 @@ type
     SaveWriter: TFPCustomImageWriter;
     SaveExt,
     SavePath,
-    Session_File,
+    Session_File,         {#todo 10 -oMaxM : Really only the Name, the Thumb must have the same name but with .digt }
     LoadedFile: String;
 
     testI,
@@ -442,6 +443,7 @@ implementation
 uses
   LCLIntf, LCLProc, fppdf, FileUtil,
   BGRAFlashProgressBar,
+  MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm, DigIt_Form_PDF,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
@@ -582,6 +584,7 @@ begin
   CropMode:= diCropNull; //setCropMode works only if there are changes
 
   {$ifopt D+}
+    itemCropModeCustom.Enabled:= True;
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
   {$endif}
@@ -1714,16 +1717,20 @@ function TDigIt_Main.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
 var
    Bitmap,
    BitmapR :TBGRABitmap;
+   curFileName: String;
 
 begin
   Result:= False;
 
-  if (AImageFile<>'') and FileExists(AImageFile) then
+  curFileName:= AImageFile;
+  RelativePathToFullPath(Path_Session, curFileName);
+
+  if (curFileName<>'') and FileExists(curFileName) then
   try
      BitmapR:= Nil;
 
      Bitmap:= TBGRABitmap.Create;
-     Bitmap.LoadFromFile(AImageFile);
+     Bitmap.LoadFromFile(curFileName);
 
      //Pre processing Filters
 
@@ -1912,14 +1919,40 @@ begin
 end;
 
 procedure TDigIt_Main.XML_SaveSessionFile(AFileName: String);
+var
+   newPath_Session: String;
+
 begin
   try
      if (AFileName <> '') then
      begin
-       //Save As, User Select a Filename
+       newPath_Session:=ExtractFilePath(AFileName);
+       ForceDirectories(newPath_Session);
 
        //Copy or Move temp/thumb Files from Current Work Session to New Session
+       Case MessageDlg('DigIt', rsSaveWorkCopy, mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
+       mrYes: begin
+                //Copy the files to new Location
+                CopyDirTree(Path_Session+'tmp', newPath_Session+'tmp',
+                            [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime]);
+
+              end;
+       mrNo: begin
+                //Copy the files to new Location
+                if CopyDirTree(Path_Session+'tmp', newPath_Session+'tmp',
+                              [cffOverwriteFile, cffCreateDestDirectory, cffPreserveTime])
+                then DeleteDirectory(Path_Session+'tmp', False);
+
+                DeleteFile(Path_Session+File_CapturedThumbs);
+                DeleteFile(Path_Session+Session_File);
+             end;
+       mrCancel: exit;
+       end;
      end;
+
+     Path_Session:= newPath_Session;
+     Session_File:= ExtractFileName(AFileName); {#todo 10 -oMaxM : Really only the Name, the Thumb must have the same name but with .digt }
+     imgListThumb_Changed:= True;
 
      XML_SaveWork;
 
@@ -2167,9 +2200,11 @@ begin
          then begin
                 curAge:= FileAge(cuFileName);
 
+                //Thumbs file don't exists we must add the image
+                if imgListCountChanged then CapturedFiles[i].iIndex:= -1;
+
                 //File is Changed, update the ImageList
-                if imgListCountChanged or (CapturedFiles[i].iIndex <= 0) or
-                   (CapturedFiles[i].fAge <> curAge) then
+                if (CapturedFiles[i].iIndex <= 0) or (CapturedFiles[i].fAge <> curAge) then
                 begin
                   CapturedFiles[i].fAge:= curAge;
 

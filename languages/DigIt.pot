@@ -138,6 +138,12 @@ msgstr ""
 msgid "Save the Work Session?"
 msgstr ""
 
+#: digit_form_main.rssaveworkcopy
+msgid ""
+"Choose Yes to make a copy of the Work Session\n"
+"Choose No to move the Work Session"
+msgstr ""
+
 #: digit_form_main.rstakeagain
 #, object-pascal-format
 msgid "Replace the last %d taked files with a new Take?"

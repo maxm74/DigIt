@@ -168,9 +168,9 @@ type
     function Path_Application: PChar; stdcall;
     function Path_Config: PChar; stdcall;
     function Path_Temp: PChar; stdcall;
-    function Path_Pictures: PChar; stdcall;
     function Path_Session: PChar; stdcall;
-    function Path_Session_Temp: PChar; stdcall;
+    function Path_Session_Scan: PChar; stdcall;
+    function Path_Session_Pictures: PChar; stdcall;
   end;
 
   IDigIt_ProgressCallback = Interface

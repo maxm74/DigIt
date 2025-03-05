@@ -732,7 +732,7 @@ begin
      inc(countTakes);
 
      sessPath:= theBridge.Settings.Path_Session;
-     TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
+     TwainPath_Temp:= theBridge.Settings.Path_Session_Scan+'twain'+DirectorySeparator;
      curPath:= TwainPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
      if rScannerInfo.FromAddList
@@ -795,23 +795,14 @@ begin
      if (Result > 0)
      then begin
             if (Result = 1 )
-            then begin
-                   curFile:= curPath+TwainFileBase+'.bmp';
-                   FullPathToRelativePath(sessPath, curFile);
-
-                   aData:= StrNew(PChar(curFile));
-                 end
+            then aData:= StrNew(PChar(curPath+TwainFileBase+'.bmp'))
             else begin
                    SetLength(DownloadedFiles, Result);
 
                    DownloadedFiles[0]:= curPath+TwainFileBase+'.bmp';
-                   FullPathToRelativePath(sessPath, DownloadedFiles[0]);
 
                    for i:=1 to Result-1 do
-                   begin
                       DownloadedFiles[i]:= curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp';
-                      FullPathToRelativePath(sessPath, DownloadedFiles[i]);
-                   end;
 
                    aData:= Self as IDigIt_ROArray;
                  end;
@@ -833,7 +824,7 @@ var
 
 begin
   {$ifopt D-}
-  TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
+  TwainPath_Temp:= theBridge.Settings.Path_Session_Scan+'twain'+DirectorySeparator;
   for i:=0 to countTakes do
     DeleteDirectory(TwainPath_Temp+IntToStr(i)+DirectorySeparator, False);
   {$endif}
@@ -857,7 +848,7 @@ end;
 
 initialization
   try
-     TwainPath_Temp:= theBridge.Settings.Path_Session_Temp+'twain'+DirectorySeparator;
+     TwainPath_Temp:= theBridge.Settings.Path_Session_Scan+'twain'+DirectorySeparator;
 
      Source_Twain:= TDigIt_Source_Twain.Create;
      theBridge.Sources.Register(DigIt_Source_Twain_Name, Source_Twain);

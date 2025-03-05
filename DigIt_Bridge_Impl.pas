@@ -138,9 +138,9 @@ type
     function Path_Application: PChar; stdcall;
     function Path_Config: PChar; stdcall;
     function Path_Temp: PChar; stdcall;
-    function Path_Pictures: PChar; stdcall;
     function Path_Session: PChar; stdcall;
-    function Path_Session_Temp: PChar; stdcall;
+    function Path_Session_Scan: PChar; stdcall;
+    function Path_Session_Pictures: PChar; stdcall;
   end;
 
   { TDigIt_Bridge }
@@ -726,9 +726,9 @@ begin
   Result:= PChar(DigIt_Types.Path_Temp);
 end;
 
-function TDigIt_Settings.Path_Pictures: PChar; stdcall;
+function TDigIt_Settings.Path_Session_Pictures: PChar; stdcall;
 begin
-  Result:= PChar(DigIt_Types.Path_Pictures);
+  Result:= PChar(DigIt_Types.Path_Session_Pictures);
 end;
 
 function TDigIt_Settings.Path_Session: PChar; stdcall;
@@ -736,9 +736,9 @@ begin
   Result:= PChar(DigIt_Types.Path_Session);
 end;
 
-function TDigIt_Settings.Path_Session_Temp: PChar; stdcall;
+function TDigIt_Settings.Path_Session_Scan: PChar; stdcall;
 begin
-  Result:= PChar(DigIt_Types.Path_Session_Temp);
+  Result:= PChar(DigIt_Types.Path_Session_Scan);
 end;
 
 { TDigIt_Bridge }

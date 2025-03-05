@@ -523,7 +523,7 @@ begin
      inc(countTakes);
 
      sessPath:= theBridge.Settings.Path_Session;
-     WIAPath_Temp:= theBridge.Settings.Path_Session_Temp+'wia'+DirectorySeparator;
+     WIAPath_Temp:= theBridge.Settings.Path_Session_Scan+'wia'+DirectorySeparator;
      curPath:= WIAPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
      if WIAParams[DeviceItemIndex].NativeUI
@@ -584,9 +584,6 @@ begin
 
      if (Result > 0)
      then begin
-            for i:=0 to Length(DownloadedFiles)-1 do
-              FullPathToRelativePath(sessPath, DownloadedFiles[i]);
-
             if (Result = 1 )
             then aData:= StrNew(PChar(DownloadedFiles[0]))
             else aData:= Self as IDigIt_ROArray
@@ -609,7 +606,7 @@ var
 
 begin
   {$ifopt D-}
-  WIAPath_Temp:= theBridge.Settings.Path_Session_Temp+'wia'+DirectorySeparator;
+  WIAPath_Temp:= theBridge.Settings.Path_Session_Scan+'wia'+DirectorySeparator;
   for i:=0 to countTakes do
     DeleteDirectory(WIAPath_Temp+IntToStr(i)+DirectorySeparator, False);
   {$endif}
@@ -639,7 +636,7 @@ end;
 
 initialization
   try
-     WIAPath_Temp:= theBridge.Settings.Path_Session_Temp+'wia'+DirectorySeparator;
+     WIAPath_Temp:= theBridge.Settings.Path_Session_Scan+'wia'+DirectorySeparator;
 
      Source_WIA:= TDigIt_Source_WIA.Create;
      theBridge.Sources.Register(DigIt_Source_WIA_Name, Source_WIA);

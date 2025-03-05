@@ -140,12 +140,8 @@ msgid "Save the Work Session?"
 msgstr "Salvo la Sessione Lavoro?"
 
 #: digit_form_main.rssaveworkcopy
-msgid ""
-"Choose Yes to make a copy of the Work Session\n"
-"Choose No to move the Work Session"
-msgstr ""
-"Scegli Si per fare una copia della Sessione Lavoro\n"
-"Scegli No per spostare la Sessione Lavoro"
+msgid "Create a Copy of the Work Session or Move it?"
+msgstr "Creare una Copia della sessione di Lavoro o Spostarla?"
 
 #: digit_form_main.rstakeagain
 #, object-pascal-format

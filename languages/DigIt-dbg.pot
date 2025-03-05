@@ -139,9 +139,7 @@ msgid "Save the Work Session?"
 msgstr ""
 
 #: digit_form_main.rssaveworkcopy
-msgid ""
-"Choose Yes to make a copy of the Work Session\n"
-"Choose No to move the Work Session"
+msgid "Create a Copy of the Work Session or Move it?"
 msgstr ""
 
 #: digit_form_main.rstakeagain

@@ -1,6 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
+2025/03/
+        05 Added Path_DefSession_XX Vars;
+	   SourceFiles/CapturedFiles works in FullPath;
+	   Renamed Session path tmp to Scan and added Pictures;
+	   Destination Path is Relative to Session (Path_Session_Pictures); 
+	   XML_SaveSessionFile Copy/Move only Session Files and convert it to new Session if Relative;
 2025/02/
         28 Added Use of Relative Path in Sources and MainForm;
            Writed XML_SaveSessionFile;

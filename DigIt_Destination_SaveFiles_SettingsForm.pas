@@ -96,8 +96,13 @@ begin
 
        //Select Current Format, if not found Select Jpeg
        cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ASaveFormat)));
-       if (cbSaveFormat.ItemIndex = -1) and (cbSaveFormat.Items.Count > 0)
-       then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
+       if (cbSaveFormat.ItemIndex = -1)
+       then begin
+              SaveFormat:= ifJpeg;
+              if (cbSaveFormat.Items.Count > 0)
+              then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
+            end
+       else SaveFormat:= ASaveFormat;
 
        Result:= (ShowModal=mrOk);
 

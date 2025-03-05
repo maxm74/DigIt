@@ -18,12 +18,11 @@ uses SysUtils;
 const
   DigIt_Version = '0.1.0';
 
-  Ext_Sess  = 'digs';
-  Ext_Thumb = 'digt';
+  Ext_Sess  = '.digs';
+  Ext_Thumb = '.digt';
 
-  File_SessionDefault = 'digit.'+Ext_Sess;
+  File_DefSession = 'digit';
   File_Options = 'digit.xml';
-  File_CapturedThumbs = 'digit.'+Ext_Thumb;
 
   XML_SourceFiles   = 'SourceFiles/';
   XML_CapturedFiles = 'CapturedFiles/';
@@ -40,22 +39,32 @@ var
    Path_Application,
    Path_Config,
    Path_Temp,
-   Path_Pictures,
+   Path_DefSession,
+   Path_DefSession_Scan,
+   Path_DefSession_Pictures,
    Path_Session,
-   Path_Session_Temp: String;
+   Path_Session_Scan,
+   Path_Session_Pictures: String;
 
 implementation
 
 initialization
    Path_Application:= ExtractFilePath(ParamStr(0));
    Path_Config:= GetAppConfigDir(False);
-   Path_Temp:= Path_Config+'tmp'+DirectorySeparator; //GetTempDir(False)+'DigIt'+DirectorySeparator;
-   Path_Pictures:= GetUserDir+'Pictures'+DirectorySeparator+'DigIt'+DirectorySeparator;
-   Path_Session:= Path_Config;
-   Path_Session_Temp:= Path_Temp;
+   Path_Temp:= GetTempDir(False)+'DigIt'+DirectorySeparator;
+//   Path_Temp:= Path_Config+'tmp'+DirectorySeparator;
 
+   Path_DefSession:= Path_Config;
+   Path_DefSession_Scan:= Path_DefSession+'Scan'+DirectorySeparator;
+   Path_DefSession_Pictures:= Path_DefSession+'Pictures'+DirectorySeparator;
+
+   Path_Session:= Path_DefSession;
+   Path_Session_Scan:= Path_DefSession_Scan;
+   Path_Session_Pictures:= Path_DefSession_Pictures;
+
+   ForceDirectories(Path_Session_Scan);
+   ForceDirectories(Path_Session_Pictures);
    ForceDirectories(Path_Temp);
-   ForceDirectories(Path_Pictures);
 
 end.
 

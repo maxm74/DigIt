@@ -2,6 +2,8 @@ DigIt CHANGE LOG
 ======================
 
 2025/03/
+        06 Tested on Linux;
+           Added Source Not Selectable MessageDialogs;
         05 Added Path_DefSession_XX Vars;
 	   SourceFiles/CapturedFiles works in FullPath;
 	   Renamed Session path tmp to Scan and added Pictures;

@@ -406,8 +406,8 @@ object DigIt_Main: TDigIt_Main
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 2
-        ClientHeight = 40
-        ClientWidth = 156
+        ClientHeight = 41
+        ClientWidth = 158
         Columns = 2
         Items.Strings = (
           'Parent'

@@ -142,6 +142,16 @@ msgstr ""
 msgid "Create a Copy of the Work Session or Move it?"
 msgstr ""
 
+#: digit_form_main.rssourcenotfound
+#, object-pascal-format
+msgid "Source \"%s\" not Found, try Select another from Menù"
+msgstr ""
+
+#: digit_form_main.rssourcenotselected
+#, object-pascal-format
+msgid "Cannot Select Source %d, try Select another from Menù"
+msgstr ""
+
 #: digit_form_main.rstakeagain
 #, object-pascal-format
 msgid "Replace the last %d taked files with a new Take?"

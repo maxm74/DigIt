@@ -143,6 +143,16 @@ msgstr "Salvo la Sessione Lavoro?"
 msgid "Create a Copy of the Work Session or Move it?"
 msgstr "Creare una Copia della sessione di Lavoro o Spostarla?"
 
+#: digit_form_main.rssourcenotfound
+#, object-pascal-format
+msgid "Source \"%s\" not Found, try Select another from Menù"
+msgstr ""
+
+#: digit_form_main.rssourcenotselected
+#, object-pascal-format
+msgid "Cannot Select Source %d, try Select another from Menù"
+msgstr ""
+
 #: digit_form_main.rstakeagain
 #, object-pascal-format
 msgid "Replace the last %d taked files with a new Take?"
@@ -150,40 +160,40 @@ msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
 
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
-msgstr "Cartella di Immagini"
+msgstr ""
 
 #: digit_source_twain.rstwainexcnotfound
 msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
-msgstr "Dispositivo non trovato..."
+msgstr ""
 
 #: digit_source_twain.rstwainname
 msgid "Twain Device"
-msgstr "Dispositivo Twain"
+msgstr ""
 
 #: digit_source_wia.rswiaacquired
 #, object-pascal-format
 msgid "Acquired %d Pages"
-msgstr "Acquisite %d Pagine"
+msgstr ""
 
 #: digit_source_wia.rswiaacquiring
 #, object-pascal-format
 msgid "Acquiring Page %d"
-msgstr "Acquisendo la pagina %d"
+msgstr ""
 
 #: digit_source_wia.rswiaacquiringtitle
 #, object-pascal-format
 msgid "Acquiring from %s"
-msgstr "Acquisizione da %s"
+msgstr ""
 
 #: digit_source_wia.rswiaacquiringtotal
 #, object-pascal-format
 msgid "Acquiring from %s at %d dpi"
-msgstr "Acquisizione da %s a %d dpi"
+msgstr ""
 
 #: digit_source_wia.rswiacancelling
 msgid "Cancelling acquisition"
-msgstr "Annullando l'acquisizione"
+msgstr ""
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
@@ -193,23 +203,19 @@ msgid ""
 "but Item %s not...\n"
 "Select the First Item %s ?"
 msgstr ""
-"Dispositivo trovato\n"
-"%s %s\n"
-"ma l'Elemento %s no...\n"
-"Selezionare il primo Elemento %s?"
 
 #: digit_source_wia.rswiaexcconnect
 msgid "Error Connecting Device"
-msgstr "Errore Connettendo al Dispositivo"
+msgstr ""
 
 #: digit_source_wia.rswiaexcnotfound
 msgctxt "digit_source_wia.rswiaexcnotfound"
 msgid "Device not found..."
-msgstr "Dispositivo non trovato..."
+msgstr ""
 
 #: digit_source_wia.rswianame
 msgid "WIA Device"
-msgstr "Dispositivo WIA"
+msgstr ""
 
 #: digit_utils.rsdestination_default
 msgid "Save as Files"
@@ -663,23 +669,23 @@ msgstr "Sorgente..."
 
 #: tdigit_pdf.caption
 msgid "PDF Info"
-msgstr "PDF Info"
+msgstr ""
 
 #: tdigit_pdf.label1.caption
 msgid "Title :"
-msgstr "Titolo :"
+msgstr ""
 
 #: tdigit_pdf.label2.caption
 msgid "Author :"
-msgstr "Autore :"
+msgstr ""
 
 #: tdigit_pdf.label3.caption
 msgid "Producer :"
-msgstr "Produttore :"
+msgstr ""
 
 #: tdigit_pdf.label4.caption
 msgid "Keywords :"
-msgstr "Parole chiave :"
+msgstr ""
 
 #: tdigit_progress.capcurrent.caption
 msgctxt "tdigit_progress.capcurrent.caption"

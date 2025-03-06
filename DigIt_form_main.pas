@@ -46,6 +46,8 @@ resourcestring
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
+  rsSourceNotFound = 'Source "%s" not Found, try Select another from Menù';
+  rsSourceNotSelected = 'Cannot Select Source %d, try Select another from Menù';
   rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
 
 type
@@ -2062,22 +2064,35 @@ end;
 function TDigIt_Main.XML_LoadSource(aXML: TXMLConfig): Integer;
 var
    aFree: Boolean;
+   newSourceName: String;
 
 begin
   try
      aFree:= (aXML = nil);
      if aFree then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
-     //Load rSource and its Params
      Result:= -1;
-     if theBridge.SourcesImpl.Select(aXML.GetValue('Source/Name', '')) then
-     begin
-       rSource:= theBridge.SourcesImpl.Selected;
-       rSourceName:= theBridge.SourcesImpl.SelectedName;
-       rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-       Result:= theBridge.SourcesImpl.SelectedIndex;
-       theBridge.SourcesImpl.LoadSelectedParams(aXML.Filename, 'Source/Params');
-     end;
+
+     //Load rSource and its Params
+     newSourceName:= aXML.GetValue('Source/Name', '');
+
+     if theBridge.SourcesImpl.Select(newSourceName)
+     then begin
+            if (theBridge.SourcesImpl.Selected <> rSource) then
+            begin
+              { #note -oMaxM : rSource Switched...Do something? }
+            end;
+
+            rSource:= theBridge.SourcesImpl.Selected;
+            rSourceName:= theBridge.SourcesImpl.SelectedName;
+            rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+            Result:= theBridge.SourcesImpl.SelectedIndex;
+            theBridge.SourcesImpl.LoadSelectedParams(aXML.Filename, 'Source/Params');
+          end
+     else begin
+            MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
+            Result:= theBridge.SourcesImpl.SelectedIndex;
+          end;
 
   finally
     if aFree then aXML.Free;
@@ -2201,7 +2216,7 @@ begin
               if (SaveWriter is TBGRAWriterJPEG) then TBGRAWriterJPEG(SaveWriter).CompressionQuality:= 100;
             end;
 
-            Result:= -1;
+            Result:= 0;
  (*
           end
      else begin
@@ -2609,18 +2624,19 @@ function TDigIt_Main.Source_Select(newSourceIndex: Integer): Boolean;
 begin
   Result:= False;
   try
-     if theBridge.SourcesImpl.Select(newSourceIndex, True) then
-     begin
-       if (theBridge.SourcesImpl.Selected <> rSource) then
-       begin
-         { #note -oMaxM : rSource Switched...Do something? }
-       end;
+     if theBridge.SourcesImpl.Select(newSourceIndex, True)
+     then begin
+            if (theBridge.SourcesImpl.Selected <> rSource) then
+            begin
+              { #note -oMaxM : rSource Switched...Do something? }
+            end;
 
-       rSource:= theBridge.SourcesImpl.Selected;
-       rSourceName:= theBridge.SourcesImpl.SelectedName;
-       rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-       Result:= True;
-     end;
+            rSource:= theBridge.SourcesImpl.Selected;
+            rSourceName:= theBridge.SourcesImpl.SelectedName;
+            rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+            Result:= True;
+          end
+     else MessageDlg('DigIt', Format(rsSourceNotSelected, [newSourceIndex]), mtInformation, [mbOk], 0);
 
   except
     Result:= False;
@@ -2632,7 +2648,7 @@ begin
   Result:= False;
   try
     (*
-     if (newDestinationIndex = -1)
+     if (newDestinationIndex = 0)
      then begin
     *)
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
@@ -3364,6 +3380,13 @@ var
    i: Integer;
 
 begin
+  //No Default Item if index is -1
+  if (newSourceI = -1)
+  then for i:=0 to menuSources.Items.Count-1 do menuSources.Items[i].Default:= False;
+
+  if (newDestinationI = -1)
+  then for i:=0 to menuDestinations.Items.Count-1 do menuDestinations.Items[i].Default:= False;
+
   curItem:= FindMenuItemByTag(menuSources, newSourceI);
   if (curItem <> Nil) then curItem.Default:= True;
 

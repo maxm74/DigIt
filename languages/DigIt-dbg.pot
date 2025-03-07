@@ -48,9 +48,16 @@ msgstr ""
 msgid "Clear the Work Queue?"
 msgstr ""
 
+#: digit_form_main.rscontinueautowork
+msgid "Continue from Auto Saved Work Session?"
+msgstr ""
+
 #: digit_form_main.rscontinuework
+#, object-pascal-format
 msgctxt "digit_form_main.rscontinuework"
-msgid "Continue from last Work Session?"
+msgid ""
+"Continue from last Work Session?\n"
+"%s"
 msgstr ""
 
 #: digit_form_main.rsconvertpdf
@@ -94,6 +101,20 @@ msgstr ""
 msgid "Operation not completed, do I keep the processed files?"
 msgstr ""
 
+#: digit_form_main.rserrloadwork
+#, object-pascal-format
+msgid ""
+"Cannot Load Work Session\n"
+"%s"
+msgstr ""
+
+#: digit_form_main.rserrsavework
+#, object-pascal-format
+msgid ""
+"Cannot Save Work Session\n"
+"%s"
+msgstr ""
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr ""
@@ -102,6 +123,10 @@ msgstr ""
 msgid ""
 "The page is within the already processed range\n"
 "Should I put it in the middle?"
+msgstr ""
+
+#: digit_form_main.rsnewwork
+msgid "Start a New Work Session?"
 msgstr ""
 
 #: digit_form_main.rsnofilesdownloaded
@@ -155,6 +180,76 @@ msgstr ""
 #: digit_form_main.rstakeagain
 #, object-pascal-format
 msgid "Replace the last %d taked files with a new Take?"
+msgstr ""
+
+#: digit_source_folder.digit_source_folder_namel
+msgid "Folder Pictures"
+msgstr ""
+
+#: digit_source_folder.rsfoldnotfound
+#, object-pascal-format
+msgid ""
+"Folder not found...\n"
+"%s"
+msgstr ""
+
+#: digit_source_folder.rsfoldselect
+msgid "Select a Folder"
+msgstr ""
+
+#: digit_source_twain.rstwainexcnotfound
+msgctxt "digit_source_twain.rstwainexcnotfound"
+msgid "Device not found..."
+msgstr ""
+
+#: digit_source_twain.rstwainname
+msgid "Twain Device"
+msgstr ""
+
+#: digit_source_wia.rswiaacquired
+#, object-pascal-format
+msgid "Acquired %d Pages"
+msgstr ""
+
+#: digit_source_wia.rswiaacquiring
+#, object-pascal-format
+msgid "Acquiring Page %d"
+msgstr ""
+
+#: digit_source_wia.rswiaacquiringtitle
+#, object-pascal-format
+msgid "Acquiring from %s"
+msgstr ""
+
+#: digit_source_wia.rswiaacquiringtotal
+#, object-pascal-format
+msgid "Acquiring from %s at %d dpi"
+msgstr ""
+
+#: digit_source_wia.rswiacancelling
+msgid "Cancelling acquisition"
+msgstr ""
+
+#: digit_source_wia.rswiadevitemsel
+#, object-pascal-format
+msgid ""
+"Device found \n"
+"%s %s\n"
+"but Item %s not...\n"
+"Select the First Item %s ?"
+msgstr ""
+
+#: digit_source_wia.rswiaexcconnect
+msgid "Error Connecting Device"
+msgstr ""
+
+#: digit_source_wia.rswiaexcnotfound
+msgctxt "digit_source_wia.rswiaexcnotfound"
+msgid "Device not found..."
+msgstr ""
+
+#: digit_source_wia.rswianame
+msgid "WIA Device"
 msgstr ""
 
 #: digit_utils.rsdestination_default
@@ -605,6 +700,26 @@ msgstr ""
 #: tdigit_main.tbsource.caption
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
+msgstr ""
+
+#: tdigit_pdf.caption
+msgid "PDF Info"
+msgstr ""
+
+#: tdigit_pdf.label1.caption
+msgid "Title :"
+msgstr ""
+
+#: tdigit_pdf.label2.caption
+msgid "Author :"
+msgstr ""
+
+#: tdigit_pdf.label3.caption
+msgid "Producer :"
+msgstr ""
+
+#: tdigit_pdf.label4.caption
+msgid "Keywords :"
 msgstr ""
 
 #: tdigit_progress.capcurrent.caption

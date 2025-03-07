@@ -2,6 +2,12 @@ DigIt CHANGE LOG
 ======================
 
 2025/03/
+        07 Changed IDigIt_Params Summary var to out;
+	   Added Autosave WorkSession in separated files;
+	   Moved Initialization of Values in functions SetDefaultXXX;
+	   FormShow/Close handle WorkSession Load/Save with AutoSave;
+	   Added SourceFolder OnSet test if DirectoryExists;
+	   Default Destination SaveAsFile now has index 0;
         06 Tested on Linux;
            Added Source Not Selectable MessageDialogs;
         05 Added Path_DefSession_XX Vars;

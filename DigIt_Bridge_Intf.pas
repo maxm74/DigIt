@@ -97,7 +97,7 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Summary(const ASummary: PChar): Integer; stdcall;
+    function Summary(out ASummary: PChar): Integer; stdcall;
 
     function OnSet: Boolean; stdcall;
   end;

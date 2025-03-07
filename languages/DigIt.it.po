@@ -48,8 +48,16 @@ msgstr "Cancello le aree di taglio?"
 msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
+#: digit_form_main.rscontinueautowork
+msgid "Continue from Auto Saved Work Session?"
+msgstr ""
+
 #: digit_form_main.rscontinuework
-msgid "Continue from last Work Session?"
+#, object-pascal-format, fuzzy, badformat
+#| msgid "Continue from last Work Session?"
+msgid ""
+"Continue from last Work Session?\n"
+"%s"
 msgstr "Continuo dall'ultima Sessione Lavoro?"
 
 #: digit_form_main.rsconvertpdf
@@ -93,6 +101,20 @@ msgstr "Elimino la Pagina Acquisita %s ?"
 msgid "Operation not completed, do I keep the processed files?"
 msgstr "Operazione non completata, conservo i file elaborati?"
 
+#: digit_form_main.rserrloadwork
+#, object-pascal-format
+msgid ""
+"Cannot Load Work Session\n"
+"%s"
+msgstr ""
+
+#: digit_form_main.rserrsavework
+#, object-pascal-format
+msgid ""
+"Cannot Save Work Session\n"
+"%s"
+msgstr ""
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr "Impossibile Creare il Contatore"
@@ -104,6 +126,10 @@ msgid ""
 msgstr ""
 "La pagina rientra nell'intervallo già elaborato\n"
 "Dovrei metterla al centro?"
+
+#: digit_form_main.rsnewwork
+msgid "Start a New Work Session?"
+msgstr ""
 
 #: digit_form_main.rsnofilesdownloaded
 msgid "NO Files Downloaded "
@@ -160,6 +186,17 @@ msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
 
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
+msgstr ""
+
+#: digit_source_folder.rsfoldnotfound
+#, object-pascal-format
+msgid ""
+"Folder not found...\n"
+"%s"
+msgstr ""
+
+#: digit_source_folder.rsfoldselect
+msgid "Select a Folder"
 msgstr ""
 
 #: digit_source_twain.rstwainexcnotfound

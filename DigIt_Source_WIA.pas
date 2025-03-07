@@ -69,7 +69,7 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Summary(const ASummary: PChar): Integer; stdcall;
+    function Summary(out ASummary: PChar): Integer; stdcall;
 
     function OnSet: Boolean; stdcall;
 
@@ -266,6 +266,8 @@ var
    aIndex: Integer;
 
 begin
+  Result:= False;
+
   if (getWIA <> nil) then
   try
      rWia.EnumAll:= False;
@@ -280,7 +282,7 @@ begin
        rWIA.SelectDeviceItem(DeviceID, DeviceItemName, curSource, aIndex);
        if (curSource = nil)
        then begin
-              //Device not finded, search with DeviceName/DeviceManufacturer
+              //Device not founded, search with DeviceName/DeviceManufacturer
               aIndex:= rWia.FindDevice(DeviceName, DeviceManufacturer);
               if (aIndex >= 0) then
               begin
@@ -317,10 +319,10 @@ begin
                    then break;
             end
        else begin
-              //Device found and to connect
+              //Device found and connected
               if (aIndex = -1) then
               begin
-                //We have finded the Device but not the Item, ask the user what to do
+                //We have found the Device but not the Item, ask the user what to do
                 curItem:= curSource.Items[0];
                 if (curItem <> nil) then
                 Case MessageDlg('DigIt WIA',
@@ -335,7 +337,10 @@ begin
 
     if (aIndex = -1)
     then Result:= GetFromUser //User has selected Abort, Get Another Device from List
-    else SelectSourceItem(curSource, aIndex);
+    else begin
+           SelectSourceItem(curSource, aIndex);
+           Result:= (curSource <> nil);
+         end;
 
   finally
   end;
@@ -455,7 +460,7 @@ begin
   end;
 end;
 
-function TDigIt_Source_WIA.Summary(const ASummary: PChar): Integer; stdcall;
+function TDigIt_Source_WIA.Summary(out ASummary: PChar): Integer; stdcall;
 begin
   Result:= 0;
 end;

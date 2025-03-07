@@ -77,7 +77,7 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Summary(const ASummary: PChar): Integer; stdcall;
+    function Summary(out ASummary: PChar): Integer; stdcall;
 
     function OnSet: Boolean; stdcall;
 
@@ -619,17 +619,18 @@ begin
   end;
 end;
 
-function TDigIt_Source_Twain.Summary(const ASummary: PChar): Integer; stdcall;
+function TDigIt_Source_Twain.Summary(out ASummary: PChar): Integer; stdcall;
 begin
   Result:= 0;
 end;
 
 function TDigIt_Source_Twain.OnSet: Boolean; stdcall;
 var
-   dlgRes: TModalResult;
    aIndex: Integer;
 
 begin
+  Result:= False;
+
   with rScannerInfo do
   begin
     aIndex:= -1;

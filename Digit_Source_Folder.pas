@@ -21,6 +21,8 @@ const
 
 resourcestring
   DigIt_Source_Folder_NameL = 'Folder Pictures';
+  rsFoldNotFound = 'Folder not found...'#13#10'%s';
+  rsFoldSelect = 'Select a Folder';
 
 type
   { TDigIt_Source_Folder }
@@ -53,7 +55,7 @@ type
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
-    function Summary(const ASummary: PChar): Integer; stdcall;
+    function Summary(out ASummary: PChar): Integer; stdcall;
 
     function OnSet: Boolean; stdcall;
 
@@ -71,7 +73,7 @@ type
 
 implementation
 
-uses Laz2_XMLCfg, Digit_Bridge_Impl, Dialogs, masks, BGRABitmapTypes;
+uses Controls, Laz2_XMLCfg, Digit_Bridge_Impl, Dialogs, masks, BGRABitmapTypes;
 
 var
    Source_Folder : TDigIt_Source_Folder = nil;
@@ -190,15 +192,26 @@ begin
   end;
 end;
 
-function TDigIt_Source_Folder.Summary(const ASummary: PChar): Integer; stdcall;
+function TDigIt_Source_Folder.Summary(out ASummary: PChar): Integer; stdcall;
 begin
-  StrPCopy(ASummary, 'Folder= '+Folder+#13#10+'Taked= '+LastTaked);
+  ASummary:= StrNew(PChar('Folder= '+Folder+#13#10+'Taked= '+LastTaked));
   Result:= Length(ASummary);
 end;
 
 function TDigIt_Source_Folder.OnSet: Boolean; stdcall;
 begin
-  Result:= True;
+  repeat
+    Result:= DirectoryExists(Folder);
+    if not(Result) then
+    begin
+      Case QuestionDlg('DigIt '+DigIt_Source_Folder_NameL, Format(rsFoldNotFound, [Folder]),
+               mtError, [mrYes, rsFoldSelect, 'IsDefault',
+                         mrRetry, mrAbort], 0) of
+      mrYes: Result:= GetFromUser;
+      mrAbort: break;
+      end;
+    end;
+  until Result;
 end;
 
 function TDigIt_Source_Folder.GetCount: DWord; stdcall;

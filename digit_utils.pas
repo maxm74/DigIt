@@ -311,7 +311,7 @@ begin
   newItem:= TMenuItem.Create(AOwner);
   newItem.Caption:= rsDestination_Default;
   newItem.ImageIndex:= 6;
-  newItem.Tag:= -1;
+  newItem.Tag:= 0;
   newItem.OnClick:= menuOnClick;
   menuDestinations.Items.Add(newItem);
 
@@ -334,7 +334,7 @@ begin
       else newItem.Caption:= theBridge.DestinationsImpl.Key[i];
 
       newItem.ImageIndex:= curDestination^.Inst.UI_ImageIndex;
-      newItem.Tag:= i;
+      newItem.Tag:= i+1;
       newItem.OnClick:= menuOnClick;
       newItem.Enabled:= curDestination^.Inst.Enabled;
       menuDestinations.Items.Add(newItem);

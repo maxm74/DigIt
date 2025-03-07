@@ -20,6 +20,8 @@ const
 
   Ext_Sess  = '.digs';
   Ext_Thumb = '.digt';
+  Ext_AutoSess = '.digas';
+  Ext_AutoThumb = '.digat';
 
   File_DefSession = 'digit';
   File_Options = 'digit.xml';

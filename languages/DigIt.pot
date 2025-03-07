@@ -48,9 +48,16 @@ msgstr ""
 msgid "Clear the Work Queue?"
 msgstr ""
 
+#: digit_form_main.rscontinueautowork
+msgid "Continue from Auto Saved Work Session?"
+msgstr ""
+
 #: digit_form_main.rscontinuework
+#, object-pascal-format
 msgctxt "digit_form_main.rscontinuework"
-msgid "Continue from last Work Session?"
+msgid ""
+"Continue from last Work Session?\n"
+"%s"
 msgstr ""
 
 #: digit_form_main.rsconvertpdf
@@ -94,6 +101,20 @@ msgstr ""
 msgid "Operation not completed, do I keep the processed files?"
 msgstr ""
 
+#: digit_form_main.rserrloadwork
+#, object-pascal-format
+msgid ""
+"Cannot Load Work Session\n"
+"%s"
+msgstr ""
+
+#: digit_form_main.rserrsavework
+#, object-pascal-format
+msgid ""
+"Cannot Save Work Session\n"
+"%s"
+msgstr ""
+
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
 msgstr ""
@@ -102,6 +123,10 @@ msgstr ""
 msgid ""
 "The page is within the already processed range\n"
 "Should I put it in the middle?"
+msgstr ""
+
+#: digit_form_main.rsnewwork
+msgid "Start a New Work Session?"
 msgstr ""
 
 #: digit_form_main.rsnofilesdownloaded
@@ -159,6 +184,17 @@ msgstr ""
 
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
+msgstr ""
+
+#: digit_source_folder.rsfoldnotfound
+#, object-pascal-format
+msgid ""
+"Folder not found...\n"
+"%s"
+msgstr ""
+
+#: digit_source_folder.rsfoldselect
+msgid "Select a Folder"
 msgstr ""
 
 #: digit_source_twain.rstwainexcnotfound

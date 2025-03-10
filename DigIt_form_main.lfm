@@ -7,7 +7,6 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
-  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -406,8 +405,8 @@ object DigIt_Main: TDigIt_Main
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 2
-        ClientHeight = 41
-        ClientWidth = 158
+        ClientHeight = 40
+        ClientWidth = 156
         Columns = 2
         Items.Strings = (
           'Parent'
@@ -1175,14 +1174,14 @@ object DigIt_Main: TDigIt_Main
       end
       object tbCaptSep1: TToolButton
         Left = 53
-        Height = 8
+        Height = 26
         Top = 2
         Caption = 'tbCaptSep1'
         Style = tbsSeparator
       end
       object tbCaptSep2: TToolButton
         Left = 113
-        Height = 8
+        Height = 26
         Top = 2
         Caption = 'tbCaptSep2'
         Style = tbsSeparator
@@ -1666,7 +1665,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepMenu: TToolButton
         Left = 76
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepMenu'
         Style = tbsSeparator
@@ -1694,7 +1693,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepTake: TToolButton
         Left = 267
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
@@ -1747,7 +1746,7 @@ object DigIt_Main: TDigIt_Main
       Wrapable = False
       object tbSepCrop: TToolButton
         Left = 1
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepCrop'
         Style = tbsSeparator
@@ -1778,7 +1777,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepClear: TToolButton
         Left = 348
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator
@@ -2704,8 +2703,10 @@ object DigIt_Main: TDigIt_Main
     Top = 108
   end
   object SavePDF: TSaveDialog
+    Title = 'Salva PDF con nome'
     DefaultExt = '.pdf'
     Filter = 'Portable Document Format (*.pdf)|*.pdf|All Files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
     Left = 426
     Top = 256
   end
@@ -3049,15 +3050,19 @@ object DigIt_Main: TDigIt_Main
     Left = 530
     Top = 490
   end
-  object OpenProject: TOpenDialog
+  object OpenSessionDlg: TOpenDialog
+    Title = 'Apri Sessione esistente'
     DefaultExt = '.digs'
     Filter = 'Digit Session (*.digs)|*.digs|All Files (*.*)|*.*'
+    Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
     Left = 426
     Top = 108
   end
-  object SaveProject: TSaveDialog
+  object SaveSessionDlg: TSaveDialog
+    Title = 'Salva Sessione con nome'
     DefaultExt = '.digs'
     Filter = 'Digit Session (*.digs)|*.digs|All Files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
     Left = 426
     Top = 178
   end

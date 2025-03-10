@@ -112,6 +112,7 @@ msgstr ""
 #, object-pascal-format
 msgid ""
 "Cannot Save Work Session\n"
+"%s\n"
 "%s"
 msgstr ""
 
@@ -165,6 +166,30 @@ msgstr ""
 
 #: digit_form_main.rssaveworkcopy
 msgid "Create a Copy of the Work Session or Move it?"
+msgstr ""
+
+#: digit_form_main.rssavingcaptured
+msgid "Saving Captured Files"
+msgstr ""
+
+#: digit_form_main.rssavingdone
+msgid "Saved Done"
+msgstr ""
+
+#: digit_form_main.rssavingsessionfiles
+msgid "Saving Session Files"
+msgstr ""
+
+#: digit_form_main.rssavingsources
+msgid "Saving Sources Files"
+msgstr ""
+
+#: digit_form_main.rssavingswitch
+msgid "Switching to New Work Session"
+msgstr ""
+
+#: digit_form_main.rssavingwork
+msgid "Saving the Work Session"
 msgstr ""
 
 #: digit_form_main.rssourcenotfound
@@ -628,6 +653,10 @@ msgstr ""
 msgid "Stop Timer"
 msgstr ""
 
+#: tdigit_main.opensessiondlg.title
+msgid "Apri Sessione esistente"
+msgstr ""
+
 #: tdigit_main.rgcropaspect.caption
 msgid "Aspect Ratio"
 msgstr ""
@@ -642,6 +671,14 @@ msgstr ""
 
 #: tdigit_main.rollpages.button.caption
 msgid "Captured Pages"
+msgstr ""
+
+#: tdigit_main.savepdf.title
+msgid "Salva PDF con nome"
+msgstr ""
+
+#: tdigit_main.savesessiondlg.title
+msgid "Salva Sessione con nome"
 msgstr ""
 
 #: tdigit_main.tbcaptsep1.caption

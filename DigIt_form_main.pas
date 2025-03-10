@@ -18,7 +18,8 @@ uses
   ExtCtrls, Menus, ComCtrls, ActnList, Spin, ShellCtrls, EditBtn, SpinEx,
   LCLVersion, LCLType, Laz2_XMLCfg, FPImage,
   BGRABitmap, BGRABitmapTypes, BGRAPapers,
-  BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList, BCExpandPanels,
+  BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList,
+  BCExpandPanels,BGRAFlashProgressBar,
   DigIt_Types, DigIt_Utils, DigIt_Counters, Digit_Bridge_Intf, Digit_Bridge_Impl;
 
 resourcestring
@@ -26,6 +27,12 @@ resourcestring
   rsContinueWork = 'Continue from last Work Session?'#13#10'%s';
   rsContinueAutoWork = 'Continue from Auto Saved Work Session?';
   rsSaveWork = 'Save the Work Session?';
+  rsSavingWork = 'Saving the Work Session';
+  rsSavingSources = 'Saving Sources Files';
+  rsSavingCaptured = 'Saving Captured Files';
+  rsSavingSessionFiles = 'Saving Session Files';
+  rsSavingSwitch = 'Switching to New Work Session';
+  rsSavingDone = 'Saved Done';
   rsSaveWorkCopy = 'Create a Copy of the Work Session or Move it?';
   rsNoFilesDownloaded = 'NO Files Downloaded ';
   rsTakeAgain = 'Replace the last %d taked files with a new Take?';
@@ -52,7 +59,7 @@ resourcestring
   rsSourceNotSelected = 'Cannot Select Source %d, try Select another from Menù';
   rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
-  rsErrSaveWork = 'Cannot Save Work Session'#13#10'%s';
+  rsErrSaveWork = 'Cannot Save Work Session'#13#10'%s'#13#10'%s';
 
 type
   TSourceFile = packed record
@@ -185,7 +192,7 @@ type
     menuTimerTakeConfig: TMenuItem;
     menuTimerTakeStop: TMenuItem;
     menuOptions: TMenuItem;
-    OpenProject: TOpenDialog;
+    OpenSessionDlg: TOpenDialog;
     panelCounter: TBCPanel;
     panelCropArea: TBCPanel;
     menuPaperSizes: TPopupMenu;
@@ -198,7 +205,7 @@ type
     rollCounters: TBCExpandPanel;
     rollCrops: TBCExpandPanel;
     rollPages: TBCExpandPanel;
-    SaveProject: TSaveDialog;
+    SaveSessionDlg: TSaveDialog;
     Separator1: TMenuItem;
     menuProjectOpen: TMenuItem;
     menuProjectSave: TMenuItem;
@@ -314,6 +321,8 @@ type
 
   private
     { private declarations }
+    dlgRes: TModalResult;
+
     lastNewBoxNum: Word;
     changingAspect,
     Closing,
@@ -370,8 +379,6 @@ type
     procedure DestinationMenuClick(Sender: TObject);
     procedure SourceMenuClick(Sender: TObject);
 
-    procedure ProgressCancelClick(Sender: TObject);
-
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
 
     procedure UpdateBoxList;
@@ -421,10 +428,13 @@ type
     function CropFile_Full(AFileName: String): Boolean; overload;
     procedure CropFile_Full(AStartIndex: Integer); overload;
 
-    procedure ProgressImagesShow(TotalMin, TotalMax: Integer);
+    procedure ProgressCancelClick(Sender: TObject);
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle=pbstNormal);
+    function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
 
     procedure Pages_InsertMiddle(ASourceFileIndex: Integer);
 
+    procedure SetSaveWriter(AFormat: TBGRAImageFormat);
     procedure SetDefaultStartupValues;
     procedure SetDefaultSessionValues;
     procedure ClearCaptured;
@@ -455,7 +465,6 @@ implementation
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
   BGRAWriteJPeg,
-  BGRAFlashProgressBar,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm, DigIt_Form_PDF,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
@@ -582,6 +591,9 @@ begin
   rDestinationName:= '';
   //  rDestinationParams:= nil;
 
+
+  SetSaveWriter(ifJpeg);
+
   Session_File:= File_DefSession;
 
   SetDefaultStartupValues;
@@ -623,21 +635,16 @@ begin
      begin
        //ask for open AutoSave if exists
        if FileExists(Path_DefSession+File_DefSession+Ext_AutoSess) then
-         begin
-           if (MessageDlg('DigIt', rsContinueAutoWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-           then XML_LoadWork(True)
-           else XML_ClearWork(True);
-
-           sessLoaded:= True;
-         end;
+       begin
+         sessLoaded:= True;
+         if (MessageDlg('DigIt', rsContinueAutoWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+         then XML_LoadWork(True)
+         else XML_ClearWork(True);
+       end;
      end;
 
-     if not(sessLoaded) then
-     begin
-       setCropMode(diCropFull);
-
-       UI_ToolBar;
-     end;
+     if not(sessLoaded)
+     then setCropMode(diCropFull);
 
   except
     Path_Session:= Path_DefSession;
@@ -647,27 +654,20 @@ begin
     SetDefaultStartupValues;
 
     setCropMode(diCropFull);
-
-    UI_ToolBar;
   end;
 end;
 
 procedure TDigIt_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-var
-   dlgRes: TModalResult;
-
 begin
   closing :=True;
 
   //AutoSave
-  if FileExists(Path_Session+Session_File+Ext_AutoSess) then XML_SaveWork(True);
-
-  //Save Current Session ?
-  if FileExists(Path_Session+Session_File+Ext_Sess) then
+  if FileExists(Path_Session+Session_File+Ext_AutoSess) then
   begin
-    dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+    XML_SaveWork(True);
 
-    if (dlgRes = mrYes) then XML_SaveWork(False);
+    //Save Current Session ?
+    actSessionSaveExecute(nil);
 
     CanClose:= not(dlgRes = mrCancel);
   end;
@@ -766,7 +766,7 @@ begin
 
           Case CropMode of
             diCropFull: begin
-              ProgressImagesShow(1, res);
+              ProgressShow(rsProcessingImages, 1, res);
 
               if (res = 1 )
               then begin
@@ -981,11 +981,10 @@ var
 
 begin
   try
-    UserCancel:= False;
     Finished:= False;
     c:= Length(SourceFiles);
     cStr:= IntToStr(c);
-    ProgressImagesShow(iSourceFiles, c);
+    ProgressShow(rsProcessingImages, iSourceFiles, c);
 
     repeat
       DigIt_Progress.progressTotal.Position:= iSourceFiles;
@@ -1450,11 +1449,6 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.ProgressCancelClick(Sender: TObject);
-begin
-  UserCancel:= True;
-end;
-
 procedure TDigIt_Main.actOptionsExecute(Sender: TObject);
 begin
   //
@@ -1565,27 +1559,40 @@ begin
      mrCancel: exit;
      end;
 
-     if OpenProject.Execute then XML_LoadSessionFile(OpenProject.FileName);
+     if OpenSessionDlg.Execute then XML_LoadSessionFile(OpenSessionDlg.FileName);
   finally
   end;
 end;
 
 procedure TDigIt_Main.actSessionSaveAsExecute(Sender: TObject);
 begin
-  if SaveProject.Execute
-  then XML_SaveSessionFile(SaveProject.FileName);
+  if SaveSessionDlg.Execute
+  then XML_SaveSessionFile(SaveSessionDlg.FileName);
 end;
 
 procedure TDigIt_Main.actSessionSaveExecute(Sender: TObject);
+var
+   canSave: Boolean;
+
 begin
   try
-     if (Path_Session = Path_DefSession)
+     if (Sender = nil)
      then begin
-            //Save As...
-            if SaveProject.Execute
-            then XML_SaveSessionFile(SaveProject.FileName);
+            dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+            canSave:= (dlgRes=mrYes);
           end
-     else XML_SaveSessionFile('');
+     else canSave:= True;
+
+     if canSave then
+     begin
+       if (Path_Session = Path_DefSession)
+       then begin
+              //Save As...
+              if SaveSessionDlg.Execute
+              then XML_SaveSessionFile(SaveSessionDlg.FileName);
+            end
+       else XML_SaveWork(False);
+     end;
 
   finally
   end;
@@ -1753,7 +1760,7 @@ end;
 procedure TDigIt_Main.CounterSelect(AIndex: Integer);
 begin
   cbCounterList.ItemIndex:=AIndex;
-  UI_FillCounter(Counters_GetCurrent);
+  UI_FillCounter(nil);
 end;
 
 function TDigIt_Main.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
@@ -1831,13 +1838,14 @@ begin
      XML_LoadCropAreas(aXML, IsAutoSave);
      XML_LoadUserInterface(aXML, IsAutoSave);
 
-     UI_MenuItemsChecks(newSourceI, newDestinationI);
-     UI_FillCounter(Counters_GetCurrent);
-     UI_ToolBar;
-
   finally
      XML_Loading:= False;
      aXML.Free;
+
+     UI_MenuItemsChecks(newSourceI, newDestinationI);
+     UI_FillCounters;
+     UI_FillCounter(nil);
+     UI_ToolBar;
   end;
 end;
 
@@ -1892,25 +1900,6 @@ begin
   DeleteFile(Path_DefSession+File_DefSession+Ext_AutoThumb);
   DeleteDirectory(Path_DefSession_Scan, True);
   DeleteDirectory(Path_DefSession_Pictures, True);
-
-  rDestinationName:= '';
-  SaveFormat:= ifJpeg;
-
-  try
-     if (SaveWriter <> nil) then SaveWriter.Free;
-     SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
-     SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
-
-  except
-    SaveWriter:= nil;
-    SaveExt:= 'jpg';
-  end;
-
-  if (SaveWriter <> nil) then
-  begin
-    if (SaveWriter is TBGRAWriterJPEG) then TBGRAWriterJPEG(SaveWriter).CompressionQuality:= 100;
-  end;
-
 
   if not(AFromStartup) then
   try
@@ -1997,6 +1986,7 @@ end;
 function TDigIt_Main.XML_SaveSessionFile(AFileName: String): Boolean;
 var
    newPath_Session,
+   newSession_File,
    curFileName,
    curFileNameR: String;
    fileSources,
@@ -2006,25 +1996,36 @@ var
    i,
    lenSources,
    lenCaptured: Integer;
-   dlgRes: TModalResult;
 
 begin
   Result:= False;
+  try
 
   if (AFileName <> '') then
   try
-     newPath_Session:=ExtractFilePath(AFileName);
+     newPath_Session:= ExtractFilePath(AFileName);
+     newSession_File:= ExtractFileNameWithoutExt(ExtractFileName(AFileName));
      ForceDirectories(newPath_Session);
 
-     //Copy or Move temp/thumb Files from Current Work Session to New Session
-     dlgRes:= QuestionDlg('DigIt', rsSaveWorkCopy, mtConfirmation,
-                          [mrYes, 'Copy', 'IsDefault',
-                          mrNo, 'Move',
-                          mrCancel, 'IsCancel'], 0);
+     //if Path is Default then we are saving a new Session, we must move the Files
+     if (Path_Session = Path_DefSession)
+     then isMove:= True
+     else begin
+            //Copy or Move temp/thumb Files from Current Work Session to New Session
+            dlgRes:= QuestionDlg('DigIt', rsSaveWorkCopy, mtConfirmation,
+                                [mrYes, 'Copy', 'IsDefault',
+                                 mrNo, 'Move',
+                                 mrCancel, 'IsCancel'], 0);
 
-     if (dlgRes = mrCancel) then exit;
+            Case dlgRes of
+            mrYes: isMove:= False;
+            mrNo: isMove:= True;
+            mrCancel: exit;
+            end;
+          end;
 
-     isMove:= (dlgRes = mrNo);
+     ProgressShow(rsSavingWork, 0, 5);
+
 
      lenSources:= Length(SourceFiles);
      lenCaptured:= Length(CapturedFiles);
@@ -2033,6 +2034,7 @@ begin
      SetLength(fileCaptured, lenCaptured);
 
      //Copy Files to new Session, if is Relative convert Names else leave as is
+     if ProgressSetTotal(rsSavingSources, 1) then exit;
      for i:=0 to lenSources-1 do
      begin
        curFileNameR:= FullPathToRelativePath(Path_Session, SourceFiles[i].fName, isRelative);
@@ -2050,8 +2052,11 @@ begin
               {#todo -oMaxM : User may select if copy the file inside the Session Scan Folder Yes,No,YesAll,NoAll }
               fileSources[i]:= SourceFiles[i].fName;
             end;
+
+       Application.ProcessMessages; if UserCancel then exit;
      end;
 
+     if ProgressSetTotal(rsSavingCaptured, 2) then exit;
      for i:=0 to lenCaptured-1 do
      begin
        curFileNameR:= FullPathToRelativePath(Path_Session, CapturedFiles[i].fName, isRelative);
@@ -2069,25 +2074,50 @@ begin
               {#todo -oMaxM : User may select if copy the file inside the Session Pictures Folder Yes,No,YesAll,NoAll }
               fileCaptured[i]:= CapturedFiles[i].fName;
             end;
+
+       Application.ProcessMessages; if UserCancel then exit;
      end;
 
+     if ProgressSetTotal(rsSavingSessionFiles, 3) then exit;
+
+     //Copy Loaded File
      curFileNameR:= FullPathToRelativePath(Path_Session, LoadedFile, isRelative);
      if isRelative then
      begin
        curFileName:= RelativePathToFullPath(newPath_Session, curFileNameR);
        ForceDirectories(ExtractFilePath(curFileName));
-       CopyFile(LoadedFile, curFileName, True, True);
+       CopyFile(LoadedFile, curFileName, True, False);
        if isMove then DeleteFile(LoadedFile);
 
        LoadedFile:= curFileName;
      end;
 
-     //Delete old Session Files
+     Application.ProcessMessages; if UserCancel then exit;
+
+     //Copy AutoSave Files
+     curFileName:=Path_Session+Session_File+Ext_AutoSess;
+     if FileExists(curFileName) then
+     begin
+       CopyFile(curFileName, newPath_Session+newSession_File+Ext_AutoSess, True, False);
+
+       //if Path is Default then we are saving a new Session, we must move the autoSave Files
+       if isMove then DeleteFile(curFileName);
+     end;
+     curFileName:=Path_Session+Session_File+Ext_AutoThumb;
+     if FileExists(curFileName) then
+     begin
+       CopyFile(curFileName, newPath_Session+newSession_File+Ext_AutoThumb, True, False);
+       if isMove then DeleteFile(curFileName);
+     end;
+
+     //if is Move then Delete old Session Files
      if isMove then
      begin
        DeleteFile(Path_Session+Session_File+Ext_Thumb);
        DeleteFile(Path_Session+Session_File+Ext_Sess);
      end;
+
+     if ProgressSetTotal(rsSavingSwitch, 4) then exit;
 
      //Populate the Files Arrays with new Filenames
      for i:=0 to lenSources-1 do
@@ -2114,14 +2144,23 @@ begin
      then Caption :='DigIt'
      else Caption :='DigIt'+' - '+Session_File;
 
-     fileSources:= nil;
-     fileCaptured:= nil;
+     ProgressSetTotal(rsSavingDone, 5);
      Result:= True;
 
   except
+    on E: Exception do
+      MessageDlg('DigIt', Format(rsErrSaveWork, [AFileName, E.Message]), mtError, [mbOk], 0);
+  end;
+
+  finally
+    if UserCancel then
+    begin
+      dlgRes:= mrCancel;
+    end;
+
     fileSources:= nil;
     fileCaptured:= nil;
-    MessageDlg('DigIt', Format(rsErrSaveWork, [AFileName]), mtError, [mbOk], 0);
+    DigIt_Progress.Hide;
   end;
 end;
 
@@ -2279,22 +2318,8 @@ begin
             //Load Format and Create Writer
             SaveFormat:= ifJpeg;
             aXML.GetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
-            try
-               if (SaveWriter <> nil) then SaveWriter.Free;
-               SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
-               SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
-
-            except
-               SaveWriter:= nil;
-               SaveExt:= 'jpg';
-            end;
-
             { #todo 5 -oMaxM : Load Format Specific parameters, Find a way using RTTI? }
-            if (SaveWriter <> nil) then
-            begin
-              if (SaveWriter is TBGRAWriterJPEG) then TBGRAWriterJPEG(SaveWriter).CompressionQuality:= 100;
-            end;
-
+            SetSaveWriter(SaveFormat);
             Result:= 0;
  (*
           end
@@ -2415,10 +2440,10 @@ begin
 
                   UI_ThumbnailUpdate(i, cuFileName);
                 end;
-              end
-         else CapturedFiles[i].iIndex :=0;
 
-         curItem.ImageIndex:= CapturedFiles[i].iIndex;
+                curItem.ImageIndex:= CapturedFiles[i].iIndex;
+              end
+         else curItem.ImageIndex:= 0; //CapturedFiles[i].iIndex :=0;
      end;
 
      if (newSelected > -1) and (newSelected < newCount)
@@ -2840,21 +2865,8 @@ begin
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
             if TDest_SaveFiles_Settings.Execute(SaveFormat, Path_Session_Pictures) then
             begin
-              try
-                 if (SaveWriter <> nil) then SaveWriter.Free;
-                 SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
-                 SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
-
-              except
-                SaveWriter:= nil;
-                SaveExt:= 'jpg';
-              end;
-
               { #todo 5 -oMaxM : Load Specific Format Settings from Form? }
-              if (SaveWriter <> nil) then
-              begin
-                if (SaveWriter is TBGRAWriterJPEG) then TBGRAWriterJPEG(SaveWriter).CompressionQuality:= 100;
-              end;
+              SetSaveWriter(SaveFormat);
             end;
 
             //this way we know it is SaveAs Destination
@@ -3117,21 +3129,10 @@ begin
 
      if TDigIt_PDF.Execute(PDF.Infos) then
      try
-        UserCancel:= False;
         saved:= False;
+        cStr:= IntToStr(lvCaptured.Items.Count-1);
 
-        with DigIt_Progress do
-        begin
-          labTotal.Caption:= '';
-          capTotal.Caption:= '';
-          progressTotal.Style:= pbstNormal;
-          progressTotal.Min:= 0;
-          progressTotal.Max:= lvCaptured.Items.Count-1;
-          progressTotal.Position:= 0;
-          panelCurrent.Visible:= False;
-          Show(PChar(rsConvertPDF));
-          cStr:= IntToStr(progressTotal.Max);
-        end;
+        ProgressShow(rsConvertPDF, 0, lvCaptured.Items.Count-1);
 
         PDF.StartDocument;
         S := PDF.Sections.AddSection;
@@ -3215,18 +3216,13 @@ begin
         imgManipulation.Opacity:= 0;
         imgManipulation.Enabled:= False;
         rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
+        rollCounters.Collapsed:= True;
 
         panelCounterList.Enabled:= False;
 
         if (Counters.Count = 0)
         then Counters.Add('Counter 0')
         else Counters.RemoveAllButFirst;
-
-       (* if not(XML_Loading) then
-        begin
-          UI_FillCounters;
-          UI_FillCounter(Counters[0]);
-        end; *)
 
         tbCropMode.Caption:= rsCropFull;
       end;
@@ -3235,14 +3231,9 @@ begin
         imgManipulation.Opacity:= 128;
         imgManipulation.Enabled:= True;
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
+        rollCounters.Collapsed:= False;
 
         panelCounterList.Enabled:= True;
-
-       (* if not(XML_Loading) then
-        begin
-          UI_FillCounters;
-          UI_FillCounter(Counters_GetCurrent);
-        end; *)
 
         tbCropMode.Caption:= rsCropCust;
       end;
@@ -3253,7 +3244,7 @@ begin
     if not(XML_Loading) then
     begin
       UI_FillCounters;
-      UI_FillCounter(Counters_GetCurrent);
+      UI_FillCounter(nil);
       UI_ToolBar;
     end;
    end;
@@ -3400,26 +3391,59 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.ProgressImagesShow(TotalMin, TotalMax: Integer);
+procedure TDigIt_Main.ProgressCancelClick(Sender: TObject);
+begin
+  UserCancel:= True;
+end;
+
+procedure TDigIt_Main.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle);
 begin
   UserCancel:= False;
   with DigIt_Progress do
   begin
     labTotal.Caption:= '';
     capTotal.Caption:= '';
-    progressTotal.Style:= pbstNormal;
+    progressTotal.Style:= AStyle;
     progressTotal.Min:= TotalMin;
     progressTotal.Max:= TotalMax;
     progressTotal.Position:= TotalMin;
     panelCurrent.Visible:= False;
-    Show(PChar(rsProcessingImages));
+    Show(PChar(ACaption));
   end;
+end;
+
+function TDigIt_Main.ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
+begin
+  DigIt_Progress.progressTotal.Position:= TotalVal;
+  DigIt_Progress.capTotal.Caption:= TotalCaption;
+  Application.ProcessMessages;
+  Result:= UserCancel;
 end;
 
 procedure TDigIt_Main.Pages_InsertMiddle(ASourceFileIndex: Integer);
 begin
   { #todo 5 -oMaxM : Re index the crops starting from the lastCropped }
   MessageDlg(rsNotImpl, mtInformation, [mbOk], 0);
+end;
+
+procedure TDigIt_Main.SetSaveWriter(AFormat: TBGRAImageFormat);
+begin
+  SaveFormat:= AFormat;
+  try
+     if (SaveWriter <> nil) then SaveWriter.Free;
+     SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
+     SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
+
+  except
+    SaveFormat:= ifJpeg;
+    SaveWriter:= nil;
+    SaveExt:= 'jpg';
+  end;
+
+  if (SaveWriter <> nil) then
+  begin
+    if (SaveWriter is TBGRAWriterJPEG) then TBGRAWriterJPEG(SaveWriter).CompressionQuality:= 100;
+  end;
 end;
 
 procedure TDigIt_Main.SetDefaultStartupValues;

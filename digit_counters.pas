@@ -24,7 +24,7 @@ type
       procedure SetValue_StringDigits(AValue: Byte);
 
     public
-      constructor Create(AName:String; AValue:Integer=-1); overload;
+      constructor Create(AName:String; AValue:Integer=0); overload;
 
       function GetValue(nextValue: Boolean=False): String; overload;
       function GetValue(AValue: Integer): String; overload;
@@ -65,7 +65,7 @@ type
       constructor Create(AName:String; AOwnsObjects:Boolean=True);
 
       function add(aCounter: TDigIt_Counter): integer; overload;
-      function add(AName:String; AValue:Integer=-1): integer; overload;
+      function add(AName:String; AValue:Integer=0): integer; overload;
 
       //Remove all Items except the First
       procedure RemoveAllButFirst;
@@ -94,9 +94,6 @@ type
       property Name:String read rName write rName;
 
       //Events
-      //property OnCropAreaAdded:TCropAreaEvent read rOnCropAreaAdded write rOnCropAreaAdded;
-      //property OnCropAreaDeleted:TCropAreaEvent read rOnCropAreaDeleted write rOnCropAreaDeleted;
-      //property OnCropAreaChanged:TCropAreaEvent read rOnCropAreaChanged write rOnCropAreaChanged;
       property OnCropAreaLoad:TCounterLoadEvent read rOnCounterLoad write rOnCounterLoad;
       property OnCropAreaSave:TCounterSaveEvent read rOnCounterSave write rOnCounterSave;
    end;
@@ -112,9 +109,9 @@ end;
 
 procedure TDigIt_Counter.SetValueNext(AValue: Integer);
 begin
-  if (AValue >= 0)
+  if (AValue > 0)
   then rValue:= AValue-1
-  else rValue:= -1;
+  else rValue:= 0;
 end;
 
 procedure TDigIt_Counter.SetValue_StringDigits(AValue: Byte);
@@ -154,12 +151,12 @@ begin
   Name :=XMLConf.GetValue(APath+'Name', '');
   if LoadValues
   then begin
-         Value:=XMLConf.GetValue(APath+'Value', -1);
-         Value_Previous:=XMLConf.GetValue(APath+'Value_Previous', -1);
+         Value:=XMLConf.GetValue(APath+'Value', 0);
+         Value_Previous:=XMLConf.GetValue(APath+'Value_Previous', 0);
        end
   else begin
-         Value:=-1;
-         Value_Previous:=-1;
+         Value:= 0;
+         Value_Previous:= 0;
        end;
   Value_StringPre:=XMLConf.GetValue(APath+'Value_StringPre', '');
   Value_StringPost:=XMLConf.GetValue(APath+'Value_StringPost', '');
@@ -362,8 +359,8 @@ begin
       curItemPath :=curPath+'Item' + IntToStr(i)+'/';
 
       curCounter :=Items[i];
-      curCounter.Value:=XMLConf.GetValue(curItemPath+'Value', -1);
-      curCounter.Value_Previous:=XMLConf.GetValue(curItemPath+'Value_Previous', -1);;
+      curCounter.Value:=XMLConf.GetValue(curItemPath+'Value', 0);
+      curCounter.Value_Previous:=XMLConf.GetValue(curItemPath+'Value_Previous', 0);
     end;
 
    finally
@@ -445,7 +442,7 @@ begin
   for i :=0 to Count-1 do
   begin
     curCounter :=Items[i];
-    curCounter.Value:= -1;
+    curCounter.Value:= 0;
   end;
 end;
 

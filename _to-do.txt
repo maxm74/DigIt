@@ -4,14 +4,11 @@ Bugs:
    
   
 Main:
-  Aggiungere Pulsanti Delete All e Delete Selected in Captured (elimina anche il file)
-
   Lasciare una sola ComboBox dei contatori (legata al Crop Selezionato) ?
 
   CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
 
   Salvare la sessione più spesso
-  (risolto, testare di più) Aggiornare le miniature dopo un Re-Take  (è solo un refresh della lista)
 
   riprendi sessione : barra di captured alla fine
   

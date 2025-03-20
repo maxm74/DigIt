@@ -289,6 +289,30 @@ msgstr ""
 msgid "   Vertical"
 msgstr ""
 
+#: tbgraformatuicontainer.caption
+msgid "BGRAFormatUIContainer"
+msgstr ""
+
+#: tbgraformatuicontainer.grayscale.caption
+msgid "GrayScale"
+msgstr ""
+
+#: tbgraformatuicontainer.iftiff.caption
+msgid "ifTiff"
+msgstr ""
+
+#: tbgraformatuicontainer.label1.caption
+msgid "Compression Quality"
+msgstr ""
+
+#: tbgraformatuicontainer.progressiveencoding.caption
+msgid "Progressive Encoding"
+msgstr ""
+
+#: tbgraformatuicontainer.radiobutton1.caption
+msgid "Tiff Test"
+msgstr ""
+
 #: tdigit_main.actcaptureddelete.caption
 msgid "Delete Selected Page"
 msgstr ""
@@ -637,6 +661,10 @@ msgstr ""
 msgid "Debug"
 msgstr ""
 
+#: tdigit_main.menuimageformat.caption
+msgid "ImageFormatForm"
+msgstr ""
+
 #: tdigit_main.menuloadxml.caption
 msgid "Load XML"
 msgstr ""
@@ -776,6 +804,7 @@ msgid "TotalL"
 msgstr ""
 
 #: tdigit_templates.bcpanel1.caption
+msgctxt "tdigit_templates.bcpanel1.caption"
 msgid "BCPanel1"
 msgstr ""
 

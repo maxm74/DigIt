@@ -2839,6 +2839,13 @@ object DigIt_Main: TDigIt_Main
     object menuDebug: TMenuItem
       Caption = 'Debug'
       Visible = False
+      object menuImageFormat: TMenuItem
+        Caption = 'ImageFormatForm'
+        OnClick = menuImageFormatClick
+      end
+      object Separator2: TMenuItem
+        Caption = '-'
+      end
       object menuLoadXML: TMenuItem
         Caption = 'Load XML'
         OnClick = menuDebugClick

@@ -119,6 +119,7 @@ type
     itemBuildDuplex: TMenuItem;
     menuDebug: TMenuItem;
     menuClearXML: TMenuItem;
+    menuImageFormat: TMenuItem;
     menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
     menuLoadXML: TMenuItem;
@@ -213,6 +214,7 @@ type
     MenuMain: TPopupMenu;
     SavePDF: TSaveDialog;
     SelectDirectory: TSelectDirectoryDialog;
+    Separator2: TMenuItem;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
     tbCapturedPDF: TToolButton;
@@ -309,6 +311,7 @@ type
     procedure edCropTopChange(Sender: TObject);
     procedure edCropWidthChange(Sender: TObject);
     procedure menuDebugClick(Sender: TObject);
+    procedure menuImageFormatClick(Sender: TObject);
     procedure rgCropAspectSelectionChanged(Sender: TObject);
     procedure btCropApplyAspectRatioClick(Sender: TObject);
 
@@ -464,7 +467,7 @@ implementation
 
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
-  BGRAWriteJPeg,
+  BGRAWriteJPeg, BGRAFormatUI,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm, DigIt_Form_PDF,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
@@ -1604,6 +1607,7 @@ var
    sourceBitmap,
    rotatedBitmap: TBGRABitmap;
    curFileName: String;
+   oIndex: Integer;
 
 begin
   captItem:= lvCaptured.Selected;
@@ -1618,8 +1622,11 @@ begin
      UI_ThumbnailUpdate(captItem.Index, rotatedBitmap);
 
      //Update the Thumbnail in ListView
-     lvCaptured.Selected:= nil;
-     lvCaptured.Selected:= captItem;
+     //lvCaptured.Selected:= nil;
+     //lvCaptured.Selected:= captItem;
+     oIndex:= captItem.ImageIndex;
+     captItem.ImageIndex:= -1;
+     captItem.ImageIndex:= oIndex;
 
   finally
      if (sourceBitmap <> nil) then sourceBitmap.Free;
@@ -1633,6 +1640,7 @@ var
    sourceBitmap,
    rotatedBitmap: TBGRABitmap;
    curFileName: String;
+   oIndex: Integer;
 
 begin
   captItem:= lvCaptured.Selected;
@@ -1647,8 +1655,11 @@ begin
      UI_ThumbnailUpdate(captItem.Index, rotatedBitmap);
 
      //Update the Thumbnail in ListView
-     lvCaptured.Selected:= nil;
-     lvCaptured.Selected:= captItem;
+     //lvCaptured.Selected:= nil;
+     //lvCaptured.Selected:= captItem;
+     oIndex:= captItem.ImageIndex;
+     captItem.ImageIndex:= -1;
+     captItem.ImageIndex:= oIndex;
 
   finally
      if (sourceBitmap <> nil) then sourceBitmap.Free;
@@ -2863,7 +2874,7 @@ begin
      if (newDestinationIndex = 0)
      then begin
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-            if TDest_SaveFiles_Settings.Execute(SaveFormat, Path_Session_Pictures) then
+            if TDest_SaveFiles_Settings.Execute(SaveFormat, SaveWriter, Path_Session_Pictures) then
             begin
               { #todo 5 -oMaxM : Load Specific Format Settings from Form? }
               SetSaveWriter(SaveFormat);
@@ -2996,6 +3007,11 @@ begin
     1: XML_SaveWork(True);
     2: XML_ClearWork(False);
   end;
+end;
+
+procedure TDigIt_Main.menuImageFormatClick(Sender: TObject);
+begin
+  TBGRAFormatUIContainer.Execute(SaveFormat, SaveWriter);
 end;
 
 procedure TDigIt_Main.rgCropAspectSelectionChanged(Sender: TObject);

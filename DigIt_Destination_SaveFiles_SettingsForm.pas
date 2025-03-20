@@ -15,14 +15,16 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, EditBtn, Buttons,
-  BGRABitmapTypes, BCPanel, BCLabel;
+  FpImage,
+  BGRABitmapTypes,
+  BCPanel, BCLabel;
 
 type
   { TDest_SaveFiles_Settings }
 
   TDest_SaveFiles_Settings = class(TForm)
     BCLabel9: TBCLabel;
-    BCPanel1: TBCPanel;
+    panelMain: TBCPanel;
     btCancel: TBitBtn;
     btOk: TBitBtn;
     cbSaveFormat: TComboBox;
@@ -31,15 +33,20 @@ type
     panelButtons: TBCPanel;
     procedure cbSaveFormatChange(Sender: TObject);
     procedure dirDestinationChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
 
   private
     SaveFormat: TBGRAImageFormat;
+    SaveWriter: TFPCustomImageWriter;
     SavePath: String;
+    panelFormatUI: TBCPanel;
 
     procedure BuildSaveFormats;
 
   public
-    class function Execute(var ASaveFormat: TBGRAImageFormat; var ASavePath: String): Boolean;
+    class function Execute(var ASaveFormat: TBGRAImageFormat;
+                           var ASaveWriter: TFPCustomImageWriter;
+                           var ASavePath: String): Boolean;
 
   end;
 
@@ -49,6 +56,8 @@ var
 implementation
 
 {$R *.lfm}
+
+uses Math, BGRAFormatUI;
 
 { TDest_SaveFiles_Settings }
 
@@ -83,13 +92,30 @@ begin
   SavePath :=dirDestination.Directory;
 end;
 
-class function TDest_SaveFiles_Settings.Execute(var ASaveFormat: TBGRAImageFormat; var ASavePath: String): Boolean;
+procedure TDest_SaveFiles_Settings.FormShow(Sender: TObject);
+begin
+  if (panelFormatUI <> nil) then
+  begin
+    panelFormatUI.Top:= 90; panelFormatUI.Left:= 100;
+    Width:= Max(510, panelFormatUI.Width+110);
+    Height:= Max(150, panelFormatUI.Height+100+panelButtons.Height);
+
+    panelFormatUI.Parent:= panelMain;
+    panelFormatUI.Visible:= True;
+  end;
+end;
+
+class function TDest_SaveFiles_Settings.Execute(var ASaveFormat: TBGRAImageFormat;
+                                                var ASaveWriter: TFPCustomImageWriter;
+                                                var ASavePath: String): Boolean;
 begin
   try
-     Dest_SaveFiles_Settings:= TDest_SaveFiles_Settings.Create(nil);
+     if (Dest_SaveFiles_Settings = nil)
+     then Dest_SaveFiles_Settings:= TDest_SaveFiles_Settings.Create(nil);
 
      with Dest_SaveFiles_Settings do
      begin
+       panelFormatUI:= nil;
        BuildSaveFormats;
 
        dirDestination.Directory:=ASavePath;
@@ -99,16 +125,28 @@ begin
        if (cbSaveFormat.ItemIndex = -1)
        then begin
               SaveFormat:= ifJpeg;
+              SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
+
               if (cbSaveFormat.Items.Count > 0)
               then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
             end
-       else SaveFormat:= ASaveFormat;
+       else begin
+              SaveFormat:= ASaveFormat;
+              SaveWriter:= ASaveWriter;
+            end;
+
+       TBGRAFormatUIContainer.GetUI(SaveFormat, SaveWriter, panelFormatUI);
 
        Result:= (ShowModal=mrOk);
 
        if Result then
        begin
          ASaveFormat:= SaveFormat;
+
+         if (BGRAFormatUIContainer <> nil) and
+            (panelFormatUI <> nil) then BGRAFormatUIContainer.SetWriterProperties(SaveWriter);
+
+         ASaveWriter:= SaveWriter;
          ASavePath:= SavePath;
          //Last Char of the Path MUST be the Directory Separator
          if (ASavePath[Length(ASavePath)] <> DirectorySeparator)
@@ -118,6 +156,7 @@ begin
 
 
   finally
+    if (BGRAFormatUIContainer <> nil) then FreeAndNil(BGRAFormatUIContainer);
     FreeAndNil(Dest_SaveFiles_Settings);
   end;
 end;

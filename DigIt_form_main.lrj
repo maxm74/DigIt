@@ -91,6 +91,7 @@
 {"hash":64809422,"name":"tdigit_main.actsessionsaveas.caption","sourcebytes":[83,97,118,101,32,87,111,114,107,32,83,101,115,115,105,111,110,32,97,115,32,46,46,46],"value":"Save Work Session as ..."},
 {"hash":100887566,"name":"tdigit_main.actoptions.caption","sourcebytes":[79,112,116,105,111,110,115,32,46,46,46],"value":"Options ..."},
 {"hash":4897207,"name":"tdigit_main.menudebug.caption","sourcebytes":[68,101,98,117,103],"value":"Debug"},
+{"hash":72446029,"name":"tdigit_main.menuimageformat.caption","sourcebytes":[73,109,97,103,101,70,111,114,109,97,116,70,111,114,109],"value":"ImageFormatForm"},
 {"hash":91642412,"name":"tdigit_main.menuloadxml.caption","sourcebytes":[76,111,97,100,32,88,77,76],"value":"Load XML"},
 {"hash":147282572,"name":"tdigit_main.menusavexml.caption","sourcebytes":[83,97,118,101,32,88,77,76],"value":"Save XML"},
 {"hash":193206076,"name":"tdigit_main.menuclearxml.caption","sourcebytes":[67,108,101,97,114,32,88,77,76],"value":"Clear XML"},

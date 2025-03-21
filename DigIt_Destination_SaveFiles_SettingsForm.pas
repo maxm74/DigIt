@@ -36,12 +36,16 @@ type
     procedure FormShow(Sender: TObject);
 
   private
-    SaveFormat: TBGRAImageFormat;
-    SaveWriter: TFPCustomImageWriter;
+    SaveFormat,
+    UserSaveFormat: TBGRAImageFormat;
+    SaveWriter,
+    UserSaveWriter: TFPCustomImageWriter;
     SavePath: String;
     panelFormatUI: TBCPanel;
+    createdWriter: Boolean;
 
     procedure BuildSaveFormats;
+    procedure AdjustFormatPanel;
 
   public
     class function Execute(var ASaveFormat: TBGRAImageFormat;
@@ -80,11 +84,46 @@ begin
   if (cbSaveFormat.Items.Count > 0) then cbSaveFormat.ItemIndex:= 0;
 end;
 
+procedure TDest_SaveFiles_Settings.AdjustFormatPanel;
+begin
+  if (panelFormatUI <> nil)
+  then begin
+         panelFormatUI.Top:= 90; panelFormatUI.Left:= 100;
+         Width:= Max(510, panelFormatUI.Width+110);
+         Height:= Max(150, panelFormatUI.Height+100+panelButtons.Height);
+
+         panelFormatUI.Parent:= panelMain;
+         panelFormatUI.Visible:= True;
+       end
+  else begin
+         Width:= 510;
+         Height:= 150;
+       end;
+end;
+
 procedure TDest_SaveFiles_Settings.cbSaveFormatChange(Sender: TObject);
 begin
   SaveFormat:= TBGRAImageFormat(PTRUInt(cbSaveFormat.Items.Objects[cbSaveFormat.ItemIndex]));
 
-  { #to-do 5 -oMaxM : Select Page with the Format Options }
+  //I Have created the old Writer, Free It
+  if createdWriter then
+  begin
+    SaveWriter.Free;
+    createdWriter:= False;
+  end;
+
+  //If the user has selected the initial format assign it, else create a new one
+  if (SaveFormat = UserSaveFormat)
+  then SaveWriter:= UserSaveWriter
+  else begin
+         SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
+         createdWriter:= True;
+       end;
+
+  if (panelFormatUI <> nil) then panelFormatUI.Visible:= False;
+
+  TBGRAFormatUIContainer.GetUI(SaveFormat, SaveWriter, panelFormatUI);
+  AdjustFormatPanel;
 end;
 
 procedure TDest_SaveFiles_Settings.dirDestinationChange(Sender: TObject);
@@ -94,15 +133,7 @@ end;
 
 procedure TDest_SaveFiles_Settings.FormShow(Sender: TObject);
 begin
-  if (panelFormatUI <> nil) then
-  begin
-    panelFormatUI.Top:= 90; panelFormatUI.Left:= 100;
-    Width:= Max(510, panelFormatUI.Width+110);
-    Height:= Max(150, panelFormatUI.Height+100+panelButtons.Height);
-
-    panelFormatUI.Parent:= panelMain;
-    panelFormatUI.Visible:= True;
-  end;
+  AdjustFormatPanel
 end;
 
 class function TDest_SaveFiles_Settings.Execute(var ASaveFormat: TBGRAImageFormat;
@@ -115,10 +146,13 @@ begin
 
      with Dest_SaveFiles_Settings do
      begin
+       UserSaveFormat:= ASaveFormat;
+       UserSaveWriter:= ASaveWriter;
+       createdWriter:= False;
        panelFormatUI:= nil;
        BuildSaveFormats;
 
-       dirDestination.Directory:=ASavePath;
+       dirDestination.Directory:= ASavePath;
 
        //Select Current Format, if not found Select Jpeg
        cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ASaveFormat)));
@@ -126,6 +160,7 @@ begin
        then begin
               SaveFormat:= ifJpeg;
               SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
+              createdWriter:= True;
 
               if (cbSaveFormat.Items.Count > 0)
               then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
@@ -151,7 +186,8 @@ begin
          //Last Char of the Path MUST be the Directory Separator
          if (ASavePath[Length(ASavePath)] <> DirectorySeparator)
          then ASavePath:= ASavePath+DirectorySeparator;
-       end;
+       end
+       else if createdWriter then SaveWriter.Free;
      end;
 
 

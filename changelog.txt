@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/03/20 Added BGRAFormat UI (First tests);
+2025/03/21 Moved BGRAFormatUI to bgracontrols package;
+           Destination SaveFiles Settings Use BGRAFormatUI Panels;
+           Commented unused functions in Utils
+        20 Added BGRAFormat UI (First tests);
         07 Changed IDigIt_Params Summary var to out;
 	   Added Autosave WorkSession in separated files;
 	   Moved Initialization of Values in functions SetDefaultXXX;

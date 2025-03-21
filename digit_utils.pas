@@ -22,13 +22,13 @@ resourcestring
   rsVertical = '   Vertical';
   rsHorizontal = '    Horizontal';
 
-function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
+(*function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
 function CreateXMLReader(ADoc: TDOMDocument; const Path: string; var DestroyDriver: boolean): TReader;
 
 procedure WritePersistentToXMLConfig(XMLConfig: TXMLConfig; const Path, AName: string; AData: TPersistent);
 procedure ReadPersistentFromXMLConfig(XMLConfig: TXMLConfig; const Path, AName: string;
                                       AData: TPersistent; OnFindComponentClass: TFindComponentClassEvent=nil);
-
+*)
 procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit;
                               AOwner: TComponent; menuPaperSizes: TMenu; menuOnClick: TNotifyEvent;
                               VImageIndex, HImageIndex: Integer);
@@ -47,6 +47,7 @@ implementation
 
 uses Digit_Bridge_Intf, Digit_Bridge_Impl;
 
+(*
 type
     //Workaround class so we can write a TPersistent using TWriter.WriteRootComponent
     TPersistentComponent = class(TComponent)
@@ -147,7 +148,7 @@ begin
     tt.Free;
   end;
 end;
-
+*)
 procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit; AOwner: TComponent; menuPaperSizes: TMenu;
   menuOnClick: TNotifyEvent; VImageIndex, HImageIndex: Integer);
 var

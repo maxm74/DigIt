@@ -167,7 +167,6 @@ object Dest_SaveFiles_Settings: TDest_SaveFiles_Settings
       Top = 3
       Width = 94
       Anchors = [akRight, akBottom]
-      Default = True
       DefaultCaption = True
       Kind = bkOK
       ModalResult = 1

@@ -289,30 +289,6 @@ msgstr ""
 msgid "   Vertical"
 msgstr ""
 
-#: tbgraformatuicontainer.caption
-msgid "BGRAFormatUIContainer"
-msgstr ""
-
-#: tbgraformatuicontainer.grayscale.caption
-msgid "GrayScale"
-msgstr ""
-
-#: tbgraformatuicontainer.iftiff.caption
-msgid "ifTiff"
-msgstr ""
-
-#: tbgraformatuicontainer.label1.caption
-msgid "Compression Quality"
-msgstr ""
-
-#: tbgraformatuicontainer.progressiveencoding.caption
-msgid "Progressive Encoding"
-msgstr ""
-
-#: tbgraformatuicontainer.radiobutton1.caption
-msgid "Tiff Test"
-msgstr ""
-
 #: tdigit_main.actcaptureddelete.caption
 msgid "Delete Selected Page"
 msgstr ""

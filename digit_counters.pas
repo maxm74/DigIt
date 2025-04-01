@@ -29,8 +29,8 @@ type
       function GetValue(nextValue: Boolean=False): String; overload;
       function GetValue(AValue: Integer): String; overload;
 
-      procedure Load(const XMLConf: TXMLConfig; APath: String; LoadValues:Boolean);
-      procedure Save(const XMLConf: TXMLConfig; APath: String; SaveValues:Boolean);
+      procedure Load(const XMLConf: TRttiXMLConfig; APath: String; LoadValues:Boolean);
+      procedure Save(const XMLConf: TRttiXMLConfig; APath: String; SaveValues:Boolean);
 
     published
       property Name: String read rName write rName;
@@ -47,9 +47,9 @@ type
     TDigIt_CounterList = class;
 
     TCounterLoadEvent = function (AOwner: TDigIt_CounterList; Counter: TDigIt_Counter;
-                                 const XMLConf: TXMLConfig; const Path:String):Integer of object;
+                                 const XMLConf: TRttiXMLConfig; const Path:String):Integer of object;
     TCounterSaveEvent = procedure (AOwner: TDigIt_CounterList; Counter: TDigIt_Counter;
-                                 const XMLConf: TXMLConfig; const Path:String) of object;
+                                 const XMLConf: TRttiXMLConfig; const Path:String) of object;
 
     TDigIt_CounterList = class(TObjectList)
     protected
@@ -71,18 +71,18 @@ type
       procedure RemoveAllButFirst;
 
       //Create List From File/Stream/XML
-      procedure Load(const XMLConf: TXMLConfig; LoadValues:Boolean);
+      procedure Load(const XMLConf: TRttiXMLConfig; LoadValues:Boolean);
       procedure LoadFromStream(Stream: TStream; LoadValues:Boolean);
       procedure LoadFromFile(const FileName: string; LoadValues:Boolean);
 
       //Save List To File/Stream/XML
-      procedure Save(const XMLConf: TXMLConfig; SaveValues:Boolean);
+      procedure Save(const XMLConf: TRttiXMLConfig; SaveValues:Boolean);
       procedure SaveToStream(Stream: TStream; SaveValues:Boolean);
       procedure SaveToFile(const FileName: string; SaveValues:Boolean);
 
       //Load/Save only Values
-      procedure LoadValues(const XMLConf: TXMLConfig);
-      procedure SaveValues(const XMLConf: TXMLConfig);
+      procedure LoadValues(const XMLConf: TRttiXMLConfig);
+      procedure SaveValues(const XMLConf: TRttiXMLConfig);
 
       procedure CopyValues(CopyFrom:TDigIt_CounterList);
       procedure CopyValuesToPrevious;
@@ -145,7 +145,7 @@ begin
   Result := Format(formatString, [rValue_StringPre, AValue, rValue_StringPost]);
 end;
 
-procedure TDigIt_Counter.Load(const XMLConf: TXMLConfig; APath: String; LoadValues: Boolean);
+procedure TDigIt_Counter.Load(const XMLConf: TRttiXMLConfig; APath: String; LoadValues: Boolean);
 begin
   //Loading:=True;
   Name :=XMLConf.GetValue(APath+'Name', '');
@@ -165,7 +165,7 @@ begin
   //Loading:=False;
 end;
 
-procedure TDigIt_Counter.Save(const XMLConf: TXMLConfig; APath: String; SaveValues: Boolean);
+procedure TDigIt_Counter.Save(const XMLConf: TRttiXMLConfig; APath: String; SaveValues: Boolean);
 begin
   XMLConf.SetValue(APath+'Name', Name);
   if SaveValues
@@ -231,7 +231,7 @@ begin
   then for i:=1 to c-1 do Delete(1);
 end;
 
-procedure TDigIt_CounterList.Load(const XMLConf: TXMLConfig; LoadValues: Boolean);
+procedure TDigIt_CounterList.Load(const XMLConf: TRttiXMLConfig; LoadValues: Boolean);
 var
   i, newCount: integer;
   curItemPath, curPath: String;
@@ -265,11 +265,11 @@ end;
 
 procedure TDigIt_CounterList.LoadFromStream(Stream: TStream; LoadValues: Boolean);
 var
-   FXMLConf: TXMLConfig;
+   FXMLConf: TRttiXMLConfig;
 
 begin
   try
-    FXMLConf := TXMLConfig.Create(nil);
+    FXMLConf := TRttiXMLConfig.Create(nil);
     FXMLConf.ReadFromStream(Stream);
     Load(FXMLConf, LoadValues);
   finally
@@ -279,18 +279,18 @@ end;
 
 procedure TDigIt_CounterList.LoadFromFile(const FileName: string; LoadValues: Boolean);
 var
-   FXMLConf: TXMLConfig;
+   FXMLConf: TRttiXMLConfig;
 
 begin
   try
-     FXMLConf := TXMLConfig.Create(FileName);
+     FXMLConf := TRttiXMLConfig.Create(FileName);
      Load(FXMLConf, LoadValues);
   finally
      FXMLConf.Free;
   end;
 end;
 
-procedure TDigIt_CounterList.Save(const XMLConf: TXMLConfig; SaveValues: Boolean);
+procedure TDigIt_CounterList.Save(const XMLConf: TRttiXMLConfig; SaveValues: Boolean);
 var
   i: integer;
   curItemPath, curPath: String;
@@ -315,11 +315,11 @@ end;
 
 procedure TDigIt_CounterList.SaveToStream(Stream: TStream; SaveValues: Boolean);
 var
-  FXMLConf: TXMLConfig;
+  FXMLConf: TRttiXMLConfig;
 
 begin
   try
-    FXMLConf := TXMLConfig.Create(nil);
+    FXMLConf := TRttiXMLConfig.Create(nil);
     Save(FXMLConf, SaveValues);
     FXMLConf.WriteToStream(Stream);
   finally
@@ -329,11 +329,11 @@ end;
 
 procedure TDigIt_CounterList.SaveToFile(const FileName: string; SaveValues: Boolean);
 var
-  FXMLConf: TXMLConfig;
+  FXMLConf: TRttiXMLConfig;
 
 begin
   try
-    FXMLConf := TXMLConfig.Create(FileName);
+    FXMLConf := TRttiXMLConfig.Create(FileName);
     Save(FXMLConf, SaveValues);
     FXMLConf.Flush;
   finally
@@ -341,7 +341,7 @@ begin
   end;
 end;
 
-procedure TDigIt_CounterList.LoadValues(const XMLConf: TXMLConfig);
+procedure TDigIt_CounterList.LoadValues(const XMLConf: TRttiXMLConfig);
 var
   i, newCount: integer;
   curItemPath, curPath: String;
@@ -367,7 +367,7 @@ begin
    end;
 end;
 
-procedure TDigIt_CounterList.SaveValues(const XMLConf: TXMLConfig);
+procedure TDigIt_CounterList.SaveValues(const XMLConf: TRttiXMLConfig);
 var
   i: integer;
   curItemPath, curPath: String;

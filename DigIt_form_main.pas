@@ -334,7 +334,8 @@ type
     inFillBoxUI,
     inFillPagesUI,
     imgListThumb_Changed,
-    UserCancel: Boolean;
+    UserCancel,
+    rSessionModified: Boolean;
     Counters: TDigIt_CounterList;
 
     CropMode: TDigItCropMode;
@@ -368,6 +369,7 @@ type
     function Counters_GetCurrent: TDigIt_Counter;
     procedure Counters_Dec;
     procedure Counters_Inc;
+    procedure SetSessionModified(AValue: Boolean);
 
     procedure UI_FillBox(ABox :TCropArea);
     procedure UI_FillCounter(ACounter :TDigIt_Counter);
@@ -396,29 +398,29 @@ type
     function XML_LoadSessionFile(AFileName: String): Boolean; overload;
     function XML_SaveSessionFile(AFileName: String): Boolean;
 
-    function XML_LoadSource(aXML: TXMLConfig; IsAutoSave: Boolean): Integer;
-    procedure XML_SaveSource(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_LoadSourceFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveSourceFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
-    function XML_LoadDestination(aXML: TXMLConfig; IsAutoSave: Boolean): Integer;
-    procedure XML_SaveDestination(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_LoadCapturedFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveCapturedFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_LoadLoadedImage(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveLoadedImage(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveSource_CapturedFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveSource_CapturedIndexes(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_LoadCropAreas(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveCropAreas(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_LoadPageSettings(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SavePageSettings(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_LoadUserInterface(aXML: TXMLConfig; IsAutoSave: Boolean);
-    procedure XML_SaveUserInterface(aXML: TXMLConfig; IsAutoSave: Boolean);
+    function XML_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
+    procedure XML_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_LoadSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    function XML_LoadDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
+    procedure XML_SaveDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_LoadLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveSource_CapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveSource_CapturedIndexes(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SavePageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure XML_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 
     procedure XML_OptionsLoad;
     procedure XML_OptionsSave;
-    procedure XML_OptionsLoad_Session(aXML: TXMLConfig; var APath, AFile: String);
-    procedure XML_OptionsSave_Session(aXML: TXMLConfig; const APath, AFile: String);
+    procedure XML_OptionsLoad_Session(aXML: TRttiXMLConfig; var APath, AFile: String);
+    procedure XML_OptionsSave_Session(aXML: TRttiXMLConfig; const APath, AFile: String);
 
     function Source_Select(newSourceIndex: Integer): Boolean;
     function Destination_Select(newDestinationIndex: Integer): Boolean;
@@ -455,6 +457,8 @@ type
     property DestinationParams: IDigIt_Params read rDestinationParams;
     *)
     property DestinationName: String read rDestinationName;
+
+    property SessionModified: Boolean read rSessionModified write SetSessionModified;
 
   end;
 
@@ -641,8 +645,14 @@ begin
        begin
          sessLoaded:= True;
          if (MessageDlg('DigIt', rsContinueAutoWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-         then XML_LoadWork(True)
-         else XML_ClearWork(True);
+         then begin
+                XML_LoadWork(True);
+                sessLoaded:= True;
+              end
+         else begin
+                XML_ClearWork(True);
+                sessLoaded:= False;
+              end;
        end;
      end;
 
@@ -665,7 +675,7 @@ begin
   closing :=True;
 
   //AutoSave
-  if FileExists(Path_Session+Session_File+Ext_AutoSess) then
+  if SessionModified then //FileExists(Path_Session+Session_File+Ext_AutoSess)
   begin
     XML_SaveWork(True);
 
@@ -1581,8 +1591,15 @@ begin
   try
      if (Sender = nil)
      then begin
-            dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
-            canSave:= (dlgRes=mrYes);
+            if SessionModified
+            then begin
+                   dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+                   canSave:= (dlgRes=mrYes);
+                 end
+            else begin
+                   dlgRes:= mrNo;
+                   canSave:= False;
+                 end;
           end
      else canSave:= True;
 
@@ -1829,15 +1846,15 @@ procedure TDigIt_Main.XML_LoadWork(IsAutoSave: Boolean);
 var
    newSourceI,
    newDestinationI: Integer;
-   aXML: TXMLConfig;
+   aXML: TRttiXMLConfig;
 
 begin
   try
      XML_Loading:= True;
 
      if IsAutoSave
-     then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-     else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+     then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+     else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      newSourceI:= XML_LoadSource(aXML, IsAutoSave);
      XML_LoadSourceFiles(aXML, IsAutoSave);
@@ -1848,6 +1865,8 @@ begin
      Counters.Load(aXML, True);
      XML_LoadCropAreas(aXML, IsAutoSave);
      XML_LoadUserInterface(aXML, IsAutoSave);
+
+     SessionModified:= IsAutoSave;
 
   finally
      XML_Loading:= False;
@@ -1862,7 +1881,7 @@ end;
 
 procedure TDigIt_Main.XML_SaveWork(IsAutoSave: Boolean);
 var
-   aXML: TXMLConfig;
+   aXML: TRttiXMLConfig;
    curExt: String;
 
 begin
@@ -1872,7 +1891,7 @@ begin
      then curExt:= Ext_AutoSess
      else curExt:= Ext_Sess;
 
-     aXML:= TXMLConfig.Create(Path_Session+Session_File+curExt);
+     aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+curExt);
 
      XML_SaveSource(aXML, IsAutoSave);
      XML_SaveSourceFiles(aXML, IsAutoSave);
@@ -1892,10 +1911,12 @@ begin
 
      //FPC Bug?
      //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
-     //So we do it after destroying XMLWork.
+     //So we do it after destroying XML.
 
      if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
 //     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Destination/Params');
+
+     if not(IsAutoSave) then SessionModified:= False;
 
   finally
   end;
@@ -1965,10 +1986,6 @@ begin
     Session_File:= AFile;
 
     XML_LoadWork(False);
-
-    if (Path_Session = Path_DefSession)
-    then Caption :='DigIt'
-    else Caption :='DigIt'+' - '+Session_File;
 
     Result:= True;
 
@@ -2175,7 +2192,7 @@ begin
   end;
 end;
 
-function TDigIt_Main.XML_LoadSource(aXML: TXMLConfig; IsAutoSave: Boolean): Integer;
+function TDigIt_Main.XML_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
 var
    aFree: Boolean;
    newSourceName: String;
@@ -2185,8 +2202,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      Result:= -1;
 
@@ -2216,28 +2233,49 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveSource(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
+   curExt: String;
 
 begin
   try
      aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+     if aFree then
+     begin
+       if IsAutoSave
+       then curExt:= Ext_AutoSess
+       else curExt:= Ext_Sess;
+
+       aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+curExt);
+     end;
 
      //Save rSource and its Params
      aXML.SetValue('Source/Name', rSourceName);
      aXML.DeletePath('Source/Params/');
 
+     if IsAutoSave then
+     begin
+       SessionModified:= True;
+
+       if aFree then
+       begin
+         aXML.Free; aXML:= nil;
+
+         //FPC Bug?
+         //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
+         //So we do it after destroying XML.
+
+         if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+       end;
+     end;
+
   finally
-    if aFree then aXML.Free;
+    if aFree and (aXML <> nil) then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadSourceFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_LoadSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
    curItemPath: String;
@@ -2248,8 +2286,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      //Load SourceFiles
      SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
@@ -2270,7 +2308,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveSourceFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
    i: Integer;
@@ -2281,8 +2319,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      //Save SourceFiles array
      aXML.DeletePath(XML_SourceFiles);
@@ -2297,12 +2335,14 @@ begin
        aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(Path_Session, SourceFiles[i].fName));
      end;
 
+     if IsAutoSave then SessionModified:= True;
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-function TDigIt_Main.XML_LoadDestination(aXML: TXMLConfig; IsAutoSave: Boolean): Integer;
+function TDigIt_Main.XML_LoadDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
 var
    aFree: Boolean;
 
@@ -2311,8 +2351,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      //Load Destination and its Params
      { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
@@ -2329,8 +2369,8 @@ begin
             //Load Format and Create Writer
             SaveFormat:= ifJpeg;
             aXML.GetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
-            { #todo 5 -oMaxM : Load Format Specific parameters, Find a way using RTTI? }
             SetSaveWriter(SaveFormat);
+            aXML.ReadObject('Destination/Params/Writer/', SaveWriter);
             Result:= 0;
  (*
           end
@@ -2351,7 +2391,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveDestination(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2360,8 +2400,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      //Save rDestination and its Params
 (*     aXML.SetValue('Destination/Name', rDestinationName);
@@ -2372,16 +2412,18 @@ begin
        aXML.SetValue('Destination/Params/Path', FullPathToRelativePath(Path_Session, Path_Session_Pictures));
 
        aXML.SetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
-       { #todo 5 -oMaxM : Save Format Specific parameters, Find a way using RTTI? }
+       aXML.WriteObject('Destination/Params/Writer/', SaveWriter);
 
 //     end;
+
+    if IsAutoSave then SessionModified:= True;
 
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadCapturedFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    i,
    imgCount,
@@ -2400,8 +2442,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      if IsAutoSave
      then curExt:= Ext_AutoThumb
@@ -2471,7 +2513,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveCapturedFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    i,
    lenCapturedFiles: Integer;
@@ -2484,8 +2526,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      if IsAutoSave
      then curExt:= Ext_AutoThumb
@@ -2521,12 +2563,14 @@ begin
        end;
      end;
 
+     if IsAutoSave then SessionModified:= True;
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadLoadedImage(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_LoadLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2535,8 +2579,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      LoadImage(RelativePathToFullPath(Path_Session, aXML.GetValue('LoadedFile', '')), False); //DON'T set to True, if you do not want infinite recursion
 
@@ -2545,7 +2589,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveLoadedImage(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2554,17 +2598,19 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      aXML.SetValue('LoadedFile', FullPathToRelativePath(Path_Session, LoadedFile));
+
+     if IsAutoSave then SessionModified:= True;
 
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveSource_CapturedFiles(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveSource_CapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2573,19 +2619,21 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      XML_SaveSourceFiles(aXML, IsAutoSave);
      XML_SaveCapturedFiles(aXML, IsAutoSave);
      XML_SaveLoadedImage(aXML, IsAutoSave);
 
+     if IsAutoSave then SessionModified:= True;
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveSource_CapturedIndexes(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveSource_CapturedIndexes(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2594,8 +2642,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      if (Length(SourceFiles) > 0) then
      begin
@@ -2612,12 +2660,14 @@ begin
 
      XML_SaveLoadedImage(aXML, IsAutoSave);
 
+     if IsAutoSave then SessionModified:= True;
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadCropAreas(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
    newCropMode: TDigItCropMode;
@@ -2627,8 +2677,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-             then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-             else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+             then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+             else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      newCropMode:= TDigItCropMode(aXML.GetValue('CropMode', 0));
      setCropMode(newCropMode);
@@ -2644,7 +2694,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveCropAreas(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2653,20 +2703,22 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      aXML.SetValue('CropMode', Integer(CropMode));
      if (CropMode = diCropCustom)
      then imgManipulation.CropAreas.Save(aXML, 'CropAreas')
      else aXML.DeletePath('CropAreas');
 
+     if IsAutoSave then SessionModified:= True;
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadPageSettings(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    selButton: Integer;
    aFree: Boolean;
@@ -2676,8 +2728,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      selButton := aXML.GetValue(XML_PageSettings+'Rotate', -1);
      Case selButton of
@@ -2706,7 +2758,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SavePageSettings(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SavePageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2715,8 +2767,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      if btPRotateLeft.Down
      then aXML.SetValue(XML_PageSettings+'Rotate', 0)
@@ -2735,12 +2787,14 @@ begin
      then aXML.SetValue(XML_PageSettings+'Flip', 1)
      else aXML.SetValue(XML_PageSettings+'Flip', -1);
 
+     if IsAutoSave then SessionModified:= True;
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_LoadUserInterface(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2749,8 +2803,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      //User Interface
      rollCrops.Collapsed:=aXML.GetValue('UI/rollCrops_Collapsed', False);
@@ -2762,7 +2816,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_SaveUserInterface(aXML: TXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.XML_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
 
@@ -2771,13 +2825,15 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
      //User Interface
      aXML.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
      aXML.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
      aXML.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
+
+     if IsAutoSave then SessionModified:= True;
 
   finally
     if aFree then aXML.Free;
@@ -2786,11 +2842,11 @@ end;
 
 procedure TDigIt_Main.XML_OptionsLoad;
 var
-   aXML: TXMLConfig;
+   aXML: TRttiXMLConfig;
 
 begin
   try
-     aXML:= TXMLConfig.Create(Path_Config+File_Options);
+     aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
 
   finally
     aXML.Free;
@@ -2799,25 +2855,25 @@ end;
 
 procedure TDigIt_Main.XML_OptionsSave;
 var
-   aXML: TXMLConfig;
+   aXML: TRttiXMLConfig;
 
 begin
   try
-     aXML:= TXMLConfig.Create(Path_Config+File_Options);
+     aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
 
   finally
     aXML.Free;
   end;
 end;
 
-procedure TDigIt_Main.XML_OptionsLoad_Session(aXML: TXMLConfig; var APath, AFile: String);
+procedure TDigIt_Main.XML_OptionsLoad_Session(aXML: TRttiXMLConfig; var APath, AFile: String);
 var
    aFree: Boolean;
 
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+File_Options);
+     if aFree then aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
 
      APath:= SetDirSeparators(aXML.GetValue('Session/Path', ''));
      AFile:= SetDirSeparators(aXML.GetValue('Session/File', ''));
@@ -2827,14 +2883,14 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.XML_OptionsSave_Session(aXML: TXMLConfig; const APath, AFile: String);
+procedure TDigIt_Main.XML_OptionsSave_Session(aXML: TRttiXMLConfig; const APath, AFile: String);
 var
    aFree: Boolean;
 
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TXMLConfig.Create(Path_Config+File_Options);
+     if aFree then aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
 
      aXML.SetValue('Session/Path', APath);
      aXML.SetValue('Session/File', AFile);
@@ -2858,6 +2914,9 @@ begin
             rSource:= theBridge.SourcesImpl.Selected;
             rSourceName:= theBridge.SourcesImpl.SelectedName;
             rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+
+            XML_SaveSource(nil, True);
+
             Result:= True;
           end
      else MessageDlg('DigIt', Format(rsSourceNotSelected, [newSourceIndex]), mtInformation, [mbOk], 0);
@@ -2874,11 +2933,8 @@ begin
      if (newDestinationIndex = 0)
      then begin
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-            if TDest_SaveFiles_Settings.Execute(SaveFormat, SaveWriter, Path_Session_Pictures) then
-            begin
-              { #todo 5 -oMaxM : Load Specific Format Settings from Form? }
-              SetSaveWriter(SaveFormat);
-            end;
+            if TDest_SaveFiles_Settings.Execute(SaveFormat, SaveWriter, Path_Session_Pictures)
+            then XML_SaveDestination(nil, True);
 
             //this way we know it is SaveAs Destination
             //rDestination:= nil;
@@ -3481,6 +3537,7 @@ begin
   Path_Session_Scan:= Path_DefSession_Scan;
   Path_Session_Pictures:= Path_DefSession_Pictures;
   Session_File:= File_DefSession;
+  rSessionModified:= False;
 end;
 
 procedure TDigIt_Main.ClearCaptured;
@@ -3559,6 +3616,22 @@ begin
     cropCounter.Value:=cropCounter.Value+1;
     inc(iCapturedFiles);
   end;
+end;
+
+procedure TDigIt_Main.SetSessionModified(AValue: Boolean);
+var
+   addStr: String;
+
+begin
+  if (rSessionModified = AValue) then exit;
+
+  rSessionModified:= AValue;
+
+  if rSessionModified then addStr:= '* ' else  addStr:= '';
+
+  if (Path_Session = Path_DefSession)
+  then Caption:= addStr+'DigIt'
+  else Caption:= addStr+'DigIt'+' - '+Session_File;
 end;
 
 procedure TDigIt_Main.UI_ToolBar;

@@ -1,6 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
+2025/04/01 Load/Save of Writer Params using RTTI;
+           Destination Setting Form use TBGRAFormatUIContainer.BuildSaveFormats and free Previous Writer if different from New;
+           Added Auto Save Source/Destination when Changed;
+           Added SessionModified property;
+           Added use of PaintNet and Ora formats;
+
 2025/03/21 Moved BGRAFormatUI to bgracontrols package;
            Destination SaveFiles Settings Use BGRAFormatUI Panels;
            Commented unused functions in Utils

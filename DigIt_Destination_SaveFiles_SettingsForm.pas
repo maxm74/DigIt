@@ -44,7 +44,6 @@ type
     panelFormatUI: TBCPanel;
     createdWriter: Boolean;
 
-    procedure BuildSaveFormats;
     procedure AdjustFormatPanel;
 
   public
@@ -64,25 +63,6 @@ implementation
 uses Math, BGRAFormatUI;
 
 { TDest_SaveFiles_Settings }
-
-procedure TDest_SaveFiles_Settings.BuildSaveFormats;
-var
-  iFormat: TBGRAImageFormat;
-
-begin
-  cbSaveFormat.Clear;
-
-  for iFormat:=Low(TBGRAImageFormat) to High(TBGRAImageFormat) do
-  begin
-    if (iFormat <> ifUnknown) and (DefaultBGRAImageWriter[iFormat] <> nil) then
-    begin
-      cbSaveFormat.Items.AddObject(BGRAImageFormat[iFormat].TypeName+' ('+SuggestImageExtension(iFormat)+')',
-                                   TObject(PTRUInt(iFormat)));
-    end;
-  end;
-
-  if (cbSaveFormat.Items.Count > 0) then cbSaveFormat.ItemIndex:= 0;
-end;
 
 procedure TDest_SaveFiles_Settings.AdjustFormatPanel;
 begin
@@ -141,6 +121,8 @@ class function TDest_SaveFiles_Settings.Execute(var ASaveFormat: TBGRAImageForma
                                                 var ASavePath: String): Boolean;
 begin
   try
+     Result:= False;
+
      if (Dest_SaveFiles_Settings = nil)
      then Dest_SaveFiles_Settings:= TDest_SaveFiles_Settings.Create(nil);
 
@@ -150,27 +132,29 @@ begin
        UserSaveWriter:= ASaveWriter;
        createdWriter:= False;
        panelFormatUI:= nil;
-       BuildSaveFormats;
 
        dirDestination.Directory:= ASavePath;
 
        //Select Current Format, if not found Select Jpeg
-       cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ASaveFormat)));
-       if (cbSaveFormat.ItemIndex = -1)
-       then begin
-              SaveFormat:= ifJpeg;
-              SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
-              createdWriter:= True;
+       if (TBGRAFormatUIContainer.BuildSaveFormats(cbSaveFormat, ASaveFormat) > 0) then
+       begin
+         if (cbSaveFormat.ItemIndex = -1)
+         then begin
+                SaveFormat:= ifJpeg;
+                SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
+                createdWriter:= True;
 
-              if (cbSaveFormat.Items.Count > 0)
-              then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
+                if (cbSaveFormat.Items.Count > 0)
+                then cbSaveFormat.ItemIndex:= cbSaveFormat.Items.IndexOfObject(TObject(PTRUInt(ifJpeg)));
             end
-       else begin
-              SaveFormat:= ASaveFormat;
-              SaveWriter:= ASaveWriter;
-            end;
+         else begin
+                SaveFormat:= ASaveFormat;
+                SaveWriter:= ASaveWriter;
+              end;
 
-       TBGRAFormatUIContainer.GetUI(SaveFormat, SaveWriter, panelFormatUI);
+         TBGRAFormatUIContainer.GetUI(SaveFormat, SaveWriter, panelFormatUI);
+       end
+       else raise Exception.Create('No Writers Registered...');
 
        Result:= (ShowModal=mrOk);
 
@@ -181,8 +165,13 @@ begin
          if (BGRAFormatUIContainer <> nil) and
             (panelFormatUI <> nil) then BGRAFormatUIContainer.SetWriterProperties(SaveWriter);
 
+         //if Previous Format is different from New one then Free it
+         if (SaveFormat <> UserSaveFormat) and (ASaveWriter <> nil)
+         then ASaveWriter.Free;
+
          ASaveWriter:= SaveWriter;
          ASavePath:= SavePath;
+
          //Last Char of the Path MUST be the Directory Separator
          if (ASavePath[Length(ASavePath)] <> DirectorySeparator)
          then ASavePath:= ASavePath+DirectorySeparator;

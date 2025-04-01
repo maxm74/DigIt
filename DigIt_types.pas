@@ -50,6 +50,8 @@ var
 
 implementation
 
+uses BGRAOpenRaster, BGRAPaintNet;
+
 initialization
    Path_Application:= ExtractFilePath(ParamStr(0));
    Path_Config:= GetAppConfigDir(False);
@@ -67,6 +69,9 @@ initialization
    ForceDirectories(Path_Session_Scan);
    ForceDirectories(Path_Session_Pictures);
    ForceDirectories(Path_Temp);
+
+   RegisterPaintNetFormat;
+   RegisterOpenRasterFormat;
 
 end.
 

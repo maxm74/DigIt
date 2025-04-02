@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/01 Load/Save of Writer Params using RTTI;
+2025/04/02 Moved some resourcestring and Types to DigIt_types;
+           Moved ProgressShow and ProgressSetTotal from Main to DigIt_Progress;
+           Use DigIt_Progress.Cancelled intestead of Locals UserCancel;
+           Added Experimental Form_ExportFiles;
+
+        01 Load/Save of Writer Params using RTTI;
            Destination Setting Form use TBGRAFormatUIContainer.BuildSaveFormats and free Previous Writer if different from New;
            Added Auto Save Source/Destination when Changed;
            Added SessionModified property;

@@ -113,7 +113,7 @@ end;
 
 procedure TDest_SaveFiles_Settings.FormShow(Sender: TObject);
 begin
-  AdjustFormatPanel
+  AdjustFormatPanel;
 end;
 
 class function TDest_SaveFiles_Settings.Execute(var ASaveFormat: TBGRAImageFormat;

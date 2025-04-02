@@ -15,6 +15,11 @@ interface
 
 uses SysUtils;
 
+resourcestring
+  rsProcessingImages = 'Processing Images';
+  rsProcessing = 'Processing %d / %s';
+  rsProcessed = 'Processed %d / %s';
+
 const
   DigIt_Version = '0.1.0';
 
@@ -36,6 +41,19 @@ type
     diCropFull,      //All captured pages are processed in bulk as they are
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
+
+  TSourceFile = packed record
+    fCrop: Boolean;
+    fName: String;
+  end;
+  TSourceFileArray = array of TSourceFile;
+
+  TCapturedFile = packed record
+    fAge: LongInt;
+    fName: String;
+    iIndex: Integer;
+  end;
+  TCapturedFileArray = array of TCapturedFile;
 
 var
    Path_Application,

@@ -11,7 +11,8 @@ uses
   DigIt_Bridge_Intf, DigIt_Bridge_Impl, DigIt_Types, DigIt_Counters,
   DigIt_Utils, DigIt_Form_Main, DigIt_Form_Templates, DigIt_Sources,
   DigIt_Destinations, DigIt_Form_Progress, DigIt_Form_BuildDuplex,
-  DigIt_Source_WIA, Digit_Source_Folder, Digit_Source_Twain, DigIt_Form_PDF;
+  DigIt_Source_WIA, Digit_Source_Folder, Digit_Source_Twain, DigIt_Form_PDF,
+  DigIt_Form_ExportFiles;
 
 {$R *.res}
 

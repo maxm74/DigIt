@@ -38,9 +38,6 @@ resourcestring
   rsTakeAgain = 'Replace the last %d taked files with a new Take?';
   rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
   rsMiddlePage = 'The page is within the already processed range'#13#10'Should I put it in the middle?';
-  rsProcessingImages = 'Processing Images';
-  rsProcessing = 'Processing %d / %s';
-  rsProcessed = 'Processed %d / %s';
   rsClearQueue = 'Clear the Work Queue?';
   rsExcCreateCounter = 'Failed to Create the Counter';
   rsNotImpl = 'Not yet implemented';
@@ -62,19 +59,6 @@ resourcestring
   rsErrSaveWork = 'Cannot Save Work Session'#13#10'%s'#13#10'%s';
 
 type
-  TSourceFile = packed record
-    fCrop: Boolean;
-    fName: String;
-  end;
-  TSourceFileArray = array of TSourceFile;
-
-  TCapturedFile = packed record
-    fAge: LongInt;
-    fName: String;
-    iIndex: Integer;
-  end;
-  TCapturedFileArray = array of TCapturedFile;
-
   { TDigIt_Main }
 
   TDigIt_Main = class(TForm)
@@ -334,7 +318,6 @@ type
     inFillBoxUI,
     inFillPagesUI,
     imgListThumb_Changed,
-    UserCancel,
     rSessionModified: Boolean;
     Counters: TDigIt_CounterList;
 
@@ -433,10 +416,6 @@ type
     function CropFile_Full(AFileName: String): Boolean; overload;
     procedure CropFile_Full(AStartIndex: Integer); overload;
 
-    procedure ProgressCancelClick(Sender: TObject);
-    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle=pbstNormal);
-    function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
-
     procedure Pages_InsertMiddle(ASourceFileIndex: Integer);
 
     procedure SetSaveWriter(AFormat: TBGRAImageFormat);
@@ -473,7 +452,9 @@ uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
   BGRAWriteJPeg, BGRAFormatUI,
   MM_StrUtils,
-  DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm, DigIt_Form_PDF,
+  DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
+  DigIt_Form_PDF,
+  //DigIt_Form_ExportFiles,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
 
@@ -625,8 +606,6 @@ var
 begin
   UI_ToolBarMods;
 
-  DigIt_Progress.OnCancelClick:= @ProgressCancelClick;
-
   sessLoaded:= False;
   try
      XML_OptionsLoad_Session(nil, optPath_Session, optFile_Session);
@@ -759,7 +738,6 @@ var
 
 begin
   try
-      UserCancel:= False;
       curData:= nil;
       res:= 0;
 
@@ -779,7 +757,7 @@ begin
 
           Case CropMode of
             diCropFull: begin
-              ProgressShow(rsProcessingImages, 1, res);
+              DigIt_Progress.ProgressShow(rsProcessingImages, 1, res);
 
               if (res = 1 )
               then begin
@@ -831,7 +809,6 @@ begin
 
     DigIt_Progress.Hide;
     FreeAndNil(WizardBuildDuplex);
-    UserCancel:= False;
   end;
 end;
 
@@ -997,13 +974,13 @@ begin
     Finished:= False;
     c:= Length(SourceFiles);
     cStr:= IntToStr(c);
-    ProgressShow(rsProcessingImages, iSourceFiles, c);
+    DigIt_Progress.ProgressShow(rsProcessingImages, iSourceFiles, c);
 
     repeat
       DigIt_Progress.progressTotal.Position:= iSourceFiles;
       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [iSourceFiles, cStr]);
       Application.ProcessMessages;
-      if UserCancel then break;
+      if DigIt_Progress.Cancelled then break;
 
       imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
       SourceFiles[iSourceFiles].fCrop:= True;
@@ -1014,7 +991,7 @@ begin
       then if not(LoadImage(SourceFiles[iSourceFiles].fName, False))
            then begin
                   { #todo -oMaxM : do something if LoadImage Fails? }
-                  UserCancel:= True;
+                  break; //UserCancel:= True;
                 end;
 
       lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
@@ -1022,7 +999,7 @@ begin
       DigIt_Progress.progressTotal.Position:= iSourceFiles+1;
       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [iSourceFiles-1, cStr]);
       Application.ProcessMessages;
-    Until Finished or UserCancel;
+    Until Finished or DigIt_Progress.Cancelled;
 
   finally
     //XML_SaveWork([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
@@ -1031,7 +1008,6 @@ begin
     UI_ToolBar;
 
     DigIt_Progress.Hide;
-    UserCancel:= False;
   end;
 end;
 
@@ -2052,7 +2028,7 @@ begin
             end;
           end;
 
-     ProgressShow(rsSavingWork, 0, 5);
+     DigIt_Progress.ProgressShow(rsSavingWork, 0, 5);
 
 
      lenSources:= Length(SourceFiles);
@@ -2062,7 +2038,7 @@ begin
      SetLength(fileCaptured, lenCaptured);
 
      //Copy Files to new Session, if is Relative convert Names else leave as is
-     if ProgressSetTotal(rsSavingSources, 1) then exit;
+     if DigIt_Progress.ProgressSetTotal(rsSavingSources, 1) then exit;
      for i:=0 to lenSources-1 do
      begin
        curFileNameR:= FullPathToRelativePath(Path_Session, SourceFiles[i].fName, isRelative);
@@ -2081,10 +2057,10 @@ begin
               fileSources[i]:= SourceFiles[i].fName;
             end;
 
-       Application.ProcessMessages; if UserCancel then exit;
+       Application.ProcessMessages; if DigIt_Progress.Cancelled then exit;
      end;
 
-     if ProgressSetTotal(rsSavingCaptured, 2) then exit;
+     if DigIt_Progress.ProgressSetTotal(rsSavingCaptured, 2) then exit;
      for i:=0 to lenCaptured-1 do
      begin
        curFileNameR:= FullPathToRelativePath(Path_Session, CapturedFiles[i].fName, isRelative);
@@ -2103,10 +2079,10 @@ begin
               fileCaptured[i]:= CapturedFiles[i].fName;
             end;
 
-       Application.ProcessMessages; if UserCancel then exit;
+       Application.ProcessMessages; if DigIt_Progress.Cancelled then exit;
      end;
 
-     if ProgressSetTotal(rsSavingSessionFiles, 3) then exit;
+     if DigIt_Progress.ProgressSetTotal(rsSavingSessionFiles, 3) then exit;
 
      //Copy Loaded File
      curFileNameR:= FullPathToRelativePath(Path_Session, LoadedFile, isRelative);
@@ -2120,7 +2096,7 @@ begin
        LoadedFile:= curFileName;
      end;
 
-     Application.ProcessMessages; if UserCancel then exit;
+     Application.ProcessMessages; if DigIt_Progress.Cancelled then exit;
 
      //Copy AutoSave Files
      curFileName:=Path_Session+Session_File+Ext_AutoSess;
@@ -2145,7 +2121,7 @@ begin
        DeleteFile(Path_Session+Session_File+Ext_Sess);
      end;
 
-     if ProgressSetTotal(rsSavingSwitch, 4) then exit;
+     if DigIt_Progress.ProgressSetTotal(rsSavingSwitch, 4) then exit;
 
      //Populate the Files Arrays with new Filenames
      for i:=0 to lenSources-1 do
@@ -2172,7 +2148,7 @@ begin
      then Caption :='DigIt'
      else Caption :='DigIt'+' - '+Session_File;
 
-     ProgressSetTotal(rsSavingDone, 5);
+     DigIt_Progress.ProgressSetTotal(rsSavingDone, 5);
      Result:= True;
 
   except
@@ -2181,7 +2157,7 @@ begin
   end;
 
   finally
-    if UserCancel then
+    if DigIt_Progress.Cancelled then
     begin
       dlgRes:= mrCancel;
     end;
@@ -3186,6 +3162,8 @@ Var
   saved: Boolean;
 
 begin
+  //TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, True);
+  //  Original Version
   if SavePDF.Execute then
   try
      pdfFileName:= SavePDF.FileName;
@@ -3204,7 +3182,7 @@ begin
         saved:= False;
         cStr:= IntToStr(lvCaptured.Items.Count-1);
 
-        ProgressShow(rsConvertPDF, 0, lvCaptured.Items.Count-1);
+        DigIt_Progress.ProgressShow(rsConvertPDF, 0, Length(CapturedFiles)-1);
 
         PDF.StartDocument;
         S := PDF.Sections.AddSection;
@@ -3214,7 +3192,7 @@ begin
           DigIt_Progress.progressTotal.Position:= i;
           DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
           Application.ProcessMessages;
-          if UserCancel then break;
+          if DigIt_Progress.Cancelled then break;
 
           curFileName:= CapturedFiles[i].fName;
 
@@ -3244,10 +3222,10 @@ begin
           DigIt_Progress.progressTotal.Position:= i+1;
           DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
           Application.ProcessMessages;
-          if UserCancel then break;
+          if DigIt_Progress.Cancelled then break;
         end;
 
-        if not(UserCancel) then
+        if not(DigIt_Progress.Cancelled) then
         begin
           PDF_File:= TFileStream.Create(pdfFileName, fmCreate);
           PDF.SaveToStream(PDF_File);
@@ -3256,7 +3234,6 @@ begin
 
      finally
        DigIt_Progress.Hide;
-       UserCancel:= False;
 
        if (PDF_File <> nil) then PDF_File.Free;
 
@@ -3404,6 +3381,7 @@ var
    old_CounterValue,
    old_iCapturedFiles: Integer;
    cStr: String;
+   UserCancel: Boolean;
 
 begin
   try
@@ -3426,7 +3404,7 @@ begin
 
        Application.ProcessMessages;
 
-       UserCancel:= UserCancel or not(CropFile_Full(SourceFiles[i].fName));
+       UserCancel:= DigIt_Progress.Cancelled or not(CropFile_Full(SourceFiles[i].fName));
        if UserCancel then break;
 
        //SourceFiles[i].fCrop:= True;
@@ -3436,7 +3414,7 @@ begin
        DigIt_Progress.progressTotal.Position:= i+1;
        DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
 
-       Application.ProcessMessages; if UserCancel then break;
+       Application.ProcessMessages; if DigIt_Progress.Cancelled then break;
      end;
 
      if UserCancel and
@@ -3458,38 +3436,7 @@ begin
   finally
     UI_ToolBar;
     UI_FillCounter(nil);
-
-    UserCancel:= False;
   end;
-end;
-
-procedure TDigIt_Main.ProgressCancelClick(Sender: TObject);
-begin
-  UserCancel:= True;
-end;
-
-procedure TDigIt_Main.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle);
-begin
-  UserCancel:= False;
-  with DigIt_Progress do
-  begin
-    labTotal.Caption:= '';
-    capTotal.Caption:= '';
-    progressTotal.Style:= AStyle;
-    progressTotal.Min:= TotalMin;
-    progressTotal.Max:= TotalMax;
-    progressTotal.Position:= TotalMin;
-    panelCurrent.Visible:= False;
-    Show(PChar(ACaption));
-  end;
-end;
-
-function TDigIt_Main.ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
-begin
-  DigIt_Progress.progressTotal.Position:= TotalVal;
-  DigIt_Progress.capTotal.Caption:= TotalCaption;
-  Application.ProcessMessages;
-  Result:= UserCancel;
 end;
 
 procedure TDigIt_Main.Pages_InsertMiddle(ASourceFileIndex: Integer);

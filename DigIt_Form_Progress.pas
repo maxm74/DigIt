@@ -40,6 +40,7 @@ type
     rCancelled: Boolean;
 
   public
+    //IDigIt_Progress implementation
     procedure SetTotalVisible(AVisible: Boolean); stdcall;
     procedure SetTotalLabel(const ALabel: PChar); stdcall;
     procedure SetTotal(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
@@ -57,6 +58,10 @@ type
 
     procedure Show(const ACaption: PChar); stdcall;
     procedure Hide; stdcall;
+
+    //Useful functions
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle=pbstNormal);
+    function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
 
     property OnCancelClick: TNotifyEvent read rOnCancelClick write rOnCancelClick;
   end;
@@ -184,6 +189,27 @@ begin
   rCancelled:= False;
   Visible:= False;
   Application.ProcessMessages;
+end;
+
+procedure TDigIt_Progress.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle);
+begin
+  rCancelled:= False;
+  labTotal.Caption:= '';
+  capTotal.Caption:= '';
+  progressTotal.Style:= AStyle;
+  progressTotal.Min:= TotalMin;
+  progressTotal.Max:= TotalMax;
+  progressTotal.Position:= TotalMin;
+  panelCurrent.Visible:= False;
+  Show(PChar(ACaption));
+end;
+
+function TDigIt_Progress.ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
+begin
+  DigIt_Progress.progressTotal.Position:= TotalVal;
+  DigIt_Progress.capTotal.Caption:= TotalCaption;
+  Application.ProcessMessages;
+  Result:= rCancelled;
 end;
 
 end.

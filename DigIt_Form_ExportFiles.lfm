@@ -1,0 +1,471 @@
+object DigIt_ExportFiles: TDigIt_ExportFiles
+  Left = 416
+  Height = 680
+  Top = 239
+  Width = 520
+  AutoSize = True
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Export Settings'
+  ClientHeight = 680
+  ClientWidth = 520
+  DesignTimePPI = 120
+  Position = poScreenCenter
+  OnCreate = FormCreate
+  OnShow = FormShow
+  object panelMain: TBCPanel
+    Left = 0
+    Height = 630
+    Top = 0
+    Width = 520
+    Align = alClient
+    Background.Color = clBtnFace
+    Background.Gradient1.StartColor = clWhite
+    Background.Gradient1.EndColor = clBlack
+    Background.Gradient1.GradientType = gtLinear
+    Background.Gradient1.Point1XPercent = 0
+    Background.Gradient1.Point1YPercent = 0
+    Background.Gradient1.Point2XPercent = 0
+    Background.Gradient1.Point2YPercent = 100
+    Background.Gradient2.StartColor = clWhite
+    Background.Gradient2.EndColor = clBlack
+    Background.Gradient2.GradientType = gtLinear
+    Background.Gradient2.Point1XPercent = 0
+    Background.Gradient2.Point1YPercent = 0
+    Background.Gradient2.Point2XPercent = 0
+    Background.Gradient2.Point2YPercent = 100
+    Background.Gradient1EndPercent = 35
+    Background.Style = bbsColor
+    BevelInner = bvRaised
+    BevelOuter = bvRaised
+    BevelWidth = 1
+    Border.Style = bboNone
+    FontEx.Color = clDefault
+    FontEx.FontQuality = fqSystemClearType
+    FontEx.Shadow = False
+    FontEx.ShadowRadius = 5
+    FontEx.ShadowOffsetX = 5
+    FontEx.ShadowOffsetY = 5
+    FontEx.Style = []
+    ParentBackground = False
+    Rounding.RoundX = 1
+    Rounding.RoundY = 1
+    TabOrder = 0
+    object panelFiles: TGroupBox
+      Left = 2
+      Height = 200
+      Top = 2
+      Width = 516
+      Align = alTop
+      Caption = ' Files '
+      ParentBackground = False
+      TabOrder = 0
+    end
+    object pageOptions: TPageControl
+      Left = 2
+      Height = 426
+      Top = 202
+      Width = 516
+      ActivePage = tabPDF
+      Align = alClient
+      ShowTabs = False
+      TabIndex = 0
+      TabOrder = 1
+      object tabPDF: TTabSheet
+        Caption = 'tabPDF'
+        ClientHeight = 418
+        ClientWidth = 508
+        object panelJPeg: TGroupBox
+          Left = 0
+          Height = 210
+          Top = 0
+          Width = 508
+          Caption = ' Image Options '
+          ClientHeight = 185
+          ClientWidth = 504
+          ParentBackground = False
+          TabOrder = 0
+          object cbPaperSize: TComboBox
+            Left = 107
+            Height = 28
+            Top = 0
+            Width = 250
+            Enabled = False
+            ItemHeight = 20
+            ItemIndex = 0
+            Items.Strings = (
+              'Same as the Image Size'
+              'Custom Size...'
+              'A4'
+              'A5'
+              'Letter'
+              'Legal'
+              'Executive'
+              'Comm10'
+              'Monarch'
+              'DL'
+              'C5'
+              'B5'
+            )
+            ReadOnly = True
+            Style = csDropDownList
+            TabOrder = 0
+            Text = 'Same as the Image Size'
+          end
+          object Label5: TBCLabel
+            Left = 20
+            Height = 20
+            Top = 4
+            Width = 75
+            Anchors = [akTop, akRight]
+            Background.Gradient1.StartColor = clWhite
+            Background.Gradient1.EndColor = clBlack
+            Background.Gradient1.GradientType = gtLinear
+            Background.Gradient1.Point1XPercent = 0
+            Background.Gradient1.Point1YPercent = 0
+            Background.Gradient1.Point2XPercent = 0
+            Background.Gradient1.Point2YPercent = 100
+            Background.Gradient2.StartColor = clWhite
+            Background.Gradient2.EndColor = clBlack
+            Background.Gradient2.GradientType = gtLinear
+            Background.Gradient2.Point1XPercent = 0
+            Background.Gradient2.Point1YPercent = 0
+            Background.Gradient2.Point2XPercent = 0
+            Background.Gradient2.Point2YPercent = 100
+            Background.Gradient1EndPercent = 35
+            Background.Style = bbsClear
+            Border.Style = bboNone
+            Caption = 'Paper Size :'
+            Enabled = False
+            FontEx.Color = clDefault
+            FontEx.FontQuality = fqSystemClearType
+            FontEx.Shadow = False
+            FontEx.ShadowRadius = 5
+            FontEx.ShadowOffsetX = 5
+            FontEx.ShadowOffsetY = 5
+            FontEx.Style = []
+            Rounding.RoundX = 1
+            Rounding.RoundY = 1
+          end
+          object btPaperOrientation: TSpeedButton
+            Left = 360
+            Height = 28
+            Hint = 'Paper Orientation'
+            Top = 0
+            Width = 30
+            AllowAllUp = True
+            Enabled = False
+            Flat = True
+            GroupIndex = 1
+            Images = imgList
+            ImageIndex = 0
+            ShowCaption = False
+            ShowHint = True
+            ParentShowHint = False
+            OnClick = btPaperOrientationClick
+          end
+          object Panel1: TPanel
+            Left = 107
+            Height = 150
+            Top = 34
+            Width = 213
+            Caption = 'Panel1'
+            TabOrder = 1
+          end
+        end
+        object panelInfos: TGroupBox
+          Left = 0
+          Height = 210
+          Top = 216
+          Width = 516
+          Caption = ' Infos '
+          ClientHeight = 185
+          ClientWidth = 512
+          ParentBackground = False
+          TabOrder = 1
+          object edTitle: TEdit
+            Left = 107
+            Height = 28
+            Top = 0
+            Width = 400
+            TabOrder = 0
+          end
+          object Label1: TBCLabel
+            Left = 67
+            Height = 20
+            Top = 4
+            Width = 36
+            Anchors = [akTop, akRight]
+            Background.Gradient1.StartColor = clWhite
+            Background.Gradient1.EndColor = clBlack
+            Background.Gradient1.GradientType = gtLinear
+            Background.Gradient1.Point1XPercent = 0
+            Background.Gradient1.Point1YPercent = 0
+            Background.Gradient1.Point2XPercent = 0
+            Background.Gradient1.Point2YPercent = 100
+            Background.Gradient2.StartColor = clWhite
+            Background.Gradient2.EndColor = clBlack
+            Background.Gradient2.GradientType = gtLinear
+            Background.Gradient2.Point1XPercent = 0
+            Background.Gradient2.Point1YPercent = 0
+            Background.Gradient2.Point2XPercent = 0
+            Background.Gradient2.Point2YPercent = 100
+            Background.Gradient1EndPercent = 35
+            Background.Style = bbsClear
+            Border.Style = bboNone
+            Caption = 'Title :'
+            FontEx.Color = clDefault
+            FontEx.FontQuality = fqSystemClearType
+            FontEx.Shadow = False
+            FontEx.ShadowRadius = 5
+            FontEx.ShadowOffsetX = 5
+            FontEx.ShadowOffsetY = 5
+            FontEx.Style = []
+            Rounding.RoundX = 1
+            Rounding.RoundY = 1
+          end
+          object Label2: TBCLabel
+            Left = 51
+            Height = 20
+            Top = 36
+            Width = 52
+            Anchors = [akTop, akRight]
+            Background.Gradient1.StartColor = clWhite
+            Background.Gradient1.EndColor = clBlack
+            Background.Gradient1.GradientType = gtLinear
+            Background.Gradient1.Point1XPercent = 0
+            Background.Gradient1.Point1YPercent = 0
+            Background.Gradient1.Point2XPercent = 0
+            Background.Gradient1.Point2YPercent = 100
+            Background.Gradient2.StartColor = clWhite
+            Background.Gradient2.EndColor = clBlack
+            Background.Gradient2.GradientType = gtLinear
+            Background.Gradient2.Point1XPercent = 0
+            Background.Gradient2.Point1YPercent = 0
+            Background.Gradient2.Point2XPercent = 0
+            Background.Gradient2.Point2YPercent = 100
+            Background.Gradient1EndPercent = 35
+            Background.Style = bbsClear
+            Border.Style = bboNone
+            Caption = 'Author :'
+            FontEx.Color = clDefault
+            FontEx.FontQuality = fqSystemClearType
+            FontEx.Shadow = False
+            FontEx.ShadowRadius = 5
+            FontEx.ShadowOffsetX = 5
+            FontEx.ShadowOffsetY = 5
+            FontEx.Style = []
+            Rounding.RoundX = 1
+            Rounding.RoundY = 1
+          end
+          object edAuthor: TEdit
+            Left = 107
+            Height = 28
+            Top = 32
+            Width = 400
+            TabOrder = 1
+          end
+          object Label3: TBCLabel
+            Left = 37
+            Height = 20
+            Top = 68
+            Width = 66
+            Anchors = [akTop, akRight]
+            Background.Gradient1.StartColor = clWhite
+            Background.Gradient1.EndColor = clBlack
+            Background.Gradient1.GradientType = gtLinear
+            Background.Gradient1.Point1XPercent = 0
+            Background.Gradient1.Point1YPercent = 0
+            Background.Gradient1.Point2XPercent = 0
+            Background.Gradient1.Point2YPercent = 100
+            Background.Gradient2.StartColor = clWhite
+            Background.Gradient2.EndColor = clBlack
+            Background.Gradient2.GradientType = gtLinear
+            Background.Gradient2.Point1XPercent = 0
+            Background.Gradient2.Point1YPercent = 0
+            Background.Gradient2.Point2XPercent = 0
+            Background.Gradient2.Point2YPercent = 100
+            Background.Gradient1EndPercent = 35
+            Background.Style = bbsClear
+            Border.Style = bboNone
+            Caption = 'Producer :'
+            FontEx.Color = clDefault
+            FontEx.FontQuality = fqSystemClearType
+            FontEx.Shadow = False
+            FontEx.ShadowRadius = 5
+            FontEx.ShadowOffsetX = 5
+            FontEx.ShadowOffsetY = 5
+            FontEx.Style = []
+            Rounding.RoundX = 1
+            Rounding.RoundY = 1
+          end
+          object edProducer: TEdit
+            Left = 107
+            Height = 28
+            Top = 64
+            Width = 400
+            TabOrder = 2
+          end
+          object Label4: TBCLabel
+            Left = 32
+            Height = 20
+            Top = 96
+            Width = 71
+            Anchors = [akTop, akRight]
+            Background.Gradient1.StartColor = clWhite
+            Background.Gradient1.EndColor = clBlack
+            Background.Gradient1.GradientType = gtLinear
+            Background.Gradient1.Point1XPercent = 0
+            Background.Gradient1.Point1YPercent = 0
+            Background.Gradient1.Point2XPercent = 0
+            Background.Gradient1.Point2YPercent = 100
+            Background.Gradient2.StartColor = clWhite
+            Background.Gradient2.EndColor = clBlack
+            Background.Gradient2.GradientType = gtLinear
+            Background.Gradient2.Point1XPercent = 0
+            Background.Gradient2.Point1YPercent = 0
+            Background.Gradient2.Point2XPercent = 0
+            Background.Gradient2.Point2YPercent = 100
+            Background.Gradient1EndPercent = 35
+            Background.Style = bbsClear
+            Border.Style = bboNone
+            Caption = 'Keywords :'
+            FontEx.Color = clDefault
+            FontEx.FontQuality = fqSystemClearType
+            FontEx.Shadow = False
+            FontEx.ShadowRadius = 5
+            FontEx.ShadowOffsetX = 5
+            FontEx.ShadowOffsetY = 5
+            FontEx.Style = []
+            Rounding.RoundX = 1
+            Rounding.RoundY = 1
+          end
+          object edKeywords: TMemo
+            Left = 107
+            Height = 80
+            Top = 96
+            Width = 400
+            ScrollBars = ssAutoBoth
+            TabOrder = 3
+          end
+        end
+      end
+      object tabIMG: TTabSheet
+        Caption = 'tabIMG'
+      end
+    end
+  end
+  object panelButtons: TBCPanel
+    Left = 0
+    Height = 50
+    Top = 630
+    Width = 520
+    Align = alBottom
+    Background.Color = clBtnFace
+    Background.Gradient1.StartColor = clWhite
+    Background.Gradient1.EndColor = clBlack
+    Background.Gradient1.GradientType = gtLinear
+    Background.Gradient1.Point1XPercent = 0
+    Background.Gradient1.Point1YPercent = 0
+    Background.Gradient1.Point2XPercent = 0
+    Background.Gradient1.Point2YPercent = 100
+    Background.Gradient2.StartColor = clWhite
+    Background.Gradient2.EndColor = clBlack
+    Background.Gradient2.GradientType = gtLinear
+    Background.Gradient2.Point1XPercent = 0
+    Background.Gradient2.Point1YPercent = 0
+    Background.Gradient2.Point2XPercent = 0
+    Background.Gradient2.Point2YPercent = 100
+    Background.Gradient1EndPercent = 35
+    Background.Style = bbsColor
+    BevelInner = bvNone
+    BevelOuter = bvSpace
+    BevelWidth = 1
+    Border.Style = bboNone
+    FontEx.Color = clDefault
+    FontEx.FontQuality = fqSystemClearType
+    FontEx.Shadow = False
+    FontEx.ShadowRadius = 5
+    FontEx.ShadowOffsetX = 5
+    FontEx.ShadowOffsetY = 5
+    FontEx.Style = []
+    ParentBackground = False
+    Rounding.RoundX = 1
+    Rounding.RoundY = 1
+    TabOrder = 1
+    object btCancel: TBitBtn
+      Left = 305
+      Height = 42
+      Top = 4
+      Width = 109
+      Anchors = [akRight, akBottom]
+      DefaultCaption = True
+      Kind = bkCancel
+      ModalResult = 2
+      TabOrder = 0
+    end
+    object btOk: TBitBtn
+      Left = 418
+      Height = 42
+      Top = 4
+      Width = 94
+      Anchors = [akRight, akBottom]
+      DefaultCaption = True
+      Kind = bkOK
+      ModalResult = 1
+      TabOrder = 1
+    end
+  end
+  object imgList: TImageList
+    Height = 22
+    Width = 22
+    Left = 32
+    Top = 272
+    Bitmap = {
+      4C7A0200000016000000160000004B0400000000000078DAED974B52DB401086
+      C996152721B708A1BC0F8B0448729210CCC3C636181B48916D9CCA09525C8005
+      1B961C20155EB6347A5986042A9DFE7B4623CB4882ECA3AABFEC2A5B9F5A3D3D
+      DDFF4C4DA5D7E2E22275BB5DEA747669B7DDA6366B67679B76B65BAC26B59A0D
+      6A3558AD262D2CBCA2F7EFDF7DE7DB66A61EB90E0F0FE9EEEE8E6E6F47F46B34
+      A25BD66834E4CFA17C8EA25074130FE9F3E7433A3E3EBE5F5E5EFEC6B73E2BE3
+      1E1C1CD0CDCD0DC5714831DF3F0C030A439F86814F212BF094280A3CFAF4E980
+      CECECEE8E8E8E8CFFCDC5C8F6F9F2EE2EEEFEF3377A4B9614891C8670EB81E05
+      BE2B8A225FB8A7A7A7747272425F7BBDDF954A65AF941BC7C28424D650C71A06
+      8A428FB92C3CABD7FB426F979768696991DEBC7E4DCF6767EF8BB87B7B7B3462
+      6EF2FE69AC265EC983433EB307571774F9F3079DB3AECE7FD2C65A958AB8DD6E
+      87731009D3E6D5374CE5F277977CC8850622E50CE4598DAD5A3197EB2B1E463A
+      3EDFAC95E495E3544A728B5813AEC77207865B2FE1EEB6B90E22CB0C659D74AC
+      817274AC2A8DD575C0BD36DCCD426EA7D3D679905CBA7A9DC0F40CD34B99DE3F
+      70DBED1DCE6920EF0C6668EA4A782A9FE90EAEF87787EA25DC5DDEB371A4DFDF
+      C77B2B27934FCB1D635A6E6DA3908B5E1071BC125B22D7C9C4A91CBD560913F2
+      9C3ED536D68BB9DC5F50AF93F1E5BD7BA2C1F5E3DC6DE17A0F784A98FD074C87
+      99D81F9ABB56CCE5FE07AEC466E383FA19DE38F3295CF457D4978EED617CC2EB
+      837969990977B38CDBD8925A9C64D95CF611639669B9EB65DC7A862BB1892E73
+      794FE536B7EAFC1F47D678705DCCF9E7789B758AB8C74CD6D8638AB837D7378B
+      F745A5324F1BEB555AAB7ED45AD5AAAEAE50F563A20FA25568456B8D7F7F39F7
+      82A6FE5FB939C57AA1165067A861EC0FECBD6DF1232DF126E875E8A3E8D1E8FF
+      982D985B988998B7107C023C08FC0DD6093580FA42ED6AB9B29FB57CE971E89F
+      E8CDE8FB98299857F88E398B190E7F00EF015F03CF847547ADA066EDDEE27AF4
+      6C1DE97E293D1EFD9E9F65E794F88040FB82580B5E093E2CE55E8EEDD9BEF41D
+      5BA34AF7F9C43FD8B96AE676E237E091E0BFE0ED509FC2E57D833DABB9D7D2CB
+      1E707DD7CE27B0E10322C3863742ECF074ED42EE95F4C734177A1E898F526646
+      9B7C20FFC330E5C31F629DB197526E36172AB35FF5FC947515B6C9B5F1439189
+      1FDE133584BD9970D1B332BD31B37E261FBEF612E253B09EC24E9F21F1B257CE
+      722FA4C7A66C9DE70CDB336CDFD48867FCA0F90E7F8CFA470FC97039666782AD
+      9C891EA6DC946FEA3DC36DE4712F64CE646785F60CDE64BE4DCEC57746BEEC23
+      78799C135673B89A3D3987727262EE831786CF86703EC0D903FD338F5BC61EE7
+      C303C35FC3BBE35C803307CE33655C511E5BA4BD0F7C353C3BCE03386B9873CC
+      0C7A3DE6086654997CF1E9E3BD490B5E1DE7009C31CCF945CE46981F984D987B
+      56EC056A56EB22F83A78C686554D3C3AFC3FCE16E6DC32FD7FF264AFBF3B9372
+      9A
+    }
+  end
+  object SavePDF: TSaveDialog
+    Title = 'Salva PDF con nome'
+    DefaultExt = '.pdf'
+    Filter = 'Portable Document Format (*.pdf)|*.pdf|All Files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
+    Left = 32
+    Top = 344
+  end
+end

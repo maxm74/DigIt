@@ -73,7 +73,6 @@
 {"hash":128362848,"name":"tdigit_main.tbcrop.caption","sourcebytes":[116,98,67,114,111,112],"value":"tbCrop"},
 {"hash":163894032,"name":"tdigit_main.tbsepcrop.caption","sourcebytes":[116,98,83,101,112,67,114,111,112],"value":"tbSepCrop"},
 {"hash":206539794,"name":"tdigit_main.tbsepclear.caption","sourcebytes":[116,98,83,101,112,67,108,101,97,114],"value":"tbSepClear"},
-{"hash":114823301,"name":"tdigit_main.savepdf.title","sourcebytes":[83,97,108,118,97,32,80,68,70,32,99,111,110,32,110,111,109,101],"value":"Salva PDF con nome"},
 {"hash":126668695,"name":"tdigit_main.actpreview.caption","sourcebytes":[80,114,101,118,105,101,119],"value":"Preview"},
 {"hash":370709,"name":"tdigit_main.acttake.caption","sourcebytes":[84,97,107,101],"value":"Take"},
 {"hash":142780485,"name":"tdigit_main.acttakere.caption","sourcebytes":[82,101,45,84,97,107,101],"value":"Re-Take"},
@@ -104,5 +103,6 @@
 {"hash":39807138,"name":"tdigit_main.menutimertakestop.caption","sourcebytes":[83,116,111,112,32,84,105,109,101,114],"value":"Stop Timer"},
 {"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"},
 {"hash":48547185,"name":"tdigit_main.itemcropmodefull.caption","sourcebytes":[70,117,108,108,32,65,114,101,97],"value":"Full Area"},
-{"hash":78424925,"name":"tdigit_main.itemcropmodecustom.caption","sourcebytes":[67,117,115,116,111,109],"value":"Custom"}
+{"hash":78424925,"name":"tdigit_main.itemcropmodecustom.caption","sourcebytes":[67,117,115,116,111,109],"value":"Custom"},
+{"hash":114823301,"name":"tdigit_main.savepdf.title","sourcebytes":[83,97,108,118,97,32,80,68,70,32,99,111,110,32,110,111,109,101],"value":"Salva PDF con nome"}
 ]}

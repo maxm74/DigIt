@@ -1,0 +1,17 @@
+{"version":1,"strings":[
+{"hash":198438275,"name":"tdigit_exportfiles.caption","sourcebytes":[69,120,112,111,114,116,32,83,101,116,116,105,110,103,115],"value":"Export Settings"},
+{"hash":80751728,"name":"tdigit_exportfiles.panelfiles.caption","sourcebytes":[32,70,105,108,101,115,32],"value":" Files "},
+{"hash":128414854,"name":"tdigit_exportfiles.tabpdf.caption","sourcebytes":[116,97,98,80,68,70],"value":"tabPDF"},
+{"hash":80942896,"name":"tdigit_exportfiles.paneljpeg.caption","sourcebytes":[32,73,109,97,103,101,32,79,112,116,105,111,110,115,32],"value":" Image Options "},
+{"hash":74247653,"name":"tdigit_exportfiles.cbpapersize.text","sourcebytes":[83,97,109,101,32,97,115,32,116,104,101,32,73,109,97,103,101,32,83,105,122,101],"value":"Same as the Image Size"},
+{"hash":17394554,"name":"tdigit_exportfiles.label5.caption","sourcebytes":[80,97,112,101,114,32,83,105,122,101,32,58],"value":"Paper Size :"},
+{"hash":25733086,"name":"tdigit_exportfiles.btpaperorientation.hint","sourcebytes":[80,97,112,101,114,32,79,114,105,101,110,116,97,116,105,111,110],"value":"Paper Orientation"},
+{"hash":90721265,"name":"tdigit_exportfiles.panel1.caption","sourcebytes":[80,97,110,101,108,49],"value":"Panel1"},
+{"hash":84203120,"name":"tdigit_exportfiles.panelinfos.caption","sourcebytes":[32,73,110,102,111,115,32],"value":" Infos "},
+{"hash":185280362,"name":"tdigit_exportfiles.label1.caption","sourcebytes":[84,105,116,108,101,32,58],"value":"Title :"},
+{"hash":212820154,"name":"tdigit_exportfiles.label2.caption","sourcebytes":[65,117,116,104,111,114,32,58],"value":"Author :"},
+{"hash":196918634,"name":"tdigit_exportfiles.label3.caption","sourcebytes":[80,114,111,100,117,99,101,114,32,58],"value":"Producer :"},
+{"hash":242067514,"name":"tdigit_exportfiles.label4.caption","sourcebytes":[75,101,121,119,111,114,100,115,32,58],"value":"Keywords :"},
+{"hash":128413207,"name":"tdigit_exportfiles.tabimg.caption","sourcebytes":[116,97,98,73,77,71],"value":"tabIMG"},
+{"hash":114823301,"name":"tdigit_exportfiles.savepdf.title","sourcebytes":[83,97,108,118,97,32,80,68,70,32,99,111,110,32,110,111,109,101],"value":"Salva PDF con nome"}
+]}

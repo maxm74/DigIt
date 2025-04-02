@@ -40,6 +40,24 @@ msgstr ""
 msgid "No Pages in Front or Back Side"
 msgstr ""
 
+#: digit_form_exportfiles.rsconvertpdf
+msgctxt "digit_form_exportfiles.rsconvertpdf"
+msgid "Converting Images to PDF..."
+msgstr ""
+
+#: digit_form_exportfiles.rslandscape
+msgid "Landscape"
+msgstr ""
+
+#: digit_form_exportfiles.rsopensavedpdf
+msgctxt "digit_form_exportfiles.rsopensavedpdf"
+msgid "Conversion to PDF completed, do i Open it?"
+msgstr ""
+
+#: digit_form_exportfiles.rsportrait
+msgid "Portrait"
+msgstr ""
+
 #: digit_form_main.rsclearcrops
 msgid "Clear Crop Areas ?"
 msgstr ""
@@ -61,6 +79,7 @@ msgid ""
 msgstr ""
 
 #: digit_form_main.rsconvertpdf
+msgctxt "digit_form_main.rsconvertpdf"
 msgid "Converting Images to PDF..."
 msgstr ""
 
@@ -143,21 +162,8 @@ msgid "Not yet implemented"
 msgstr ""
 
 #: digit_form_main.rsopensavedpdf
+msgctxt "digit_form_main.rsopensavedpdf"
 msgid "Conversion to PDF completed, do i Open it?"
-msgstr ""
-
-#: digit_form_main.rsprocessed
-#, object-pascal-format
-msgid "Processed %d / %s"
-msgstr ""
-
-#: digit_form_main.rsprocessing
-#, object-pascal-format
-msgid "Processing %d / %s"
-msgstr ""
-
-#: digit_form_main.rsprocessingimages
-msgid "Processing Images"
 msgstr ""
 
 #: digit_form_main.rssavework
@@ -277,6 +283,23 @@ msgstr ""
 msgid "WIA Device"
 msgstr ""
 
+#: digit_types.rsprocessed
+#, object-pascal-format
+msgctxt "digit_types.rsprocessed"
+msgid "Processed %d / %s"
+msgstr ""
+
+#: digit_types.rsprocessing
+#, object-pascal-format
+msgctxt "digit_types.rsprocessing"
+msgid "Processing %d / %s"
+msgstr ""
+
+#: digit_types.rsprocessingimages
+msgctxt "digit_types.rsprocessingimages"
+msgid "Processing Images"
+msgstr ""
+
 #: digit_utils.rsdestination_default
 msgid "Save as Files"
 msgstr ""
@@ -287,6 +310,71 @@ msgstr ""
 
 #: digit_utils.rsvertical
 msgid "   Vertical"
+msgstr ""
+
+#: tdigit_exportfiles.btpaperorientation.hint
+msgid "Paper Orientation"
+msgstr ""
+
+#: tdigit_exportfiles.caption
+msgid "Export Settings"
+msgstr ""
+
+#: tdigit_exportfiles.cbpapersize.text
+msgid "Same as the Image Size"
+msgstr ""
+
+#: tdigit_exportfiles.label1.caption
+msgctxt "tdigit_exportfiles.label1.caption"
+msgid "Title :"
+msgstr ""
+
+#: tdigit_exportfiles.label2.caption
+msgctxt "tdigit_exportfiles.label2.caption"
+msgid "Author :"
+msgstr ""
+
+#: tdigit_exportfiles.label3.caption
+msgctxt "tdigit_exportfiles.label3.caption"
+msgid "Producer :"
+msgstr ""
+
+#: tdigit_exportfiles.label4.caption
+msgctxt "tdigit_exportfiles.label4.caption"
+msgid "Keywords :"
+msgstr ""
+
+#: tdigit_exportfiles.label5.caption
+msgid "Paper Size :"
+msgstr ""
+
+#: tdigit_exportfiles.panel1.caption
+msgid "Panel1"
+msgstr ""
+
+#: tdigit_exportfiles.panelfiles.caption
+msgid " Files "
+msgstr ""
+
+#: tdigit_exportfiles.panelinfos.caption
+msgid " Infos "
+msgstr ""
+
+#: tdigit_exportfiles.paneljpeg.caption
+msgid " Image Options "
+msgstr ""
+
+#: tdigit_exportfiles.savepdf.title
+msgctxt "tdigit_exportfiles.savepdf.title"
+msgid "Salva PDF con nome"
+msgstr ""
+
+#: tdigit_exportfiles.tabimg.caption
+msgid "tabIMG"
+msgstr ""
+
+#: tdigit_exportfiles.tabpdf.caption
+msgid "tabPDF"
 msgstr ""
 
 #: tdigit_main.actcaptureddelete.caption
@@ -678,6 +766,7 @@ msgid "Captured Pages"
 msgstr ""
 
 #: tdigit_main.savepdf.title
+msgctxt "tdigit_main.savepdf.title"
 msgid "Salva PDF con nome"
 msgstr ""
 
@@ -748,18 +837,22 @@ msgid "PDF Info"
 msgstr ""
 
 #: tdigit_pdf.label1.caption
+msgctxt "tdigit_pdf.label1.caption"
 msgid "Title :"
 msgstr ""
 
 #: tdigit_pdf.label2.caption
+msgctxt "tdigit_pdf.label2.caption"
 msgid "Author :"
 msgstr ""
 
 #: tdigit_pdf.label3.caption
+msgctxt "tdigit_pdf.label3.caption"
 msgid "Producer :"
 msgstr ""
 
 #: tdigit_pdf.label4.caption
+msgctxt "tdigit_pdf.label4.caption"
 msgid "Keywords :"
 msgstr ""
 

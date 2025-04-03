@@ -40,6 +40,26 @@ msgstr "Annullo l'acquisizione del Lato Frontale appena effettuata?"
 msgid "No Pages in Front or Back Side"
 msgstr "Nessuna Pagina sul lato Frontale o Posteriore"
 
+#: digit_form_exportfiles.rsconvertpdf
+#, fuzzy
+msgctxt "digit_form_exportfiles.rsconvertpdf"
+msgid "Converting Images to PDF..."
+msgstr "Convertendo le Immagini in PDF..."
+
+#: digit_form_exportfiles.rslandscape
+msgid "Landscape"
+msgstr ""
+
+#: digit_form_exportfiles.rsopensavedpdf
+#, fuzzy
+msgctxt "digit_form_exportfiles.rsopensavedpdf"
+msgid "Conversion to PDF completed, do i Open it?"
+msgstr "Conversione a PDF completata, lo Apro?"
+
+#: digit_form_exportfiles.rsportrait
+msgid "Portrait"
+msgstr ""
+
 #: digit_form_main.rsclearcrops
 msgid "Clear Crop Areas ?"
 msgstr "Cancello le aree di taglio?"
@@ -59,10 +79,6 @@ msgid ""
 "Continue from last Work Session?\n"
 "%s"
 msgstr "Continuo dall'ultima Sessione Lavoro?"
-
-#: digit_form_main.rsconvertpdf
-msgid "Converting Images to PDF..."
-msgstr "Convertendo le Immagini in PDF..."
 
 #: digit_form_main.rscounterprev
 #, object-pascal-format
@@ -143,24 +159,6 @@ msgstr "Non ci sono più file da elaborare, devo cancellare la Coda di Lavoro?"
 #: digit_form_main.rsnotimpl
 msgid "Not yet implemented"
 msgstr "Non ancora implementato"
-
-#: digit_form_main.rsopensavedpdf
-msgid "Conversion to PDF completed, do i Open it?"
-msgstr "Conversione a PDF completata, lo Apro?"
-
-#: digit_form_main.rsprocessed
-#, object-pascal-format
-msgid "Processed %d / %s"
-msgstr "Elaborato %d / %s"
-
-#: digit_form_main.rsprocessing
-#, object-pascal-format
-msgid "Processing %d / %s"
-msgstr "Elaborando %d / %s"
-
-#: digit_form_main.rsprocessingimages
-msgid "Processing Images"
-msgstr "Elaborando le Immagini"
 
 #: digit_form_main.rssavework
 msgid "Save the Work Session?"
@@ -279,6 +277,24 @@ msgstr ""
 msgid "WIA Device"
 msgstr ""
 
+#: digit_types.rsprocessed
+#, object-pascal-format, fuzzy
+msgctxt "digit_types.rsprocessed"
+msgid "Processed %d / %s"
+msgstr "Elaborato %d / %s"
+
+#: digit_types.rsprocessing
+#, object-pascal-format, fuzzy
+msgctxt "digit_types.rsprocessing"
+msgid "Processing %d / %s"
+msgstr "Elaborando %d / %s"
+
+#: digit_types.rsprocessingimages
+#, fuzzy
+msgctxt "digit_types.rsprocessingimages"
+msgid "Processing Images"
+msgstr "Elaborando le Immagini"
+
 #: digit_utils.rsdestination_default
 msgid "Save as Files"
 msgstr "Salva come Files"
@@ -290,6 +306,71 @@ msgstr "    Orizzontale"
 #: digit_utils.rsvertical
 msgid "   Vertical"
 msgstr "   Verticale"
+
+#: tdigit_exportfiles.btpaperorientation.hint
+msgid "Paper Orientation"
+msgstr ""
+
+#: tdigit_exportfiles.caption
+msgid "Export Settings"
+msgstr ""
+
+#: tdigit_exportfiles.cbpapersize.text
+msgid "Same as the Image Size"
+msgstr ""
+
+#: tdigit_exportfiles.cbusejpgasis.caption
+msgid "Use JPeg Files as is"
+msgstr ""
+
+#: tdigit_exportfiles.label1.caption
+msgctxt "tdigit_exportfiles.label1.caption"
+msgid "Title :"
+msgstr ""
+
+#: tdigit_exportfiles.label2.caption
+msgctxt "tdigit_exportfiles.label2.caption"
+msgid "Author :"
+msgstr ""
+
+#: tdigit_exportfiles.label3.caption
+msgctxt "tdigit_exportfiles.label3.caption"
+msgid "Producer :"
+msgstr ""
+
+#: tdigit_exportfiles.label4.caption
+msgctxt "tdigit_exportfiles.label4.caption"
+msgid "Keywords :"
+msgstr ""
+
+#: tdigit_exportfiles.label5.caption
+msgid "Paper Size :"
+msgstr ""
+
+#: tdigit_exportfiles.panelfiles.caption
+msgid " Files "
+msgstr ""
+
+#: tdigit_exportfiles.panelinfos.caption
+msgid " Infos "
+msgstr ""
+
+#: tdigit_exportfiles.paneljpeg.caption
+msgid " Image Options "
+msgstr ""
+
+#: tdigit_exportfiles.savepdf.title
+msgctxt "tdigit_exportfiles.savepdf.title"
+msgid "Salva PDF con nome"
+msgstr ""
+
+#: tdigit_exportfiles.tabimg.caption
+msgid "tabIMG"
+msgstr ""
+
+#: tdigit_exportfiles.tabpdf.caption
+msgid "tabPDF"
+msgstr ""
 
 #: tdigit_main.actcaptureddelete.caption
 msgid "Delete Selected Page"
@@ -680,6 +761,7 @@ msgid "Captured Pages"
 msgstr "Pagine Catturate"
 
 #: tdigit_main.savepdf.title
+msgctxt "tdigit_main.savepdf.title"
 msgid "Salva PDF con nome"
 msgstr ""
 
@@ -744,26 +826,6 @@ msgstr ""
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
-
-#: tdigit_pdf.caption
-msgid "PDF Info"
-msgstr ""
-
-#: tdigit_pdf.label1.caption
-msgid "Title :"
-msgstr ""
-
-#: tdigit_pdf.label2.caption
-msgid "Author :"
-msgstr ""
-
-#: tdigit_pdf.label3.caption
-msgid "Producer :"
-msgstr ""
-
-#: tdigit_pdf.label4.caption
-msgid "Keywords :"
-msgstr ""
 
 #: tdigit_progress.capcurrent.caption
 msgctxt "tdigit_progress.capcurrent.caption"

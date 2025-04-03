@@ -15,7 +15,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, ComCtrls, fppdf, BCPanel, BCLabel,
+  Buttons, ComCtrls, BCPanel, BCLabel,
   FPImage, BGRABitmap, BGRABitmapTypes,
   DigIt_Types;
 
@@ -31,6 +31,7 @@ type
   TDigIt_ExportFiles = class(TForm)
     btPaperOrientation: TSpeedButton;
     cbPaperSize: TComboBox;
+    cbUseJpgAsIs: TCheckBox;
     edAuthor: TEdit;
     edKeywords: TMemo;
     edProducer: TEdit;
@@ -42,7 +43,6 @@ type
     Label4: TBCLabel;
     Label5: TBCLabel;
     pageOptions: TPageControl;
-    Panel1: TPanel;
     panelFiles: TGroupBox;
     panelInfos: TGroupBox;
     panelJPeg: TGroupBox;
@@ -78,7 +78,7 @@ implementation
 
 {$R *.lfm}
 
-uses LCLIntf, BGRAWriteJpeg, BGRAFormatUI, DigIt_Form_Progress;
+uses LCLIntf, BGRAWriteJpeg, fpPDF, BGRAPdf, BGRAFormatUI, DigIt_Form_Progress;
 
 { TDigIt_ExportFiles }
 
@@ -111,8 +111,9 @@ begin
   begin
     if (pageOptions.ActivePage = tabPDF)
     then begin
-           panelFormatUI.Top:= 34; panelFormatUI.Left:= 107;
+           panelFormatUI.Top:= 68; panelFormatUI.Left:= 107;
            panelFormatUI.Parent:= panelJPeg;
+           panelFormatUI.Color:= clDefault;
            panelFormatUI.Visible:= True;
          end
     else begin
@@ -127,19 +128,22 @@ var
 
    function SaveAsPDF: Boolean;
    var
-     PDF: TPDFDocument;
+     PDF: TBGRAPDFDocument;
      P: TPDFPage;
      S: TPDFSection;
      paper: TPDFPaper;
+     curImg: TBGRAPDFImageItem;
      IDX,
      i, W, H,
+     lenCaptured,
      curPaper: Integer;
      cStr,
+     curExt,
      curFileName,
      pdfFileName: String;
+     directAdd: Boolean;
      srcBitmap: TBGRABitmap;
      MemStream: TMemoryStream;
-     PDF_File: TFileStream;
 
    begin
      Result:= False;
@@ -147,32 +151,31 @@ var
      with DigIt_ExportFiles do
      if SavePDF.Execute then
      try
+        pdfFileName:= SavePDF.FileName;
+
         srcBitmap:= TBGRABitmap.Create;
         MemStream:= TMemoryStream.Create;
 
-        pdfFileName:= SavePDF.FileName;
 
-        PDF:= TPDFDocument.Create(Nil);
-
+        PDF:= TBGRAPDFDocument.Create(Nil);
         PDF.Infos.Title := edTitle.Text;
         PDF.Infos.Author := edAuthor.Text;
         PDF.Infos.Producer := edProducer.Text;
         PDF.Infos.Keywords:= edKeyWords.Text;
         PDF.Infos.ApplicationName := Application.Title+' ver '+DigIt_Version;
         PDF.Infos.CreationDate := Now;
-
         PDF.Options := [poCompressImages, poUseRawJPEG];
 
-        cStr:= IntToStr(Length(CapturedFiles)-1);
-
-        DigIt_Progress.ProgressShow(rsConvertPDF, 0, Length(CapturedFiles)-1);
+        lenCaptured:= Length(CapturedFiles)-1;
+        cStr:= IntToStr(lenCaptured+1);
+        DigIt_Progress.ProgressShow(rsConvertPDF, 0, lenCaptured);
 
         PDF.StartDocument;
         S := PDF.Sections.AddSection;
 
         curPaper:= Integer(PTRUInt(cbPaperSize.Items.Objects[cbPaperSize.ItemIndex]));
 
-        for i := 0 to Length(CapturedFiles)-1 do
+        for i:=0 to lenCaptured do
         begin
           DigIt_Progress.progressTotal.Position:= i;
           DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
@@ -183,22 +186,33 @@ var
 
           if FileExists(curFileName) then
           begin
+            curExt:= Uppercase(ExtractFileExt(curFileName));
+
             P := PDF.Pages.AddPage;
 
-            //Directly from File but we cannot use File Options
-            //IDX:= PDF.Images.AddFromFile(curFileName, False);
+            directAdd:= cbUseJpgAsIs.Checked and ((curExt = '.JPG') or (curExt = '.JPEG'));
 
-            //Load Image and Convert To JPeg in Memory (Options is already in SaveWriter)
-            srcBitmap.LoadFromFile(curFileName);
-            MemStream.Position:= 0;
-            MemStream.Size:= 0;
-            srcBitmap.SaveToStream(MemStream, SaveWriter);
-            IDX:= PDF.Images.AddJPEGStream(MemStream, srcBitmap.Width, srcBitmap.Height);
+            if directAdd
+            then IDX:= PDF.Images.AddFromFile(curFileName, False) //Directly from File but we cannot use JPeg Options
+            else begin
+                   //Load Image and Convert To JPeg in Memory (Options is already in SaveWriter)
+                   srcBitmap.LoadFromFile(curFileName);
+                   MemStream.Position:= 0;
+                   MemStream.Size:= 0;
+                   srcBitmap.SaveToStream(MemStream, SaveWriter);
+                   MemStream.Position:= 0;
+                   IDX:= PDF.Images.AddJPEGStream(MemStream, srcBitmap.Width, srcBitmap.Height);
+                 end;
 
             if (IDX >= 0) then
             begin
-              W := PDF.Images[IDX].Width;
-              H := PDF.Images[IDX].Height;
+              curImg:= TBGRAPDFImageItem(PDF.Images[IDX]);
+
+              if not(directAdd) and TBGRAWriterJPEG(SaveWriter).GrayScale
+              then curImg.ColorSpace:= csDeviceGray;
+
+              W := curImg.Width;
+              H := curImg.Height;
 
               (*case curPaper of
                 Integer(ptCustom): begin
@@ -249,8 +263,6 @@ var
 
         if not(DigIt_Progress.Cancelled) then
         begin
-          //PDF_File:= TFileStream.Create(pdfFileName, fmCreate);
-          //PDF.SaveToStream(PDF_File);
           PDF.SaveToFile(pdfFileName);
           Finished:= True;
           Result:= True;
@@ -261,14 +273,11 @@ var
 
         srcBitmap.Free;
         MemStream.Free;
-
-        //if (PDF_File <> nil) then PDF_File.Free;
+        PDF.Free;
 
         if Result and FileExists(pdfFileName)
         then if (MessageDlg('DigIt', rsOpenSavedPDF, mtConfirmation, mbYesNo, 0) = mrYes)
              then OpenDocument(pdfFileName);
-
-        PDF.Free;
      end;
    end;
 
@@ -291,9 +300,6 @@ begin
        if asPDF
        then begin
               pageOptions.ActivePage:= tabPDF;
-
-              //PDF does not support GrayScale JPeg?????
-              if (BGRAFormatUIContainer <> nil) then BGRAFormatUIContainer.ifJpeg_GrayScale.Enabled:= False;
 
               edTitle.Text:= ATitle;
               edAuthor.Text:= 'MaxM';

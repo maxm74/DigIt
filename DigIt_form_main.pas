@@ -41,8 +41,6 @@ resourcestring
   rsClearQueue = 'Clear the Work Queue?';
   rsExcCreateCounter = 'Failed to Create the Counter';
   rsNotImpl = 'Not yet implemented';
-  rsConvertPDF = 'Converting Images to PDF...';
-  rsOpenSavedPDF = 'Conversion to PDF completed, do i Open it?';
   rsClearCrops = 'Clear Crop Areas ?';
   rsCropFull = 'Full Area';
   rsCropCust = 'Custom';
@@ -453,8 +451,8 @@ uses
   BGRAWriteJPeg, BGRAFormatUI,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
-  DigIt_Form_PDF,
-  //DigIt_Form_ExportFiles,
+  //DigIt_Form_PDF,
+  DigIt_Form_ExportFiles,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
 
 
@@ -3148,103 +3146,8 @@ begin
 end;
 
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
-Var
-  PDF: TPDFDocument;
-  PDF_File: TFileStream;
-  P: TPDFPage;
-  S: TPDFSection;
-  paper: TPDFPaper;
-  IDX,
-  i, W, H: Integer;
-  cStr,
-  curFileName,
-  pdfFileName: String;
-  saved: Boolean;
-
 begin
-  //TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, True);
-  //  Original Version
-  if SavePDF.Execute then
-  try
-     pdfFileName:= SavePDF.FileName;
-
-     PDF:= TPDFDocument.Create(Nil);
-
-     PDF.Infos.Title := Application.Title;
-     PDF.Infos.Author := 'MaxM';
-     PDF.Infos.Producer := Application.Title;
-     PDF.Infos.ApplicationName := Application.Title+' ver '+DigIt_Version;
-     PDF.Infos.CreationDate := Now;
-     PDF.Options := [poCompressImages, poUseRawJPEG];
-
-     if TDigIt_PDF.Execute(PDF.Infos) then
-     try
-        saved:= False;
-        cStr:= IntToStr(lvCaptured.Items.Count-1);
-
-        DigIt_Progress.ProgressShow(rsConvertPDF, 0, Length(CapturedFiles)-1);
-
-        PDF.StartDocument;
-        S := PDF.Sections.AddSection;
-
-        for i := 0 to Length(CapturedFiles)-1 do
-        begin
-          DigIt_Progress.progressTotal.Position:= i;
-          DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
-          Application.ProcessMessages;
-          if DigIt_Progress.Cancelled then break;
-
-          curFileName:= CapturedFiles[i].fName;
-
-          if FileExists(curFileName) then
-          begin
-            P := PDF.Pages.AddPage;
-            P.PaperType := ptCustom; //ptCustom; //ptA4;
-            P.UnitOfMeasure := uomPixels;//uomMillimeters;
-
-            IDX := PDF.Images.AddFromFile(curFileName, False);
-            if (IDX >= 0) then
-            begin
-              W := PDF.Images[IDX].Width;
-              H := PDF.Images[IDX].Height;
-
-              //Set Paper to Full image size
-              paper.W:=W;
-              paper.H:=H;
-              P.Paper:=paper;
-
-              P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
-
-              S.AddPage(P);
-            end;
-          end;
-
-          DigIt_Progress.progressTotal.Position:= i+1;
-          DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
-          Application.ProcessMessages;
-          if DigIt_Progress.Cancelled then break;
-        end;
-
-        if not(DigIt_Progress.Cancelled) then
-        begin
-          PDF_File:= TFileStream.Create(pdfFileName, fmCreate);
-          PDF.SaveToStream(PDF_File);
-          saved:= True;
-        end;
-
-     finally
-       DigIt_Progress.Hide;
-
-       if (PDF_File <> nil) then PDF_File.Free;
-
-       if saved and FileExists(pdfFileName)
-       then if (MessageDlg('DigIt', rsOpenSavedPDF, mtConfirmation, mbYesNo, 0) = mrYes)
-            then OpenDocument(pdfFileName);
-     end;
-
-  finally
-    PDF.Free;
-  end;
+  TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, True);
 end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);

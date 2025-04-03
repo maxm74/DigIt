@@ -1,13 +1,13 @@
 object DigIt_ExportFiles: TDigIt_ExportFiles
   Left = 416
-  Height = 680
+  Height = 730
   Top = 239
   Width = 520
   AutoSize = True
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Export Settings'
-  ClientHeight = 680
+  ClientHeight = 730
   ClientWidth = 520
   DesignTimePPI = 120
   Position = poScreenCenter
@@ -15,7 +15,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
   OnShow = FormShow
   object panelMain: TBCPanel
     Left = 0
-    Height = 630
+    Height = 680
     Top = 0
     Width = 520
     Align = alClient
@@ -63,7 +63,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
     end
     object pageOptions: TPageControl
       Left = 2
-      Height = 426
+      Height = 476
       Top = 202
       Width = 516
       ActivePage = tabPDF
@@ -73,15 +73,15 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
       TabOrder = 1
       object tabPDF: TTabSheet
         Caption = 'tabPDF'
-        ClientHeight = 418
+        ClientHeight = 468
         ClientWidth = 508
         object panelJPeg: TGroupBox
           Left = 0
-          Height = 210
+          Height = 250
           Top = 0
           Width = 508
           Caption = ' Image Options '
-          ClientHeight = 185
+          ClientHeight = 225
           ClientWidth = 504
           ParentBackground = False
           TabOrder = 0
@@ -164,19 +164,19 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             ParentShowHint = False
             OnClick = btPaperOrientationClick
           end
-          object Panel1: TPanel
-            Left = 107
-            Height = 150
-            Top = 34
-            Width = 213
-            Caption = 'Panel1'
+          object cbUseJpgAsIs: TCheckBox
+            Left = 20
+            Height = 24
+            Top = 35
+            Width = 144
+            Caption = 'Use JPeg Files as is'
             TabOrder = 1
           end
         end
         object panelInfos: TGroupBox
           Left = 0
           Height = 210
-          Top = 216
+          Top = 252
           Width = 516
           Caption = ' Infos '
           ClientHeight = 185
@@ -358,7 +358,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
   object panelButtons: TBCPanel
     Left = 0
     Height = 50
-    Top = 630
+    Top = 680
     Width = 520
     Align = alBottom
     Background.Color = clBtnFace
@@ -419,8 +419,8 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
   object imgList: TImageList
     Height = 22
     Width = 22
-    Left = 32
-    Top = 272
+    Left = 96
+    Top = 344
     Bitmap = {
       4C7A0200000016000000160000004B0400000000000078DAED974B52DB401086
       C996152721B708A1BC0F8B0448729210CCC3C636181B48916D9CCA09525C8005

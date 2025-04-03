@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/02 Moved some resourcestring and Types to DigIt_types;
+2025/04/03 Deleted Form_PDF;
+           Use of ExportFiles Form to generate PDF;
+
+        02 Moved some resourcestring and Types to DigIt_types;
            Moved ProgressShow and ProgressSetTotal from Main to DigIt_Progress;
            Use DigIt_Progress.Cancelled intestead of Locals UserCancel;
            Added Experimental Form_ExportFiles;

@@ -78,11 +78,6 @@ msgid ""
 "%s"
 msgstr ""
 
-#: digit_form_main.rsconvertpdf
-msgctxt "digit_form_main.rsconvertpdf"
-msgid "Converting Images to PDF..."
-msgstr ""
-
 #: digit_form_main.rscounterprev
 #, object-pascal-format
 msgid "Value Previous: %d"
@@ -159,11 +154,6 @@ msgstr ""
 
 #: digit_form_main.rsnotimpl
 msgid "Not yet implemented"
-msgstr ""
-
-#: digit_form_main.rsopensavedpdf
-msgctxt "digit_form_main.rsopensavedpdf"
-msgid "Conversion to PDF completed, do i Open it?"
 msgstr ""
 
 #: digit_form_main.rssavework
@@ -324,6 +314,10 @@ msgstr ""
 msgid "Same as the Image Size"
 msgstr ""
 
+#: tdigit_exportfiles.cbusejpgasis.caption
+msgid "Use JPeg Files as is"
+msgstr ""
+
 #: tdigit_exportfiles.label1.caption
 msgctxt "tdigit_exportfiles.label1.caption"
 msgid "Title :"
@@ -346,10 +340,6 @@ msgstr ""
 
 #: tdigit_exportfiles.label5.caption
 msgid "Paper Size :"
-msgstr ""
-
-#: tdigit_exportfiles.panel1.caption
-msgid "Panel1"
 msgstr ""
 
 #: tdigit_exportfiles.panelfiles.caption
@@ -830,30 +820,6 @@ msgstr ""
 #: tdigit_main.tbsource.caption
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
-msgstr ""
-
-#: tdigit_pdf.caption
-msgid "PDF Info"
-msgstr ""
-
-#: tdigit_pdf.label1.caption
-msgctxt "tdigit_pdf.label1.caption"
-msgid "Title :"
-msgstr ""
-
-#: tdigit_pdf.label2.caption
-msgctxt "tdigit_pdf.label2.caption"
-msgid "Author :"
-msgstr ""
-
-#: tdigit_pdf.label3.caption
-msgctxt "tdigit_pdf.label3.caption"
-msgid "Producer :"
-msgstr ""
-
-#: tdigit_pdf.label4.caption
-msgctxt "tdigit_pdf.label4.caption"
-msgid "Keywords :"
 msgstr ""
 
 #: tdigit_progress.capcurrent.caption

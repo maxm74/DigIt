@@ -121,7 +121,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="19">
+    <Units Count="18">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -211,13 +211,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit17>
-      <Unit18>
-        <Filename Value="DigIt_Form_PDF.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="DigIt_PDF"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit18>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

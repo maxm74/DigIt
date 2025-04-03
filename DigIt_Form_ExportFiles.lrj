@@ -6,7 +6,7 @@
 {"hash":74247653,"name":"tdigit_exportfiles.cbpapersize.text","sourcebytes":[83,97,109,101,32,97,115,32,116,104,101,32,73,109,97,103,101,32,83,105,122,101],"value":"Same as the Image Size"},
 {"hash":17394554,"name":"tdigit_exportfiles.label5.caption","sourcebytes":[80,97,112,101,114,32,83,105,122,101,32,58],"value":"Paper Size :"},
 {"hash":25733086,"name":"tdigit_exportfiles.btpaperorientation.hint","sourcebytes":[80,97,112,101,114,32,79,114,105,101,110,116,97,116,105,111,110],"value":"Paper Orientation"},
-{"hash":90721265,"name":"tdigit_exportfiles.panel1.caption","sourcebytes":[80,97,110,101,108,49],"value":"Panel1"},
+{"hash":89147571,"name":"tdigit_exportfiles.cbusejpgasis.caption","sourcebytes":[85,115,101,32,74,80,101,103,32,70,105,108,101,115,32,97,115,32,105,115],"value":"Use JPeg Files as is"},
 {"hash":84203120,"name":"tdigit_exportfiles.panelinfos.caption","sourcebytes":[32,73,110,102,111,115,32],"value":" Infos "},
 {"hash":185280362,"name":"tdigit_exportfiles.label1.caption","sourcebytes":[84,105,116,108,101,32,58],"value":"Title :"},
 {"hash":212820154,"name":"tdigit_exportfiles.label2.caption","sourcebytes":[65,117,116,104,111,114,32,58],"value":"Author :"},

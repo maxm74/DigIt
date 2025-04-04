@@ -57,7 +57,7 @@
 {"hash":131777658,"name":"tdigit_main.bclabel14.caption","sourcebytes":[65,102,116,101,114,32,58],"value":"After :"},
 {"hash":138898394,"name":"tdigit_main.label4.caption","sourcebytes":[69,120,97,109,112,108,101,32,58],"value":"Example :"},
 {"hash":266383770,"name":"tdigit_main.bclabel8.caption","sourcebytes":[68,105,103,105,116,115,32,58],"value":"Digits :"},
-{"hash":816,"name":"tdigit_main.lbcounterexample.caption","sourcebytes":[48,48],"value":"00"},
+{"hash":13104,"name":"tdigit_main.lbcounterexample.caption","sourcebytes":[48,48,48],"value":"000"},
 {"hash":127301168,"name":"tdigit_main.lbprevious.caption","sourcebytes":[86,97,108,117,101,32,80,114,101,118,105,111,117,115,58,32],"value":"Value Previous: "},
 {"hash":265173442,"name":"tdigit_main.btcounter_add.hint","sourcebytes":[65,100,100,32,97,32,67,111,117,110,116,101,114],"value":"Add a Counter"},
 {"hash":43,"name":"tdigit_main.btcounter_add.caption","sourcebytes":[43],"value":"+"},
@@ -98,11 +98,10 @@
 {"hash":47076692,"name":"tdigit_main.actcapturedrotateright.caption","sourcebytes":[82,111,116,97,116,101,32,82,105,103,104,116],"value":"Rotate Right"},
 {"hash":248217221,"name":"tdigit_main.actcaptureddelete.caption","sourcebytes":[68,101,108,101,116,101,32,83,101,108,101,99,116,101,100,32,80,97,103,101],"value":"Delete Selected Page"},
 {"hash":49648067,"name":"tdigit_main.actcaptureddeleteall.caption","sourcebytes":[68,101,108,101,116,101,32,65,108,108,32,80,97,103,101,115],"value":"Delete All Pages"},
-{"hash":20519029,"name":"tdigit_main.opensessiondlg.title","sourcebytes":[65,112,114,105,32,83,101,115,115,105,111,110,101,32,101,115,105,115,116,101,110,116,101],"value":"Apri Sessione esistente"},
-{"hash":157518821,"name":"tdigit_main.savesessiondlg.title","sourcebytes":[83,97,108,118,97,32,83,101,115,115,105,111,110,101,32,99,111,110,32,110,111,109,101],"value":"Salva Sessione con nome"},
+{"hash":258363502,"name":"tdigit_main.opensessiondlg.title","sourcebytes":[79,112,101,110,32,69,120,105,115,116,105,110,103,32,83,101,115,115,105,111,110],"value":"Open Existing Session"},
+{"hash":93438883,"name":"tdigit_main.savesessiondlg.title","sourcebytes":[83,97,118,101,32,83,101,115,115,105,111,110,32,97,115],"value":"Save Session as"},
 {"hash":39807138,"name":"tdigit_main.menutimertakestop.caption","sourcebytes":[83,116,111,112,32,84,105,109,101,114],"value":"Stop Timer"},
 {"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"},
 {"hash":48547185,"name":"tdigit_main.itemcropmodefull.caption","sourcebytes":[70,117,108,108,32,65,114,101,97],"value":"Full Area"},
-{"hash":78424925,"name":"tdigit_main.itemcropmodecustom.caption","sourcebytes":[67,117,115,116,111,109],"value":"Custom"},
-{"hash":114823301,"name":"tdigit_main.savepdf.title","sourcebytes":[83,97,108,118,97,32,80,68,70,32,99,111,110,32,110,111,109,101],"value":"Salva PDF con nome"}
+{"hash":78424925,"name":"tdigit_main.itemcropmodecustom.caption","sourcebytes":[67,117,115,116,111,109],"value":"Custom"}
 ]}

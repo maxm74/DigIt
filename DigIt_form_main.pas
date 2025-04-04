@@ -194,7 +194,6 @@ type
     menuProjectSave: TMenuItem;
     menuProjectNew: TMenuItem;
     MenuMain: TPopupMenu;
-    SavePDF: TSaveDialog;
     SelectDirectory: TSelectDirectoryDialog;
     Separator2: TMenuItem;
     tbCaptured: TToolBar;

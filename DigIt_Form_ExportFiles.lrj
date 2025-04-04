@@ -13,5 +13,5 @@
 {"hash":196918634,"name":"tdigit_exportfiles.label3.caption","sourcebytes":[80,114,111,100,117,99,101,114,32,58],"value":"Producer :"},
 {"hash":242067514,"name":"tdigit_exportfiles.label4.caption","sourcebytes":[75,101,121,119,111,114,100,115,32,58],"value":"Keywords :"},
 {"hash":128413207,"name":"tdigit_exportfiles.tabimg.caption","sourcebytes":[116,97,98,73,77,71],"value":"tabIMG"},
-{"hash":114823301,"name":"tdigit_exportfiles.savepdf.title","sourcebytes":[83,97,108,118,97,32,80,68,70,32,99,111,110,32,110,111,109,101],"value":"Salva PDF con nome"}
+{"hash":85002995,"name":"tdigit_exportfiles.savepdf.title","sourcebytes":[83,97,118,101,32,80,68,70,32,97,115],"value":"Save PDF as"}
 ]}

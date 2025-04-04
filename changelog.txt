@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/03 Deleted Form_PDF;
+2025/04/04 Rewrite of Export to PDF using TBGRAReaderJpeg.GetJpegInfo and Streams;
+	   Counters Default to 3 Digits;
+	   Release of 0.1 beta;
+
+        03 Deleted Form_PDF;
            Use of ExportFiles Form to generate PDF;
 
         02 Moved some resourcestring and Types to DigIt_types;

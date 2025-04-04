@@ -129,8 +129,8 @@ begin
   rName :=AName;
   rValue :=AValue;
   rValue_Previous:=AValue;
-  rValue_StringDigits:=2;
-  formatString:= '%s%.2d%s';
+  rValue_StringDigits:=3;
+  formatString:= '%s%.3d%s';
 end;
 
 function TDigIt_Counter.GetValue(nextValue: Boolean): String;
@@ -160,7 +160,7 @@ begin
        end;
   Value_StringPre:=XMLConf.GetValue(APath+'Value_StringPre', '');
   Value_StringPost:=XMLConf.GetValue(APath+'Value_StringPost', '');
-  Value_StringDigits:=XMLConf.GetValue(APath+'Value_StringDigits', 2);
+  Value_StringDigits:=XMLConf.GetValue(APath+'Value_StringDigits', 3);
   UserData:=XMLConf.GetValue(APath+'UserData', -1);
   //Loading:=False;
 end;

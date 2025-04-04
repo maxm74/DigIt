@@ -78,7 +78,7 @@ implementation
 
 {$R *.lfm}
 
-uses LCLIntf, BGRAWriteJpeg, fpPDF, BGRAPdf, BGRAFormatUI, DigIt_Form_Progress;
+uses LCLIntf, BGRAReadJpeg, BGRAWriteJpeg, fpPDF, BGRAPdf, BGRAFormatUI, DigIt_Form_Progress;
 
 { TDigIt_ExportFiles }
 
@@ -133,17 +133,19 @@ var
      S: TPDFSection;
      paper: TPDFPaper;
      curImg: TBGRAPDFImageItem;
-     IDX,
-     i, W, H,
+     curColorSpace: TPDFColorSpace;
+     IDX, i,
      lenCaptured,
      curPaper: Integer;
      cStr,
      curExt,
      curFileName,
      pdfFileName: String;
-     directAdd: Boolean;
      srcBitmap: TBGRABitmap;
      MemStream: TMemoryStream;
+     loadImg,
+     ImgInStream: Boolean;
+     jpgInfo: TJPEGInfo;
 
    begin
      Result:= False;
@@ -155,7 +157,6 @@ var
 
         srcBitmap:= TBGRABitmap.Create;
         MemStream:= TMemoryStream.Create;
-
 
         PDF:= TBGRAPDFDocument.Create(Nil);
         PDF.Infos.Title := edTitle.Text;
@@ -186,71 +187,78 @@ var
 
           if FileExists(curFileName) then
           begin
-            curExt:= Uppercase(ExtractFileExt(curFileName));
-
             P := PDF.Pages.AddPage;
 
-            directAdd:= cbUseJpgAsIs.Checked and ((curExt = '.JPG') or (curExt = '.JPEG'));
+            curExt:= Uppercase(ExtractFileExt(curFileName));
+            loadImg:= True;
+            ImgInStream:= False;
 
-            if directAdd
-            then IDX:= PDF.Images.AddFromFile(curFileName, False) //Directly from File but we cannot use JPeg Options
-            else begin
-                   //Load Image and Convert To JPeg in Memory (Options is already in SaveWriter)
-                   srcBitmap.LoadFromFile(curFileName);
-                   MemStream.Position:= 0;
-                   MemStream.Size:= 0;
-                   srcBitmap.SaveToStream(MemStream, SaveWriter);
-                   MemStream.Position:= 0;
-                   IDX:= PDF.Images.AddJPEGStream(MemStream, srcBitmap.Width, srcBitmap.Height);
-                 end;
+            if cbUseJpgAsIs.Checked and ((curExt = '.JPG') or (curExt = '.JPEG')) then
+            try
+              MemStream.Position:= 0;
+              MemStream.Size:= 0;
+              MemStream.LoadFromFile(curFileName);
+              ImgInStream:= True;
 
+              curColorSpace:= csDeviceRGB;
+
+              //Get Jpeg Info, if False try to read the Image with srcBitmap
+              loadImg:= not(TBGRAReaderJpeg.GetJpegInfo(MemStream, jpgInfo));
+
+            except
+              loadImg:= True;
+            end;
+
+            if loadImg then
+            begin
+              //Load Image and Convert To JPeg in Memory (Options is already in SaveWriter)
+              if ImgInStream
+              then srcBitmap.LoadFromStream(MemStream)  //I deliberately do not use the file extension, because if we are here
+                                                        //the file has a fake extension and we let DetectFileFormat determine the format
+              else srcBitmap.LoadFromFile(curFileName);
+
+              //Reuse the Same Stream to Write converted JPeg
+              MemStream.Position:= 0;
+              MemStream.Size:= 0;
+              srcBitmap.SaveToStream(MemStream, SaveWriter);
+              MemStream.Position:= 0;
+
+              jpgInfo.Width:= srcBitmap.Width;
+              jpgInfo.Height:= srcBitmap.Height;
+              jpgInfo.GrayScale:= TBGRAWriterJPEG(SaveWriter).GrayScale;
+            end;
+
+            IDX:= PDF.Images.AddJPEGStream(MemStream, jpgInfo.Width, jpgInfo.Height);
             if (IDX >= 0) then
             begin
               curImg:= TBGRAPDFImageItem(PDF.Images[IDX]);
 
-              if not(directAdd) and TBGRAWriterJPEG(SaveWriter).GrayScale
-              then curImg.ColorSpace:= csDeviceGray;
+              if jpgInfo.GrayScale
+              then curImg.ColorSpace:= csDeviceGray
+              else curImg.ColorSpace:= csDeviceRGB;
 
-              W := curImg.Width;
-              H := curImg.Height;
-
-              (*case curPaper of
+              (*case curPaper of   Add In Next Version
                 Integer(ptCustom): begin
+                  //P.PaperType:= ptCustom;
+                  P.UnitOfMeasure:= From UI;
+                  //Set Paper to Full image size
+                  paper.W:= From UI;
+                  paper.H:= From UI;
+                  P.Paper:=paper;
 
                 end;
                 255:  begin*)
-                  P.PaperType := ptCustom;
-                  P.UnitOfMeasure := uomPixels;
+                  //P.PaperType:= ptCustom;
+                  P.UnitOfMeasure:= uomPixels;
                   //Set Paper to Full image size
-                  paper.W:=W;
-                  paper.H:=H;
+                  paper.W:= jpgInfo.Width;
+                  paper.H:= jpgInfo.Height;
+                  P.Paper:=paper;
                 (*end;
-                else begin
-                       P.PaperType:= TPDFPaperType(curPaper);
-
-                       case Img.ResolutionUnit of
-                         ruPixelsPerCentimeter: begin
-                           P.UnitOfMeasure := uomCentimeters;
-                           paper.W:= Round(Img.ResolutionWidth);
-                           paper.H:= Round(Img.ResolutionHeight);
-                         end;
-                         ruPixelsPerInch: begin
-                           P.UnitOfMeasure := uomInches;
-                           paper.W:= Round(Img.ResolutionWidth);
-                           paper.H:= Round(Img.ResolutionHeight);
-                         end;
-                         ruNone: begin
-                            P.UnitOfMeasure := uomPixels;
-                            paper.W:= PDFPaperSizes[P.PaperType, 1];
-                            paper.H:= PDFPaperSizes[P.PaperType, 0];
-                         end;
-                       end;
-                end;
+                else P.PaperType:= TPDFPaperType(curPaper);
               end;*)
 
-              P.Paper:=paper;
-              P.AddObject(TPDFImage.Create(PDF, 0, 0, W, H, IDX));
-
+              P.AddObject(TPDFImage.Create(PDF, 0, 0, jpgInfo.Width, jpgInfo.Height, IDX));
               S.AddPage(P);
             end;
           end;

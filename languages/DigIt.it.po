@@ -1,5 +1,15 @@
 msgid ""
-msgstr "Content-Type: text/plain; charset=UTF-8"
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
 
 #: digit_form_buildduplex.caption_cancel
 msgctxt "digit_form_buildduplex.caption_cancel"
@@ -41,24 +51,22 @@ msgid "No Pages in Front or Back Side"
 msgstr "Nessuna Pagina sul lato Frontale o Posteriore"
 
 #: digit_form_exportfiles.rsconvertpdf
-#, fuzzy
 msgctxt "digit_form_exportfiles.rsconvertpdf"
 msgid "Converting Images to PDF..."
 msgstr "Convertendo le Immagini in PDF..."
 
 #: digit_form_exportfiles.rslandscape
 msgid "Landscape"
-msgstr ""
+msgstr "Orizzontale"
 
 #: digit_form_exportfiles.rsopensavedpdf
-#, fuzzy
 msgctxt "digit_form_exportfiles.rsopensavedpdf"
 msgid "Conversion to PDF completed, do i Open it?"
 msgstr "Conversione a PDF completata, lo Apro?"
 
 #: digit_form_exportfiles.rsportrait
 msgid "Portrait"
-msgstr ""
+msgstr "Verticale"
 
 #: digit_form_main.rsclearcrops
 msgid "Clear Crop Areas ?"
@@ -70,15 +78,16 @@ msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinueautowork
 msgid "Continue from Auto Saved Work Session?"
-msgstr ""
+msgstr "Continuo dalla Sessione Lavoro Salvata in Automatico?"
 
 #: digit_form_main.rscontinuework
-#, object-pascal-format, fuzzy, badformat
-#| msgid "Continue from last Work Session?"
+#, object-pascal-format
 msgid ""
 "Continue from last Work Session?\n"
 "%s"
-msgstr "Continuo dall'ultima Sessione Lavoro?"
+msgstr ""
+"Continuo dall'ultima Sessione Lavoro?\n"
+"%s"
 
 #: digit_form_main.rscounterprev
 #, object-pascal-format
@@ -123,6 +132,8 @@ msgid ""
 "Cannot Load Work Session\n"
 "%s"
 msgstr ""
+"Impossibile Caricare la Sessione Lavoro\n"
+"%s"
 
 #: digit_form_main.rserrsavework
 #, object-pascal-format
@@ -131,6 +142,9 @@ msgid ""
 "%s\n"
 "%s"
 msgstr ""
+"Impossibile Salvare la Sessione Lavoro\n"
+"%s\n"
+"%s"
 
 #: digit_form_main.rsexccreatecounter
 msgid "Failed to Create the Counter"
@@ -146,7 +160,7 @@ msgstr ""
 
 #: digit_form_main.rsnewwork
 msgid "Start a New Work Session?"
-msgstr ""
+msgstr "Avvio una Nuova Sessione Lavoro?"
 
 #: digit_form_main.rsnofilesdownloaded
 msgid "NO Files Downloaded "
@@ -170,37 +184,37 @@ msgstr "Creare una Copia della sessione di Lavoro o Spostarla?"
 
 #: digit_form_main.rssavingcaptured
 msgid "Saving Captured Files"
-msgstr ""
+msgstr "Salvando i Files Acquisiti"
 
 #: digit_form_main.rssavingdone
 msgid "Saved Done"
-msgstr ""
+msgstr "Salvataggio Completato"
 
 #: digit_form_main.rssavingsessionfiles
 msgid "Saving Session Files"
-msgstr ""
+msgstr "Salvando i Files di Sessione"
 
 #: digit_form_main.rssavingsources
 msgid "Saving Sources Files"
-msgstr ""
+msgstr "Salvando i File Sorgenti"
 
 #: digit_form_main.rssavingswitch
 msgid "Switching to New Work Session"
-msgstr ""
+msgstr "Passando alla Nuova Sessione Lavoro"
 
 #: digit_form_main.rssavingwork
 msgid "Saving the Work Session"
-msgstr ""
+msgstr "Salvando la Sessione Lavoro"
 
 #: digit_form_main.rssourcenotfound
 #, object-pascal-format
 msgid "Source \"%s\" not Found, try Select another from Menù"
-msgstr ""
+msgstr "Sorgente \"%s\" non Trovata, prova a Selezionarne un'altra dal Menù"
 
 #: digit_form_main.rssourcenotselected
 #, object-pascal-format
 msgid "Cannot Select Source %d, try Select another from Menù"
-msgstr ""
+msgstr "Impossibile Selezionare la Sorgente \"%d, prova a Selezionarne un'altra dal Menù"
 
 #: digit_form_main.rstakeagain
 #, object-pascal-format
@@ -209,7 +223,7 @@ msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
 
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
-msgstr ""
+msgstr "Cartella di Immagini"
 
 #: digit_source_folder.rsfoldnotfound
 #, object-pascal-format
@@ -217,43 +231,45 @@ msgid ""
 "Folder not found...\n"
 "%s"
 msgstr ""
+"Cartella non trovata...\n"
+"%s"
 
 #: digit_source_folder.rsfoldselect
 msgid "Select a Folder"
-msgstr ""
+msgstr "Seleziona una Cartella"
 
 #: digit_source_twain.rstwainexcnotfound
 msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
-msgstr ""
+msgstr "Dispositivo non trovato..."
 
 #: digit_source_twain.rstwainname
 msgid "Twain Device"
-msgstr ""
+msgstr "Dispositivo Twain"
 
 #: digit_source_wia.rswiaacquired
 #, object-pascal-format
 msgid "Acquired %d Pages"
-msgstr ""
+msgstr "Acquisite %d Pagine"
 
 #: digit_source_wia.rswiaacquiring
 #, object-pascal-format
 msgid "Acquiring Page %d"
-msgstr ""
+msgstr "Acquisendo la Pagina %d"
 
 #: digit_source_wia.rswiaacquiringtitle
 #, object-pascal-format
 msgid "Acquiring from %s"
-msgstr ""
+msgstr "Acquisendo da %s"
 
 #: digit_source_wia.rswiaacquiringtotal
 #, object-pascal-format
 msgid "Acquiring from %s at %d dpi"
-msgstr ""
+msgstr "Acquisendo da %s a %d dpi"
 
 #: digit_source_wia.rswiacancelling
 msgid "Cancelling acquisition"
-msgstr ""
+msgstr "Annullando l'acquisizione"
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
@@ -263,34 +279,37 @@ msgid ""
 "but Item %s not...\n"
 "Select the First Item %s ?"
 msgstr ""
+"Dispositivo trovato\n"
+"\"%s %s\n"
+"ma l'Elemento %s no...\n"
+"Selezionare il primo Elemento %s?"
 
 #: digit_source_wia.rswiaexcconnect
 msgid "Error Connecting Device"
-msgstr ""
+msgstr "Errore Connettendo al Dispositivo"
 
 #: digit_source_wia.rswiaexcnotfound
 msgctxt "digit_source_wia.rswiaexcnotfound"
 msgid "Device not found..."
-msgstr ""
+msgstr "Dispositivo non trovato..."
 
 #: digit_source_wia.rswianame
 msgid "WIA Device"
-msgstr ""
+msgstr "Dispositivo WIA"
 
 #: digit_types.rsprocessed
-#, object-pascal-format, fuzzy
+#, object-pascal-format
 msgctxt "digit_types.rsprocessed"
 msgid "Processed %d / %s"
 msgstr "Elaborato %d / %s"
 
 #: digit_types.rsprocessing
-#, object-pascal-format, fuzzy
+#, object-pascal-format
 msgctxt "digit_types.rsprocessing"
 msgid "Processing %d / %s"
 msgstr "Elaborando %d / %s"
 
 #: digit_types.rsprocessingimages
-#, fuzzy
 msgctxt "digit_types.rsprocessingimages"
 msgid "Processing Images"
 msgstr "Elaborando le Immagini"
@@ -309,43 +328,43 @@ msgstr "   Verticale"
 
 #: tdigit_exportfiles.btpaperorientation.hint
 msgid "Paper Orientation"
-msgstr ""
+msgstr "Orientamento Carta"
 
 #: tdigit_exportfiles.caption
 msgid "Export Settings"
-msgstr ""
+msgstr "Impostazioni Esportazione"
 
 #: tdigit_exportfiles.cbpapersize.text
 msgid "Same as the Image Size"
-msgstr ""
+msgstr "Uguale a Dimensione Immagine"
 
 #: tdigit_exportfiles.cbusejpgasis.caption
 msgid "Use JPeg Files as is"
-msgstr ""
+msgstr "Usa file JPEG così come sono"
 
 #: tdigit_exportfiles.label1.caption
 msgctxt "tdigit_exportfiles.label1.caption"
 msgid "Title :"
-msgstr ""
+msgstr "Titolo :"
 
 #: tdigit_exportfiles.label2.caption
 msgctxt "tdigit_exportfiles.label2.caption"
 msgid "Author :"
-msgstr ""
+msgstr "Autore :"
 
 #: tdigit_exportfiles.label3.caption
 msgctxt "tdigit_exportfiles.label3.caption"
 msgid "Producer :"
-msgstr ""
+msgstr "Produttore :"
 
 #: tdigit_exportfiles.label4.caption
 msgctxt "tdigit_exportfiles.label4.caption"
 msgid "Keywords :"
-msgstr ""
+msgstr "Parole Chiave :"
 
 #: tdigit_exportfiles.label5.caption
 msgid "Paper Size :"
-msgstr ""
+msgstr "Dimensione Carta :"
 
 #: tdigit_exportfiles.panelfiles.caption
 msgid " Files "
@@ -357,12 +376,12 @@ msgstr ""
 
 #: tdigit_exportfiles.paneljpeg.caption
 msgid " Image Options "
-msgstr ""
+msgstr " Opzioni immagine "
 
 #: tdigit_exportfiles.savepdf.title
 msgctxt "tdigit_exportfiles.savepdf.title"
-msgid "Salva PDF con nome"
-msgstr ""
+msgid "Save PDF as"
+msgstr "Salva PDF come"
 
 #: tdigit_exportfiles.tabimg.caption
 msgid "tabIMG"
@@ -705,7 +724,9 @@ msgid "Rotate :"
 msgstr "Ruota :"
 
 #: tdigit_main.lbcounterexample.caption
-msgid "00"
+#, fuzzy
+#| msgid "00"
+msgid "000"
 msgstr "00"
 
 #: tdigit_main.lbprevious.caption
@@ -741,8 +762,8 @@ msgid "Stop Timer"
 msgstr "Ferma Timer"
 
 #: tdigit_main.opensessiondlg.title
-msgid "Apri Sessione esistente"
-msgstr ""
+msgid "Open Existing Session"
+msgstr "Apri Sessione esistente"
 
 #: tdigit_main.rgcropaspect.caption
 msgid "Aspect Ratio"
@@ -760,14 +781,9 @@ msgstr "Aree di Taglio"
 msgid "Captured Pages"
 msgstr "Pagine Catturate"
 
-#: tdigit_main.savepdf.title
-msgctxt "tdigit_main.savepdf.title"
-msgid "Salva PDF con nome"
-msgstr ""
-
 #: tdigit_main.savesessiondlg.title
-msgid "Salva Sessione con nome"
-msgstr ""
+msgid "Save Session as"
+msgstr "Salva Sessione come"
 
 #: tdigit_main.tbcaptsep1.caption
 msgid "tbCaptSep1"

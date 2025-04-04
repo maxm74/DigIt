@@ -461,7 +461,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
     }
   end
   object SavePDF: TSaveDialog
-    Title = 'Salva PDF con nome'
+    Title = 'Save PDF as'
     DefaultExt = '.pdf'
     Filter = 'Portable Document Format (*.pdf)|*.pdf|All Files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]

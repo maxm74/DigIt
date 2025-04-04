@@ -356,7 +356,7 @@ msgstr ""
 
 #: tdigit_exportfiles.savepdf.title
 msgctxt "tdigit_exportfiles.savepdf.title"
-msgid "Salva PDF con nome"
+msgid "Save PDF as"
 msgstr ""
 
 #: tdigit_exportfiles.tabimg.caption
@@ -700,7 +700,7 @@ msgid "Rotate :"
 msgstr ""
 
 #: tdigit_main.lbcounterexample.caption
-msgid "00"
+msgid "000"
 msgstr ""
 
 #: tdigit_main.lbprevious.caption
@@ -736,7 +736,7 @@ msgid "Stop Timer"
 msgstr ""
 
 #: tdigit_main.opensessiondlg.title
-msgid "Apri Sessione esistente"
+msgid "Open Existing Session"
 msgstr ""
 
 #: tdigit_main.rgcropaspect.caption
@@ -755,13 +755,8 @@ msgstr ""
 msgid "Captured Pages"
 msgstr ""
 
-#: tdigit_main.savepdf.title
-msgctxt "tdigit_main.savepdf.title"
-msgid "Salva PDF con nome"
-msgstr ""
-
 #: tdigit_main.savesessiondlg.title
-msgid "Salva Sessione con nome"
+msgid "Save Session as"
 msgstr ""
 
 #: tdigit_main.tbcaptsep1.caption

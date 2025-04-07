@@ -215,6 +215,7 @@ msgid ""
 msgstr ""
 
 #: digit_source_folder.rsfoldselect
+msgctxt "digit_source_folder.rsfoldselect"
 msgid "Select a Folder"
 msgstr ""
 
@@ -302,12 +303,48 @@ msgstr ""
 msgid "   Vertical"
 msgstr ""
 
+#: tdigit_exportfiles.btaddfiles.caption
+msgid "Add Files..."
+msgstr ""
+
+#: tdigit_exportfiles.btaddfolder.caption
+msgid "Add Folder..."
+msgstr ""
+
+#: tdigit_exportfiles.btdel.caption
+msgid "Delete"
+msgstr ""
+
+#: tdigit_exportfiles.btdelall.caption
+msgid "Delete All"
+msgstr ""
+
+#: tdigit_exportfiles.btdown.hint
+msgctxt "tdigit_exportfiles.btdown.hint"
+msgid "Down"
+msgstr ""
+
+#: tdigit_exportfiles.btfirst.hint
+msgctxt "tdigit_exportfiles.btfirst.hint"
+msgid "To First"
+msgstr ""
+
+#: tdigit_exportfiles.btlast.hint
+msgctxt "tdigit_exportfiles.btlast.hint"
+msgid "To Last"
+msgstr ""
+
 #: tdigit_exportfiles.btpaperorientation.hint
 msgid "Paper Orientation"
 msgstr ""
 
+#: tdigit_exportfiles.btup.hint
+msgctxt "tdigit_exportfiles.btup.hint"
+msgid "Up"
+msgstr ""
+
 #: tdigit_exportfiles.caption
-msgid "Export Settings"
+msgid "Export Settings - "
 msgstr ""
 
 #: tdigit_exportfiles.cbpapersize.text
@@ -340,6 +377,23 @@ msgstr ""
 
 #: tdigit_exportfiles.label5.caption
 msgid "Paper Size :"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[0].caption
+msgid "Name"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[1].caption
+msgid "Full Path"
+msgstr ""
+
+#: tdigit_exportfiles.opendlg.title
+msgid "Open Existing Files"
+msgstr ""
+
+#: tdigit_exportfiles.openfolder.title
+msgctxt "tdigit_exportfiles.openfolder.title"
+msgid "Select a Folder"
 msgstr ""
 
 #: tdigit_exportfiles.panelfiles.caption
@@ -387,6 +441,14 @@ msgstr ""
 
 #: tdigit_main.actclearqueue.caption
 msgid "Clear Work Queue"
+msgstr ""
+
+#: tdigit_main.actconvertfiles.caption
+msgid "Convert Images"
+msgstr ""
+
+#: tdigit_main.actconvertpdf.caption
+msgid "Convert Images to PDF"
 msgstr ""
 
 #: tdigit_main.actcrop.caption
@@ -622,18 +684,22 @@ msgid "Rotate Right"
 msgstr ""
 
 #: tdigit_main.btzback.hint
+msgctxt "tdigit_main.btzback.hint"
 msgid "To Back"
 msgstr ""
 
 #: tdigit_main.btzdown.hint
+msgctxt "tdigit_main.btzdown.hint"
 msgid "Down"
 msgstr ""
 
 #: tdigit_main.btzfront.hint
+msgctxt "tdigit_main.btzfront.hint"
 msgid "To Front"
 msgstr ""
 
 #: tdigit_main.btzup.hint
+msgctxt "tdigit_main.btzup.hint"
 msgid "Up"
 msgstr ""
 
@@ -713,6 +779,10 @@ msgstr ""
 
 #: tdigit_main.menudebug.caption
 msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuexport.caption
+msgid "Tools"
 msgstr ""
 
 #: tdigit_main.menuimageformat.caption

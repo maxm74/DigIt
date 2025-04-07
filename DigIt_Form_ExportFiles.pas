@@ -15,7 +15,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, ComCtrls, BCPanel, BCLabel,
+  Buttons, ComCtrls, BCPanel, BCLabel, BGRADialogs,
   FPImage, BGRABitmap, BGRABitmapTypes,
   DigIt_Types;
 
@@ -29,6 +29,11 @@ type
   { TDigIt_ExportFiles }
 
   TDigIt_ExportFiles = class(TForm)
+    btLast: TSpeedButton;
+    btDown: TSpeedButton;
+    btFirst: TSpeedButton;
+    btUp: TSpeedButton;
+    OpenDlg: TBGRAOpenPictureDialog;
     btPaperOrientation: TSpeedButton;
     cbPaperSize: TComboBox;
     cbUseJpgAsIs: TCheckBox;
@@ -42,6 +47,7 @@ type
     Label3: TBCLabel;
     Label4: TBCLabel;
     Label5: TBCLabel;
+    lvFiles: TListView;
     pageOptions: TPageControl;
     panelFiles: TGroupBox;
     panelInfos: TGroupBox;
@@ -51,11 +57,21 @@ type
     btOk: TBitBtn;
     panelButtons: TBCPanel;
     SavePDF: TSaveDialog;
+    btAddFiles: TSpeedButton;
+    btAddFolder: TSpeedButton;
+    btDel: TSpeedButton;
+    btDelAll: TSpeedButton;
+    OpenFolder: TSelectDirectoryDialog;
     tabPDF: TTabSheet;
     tabIMG: TTabSheet;
+    procedure btAddFilesClick(Sender: TObject);
+    procedure btAddFolderClick(Sender: TObject);
+    procedure btDelAllClick(Sender: TObject);
+    procedure btDelClick(Sender: TObject);
     procedure btPaperOrientationClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure lvFilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 
   private
     SaveFormat: TBGRAImageFormat;
@@ -63,10 +79,11 @@ type
     SavePath: String;
     panelFormatUI: TBCPanel;
 
-    procedure AdjustFormatPanel;
+    procedure UI_AdjustFormatPanel;
+    procedure UI_EnableButtons;
 
   public
-    class function Execute(const ATitle: String; const CapturedFiles: TCapturedFileArray;
+    class function Execute(const ATitle: String; CapturedFiles: TCapturedFileArray;
                            asPDF: Boolean): Boolean;
 
   end;
@@ -89,6 +106,78 @@ begin
   else begin btPaperOrientation.ImageIndex:= 0; btPaperOrientation.Hint:= rsPortrait; end;
 end;
 
+procedure TDigIt_ExportFiles.btAddFilesClick(Sender: TObject);
+var
+   i: Integer;
+   newItem: TListItem;
+
+begin
+  if OpenDlg.Execute then
+  try
+     lvFiles.BeginUpdate;
+
+     for i:=0 to OpenDlg.Files.Count-1 do
+     begin
+       newItem:= lvFiles.Items.Add;
+       newItem.Caption:= ExtractFileName(OpenDlg.Files[i]);
+       newItem.ImageIndex:= 2;
+       newItem.SubItems.Add(OpenDlg.Files[i]);
+     end;
+
+     lvFiles.EndUpdate;
+     if (newItem <> nil) then lvFiles.Selected:= newItem;
+
+  finally
+    UI_EnableButtons;
+  end;
+end;
+
+procedure TDigIt_ExportFiles.btAddFolderClick(Sender: TObject);
+var
+   i: Integer;
+   newItem: TListItem;
+
+begin
+  if OpenFolder.Execute then
+  try
+     lvFiles.BeginUpdate;
+
+     for i:=0 to OpenFolder.Files.Count-1 do
+     begin
+       newItem:= lvFiles.Items.Add;
+       newItem.Caption:= ExtractFileName(OpenFolder.Files[i]);
+       newItem.ImageIndex:= 3;
+       newItem.SubItems.Add(OpenFolder.Files[i]);
+     end;
+
+     lvFiles.EndUpdate;
+     if (newItem <> nil) then lvFiles.Selected:= newItem;
+
+  finally
+    UI_EnableButtons;
+  end;
+end;
+
+procedure TDigIt_ExportFiles.btDelAllClick(Sender: TObject);
+begin
+  try
+    lvFiles.Clear;
+
+  finally
+    UI_EnableButtons;
+  end;
+end;
+
+procedure TDigIt_ExportFiles.btDelClick(Sender: TObject);
+begin
+  if (lvFiles.Selected <> nil) then
+  try
+     lvFiles.Items.Delete(lvFiles.Selected.Index);
+
+  finally
+  end;
+end;
+
 procedure TDigIt_ExportFiles.FormCreate(Sender: TObject);
 var
    i: Integer;
@@ -102,10 +191,15 @@ end;
 
 procedure TDigIt_ExportFiles.FormShow(Sender: TObject);
 begin
-  AdjustFormatPanel;
+  UI_AdjustFormatPanel;
 end;
 
-procedure TDigIt_ExportFiles.AdjustFormatPanel;
+procedure TDigIt_ExportFiles.lvFilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+begin
+  UI_EnableButtons;
+end;
+
+procedure TDigIt_ExportFiles.UI_AdjustFormatPanel;
 begin
   if (panelFormatUI <> nil) then
   begin
@@ -121,10 +215,28 @@ begin
   end;
 end;
 
-class function TDigIt_ExportFiles.Execute(const ATitle: String; const CapturedFiles: TCapturedFileArray;
+procedure TDigIt_ExportFiles.UI_EnableButtons;
+var
+   lvCount: Integer;
+
+begin
+  lvCount:= lvFiles.Items.Count;
+  btDel.Enabled:= (lvCount > 0);
+  btDelAll.Enabled:= (lvCount > 0);
+  btUp.Enabled:= (lvCount > 1) and (lvFiles.Selected <> nil) and (lvFiles.Selected.Index > 0);
+  btDown.Enabled:= (lvCount > 1) and (lvFiles.Selected <> nil) and (lvFiles.Selected.Index < lvCount-1);
+  btFirst.Enabled:= btUp.Enabled;
+  btLast.Enabled:= btDown.Enabled;
+end;
+
+class function TDigIt_ExportFiles.Execute(const ATitle: String; CapturedFiles: TCapturedFileArray;
                                           asPDF: Boolean): Boolean;
 var
    Finished: Boolean;
+
+   procedure GenerateCapturedFiles;
+   begin
+   end;
 
    function SaveAsPDF: Boolean;
    var
@@ -133,7 +245,6 @@ var
      S: TPDFSection;
      paper: TPDFPaper;
      curImg: TBGRAPDFImageItem;
-     curColorSpace: TPDFColorSpace;
      IDX, i,
      lenCaptured,
      curPaper: Integer;
@@ -199,8 +310,6 @@ var
               MemStream.Size:= 0;
               MemStream.LoadFromFile(curFileName);
               ImgInStream:= True;
-
-              curColorSpace:= csDeviceRGB;
 
               //Get Jpeg Info, if False try to read the Image with srcBitmap
               loadImg:= not(TBGRAReaderJpeg.GetJpegInfo(MemStream, jpgInfo));
@@ -299,7 +408,7 @@ begin
      begin
        Result:= False;
 
-       panelFiles.Visible:= (CapturedFiles=nil);
+       panelFiles.Visible:= (CapturedFiles = nil);
 
        SaveFormat:= ifJpeg;
        SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
@@ -307,6 +416,7 @@ begin
 
        if asPDF
        then begin
+              Caption:= Caption+'PDF';
               pageOptions.ActivePage:= tabPDF;
 
               edTitle.Text:= ATitle;
@@ -315,6 +425,7 @@ begin
               edKeyWords.Text:= '';
             end
        else begin
+              Caption:= Caption+'Image';
               pageOptions.ActivePage:= tabIMG;
 
             end;
@@ -327,6 +438,8 @@ begin
          begin
            if (BGRAFormatUIContainer <> nil) and
               (panelFormatUI <> nil) then BGRAFormatUIContainer.SetWriterProperties(SaveWriter);
+
+           if (CapturedFiles = nil) then GenerateCapturedFiles;
 
            if asPDF
            then SaveAsPDF

@@ -1,6 +1,16 @@
 {"version":1,"strings":[
-{"hash":198438275,"name":"tdigit_exportfiles.caption","sourcebytes":[69,120,112,111,114,116,32,83,101,116,116,105,110,103,115],"value":"Export Settings"},
+{"hash":249098176,"name":"tdigit_exportfiles.caption","sourcebytes":[69,120,112,111,114,116,32,83,101,116,116,105,110,103,115,32,45,32],"value":"Export Settings - "},
 {"hash":80751728,"name":"tdigit_exportfiles.panelfiles.caption","sourcebytes":[32,70,105,108,101,115,32],"value":" Files "},
+{"hash":346165,"name":"tdigit_exportfiles.lvfiles.columns[0].caption","sourcebytes":[78,97,109,101],"value":"Name"},
+{"hash":48571752,"name":"tdigit_exportfiles.lvfiles.columns[1].caption","sourcebytes":[70,117,108,108,32,80,97,116,104],"value":"Full Path"},
+{"hash":206980558,"name":"tdigit_exportfiles.btaddfiles.caption","sourcebytes":[65,100,100,32,70,105,108,101,115,46,46,46],"value":"Add Files..."},
+{"hash":84549166,"name":"tdigit_exportfiles.btaddfolder.caption","sourcebytes":[65,100,100,32,70,111,108,100,101,114,46,46,46],"value":"Add Folder..."},
+{"hash":78392485,"name":"tdigit_exportfiles.btdel.caption","sourcebytes":[68,101,108,101,116,101],"value":"Delete"},
+{"hash":212069388,"name":"tdigit_exportfiles.btdelall.caption","sourcebytes":[68,101,108,101,116,101,32,65,108,108],"value":"Delete All"},
+{"hash":21826580,"name":"tdigit_exportfiles.btfirst.hint","sourcebytes":[84,111,32,70,105,114,115,116],"value":"To First"},
+{"hash":185936116,"name":"tdigit_exportfiles.btlast.hint","sourcebytes":[84,111,32,76,97,115,116],"value":"To Last"},
+{"hash":1472,"name":"tdigit_exportfiles.btup.hint","sourcebytes":[85,112],"value":"Up"},
+{"hash":308958,"name":"tdigit_exportfiles.btdown.hint","sourcebytes":[68,111,119,110],"value":"Down"},
 {"hash":128414854,"name":"tdigit_exportfiles.tabpdf.caption","sourcebytes":[116,97,98,80,68,70],"value":"tabPDF"},
 {"hash":80942896,"name":"tdigit_exportfiles.paneljpeg.caption","sourcebytes":[32,73,109,97,103,101,32,79,112,116,105,111,110,115,32],"value":" Image Options "},
 {"hash":74247653,"name":"tdigit_exportfiles.cbpapersize.text","sourcebytes":[83,97,109,101,32,97,115,32,116,104,101,32,73,109,97,103,101,32,83,105,122,101],"value":"Same as the Image Size"},
@@ -13,5 +23,7 @@
 {"hash":196918634,"name":"tdigit_exportfiles.label3.caption","sourcebytes":[80,114,111,100,117,99,101,114,32,58],"value":"Producer :"},
 {"hash":242067514,"name":"tdigit_exportfiles.label4.caption","sourcebytes":[75,101,121,119,111,114,100,115,32,58],"value":"Keywords :"},
 {"hash":128413207,"name":"tdigit_exportfiles.tabimg.caption","sourcebytes":[116,97,98,73,77,71],"value":"tabIMG"},
-{"hash":85002995,"name":"tdigit_exportfiles.savepdf.title","sourcebytes":[83,97,118,101,32,80,68,70,32,97,115],"value":"Save PDF as"}
+{"hash":85002995,"name":"tdigit_exportfiles.savepdf.title","sourcebytes":[83,97,118,101,32,80,68,70,32,97,115],"value":"Save PDF as"},
+{"hash":2780691,"name":"tdigit_exportfiles.opendlg.title","sourcebytes":[79,112,101,110,32,69,120,105,115,116,105,110,103,32,70,105,108,101,115],"value":"Open Existing Files"},
+{"hash":110105906,"name":"tdigit_exportfiles.openfolder.title","sourcebytes":[83,101,108,101,99,116,32,97,32,70,111,108,100,101,114],"value":"Select a Folder"}
 ]}

@@ -67,6 +67,8 @@ type
     actCropGoNext: TAction;
     actCapturedDeleteAll: TAction;
     actCapturedDelete: TAction;
+    actConvertFiles: TAction;
+    actConvertPDF: TAction;
     actTakeBuildDuplex: TAction;
     actTakeRe: TAction;
     actTimerTake: TAction;
@@ -102,6 +104,9 @@ type
     menuDebug: TMenuItem;
     menuClearXML: TMenuItem;
     menuImageFormat: TMenuItem;
+    menuExport: TMenuItem;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
     menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
     menuLoadXML: TMenuItem;
@@ -196,6 +201,8 @@ type
     MenuMain: TPopupMenu;
     SelectDirectory: TSelectDirectoryDialog;
     Separator2: TMenuItem;
+    Separator3: TMenuItem;
+    SpeedButton1: TSpeedButton;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
     tbCapturedPDF: TToolButton;
@@ -227,6 +234,8 @@ type
 
     procedure actCapturedDeleteAllExecute(Sender: TObject);
     procedure actCapturedDeleteExecute(Sender: TObject);
+    procedure actConvertFilesExecute(Sender: TObject);
+    procedure actConvertPDFExecute(Sender: TObject);
     procedure actOptionsExecute(Sender: TObject);
     procedure actSessionNewExecute(Sender: TObject);
     procedure actSessionOpenExecute(Sender: TObject);
@@ -1489,6 +1498,16 @@ begin
   finally
     lvCaptured.EndUpdate;
   end;
+end;
+
+procedure TDigIt_Main.actConvertFilesExecute(Sender: TObject);
+begin
+  TDigIt_ExportFiles.Execute(Application.Title, nil, False);
+end;
+
+procedure TDigIt_Main.actConvertPDFExecute(Sender: TObject);
+begin
+  TDigIt_ExportFiles.Execute(Application.Title, nil, True);
 end;
 
 procedure TDigIt_Main.actCapturedDeleteAllExecute(Sender: TObject);

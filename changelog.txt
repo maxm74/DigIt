@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/04 Rewrite of Export to PDF using TBGRAReaderJpeg.GetJpegInfo and Streams;
+2025/04/07 Added Tools Menu in Main;
+           Added ExportFiles List UI;
+           Added Screen Shots and Modified Readme in GitHub.
+           
+        04 Rewrite of Export to PDF using TBGRAReaderJpeg.GetJpegInfo and Streams;
 	   Counters Default to 3 Digits;
 	   Release of 0.1 beta;
 

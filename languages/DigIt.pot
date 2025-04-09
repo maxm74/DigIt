@@ -40,6 +40,10 @@ msgstr ""
 msgid "No Pages in Front or Back Side"
 msgstr ""
 
+#: digit_form_exportfiles.rsconvertimg
+msgid "Converting Images to Images..."
+msgstr ""
+
 #: digit_form_exportfiles.rsconvertpdf
 msgctxt "digit_form_exportfiles.rsconvertpdf"
 msgid "Converting Images to PDF..."
@@ -47,6 +51,10 @@ msgstr ""
 
 #: digit_form_exportfiles.rslandscape
 msgid "Landscape"
+msgstr ""
+
+#: digit_form_exportfiles.rsopendirectory
+msgid "Conversion to Images completed, do i Open it?"
 msgstr ""
 
 #: digit_form_exportfiles.rsopensavedpdf
@@ -215,6 +223,7 @@ msgid ""
 msgstr ""
 
 #: digit_source_folder.rsfoldselect
+msgctxt "digit_source_folder.rsfoldselect"
 msgid "Select a Folder"
 msgstr ""
 
@@ -302,16 +311,58 @@ msgstr ""
 msgid "   Vertical"
 msgstr ""
 
+#: tdigit_exportfiles.bclabel9.caption
+msgid "Format :"
+msgstr ""
+
+#: tdigit_exportfiles.btaddfiles.caption
+msgid "Add Files..."
+msgstr ""
+
+#: tdigit_exportfiles.btaddfolder.caption
+msgid "Add Folder..."
+msgstr ""
+
+#: tdigit_exportfiles.btdel.caption
+msgid "Delete"
+msgstr ""
+
+#: tdigit_exportfiles.btdelall.caption
+msgid "Delete All"
+msgstr ""
+
+#: tdigit_exportfiles.btdown.hint
+msgctxt "tdigit_exportfiles.btdown.hint"
+msgid "Down"
+msgstr ""
+
+#: tdigit_exportfiles.btfirst.hint
+msgid "To First"
+msgstr ""
+
+#: tdigit_exportfiles.btlast.hint
+msgid "To Last"
+msgstr ""
+
 #: tdigit_exportfiles.btpaperorientation.hint
 msgid "Paper Orientation"
 msgstr ""
 
+#: tdigit_exportfiles.btup.hint
+msgctxt "tdigit_exportfiles.btup.hint"
+msgid "Up"
+msgstr ""
+
 #: tdigit_exportfiles.caption
-msgid "Export Settings"
+msgid "Export Settings - "
 msgstr ""
 
 #: tdigit_exportfiles.cbpapersize.text
 msgid "Same as the Image Size"
+msgstr ""
+
+#: tdigit_exportfiles.cbresursive.caption
+msgid "Recursive"
 msgstr ""
 
 #: tdigit_exportfiles.cbusejpgasis.caption
@@ -340,6 +391,23 @@ msgstr ""
 
 #: tdigit_exportfiles.label5.caption
 msgid "Paper Size :"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[0].caption
+msgid "File Name"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[1].caption
+msgid "Full Path"
+msgstr ""
+
+#: tdigit_exportfiles.opendlg.title
+msgid "Open Existing Files"
+msgstr ""
+
+#: tdigit_exportfiles.openfolder.title
+msgctxt "tdigit_exportfiles.openfolder.title"
+msgid "Select a Folder"
 msgstr ""
 
 #: tdigit_exportfiles.panelfiles.caption
@@ -387,6 +455,14 @@ msgstr ""
 
 #: tdigit_main.actclearqueue.caption
 msgid "Clear Work Queue"
+msgstr ""
+
+#: tdigit_main.actconvertfiles.caption
+msgid "Convert Images"
+msgstr ""
+
+#: tdigit_main.actconvertpdf.caption
+msgid "Convert Images to PDF"
 msgstr ""
 
 #: tdigit_main.actcrop.caption
@@ -626,6 +702,7 @@ msgid "To Back"
 msgstr ""
 
 #: tdigit_main.btzdown.hint
+msgctxt "tdigit_main.btzdown.hint"
 msgid "Down"
 msgstr ""
 
@@ -634,6 +711,7 @@ msgid "To Front"
 msgstr ""
 
 #: tdigit_main.btzup.hint
+msgctxt "tdigit_main.btzup.hint"
 msgid "Up"
 msgstr ""
 
@@ -713,6 +791,10 @@ msgstr ""
 
 #: tdigit_main.menudebug.caption
 msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuexport.caption
+msgid "Tools"
 msgstr ""
 
 #: tdigit_main.menuimageformat.caption

@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/07 Added Tools Menu in Main;
+2025/04/09 ExportFiles Added first version of SaveAsIMG, moved functions from Execute to Class;
+           Added EmptyImage in DeleteAll Captured.
+
+        07 Added Tools Menu in Main;
            Added ExportFiles List UI;
            Added Screen Shots and Modified Readme in GitHub.
            

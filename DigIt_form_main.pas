@@ -378,7 +378,9 @@ type
     procedure UpdateBoxList;
     procedure UpdateCropAreaCountersList(ACounter :TDigIt_Counter);
     procedure CounterSelect(AIndex:Integer);
+
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
+    procedure EmptyImage(saveToXML: Boolean);
 
     procedure XML_LoadWork(IsAutoSave: Boolean);
     procedure XML_SaveWork(IsAutoSave: Boolean);
@@ -1533,6 +1535,8 @@ begin
      //Reset Counters
      Counters.Reset;
 
+     EmptyImage(False);
+
      XML_SaveWork(True);
 
      UI_ToolBar;
@@ -1832,6 +1836,13 @@ begin
      if (Bitmap <> Nil) then Bitmap.Free;
      if (BitmapR <> Nil) then BitmapR.Free;
   end;
+end;
+
+procedure TDigIt_Main.EmptyImage(saveToXML: Boolean);
+begin
+  imgManipulation.Bitmap:= nil;
+  LoadedFile:= '';
+  if saveToXML then XML_SaveLoadedImage(nil, True);
 end;
 
 procedure TDigIt_Main.XML_LoadWork(IsAutoSave: Boolean);

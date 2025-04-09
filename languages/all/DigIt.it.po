@@ -50,6 +50,10 @@ msgstr "Annullo l'acquisizione del Lato Frontale appena effettuata?"
 msgid "No Pages in Front or Back Side"
 msgstr "Nessuna Pagina sul lato Frontale o Posteriore"
 
+#: digit_form_exportfiles.rsconvertimg
+msgid "Converting Images to Images..."
+msgstr "Convertendo le Immagini in Immagini..."
+
 #: digit_form_exportfiles.rsconvertpdf
 msgctxt "digit_form_exportfiles.rsconvertpdf"
 msgid "Converting Images to PDF..."
@@ -58,6 +62,10 @@ msgstr "Convertendo le Immagini in PDF..."
 #: digit_form_exportfiles.rslandscape
 msgid "Landscape"
 msgstr "Orizzontale"
+
+#: digit_form_exportfiles.rsopendirectory
+msgid "Conversion to Images completed, do i Open it?"
+msgstr "Conversione In Immagini completata, lo Apro?"
 
 #: digit_form_exportfiles.rsopensavedpdf
 msgctxt "digit_form_exportfiles.rsopensavedpdf"
@@ -235,6 +243,7 @@ msgstr ""
 "%s"
 
 #: digit_source_folder.rsfoldselect
+msgctxt "digit_source_folder.rsfoldselect"
 msgid "Select a Folder"
 msgstr "Seleziona una Cartella"
 
@@ -326,17 +335,61 @@ msgstr "    Orizzontale"
 msgid "   Vertical"
 msgstr "   Verticale"
 
+#: tdigit_exportfiles.bclabel9.caption
+msgid "Format :"
+msgstr "Formato :"
+
+#: tdigit_exportfiles.btaddfiles.caption
+msgid "Add Files..."
+msgstr "Aggiungi Files..."
+
+#: tdigit_exportfiles.btaddfolder.caption
+msgid "Add Folder..."
+msgstr "Aggiungi Cartella..."
+
+#: tdigit_exportfiles.btdel.caption
+msgid "Delete"
+msgstr "Elimina"
+
+#: tdigit_exportfiles.btdelall.caption
+msgid "Delete All"
+msgstr "Elimina Tutto"
+
+#: tdigit_exportfiles.btdown.hint
+#, fuzzy
+msgctxt "tdigit_exportfiles.btdown.hint"
+msgid "Down"
+msgstr "Giù"
+
+#: tdigit_exportfiles.btfirst.hint
+msgid "To First"
+msgstr "All'Inizio"
+
+#: tdigit_exportfiles.btlast.hint
+msgid "To Last"
+msgstr "Alla Fine"
+
 #: tdigit_exportfiles.btpaperorientation.hint
 msgid "Paper Orientation"
 msgstr "Orientamento Carta"
 
+#: tdigit_exportfiles.btup.hint
+#, fuzzy
+msgctxt "tdigit_exportfiles.btup.hint"
+msgid "Up"
+msgstr "Su"
+
 #: tdigit_exportfiles.caption
-msgid "Export Settings"
-msgstr "Impostazioni Esportazione"
+msgid "Export Settings - "
+msgstr "Impostazioni Esportazione -"
 
 #: tdigit_exportfiles.cbpapersize.text
 msgid "Same as the Image Size"
 msgstr "Uguale a Dimensione Immagine"
+
+#: tdigit_exportfiles.cbresursive.caption
+msgid "Recursive"
+msgstr "Ricorsiva"
 
 #: tdigit_exportfiles.cbusejpgasis.caption
 msgid "Use JPeg Files as is"
@@ -365,6 +418,24 @@ msgstr "Parole Chiave :"
 #: tdigit_exportfiles.label5.caption
 msgid "Paper Size :"
 msgstr "Dimensione Carta :"
+
+#: tdigit_exportfiles.lvfiles.columns[0].caption
+msgid "File Name"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[1].caption
+msgid "Full Path"
+msgstr ""
+
+#: tdigit_exportfiles.opendlg.title
+msgid "Open Existing Files"
+msgstr "Apri File Esistenti"
+
+#: tdigit_exportfiles.openfolder.title
+#, fuzzy
+msgctxt "tdigit_exportfiles.openfolder.title"
+msgid "Select a Folder"
+msgstr "Seleziona una Cartella"
 
 #: tdigit_exportfiles.panelfiles.caption
 msgid " Files "
@@ -412,6 +483,14 @@ msgstr "Ruota a Destra"
 #: tdigit_main.actclearqueue.caption
 msgid "Clear Work Queue"
 msgstr "Cancella Coda Lavoro"
+
+#: tdigit_main.actconvertfiles.caption
+msgid "Convert Images"
+msgstr "Converti Immagini"
+
+#: tdigit_main.actconvertpdf.caption
+msgid "Convert Images to PDF"
+msgstr "Converti Immagini in PDF"
 
 #: tdigit_main.actcrop.caption
 msgid "Crop"
@@ -650,6 +729,7 @@ msgid "To Back"
 msgstr "In Fondo"
 
 #: tdigit_main.btzdown.hint
+msgctxt "tdigit_main.btzdown.hint"
 msgid "Down"
 msgstr "Giù"
 
@@ -658,6 +738,7 @@ msgid "To Front"
 msgstr "In Alto"
 
 #: tdigit_main.btzup.hint
+msgctxt "tdigit_main.btzup.hint"
 msgid "Up"
 msgstr "Su"
 
@@ -724,7 +805,9 @@ msgid "Rotate :"
 msgstr "Ruota :"
 
 #: tdigit_main.lbcounterexample.caption
-msgid "00"
+#, fuzzy
+#| msgid "00"
+msgid "000"
 msgstr "00"
 
 #: tdigit_main.lbprevious.caption
@@ -737,6 +820,10 @@ msgstr ""
 
 #: tdigit_main.menudebug.caption
 msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuexport.caption
+msgid "Tools"
 msgstr ""
 
 #: tdigit_main.menuimageformat.caption

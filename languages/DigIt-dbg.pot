@@ -40,6 +40,10 @@ msgstr ""
 msgid "No Pages in Front or Back Side"
 msgstr ""
 
+#: digit_form_exportfiles.rsconvertimg
+msgid "Converting Images to Images..."
+msgstr ""
+
 #: digit_form_exportfiles.rsconvertpdf
 msgctxt "digit_form_exportfiles.rsconvertpdf"
 msgid "Converting Images to PDF..."
@@ -47,6 +51,10 @@ msgstr ""
 
 #: digit_form_exportfiles.rslandscape
 msgid "Landscape"
+msgstr ""
+
+#: digit_form_exportfiles.rsopendirectory
+msgid "Conversion to Images completed, do i Open it?"
 msgstr ""
 
 #: digit_form_exportfiles.rsopensavedpdf
@@ -303,6 +311,10 @@ msgstr ""
 msgid "   Vertical"
 msgstr ""
 
+#: tdigit_exportfiles.bclabel9.caption
+msgid "Format :"
+msgstr ""
+
 #: tdigit_exportfiles.btaddfiles.caption
 msgid "Add Files..."
 msgstr ""
@@ -351,6 +363,10 @@ msgstr ""
 msgid "Same as the Image Size"
 msgstr ""
 
+#: tdigit_exportfiles.cbresursive.caption
+msgid "Recursive"
+msgstr ""
+
 #: tdigit_exportfiles.cbusejpgasis.caption
 msgid "Use JPeg Files as is"
 msgstr ""
@@ -380,7 +396,7 @@ msgid "Paper Size :"
 msgstr ""
 
 #: tdigit_exportfiles.lvfiles.columns[0].caption
-msgid "Name"
+msgid "File Name"
 msgstr ""
 
 #: tdigit_exportfiles.lvfiles.columns[1].caption

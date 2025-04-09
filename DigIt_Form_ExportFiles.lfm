@@ -1,21 +1,23 @@
 object DigIt_ExportFiles: TDigIt_ExportFiles
   Left = 416
-  Height = 730
+  Height = 754
   Top = 239
   Width = 520
   AutoSize = True
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Export Settings - '
-  ClientHeight = 730
+  ClientHeight = 754
   ClientWidth = 520
   DesignTimePPI = 120
   Position = poScreenCenter
+  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   object panelMain: TBCPanel
     Left = 0
-    Height = 680
+    Height = 704
     Top = 0
     Width = 520
     Align = alClient
@@ -53,33 +55,33 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
     TabOrder = 0
     object panelFiles: TGroupBox
       Left = 2
-      Height = 200
+      Height = 240
       Top = 2
       Width = 516
       Align = alTop
       Caption = ' Files '
-      ClientHeight = 175
+      ClientHeight = 215
       ClientWidth = 512
       ParentBackground = False
       TabOrder = 0
       object lvFiles: TListView
         Left = 2
-        Height = 170
+        Height = 210
         Top = 0
         Width = 350
         AutoSort = False
         Columns = <        
           item
             AutoSize = True
-            Caption = 'Name'
+            Caption = 'File Name'
             MinWidth = 100
-            Width = 60
+            Width = 100
           end        
           item
             AutoSize = True
             Caption = 'Full Path'
             MinWidth = 100
-            Width = 76
+            Width = 100
           end>
         HideSelection = False
         IconOptions.Arrangement = iaLeft
@@ -117,7 +119,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
       object btDel: TSpeedButton
         Left = 360
         Height = 28
-        Top = 64
+        Top = 96
         Width = 150
         Alignment = taLeftJustify
         Caption = 'Delete'
@@ -129,7 +131,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
       object btDelAll: TSpeedButton
         Left = 360
         Height = 28
-        Top = 96
+        Top = 128
         Width = 150
         Alignment = taLeftJustify
         Caption = 'Delete All'
@@ -142,7 +144,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         Left = 360
         Height = 28
         Hint = 'To First'
-        Top = 142
+        Top = 182
         Width = 29
         Enabled = False
         Flat = True
@@ -151,12 +153,14 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btUpDownClick
       end
       object btLast: TSpeedButton
+        Tag = 1
         Left = 390
         Height = 28
         Hint = 'To Last'
-        Top = 142
+        Top = 182
         Width = 29
         Enabled = False
         Flat = True
@@ -165,12 +169,14 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btUpDownClick
       end
       object btUp: TSpeedButton
+        Tag = 2
         Left = 419
         Height = 28
         Hint = 'Up'
-        Top = 142
+        Top = 182
         Width = 29
         Enabled = False
         Flat = True
@@ -179,12 +185,14 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btUpDownClick
       end
       object btDown: TSpeedButton
+        Tag = 3
         Left = 449
         Height = 28
         Hint = 'Down'
-        Top = 142
+        Top = 182
         Width = 29
         Enabled = False
         Flat = True
@@ -193,21 +201,31 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btUpDownClick
+      end
+      object cbResursive: TCheckBox
+        Left = 390
+        Height = 24
+        Top = 64
+        Width = 83
+        Caption = 'Recursive'
+        TabOrder = 1
+        OnChange = cbResursiveChange
       end
     end
     object pageOptions: TPageControl
       Left = 2
-      Height = 476
-      Top = 202
+      Height = 460
+      Top = 242
       Width = 516
-      ActivePage = tabPDF
+      ActivePage = tabIMG
       Align = alClient
       ShowTabs = False
-      TabIndex = 0
+      TabIndex = 1
       TabOrder = 1
       object tabPDF: TTabSheet
         Caption = 'tabPDF'
-        ClientHeight = 468
+        ClientHeight = 452
         ClientWidth = 508
         object panelJPeg: TGroupBox
           Left = 0
@@ -488,13 +506,58 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
       end
       object tabIMG: TTabSheet
         Caption = 'tabIMG'
+        ClientHeight = 452
+        ClientWidth = 508
+        object BCLabel9: TBCLabel
+          Left = 40
+          Height = 20
+          Top = 10
+          Width = 54
+          Background.Gradient1.StartColor = clWhite
+          Background.Gradient1.EndColor = clBlack
+          Background.Gradient1.GradientType = gtLinear
+          Background.Gradient1.Point1XPercent = 0
+          Background.Gradient1.Point1YPercent = 0
+          Background.Gradient1.Point2XPercent = 0
+          Background.Gradient1.Point2YPercent = 100
+          Background.Gradient2.StartColor = clWhite
+          Background.Gradient2.EndColor = clBlack
+          Background.Gradient2.GradientType = gtLinear
+          Background.Gradient2.Point1XPercent = 0
+          Background.Gradient2.Point1YPercent = 0
+          Background.Gradient2.Point2XPercent = 0
+          Background.Gradient2.Point2YPercent = 100
+          Background.Gradient1EndPercent = 35
+          Background.Style = bbsClear
+          Border.Style = bboNone
+          Caption = 'Format :'
+          FontEx.Color = clDefault
+          FontEx.FontQuality = fqSystemClearType
+          FontEx.Shadow = False
+          FontEx.ShadowRadius = 5
+          FontEx.ShadowOffsetX = 5
+          FontEx.ShadowOffsetY = 5
+          FontEx.Style = []
+          Rounding.RoundX = 1
+          Rounding.RoundY = 1
+        end
+        object cbSaveFormat: TComboBox
+          Left = 100
+          Height = 28
+          Top = 8
+          Width = 400
+          ItemHeight = 20
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = cbSaveFormatChange
+        end
       end
     end
   end
   object panelButtons: TBCPanel
     Left = 0
     Height = 50
-    Top = 680
+    Top = 704
     Width = 520
     Align = alBottom
     Background.Color = clBtnFace
@@ -900,8 +963,13 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
   end
   object OpenFolder: TSelectDirectoryDialog
     Title = 'Select a Folder'
-    Options = [ofAllowMultiSelect, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
     Left = 277
+    Top = 348
+  end
+  object SaveFolder: TSelectDirectoryDialog
+    Options = [ofCreatePrompt, ofEnableSizing, ofViewDetail]
+    Left = 384
     Top = 348
   end
 end

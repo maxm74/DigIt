@@ -380,7 +380,9 @@ msgid "Up"
 msgstr "Su"
 
 #: tdigit_exportfiles.caption
-msgid "Export Settings - "
+#, fuzzy
+#| msgid "Export Settings - "
+msgid "Export Settings -"
 msgstr "Impostazioni Esportazione -"
 
 #: tdigit_exportfiles.cbpapersize.text
@@ -448,6 +450,10 @@ msgstr ""
 #: tdigit_exportfiles.paneljpeg.caption
 msgid " Image Options "
 msgstr " Opzioni immagine "
+
+#: tdigit_exportfiles.panelsaveformat.caption
+msgid " Save Options "
+msgstr " Opzioni Salvataggio"
 
 #: tdigit_exportfiles.savepdf.title
 msgctxt "tdigit_exportfiles.savepdf.title"
@@ -870,6 +876,10 @@ msgstr "Pagine Catturate"
 msgid "Save Session as"
 msgstr "Salva Sessione come"
 
+#: tdigit_main.separator2.hint
+msgid "Test Big Separator"
+msgstr ""
+
 #: tdigit_main.tbcaptsep1.caption
 msgid "tbCaptSep1"
 msgstr ""
@@ -885,6 +895,10 @@ msgstr ""
 #: tdigit_main.tbcapturedpdf.caption
 msgid "Export to PDF"
 msgstr "Esporta in PDF"
+
+#: tdigit_main.tbcapturedtoimg.caption
+msgid "Export to Images"
+msgstr "Esporta come Immagini"
 
 #: tdigit_main.tbcrop.caption
 msgid "tbCrop"
@@ -1039,3 +1053,4 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
+

@@ -231,6 +231,7 @@ type
     tbCapturedDeleteAll: TToolButton;
     tbCaptSep1: TToolButton;
     tbCaptSep2: TToolButton;
+    tbCapturedToImg: TToolButton;
 
     procedure actCapturedDeleteAllExecute(Sender: TObject);
     procedure actCapturedDeleteExecute(Sender: TObject);
@@ -309,8 +310,13 @@ type
     procedure DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
     procedure SelectedChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
+    procedure Separator2DrawItem(Sender: TObject; ACanvas: TCanvas;
+      ARect: TRect; AState: TOwnerDrawState);
+    procedure Separator2MeasureItem(Sender: TObject; ACanvas: TCanvas;
+      var AWidth, AHeight: Integer);
 
     procedure tbCapturedPDFClick(Sender: TObject);
+    procedure tbCapturedToImgClick(Sender: TObject);
 
   private
     { private declarations }
@@ -372,7 +378,8 @@ type
 
     procedure DestinationMenuClick(Sender: TObject);
     procedure SourceMenuClick(Sender: TObject);
-
+                                            //Only the File Part, Path and Ext are added automatically
+    function SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
     procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
 
     procedure UpdateBoxList;
@@ -458,7 +465,7 @@ implementation
 
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
-  BGRAWriteJPeg, BGRAFormatUI,
+  BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
@@ -601,6 +608,7 @@ begin
     itemCropModeCustom.Enabled:= True;
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
+//    MenuMain.OwnerDraw:= True;
   {$endif}
 end;
 
@@ -1680,6 +1688,18 @@ begin
   end;
 end;
 
+function TDigIt_Main.SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
+begin
+  Result:=Path_Session_Pictures+AFileName+ExtensionSeparator+SaveExt;
+
+  { #todo -oMaxM : In future Presaving filters as Interfaces Here }
+
+  //Adjust some Writers
+  if (SaveWriter is TBGRAWriterTiff) then TBGRAWriterTiff(SaveWriter).Clear;
+
+  Bitmap.SaveToFile(Result, SaveWriter);
+end;
+
 procedure TDigIt_Main.SaveCallBack(Bitmap: TBGRABitmap; CropArea: TCropArea; AUserData: Integer);
 var
   cropCounter: TDigIt_Counter;
@@ -1690,11 +1710,7 @@ begin
   if (CropArea <> nil)
   then begin
          if (CropArea.UserData<0)
-         then begin
-                //No Counter, Save File with CropArea Name
-                savedFile:=Path_Session_Pictures+CropArea.Name+'.'+SaveExt;
-                Bitmap.SaveToFile(savedFile, SaveWriter);
-              end
+         then savedFile:= SaveImage(Bitmap, CropArea.Name) //No Counter, Save File with CropArea Name
          else begin
                 //Increment the Counter Value
                 cropCounter :=TDigIt_Counter(Counters.items[CropArea.UserData]);
@@ -1702,8 +1718,7 @@ begin
                 inc(iCapturedFiles);
 
                 //Save File
-                savedFile:=Path_Session_Pictures+cropCounter.GetValue+'.'+SaveExt;
-                Bitmap.SaveToFile(savedFile, SaveWriter);
+                savedFile:= SaveImage(Bitmap, cropCounter.GetValue);
               end;
        end
   else begin
@@ -1713,8 +1728,7 @@ begin
          inc(iCapturedFiles);
 
          //Save File
-         savedFile:=Path_Session_Pictures+cropCounter.GetValue+'.'+SaveExt;
-         Bitmap.SaveToFile(savedFile, SaveWriter);
+         savedFile:= SaveImage(Bitmap, cropCounter.GetValue);
        end;
 
   captItem:= nil;
@@ -2936,8 +2950,11 @@ begin
      if (newDestinationIndex = 0)
      then begin
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-            if TDest_SaveFiles_Settings.Execute(SaveFormat, SaveWriter, Path_Session_Pictures)
-            then XML_SaveDestination(nil, True);
+            if TDest_SaveFiles_Settings.Execute(SaveFormat, SaveWriter, Path_Session_Pictures) then
+            begin
+              SaveExt:= SuggestImageExtension(SaveFormat);
+              XML_SaveDestination(nil, True);
+            end;
 
             //this way we know it is SaveAs Destination
             //rDestination:= nil;
@@ -3174,9 +3191,34 @@ begin
    UI_FillBox(imgManipulation.SelectedCropArea);
 end;
 
+procedure TDigIt_Main.Separator2DrawItem(Sender: TObject; ACanvas: TCanvas;
+  ARect: TRect; AState: TOwnerDrawState);
+var
+   textS: TTextStyle;
+
+begin
+  ACanvas.DrawFocusRect(ARect);
+  textS.Alignment:= taCenter;
+  textS.Layout:= Graphics.tlCenter;
+  textS.Opaque:= False;
+  ACanvas.TextRect(ARect, 0,0, TMenuItem(Sender).Hint, textS);
+  imgListMain.Draw(ACanvas, ARect.Left, ARect.Top, TMenuItem(Sender).ImageIndex, True);
+end;
+
+procedure TDigIt_Main.Separator2MeasureItem(Sender: TObject; ACanvas: TCanvas;
+  var AWidth, AHeight: Integer);
+begin
+  AHeight:= 32;
+end;
+
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
 begin
   TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, True);
+end;
+
+procedure TDigIt_Main.tbCapturedToImgClick(Sender: TObject);
+begin
+  TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, False);
 end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
@@ -3382,8 +3424,8 @@ begin
   SaveFormat:= AFormat;
   try
      if (SaveWriter <> nil) then SaveWriter.Free;
-     SaveWriter:= BGRABitmapTypes.CreateBGRAImageWriter(SaveFormat, True);
-     SaveExt:= BGRABitmapTypes.SuggestImageExtension(SaveFormat);
+     SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
+     SaveExt:= SuggestImageExtension(SaveFormat);
 
   except
     SaveFormat:= ifJpeg;
@@ -3574,6 +3616,7 @@ begin
   actCapturedRotateLeft.Enabled:= (lenCaptured > 0) and (lvCaptured.Selected <> nil);
   actCapturedRotateRight.Enabled:= actCapturedRotateLeft.Enabled;
   tbCapturedPDF.Enabled:= (lenCaptured > 0);
+  tbCapturedToImg.Enabled:= (lenCaptured > 0);
 end;
 
 procedure TDigIt_Main.UI_ToolBarMods;

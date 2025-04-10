@@ -28,11 +28,8 @@ type
   { TDigIt_Source_Folder }
   TDigIt_Source_Folder = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source)
   protected
-    xFiles : TStringList; //A Citation
-    lastFile: Integer;
-    lastFolder,
-    Folder,
-    LastTaked :String;
+    xFiles: TStringList; //A Citation
+    Folder: String;
 
   public
     constructor Create;
@@ -73,57 +70,12 @@ type
 
 implementation
 
-uses Controls, Laz2_XMLCfg, Digit_Bridge_Impl, Dialogs, masks, BGRABitmapTypes;
+uses Digit_Bridge_Impl, BGRABitmapTypes,
+     Controls, Dialogs, Laz2_XMLCfg,
+     MM_FilesUtils;
 
 var
    Source_Folder : TDigIt_Source_Folder = nil;
-
-procedure SearchOnPath(xItems: TStringList; BaseDir, EnumFilter: String; EnumAttr:Integer; Recursive:Boolean);
-var
-   fileInfo: TSearchRec;
-   err, i, dupIndex: Integer;
-   theCaption,
-   insCaption,
-   theExt: String;
-   isDefault,
-   CanAdd,
-   IsDir: Boolean;
-
-begin
-  //if Last char is Separator, Delete it
-  if (BaseDir[Length(BaseDir)] in AllowDirectorySeparators)
-  then SetLength(BaseDir, Length(BaseDir)-1);
-
-  if DirectoryExists(BaseDir) then
-  try
-     err :=FindFirst(BaseDir+DirectorySeparator+'*', faAnyFile, fileInfo);
-     while (err=0) do
-     begin
-       if (fileInfo.Name[1] <> '.') then  //non è [.] o [..]
-       begin
-         theCaption :=ExtractFileName(fileInfo.Name);
-         theExt     :=ExtractFileExt(fileInfo.Name);
-         IsDir  :=((fileInfo.Attr and faDirectory)<>0);
-         CanAdd :=((fileInfo.Attr and EnumAttr) <>0) and
-                    MatchesMask(fileInfo.Name, EnumFilter) and
-                    (DetectFileFormat(nil, theExt)<>ifUnknown);
-
-         if IsDir and Recursive
-         then SearchOnPath(xItems, BaseDir+DirectorySeparator+fileInfo.Name, EnumFilter, EnumAttr, Recursive)
-         else if CanAdd
-              then if (Recursive)
-                   then xItems.Add(BaseDir+DirectorySeparator+fileInfo.Name)
-                   else xItems.Add(fileInfo.Name);
-
-       end;
-
-       err :=FindNext(fileInfo);
-      end;
-
-  finally
-    FindClose(fileInfo);
-  end;
-end;
 
 { TDigIt_Source_Folder }
 
@@ -132,15 +84,14 @@ var
    openDialog: TSelectDirectoryDialog;
 
 begin
-  Result :=False;
+  Result:= False;
   try
      openDialog:=TSelectDirectoryDialog.Create(nil);
-     openDialog.InitialDir:=Folder;
-     Result :=openDialog.Execute;
+     openDialog.InitialDir:= Folder;
+     Result:= openDialog.Execute;
      if Result then
      begin
-       Folder :=openDialog.FileName;
-       LastTaked:='';
+       Folder:= openDialog.FileName;
      end;
 
   finally
@@ -163,7 +114,6 @@ begin
      XMLWork:= TXMLConfig.Create(xml_File);
 
      Folder:= XMLWork.GetValue(xml_RootPath+'/Folder', '');
-     LastTaked:= XMLWork.GetValue(xml_RootPath+'/LastTaked', '');
 
      Result:= True;
 
@@ -182,7 +132,6 @@ begin
      XMLWork:= TXMLConfig.Create(xml_File);
 
      XMLWork.SetValue(xml_RootPath+'/Folder', Folder);
-     XMLWork.SetValue(xml_RootPath+'/LastTaked', LastTaked);
      XMLWork.Flush;
 
      Result:= True;
@@ -194,7 +143,7 @@ end;
 
 function TDigIt_Source_Folder.Summary(out ASummary: PChar): Integer; stdcall;
 begin
-  ASummary:= StrNew(PChar('Folder= '+Folder+#13#10+'Taked= '+LastTaked));
+  ASummary:= StrNew(PChar('Folder= '+Folder));
   Result:= Length(ASummary);
 end;
 
@@ -203,27 +152,26 @@ begin
   repeat
     Result:= DirectoryExists(Folder);
     if not(Result) then
-    begin
       Case QuestionDlg('DigIt '+DigIt_Source_Folder_NameL, Format(rsFoldNotFound, [Folder]),
-               mtError, [mrYes, rsFoldSelect, 'IsDefault',
-                         mrRetry, mrAbort], 0) of
+                       mtError, [mrYes, rsFoldSelect, 'IsDefault',
+                       mrRetry, mrAbort], 0) of
       mrYes: Result:= GetFromUser;
       mrAbort: break;
       end;
-    end;
   until Result;
 end;
 
 function TDigIt_Source_Folder.GetCount: DWord; stdcall;
 begin
-  Result:= xFiles.Count;
+  Result:= 0;
+  if (xFiles <> nil) then Result:= xFiles.Count;
 end;
 
 function TDigIt_Source_Folder.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
 begin
-  Result:= (aIndex < xFiles.Count);
+  Result:= (xFiles <> nil) and (aIndex < xFiles.Count);
   if Result
-  then aData:= StrNew(PChar(Folder+DirectorySeparator+xFiles[aIndex]))
+  then aData:= StrNew(PChar(xFiles[aIndex]))
   else aData:= nil;
 end;
 
@@ -231,16 +179,14 @@ constructor TDigIt_Source_Folder.Create;
 begin
   inherited Create;
 
-  xFiles :=TStringList.Create;
-  lastFile :=-1;
-  lastFolder :='';
+  xFiles:= nil;
 end;
 
 destructor TDigIt_Source_Folder.Destroy;
 begin
   inherited Destroy;
 
-  xFiles.Free;
+  if (xFiles <> nil) then xFiles.Free;
 end;
 
 function TDigIt_Source_Folder.Flags: TDigItInterfaceKind; stdcall;
@@ -293,71 +239,16 @@ begin
   aData:= nil;
   aDataType:= diDataType_FileName;
 
-  (* old code
-  if (lastFolder <> Folder) then xFiles.Clear;
+  if (xFiles <> nil) then xFiles.Free;
 
-  if (xFiles.Count = 0) then
-  begin
-    SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-    xFiles.Sort;
-    lastFolder:= Folder;
-    lastFile:= xFiles.IndexOf(LastTaked);
-    if (lastFile = -1) then
-    begin
-      lastFile:= 0;
-      LastTaked:= xFiles[lastFile];
-    end;
-  end;
+  xFiles:= GetFilesInDir(Folder, False,
+                         faAnyFile, BGRARegisteredImageReaderExtension,
+                         flsSortName, False, True);
 
-  Case takeAction of
-  takeActPreview: begin
-    if (xFiles.Count = 0) or ((lastFile+1) >= xFiles.Count)
-    then Result:= 0
-    else begin
-           aData:= StrNew(PChar(Folder+DirectorySeparator+xFiles[lastFile+1]));
-           Result:= 1;
-         end;
-  end;
-  takeActTake: begin
-    if (xFiles.Count = 0) or ((lastFile+1) >= xFiles.Count)
-    then Result :=0
-    else begin
-           Inc(lastFile);
-           LastTaked:= xFiles[lastFile];
-
-           aData:= Self as IDigIt_ROArray;
-           Result:= xFiles.Count;
-         end;
-  end;
-  takeActReTake: begin
-    xFiles.Clear;
-    SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-    lastFolder:= Folder;
-    lastFile:= xFiles.IndexOf(LastTaked);
-    if (lastFile = -1) then
-    begin
-      lastFile:= 0;
-      LastTaked:= xFiles[lastFile];
-    end;
-
-    aData:= Self as IDigIt_ROArray;
-    Result:= xFiles.Count;
-  end;
-  end; *)
-
-  if (lastFolder <> Folder) then xFiles.Clear;
-
-  if (xFiles.Count = 0) then
-  begin
-    SearchOnPath(xFiles, Folder, '*.*', faAnyFile, False);
-    xFiles.Sort;
-    lastFolder:= Folder;
-  end;
-
-  if (xFiles.Count > 0) then
+  if (xFiles <> nil) and (xFiles.Count > 0) then
   Case takeAction of
     takeActPreview: begin
-       aData:= StrNew(PChar(Folder+DirectorySeparator+xFiles[0]));
+       aData:= StrNew(PChar(xFiles[0]));
        Result:= 1;
     end;
     takeActTake: begin
@@ -369,8 +260,11 @@ end;
 
 procedure TDigIt_Source_Folder.Clear; stdcall;
 begin
-  LastTaked:= '';
-  xFiles.Clear;
+  if (xFiles <> nil) then
+  begin
+    xFiles.Free;
+    xFiles:= nil;
+  end;
 end;
 
 initialization

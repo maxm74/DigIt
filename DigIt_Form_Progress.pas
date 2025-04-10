@@ -60,8 +60,15 @@ type
     procedure Hide; stdcall;
 
     //Useful functions
-    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle=pbstNormal);
-    function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; AStyle: TBGRAPBarStyle=pbstNormal); overload;
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer;
+                           ATotalStyle: TBGRAPBarStyle=pbstNormal; ACurrentStyle: TBGRAPBarStyle=pbstNormal); overload;
+
+    function ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean; overload;
+    function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean; overload;
+
+    function ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean; overload;
+    function ProgressSetCurrent(CurrentCaption: String; CurrentMin, CurrentMax, CurrentVal: Integer): Boolean; overload;
 
     property OnCancelClick: TNotifyEvent read rOnCancelClick write rOnCancelClick;
   end;
@@ -204,10 +211,69 @@ begin
   Show(PChar(ACaption));
 end;
 
+procedure TDigIt_Progress.ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer;
+                                       ATotalStyle: TBGRAPBarStyle; ACurrentStyle: TBGRAPBarStyle);
+begin
+  rCancelled:= False;
+  labTotal.Caption:= '';
+  capTotal.Caption:= '';
+  progressTotal.Style:= ATotalStyle;
+  progressTotal.Min:= TotalMin;
+  progressTotal.Max:= TotalMax;
+  progressTotal.Position:= TotalMin;
+  progressCurrent.Style:= ACurrentStyle;
+  progressCurrent.Min:= CurrentMin;
+  progressCurrent.Max:= CurrentMax;
+  progressCurrent.Position:= CurrentMin;
+  panelCurrent.Visible:= True;
+  Show(PChar(ACaption));
+end;
+
+
 function TDigIt_Progress.ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
 begin
-  DigIt_Progress.progressTotal.Position:= TotalVal;
-  DigIt_Progress.capTotal.Caption:= TotalCaption;
+  Result:= rCancelled;
+  if rCancelled then exit;
+
+  progressTotal.Position:= TotalVal;
+  capTotal.Caption:= TotalCaption;
+  Application.ProcessMessages;
+  Result:= rCancelled;
+end;
+
+function TDigIt_Progress.ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean;
+begin
+  Result:= rCancelled;
+  if rCancelled then exit;
+
+  progressTotal.Min:= TotalMin;
+  progressTotal.Max:= TotalMax;
+  progressTotal.Position:= TotalVal;
+  capTotal.Caption:= TotalCaption;
+  Application.ProcessMessages;
+  Result:= rCancelled;
+end;
+
+function TDigIt_Progress.ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean;
+begin
+  Result:= rCancelled;
+  if rCancelled then exit;
+
+  progressCurrent.Position:= CurrentVal;
+  capCurrent.Caption:= CurrentCaption;
+  Application.ProcessMessages;
+  Result:= rCancelled;
+end;
+
+function TDigIt_Progress.ProgressSetCurrent(CurrentCaption: String; CurrentMin, CurrentMax, CurrentVal: Integer): Boolean;
+begin
+  Result:= rCancelled;
+  if rCancelled then exit;
+
+  progressCurrent.Min:= CurrentMin;
+  progressCurrent.Max:= CurrentMax;
+  progressCurrent.Position:= CurrentVal;
+  capCurrent.Caption:= CurrentCaption;
   Application.ProcessMessages;
   Result:= rCancelled;
 end;

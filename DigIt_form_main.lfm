@@ -7,7 +7,6 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
-  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -1160,6 +1159,7 @@ object DigIt_Main: TDigIt_Main
         Left = 121
         Top = 2
         Caption = 'Export to PDF'
+        Enabled = False
         ImageIndex = 4
         OnClick = tbCapturedPDFClick
       end
@@ -1175,17 +1175,25 @@ object DigIt_Main: TDigIt_Main
       end
       object tbCaptSep1: TToolButton
         Left = 53
-        Height = 8
+        Height = 26
         Top = 2
         Caption = 'tbCaptSep1'
         Style = tbsSeparator
       end
       object tbCaptSep2: TToolButton
         Left = 113
-        Height = 8
+        Height = 26
         Top = 2
         Caption = 'tbCaptSep2'
         Style = tbsSeparator
+      end
+      object tbCapturedToImg: TToolButton
+        Left = 147
+        Top = 2
+        Caption = 'Export to Images'
+        Enabled = False
+        ImageIndex = 5
+        OnClick = tbCapturedToImgClick
       end
     end
     object lvCaptured: TListView
@@ -1672,7 +1680,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepMenu: TToolButton
         Left = 76
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepMenu'
         Style = tbsSeparator
@@ -1700,7 +1708,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepTake: TToolButton
         Left = 267
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
@@ -1753,7 +1761,7 @@ object DigIt_Main: TDigIt_Main
       Wrapable = False
       object tbSepCrop: TToolButton
         Left = 1
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepCrop'
         Style = tbsSeparator
@@ -1784,7 +1792,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepClear: TToolButton
         Left = 348
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator
@@ -2963,6 +2971,10 @@ object DigIt_Main: TDigIt_Main
       end
       object Separator2: TMenuItem
         Caption = '-'
+        Hint = 'Test Big Separator'
+        ImageIndex = 21
+        OnDrawItem = Separator2DrawItem
+        OnMeasureItem = Separator2MeasureItem
       end
       object menuLoadXML: TMenuItem
         Caption = 'Load XML'

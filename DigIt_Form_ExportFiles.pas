@@ -38,6 +38,7 @@ type
     btUp: TSpeedButton;
     cbResursive: TCheckBox;
     cbSaveFormat: TComboBox;
+    panelSaveFormat: TGroupBox;
     OpenDlg: TBGRAOpenPictureDialog;
     btPaperOrientation: TSpeedButton;
     cbPaperSize: TComboBox;
@@ -117,7 +118,7 @@ implementation
 
 uses LCLIntf, LazFileUtils,
      MM_StrUtils, MM_FilesUtils,
-     BGRAReadJpeg, BGRAWriteJpeg, fpPDF, BGRAPdf,
+     BGRAReadJpeg, BGRAWriteJpeg, BGRAWriteTiff, fpPDF, BGRAPdf,
      BGRAFormatUI, DigIt_Form_Progress;
 
 const
@@ -184,6 +185,7 @@ procedure TDigIt_ExportFiles.btAddFolderClick(Sender: TObject);
 var
    i: Integer;
    newItem: TListItem;
+   curFolder: String;
 
 begin
   if OpenFolder.Execute then
@@ -195,7 +197,13 @@ begin
        newItem:= lvFiles.Items.Add;
        newItem.Caption:= ExtractFileName(OpenFolder.Files[i]);
        newItem.ImageIndex:= IMG_FOLDER;
-       newItem.SubItems.Add(OpenFolder.Files[i]);
+
+       curFolder:= OpenFolder.Files[i];
+
+       if not(curFolder[Length(curFolder)] in AllowDirectorySeparators)
+       then curFolder:= curFolder+DirectorySeparator;
+
+       newItem.SubItems.Add(curFolder);
        newItem.Data:= Pointer(Integer(cbResursive.Checked));
      end;
 
@@ -292,12 +300,16 @@ begin
   begin
     if (pageOptions.ActivePage = tabPDF)
     then begin
-           panelFormatUI.Top:= 68; panelFormatUI.Left:= 107;
+           pageOptions.Height:= 470;
+           Height:= 760;
+           panelFormatUI.Top:= 70; panelFormatUI.Left:= 108;
            panelFormatUI.Parent:= panelJPeg;
          end
     else begin
-           panelFormatUI.Top:= 50; panelFormatUI.Left:= 100;
-           panelFormatUI.Parent:= tabIMG;
+           pageOptions.Height:= 260;
+           Height:= 550;
+           panelFormatUI.Top:= 40; panelFormatUI.Left:= 108;
+           panelFormatUI.Parent:= panelSaveFormat;
          end;
 
     panelFormatUI.Color:= clDefault;
@@ -394,6 +406,8 @@ begin
   if SavePDF.Execute then
   try
      pdfFileName:= SavePDF.FileName;
+
+     if (CapturedFiles = nil) then GenerateCapturedFiles;
 
      srcBitmap:= TBGRABitmap.Create;
      MemStream:= TMemoryStream.Create;
@@ -526,14 +540,41 @@ end;
 
 function TDigIt_ExportFiles.SaveAsIMG(out destPath: String): Boolean;
 var
-  i,
+  i, iItem,
+  lenItems,
   lenCaptured: Integer;
   cStr,
-  curFileName,
-  destDir,
-  destExt,
-  destFilename: String;
+  cStrItems,
+  srcFileName,
+  srcPath,
+  dstPath,
+  dstExt: String;
   srcBitmap: TBGRABitmap;
+  isRecursive: Boolean;
+  curItem: TListItem;
+
+  function ProcessFile(curFileName, curDestPath: String): Boolean;
+  var
+     dstFilename: String;
+
+  begin
+    Result:= False;
+    if FileExists(curFileName) then
+    try
+      srcBitmap.LoadFromFile(curFileName);
+      ForceDirectory(curDestPath);
+      dstFilename:= GetFileFreeName(curDestPath, ExtractFileNameOnly(curFileName), dstExt, True, 3);
+
+      //Adjust some Writers
+      if (SaveWriter is TBGRAWriterTiff) then TBGRAWriterTiff(SaveWriter).Clear;
+
+      srcBitmap.SaveToFile(curDestPath+dstFilename, SaveWriter);
+      Result:= True;
+
+    except
+      //Some Error Loading Ignore It
+    end;
+  end;
 
 begin
   Result:= False;
@@ -542,61 +583,98 @@ begin
   if SaveFolder.Execute then
   try
      destPath:= SaveFolder.FileName;
-     destExt:= ExtensionSeparator+SuggestImageExtension(SaveFormat);
+
+     if not(destPath[Length(destPath)] in AllowDirectorySeparators)
+     then destPath:= destPath+DirectorySeparator;
+
+     dstExt:= ExtensionSeparator+SuggestImageExtension(SaveFormat);
 
      srcBitmap:= TBGRABitmap.Create;
 
-     lenCaptured:= Length(CapturedFiles)-1;
-     cStr:= IntToStr(lenCaptured+1);
-     DigIt_Progress.ProgressShow(rsConvertIMG, 0, lenCaptured);
+     if (CapturedFiles = nil)
+     then begin
+            //Process Using the ListView Items
+            lenItems:= lvFiles.Items.Count-1;
+            cStrItems:= IntToStr(lenItems+1);
+            DigIt_Progress.ProgressShow(rsConvertIMG, 0, lenItems, 0, 100);
 
-(*  Recursive cicle like this...
-for i:=0 to lvFiles.Items.Count-1 do
-begin
-  curItem:= lvFiles.Items[i];
+            for iItem:=0 to lvFiles.Items.Count-1 do
+            begin
+              curItem:= lvFiles.Items[iItem];
 
-  if (curItem.ImageIndex = IMG_FOLDER)
-  then AddFolder(curItem.SubItems[0], (curItem.Data <> nil))
-  else begin
-         SetLength(CapturedFiles, Length(CapturedFiles)+1);
-         CapturedFiles[Length(CapturedFiles)-1].fName:= curItem.SubItems[0];
-       end;
-end;
+              if DigIt_Progress.ProgressSetTotal(Format(rsProcessing, [iItem, cStrItems])+' '+curItem.Caption, iItem)
+              then break;
 
-using  FullPathToRelativePath() and RelativePathToFullPath()
+              if (curItem.ImageIndex = IMG_FOLDER)
+              then begin
+                     isRecursive:= (curItem.Data <> nil);
+                     srcPath:= curItem.SubItems[0];
+                     dstPath:= destPath;
 
-*)
-     for i:=0 to lenCaptured do
-     begin
-       DigIt_Progress.progressTotal.Position:= i;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
-       Application.ProcessMessages;
-       if DigIt_Progress.Cancelled then break;
+                     CapturedFiles:= nil;
+                     AddFolder(srcPath, isRecursive);
 
-       curFileName:= CapturedFiles[i].fName;
+                     lenCaptured:= Length(CapturedFiles)-1;
+                     cStr:= IntToStr(lenCaptured+1);
 
-       if FileExists(curFileName) then
-       try
-         srcBitmap.LoadFromFile(curFileName);
-         destFilename:= GetFileFreeName(destPath, ExtractFileNameOnly(curFileName), destExt, True, 3);
+                     if DigIt_Progress.ProgressSetCurrent(Format(rsProcessing, [0, cStr]), 0, lenCaptured, 0)
+                     then break;
 
-         srcBitmap.SaveToFile(destPath+DirectorySeparator+destFilename, SaveWriter);
+                     //Process current Folder
+                     for i:=0 to lenCaptured do
+                     begin
+                       if DigIt_Progress.ProgressSetCurrent(Format(rsProcessing, [i, cStr]), i)
+                       then break;
 
-       except
-         //Some Error Loading Ignore It
-       end;
+                       if isRecursive then
+                       begin
+                         dstPath:= FullPathToRelativePath(srcPath, ExtractFilePath(CapturedFiles[i].fName));
+                         dstPath:= RelativePathToFullPath(destPath, dstPath);
+                       end;
+                       ProcessFile(CapturedFiles[i].fName, dstPath);
 
-       DigIt_Progress.progressTotal.Position:= i+1;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
-       Application.ProcessMessages;
-       if DigIt_Progress.Cancelled then break;
-     end;
+                       if DigIt_Progress.ProgressSetCurrent(Format(rsProcessed, [i, cStr]), i+1)
+                       then break;
+                     end;
+                  end
+              else begin
+                     if DigIt_Progress.ProgressSetCurrent(Format(rsProcessing, [0, '1']), 0, 1, 0)
+                     then break;
+
+                     ProcessFile(curItem.SubItems[0], destPath);
+
+                     if DigIt_Progress.ProgressSetCurrent(Format(rsProcessed, [1, '1']), 1)
+                     then break;
+                   end;
+
+              if DigIt_Progress.ProgressSetTotal(Format(rsProcessed, [iItem, cStrItems]), iItem+1)
+              then break;
+            end;
+          end
+     else begin
+            //Process Using directly CapturedFiles
+            lenCaptured:= Length(CapturedFiles)-1;
+            cStr:= IntToStr(lenCaptured+1);
+            DigIt_Progress.ProgressShow(rsConvertIMG, 0, lenCaptured);
+
+            for i:=0 to lenCaptured do
+            begin
+              if DigIt_Progress.ProgressSetTotal(Format(rsProcessing, [i, cStr]), i)
+              then break;
+
+              ProcessFile(CapturedFiles[i].fName, destPath);
+
+              if DigIt_Progress.ProgressSetTotal(Format(rsProcessed, [i, cStr]), i+1)
+              then break;
+            end;
+          end;
 
      Result:= not(DigIt_Progress.Cancelled);
 
   finally
      DigIt_Progress.Hide;
 
+     CapturedFiles:= nil;
      srcBitmap.Free;
   end;
 end;
@@ -626,7 +704,7 @@ begin
 
        if asPDF
        then begin
-              Caption:= Caption+'PDF';
+              Caption:= Caption+' PDF';
               pageOptions.ActivePage:= tabPDF;
 
               edTitle.Text:= ATitle;
@@ -635,7 +713,7 @@ begin
               edKeyWords.Text:= '';
             end
        else begin
-              Caption:= Caption+'Image';
+              Caption:= Caption+' Image';
               pageOptions.ActivePage:= tabIMG;
 
               if not(TBGRAFormatUIContainer.BuildSaveFormats(cbSaveFormat, SaveFormat) > 0)
@@ -651,9 +729,8 @@ begin
            if (BGRAFormatUIContainer <> nil) and
               (panelFormatUI <> nil) then BGRAFormatUIContainer.SetWriterProperties(SaveWriter);
 
-           if (ACapturedFiles = nil)
-           then GenerateCapturedFiles
-           else CapturedFiles:= ACapturedFiles;
+           //User has specified a File List, use it
+           if (ACapturedFiles <> nil) then CapturedFiles:= ACapturedFiles;
 
            if asPDF
            then begin
@@ -682,7 +759,6 @@ begin
                      (MessageDlg('DigIt', rsOpenDirectory, mtConfirmation, mbYesNo, 0) = mrYes)
                 then OpenDocument(Dest);
               end;
-
        end;
 
      finally

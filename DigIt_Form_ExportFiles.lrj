@@ -1,5 +1,5 @@
 {"version":1,"strings":[
-{"hash":249098176,"name":"tdigit_exportfiles.caption","sourcebytes":[69,120,112,111,114,116,32,83,101,116,116,105,110,103,115,32,45,32],"value":"Export Settings - "},
+{"hash":65900285,"name":"tdigit_exportfiles.caption","sourcebytes":[69,120,112,111,114,116,32,83,101,116,116,105,110,103,115,32,45],"value":"Export Settings -"},
 {"hash":80751728,"name":"tdigit_exportfiles.panelfiles.caption","sourcebytes":[32,70,105,108,101,115,32],"value":" Files "},
 {"hash":41225013,"name":"tdigit_exportfiles.lvfiles.columns[0].caption","sourcebytes":[70,105,108,101,32,78,97,109,101],"value":"File Name"},
 {"hash":48571752,"name":"tdigit_exportfiles.lvfiles.columns[1].caption","sourcebytes":[70,117,108,108,32,80,97,116,104],"value":"Full Path"},
@@ -24,6 +24,7 @@
 {"hash":196918634,"name":"tdigit_exportfiles.label3.caption","sourcebytes":[80,114,111,100,117,99,101,114,32,58],"value":"Producer :"},
 {"hash":242067514,"name":"tdigit_exportfiles.label4.caption","sourcebytes":[75,101,121,119,111,114,100,115,32,58],"value":"Keywords :"},
 {"hash":128413207,"name":"tdigit_exportfiles.tabimg.caption","sourcebytes":[116,97,98,73,77,71],"value":"tabIMG"},
+{"hash":237253216,"name":"tdigit_exportfiles.panelsaveformat.caption","sourcebytes":[32,83,97,118,101,32,79,112,116,105,111,110,115,32],"value":" Save Options "},
 {"hash":110330602,"name":"tdigit_exportfiles.bclabel9.caption","sourcebytes":[70,111,114,109,97,116,32,58],"value":"Format :"},
 {"hash":85002995,"name":"tdigit_exportfiles.savepdf.title","sourcebytes":[83,97,118,101,32,80,68,70,32,97,115],"value":"Save PDF as"},
 {"hash":2780691,"name":"tdigit_exportfiles.opendlg.title","sourcebytes":[79,112,101,110,32,69,120,105,115,116,105,110,103,32,70,105,108,101,115],"value":"Open Existing Files"},

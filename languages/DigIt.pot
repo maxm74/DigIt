@@ -354,7 +354,7 @@ msgid "Up"
 msgstr ""
 
 #: tdigit_exportfiles.caption
-msgid "Export Settings - "
+msgid "Export Settings -"
 msgstr ""
 
 #: tdigit_exportfiles.cbpapersize.text
@@ -420,6 +420,10 @@ msgstr ""
 
 #: tdigit_exportfiles.paneljpeg.caption
 msgid " Image Options "
+msgstr ""
+
+#: tdigit_exportfiles.panelsaveformat.caption
+msgid " Save Options "
 msgstr ""
 
 #: tdigit_exportfiles.savepdf.title
@@ -841,6 +845,10 @@ msgstr ""
 msgid "Save Session as"
 msgstr ""
 
+#: tdigit_main.separator2.hint
+msgid "Test Big Separator"
+msgstr ""
+
 #: tdigit_main.tbcaptsep1.caption
 msgid "tbCaptSep1"
 msgstr ""
@@ -855,6 +863,10 @@ msgstr ""
 
 #: tdigit_main.tbcapturedpdf.caption
 msgid "Export to PDF"
+msgstr ""
+
+#: tdigit_main.tbcapturedtoimg.caption
+msgid "Export to Images"
 msgstr ""
 
 #: tdigit_main.tbcrop.caption

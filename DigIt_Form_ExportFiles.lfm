@@ -1,23 +1,22 @@
 object DigIt_ExportFiles: TDigIt_ExportFiles
   Left = 416
-  Height = 754
+  Height = 760
   Top = 239
   Width = 520
   AutoSize = True
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Export Settings - '
-  ClientHeight = 754
+  Caption = 'Export Settings -'
+  ClientHeight = 760
   ClientWidth = 520
   DesignTimePPI = 120
   Position = poScreenCenter
-  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   object panelMain: TBCPanel
     Left = 0
-    Height = 704
+    Height = 710
     Top = 0
     Width = 520
     Align = alClient
@@ -75,13 +74,13 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             AutoSize = True
             Caption = 'File Name'
             MinWidth = 100
-            Width = 100
+            Width = 87
           end        
           item
             AutoSize = True
             Caption = 'Full Path'
             MinWidth = 100
-            Width = 100
+            Width = 76
           end>
         HideSelection = False
         IconOptions.Arrangement = iaLeft
@@ -218,10 +217,10 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
       Height = 460
       Top = 242
       Width = 516
-      ActivePage = tabIMG
-      Align = alClient
+      ActivePage = tabPDF
+      Align = alTop
       ShowTabs = False
-      TabIndex = 1
+      TabIndex = 0
       TabOrder = 1
       object tabPDF: TTabSheet
         Caption = 'tabPDF'
@@ -231,14 +230,14 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
           Left = 0
           Height = 250
           Top = 0
-          Width = 508
+          Width = 510
           Caption = ' Image Options '
           ClientHeight = 225
-          ClientWidth = 504
+          ClientWidth = 506
           ParentBackground = False
           TabOrder = 0
           object cbPaperSize: TComboBox
-            Left = 107
+            Left = 166
             Height = 28
             Top = 0
             Width = 250
@@ -265,7 +264,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Text = 'Same as the Image Size'
           end
           object Label5: TBCLabel
-            Left = 20
+            Left = 80
             Height = 20
             Top = 4
             Width = 75
@@ -300,7 +299,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Rounding.RoundY = 1
           end
           object btPaperOrientation: TSpeedButton
-            Left = 360
+            Left = 418
             Height = 28
             Hint = 'Paper Orientation'
             Top = 0
@@ -319,7 +318,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
           object cbUseJpgAsIs: TCheckBox
             Left = 20
             Height = 24
-            Top = 35
+            Top = 38
             Width = 144
             Caption = 'Use JPeg Files as is'
             Checked = True
@@ -331,21 +330,21 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
           Left = 0
           Height = 210
           Top = 252
-          Width = 516
+          Width = 510
           Caption = ' Infos '
           ClientHeight = 185
-          ClientWidth = 512
+          ClientWidth = 506
           ParentBackground = False
           TabOrder = 1
           object edTitle: TEdit
-            Left = 107
+            Left = 108
             Height = 28
             Top = 0
-            Width = 400
+            Width = 390
             TabOrder = 0
           end
           object Label1: TBCLabel
-            Left = 67
+            Left = 61
             Height = 20
             Top = 4
             Width = 36
@@ -379,7 +378,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Rounding.RoundY = 1
           end
           object Label2: TBCLabel
-            Left = 51
+            Left = 45
             Height = 20
             Top = 36
             Width = 52
@@ -413,14 +412,14 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Rounding.RoundY = 1
           end
           object edAuthor: TEdit
-            Left = 107
+            Left = 108
             Height = 28
             Top = 32
-            Width = 400
+            Width = 390
             TabOrder = 1
           end
           object Label3: TBCLabel
-            Left = 37
+            Left = 31
             Height = 20
             Top = 68
             Width = 66
@@ -454,16 +453,16 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Rounding.RoundY = 1
           end
           object edProducer: TEdit
-            Left = 107
+            Left = 108
             Height = 28
             Top = 64
-            Width = 400
+            Width = 390
             TabOrder = 2
           end
           object Label4: TBCLabel
-            Left = 32
+            Left = 26
             Height = 20
-            Top = 96
+            Top = 98
             Width = 71
             Anchors = [akTop, akRight]
             Background.Gradient1.StartColor = clWhite
@@ -495,10 +494,10 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Rounding.RoundY = 1
           end
           object edKeywords: TMemo
-            Left = 107
+            Left = 108
             Height = 80
-            Top = 96
-            Width = 400
+            Top = 98
+            Width = 390
             ScrollBars = ssAutoBoth
             TabOrder = 3
           end
@@ -508,48 +507,58 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         Caption = 'tabIMG'
         ClientHeight = 452
         ClientWidth = 508
-        object BCLabel9: TBCLabel
-          Left = 40
-          Height = 20
-          Top = 10
-          Width = 54
-          Background.Gradient1.StartColor = clWhite
-          Background.Gradient1.EndColor = clBlack
-          Background.Gradient1.GradientType = gtLinear
-          Background.Gradient1.Point1XPercent = 0
-          Background.Gradient1.Point1YPercent = 0
-          Background.Gradient1.Point2XPercent = 0
-          Background.Gradient1.Point2YPercent = 100
-          Background.Gradient2.StartColor = clWhite
-          Background.Gradient2.EndColor = clBlack
-          Background.Gradient2.GradientType = gtLinear
-          Background.Gradient2.Point1XPercent = 0
-          Background.Gradient2.Point1YPercent = 0
-          Background.Gradient2.Point2XPercent = 0
-          Background.Gradient2.Point2YPercent = 100
-          Background.Gradient1EndPercent = 35
-          Background.Style = bbsClear
-          Border.Style = bboNone
-          Caption = 'Format :'
-          FontEx.Color = clDefault
-          FontEx.FontQuality = fqSystemClearType
-          FontEx.Shadow = False
-          FontEx.ShadowRadius = 5
-          FontEx.ShadowOffsetX = 5
-          FontEx.ShadowOffsetY = 5
-          FontEx.Style = []
-          Rounding.RoundX = 1
-          Rounding.RoundY = 1
-        end
-        object cbSaveFormat: TComboBox
-          Left = 100
-          Height = 28
-          Top = 8
-          Width = 400
-          ItemHeight = 20
-          Style = csDropDownList
+        object panelSaveFormat: TGroupBox
+          Left = 0
+          Height = 250
+          Top = 0
+          Width = 508
+          Caption = ' Save Options '
+          ClientHeight = 225
+          ClientWidth = 504
           TabOrder = 0
-          OnChange = cbSaveFormatChange
+          object BCLabel9: TBCLabel
+            Left = 43
+            Height = 20
+            Top = 4
+            Width = 54
+            Background.Gradient1.StartColor = clWhite
+            Background.Gradient1.EndColor = clBlack
+            Background.Gradient1.GradientType = gtLinear
+            Background.Gradient1.Point1XPercent = 0
+            Background.Gradient1.Point1YPercent = 0
+            Background.Gradient1.Point2XPercent = 0
+            Background.Gradient1.Point2YPercent = 100
+            Background.Gradient2.StartColor = clWhite
+            Background.Gradient2.EndColor = clBlack
+            Background.Gradient2.GradientType = gtLinear
+            Background.Gradient2.Point1XPercent = 0
+            Background.Gradient2.Point1YPercent = 0
+            Background.Gradient2.Point2XPercent = 0
+            Background.Gradient2.Point2YPercent = 100
+            Background.Gradient1EndPercent = 35
+            Background.Style = bbsClear
+            Border.Style = bboNone
+            Caption = 'Format :'
+            FontEx.Color = clDefault
+            FontEx.FontQuality = fqSystemClearType
+            FontEx.Shadow = False
+            FontEx.ShadowRadius = 5
+            FontEx.ShadowOffsetX = 5
+            FontEx.ShadowOffsetY = 5
+            FontEx.Style = []
+            Rounding.RoundX = 1
+            Rounding.RoundY = 1
+          end
+          object cbSaveFormat: TComboBox
+            Left = 108
+            Height = 28
+            Top = 0
+            Width = 390
+            ItemHeight = 20
+            Style = csDropDownList
+            TabOrder = 0
+            OnChange = cbSaveFormatChange
+          end
         end
       end
     end
@@ -557,7 +566,7 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
   object panelButtons: TBCPanel
     Left = 0
     Height = 50
-    Top = 704
+    Top = 710
     Width = 520
     Align = alBottom
     Background.Color = clBtnFace

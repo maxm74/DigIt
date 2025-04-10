@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/09 ExportFiles Added first version of SaveAsIMG, moved functions from Execute to Class;
+2025/04/10 Solved SaveExt not updated when User Change Format;
+           Added SaveImage method in Main;
+	   Use of GetFilesInDir in Source_Folder and old code cleanup;
+	   Added other Useful function in Progress Form;
+	   ExportFiles Updated SaveAsIMG to handle recursive paths;
+
+        09 ExportFiles Added first version of SaveAsIMG, moved functions from Execute to Class;
            Added EmptyImage in DeleteAll Captured.
 
         07 Added Tools Menu in Main;

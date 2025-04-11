@@ -15,6 +15,7 @@ interface
 
 uses 
   Windows, Classes, SysUtils,
+  MM_OpenArrayList,
   WIA, WiaDef, WIA_LH, WIA_PaperSizes, WIA_SettingsForm,
   Digit_Bridge_Intf;
 
@@ -34,9 +35,15 @@ resourcestring
   rsWIACancelling = 'Cancelling acquisition';
 
 type
+  { TDigIt_Source_WIA_Files}
+
+  TDigIt_Source_WIA_Files = class(specialize TOpenArray<String>, IDigIt_ArrayR_PChars)
+    function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
+  end;
 
   { TDigIt_Source_WIA }
-  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source, IDigIt_ProgressCallback)
+
+  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source, IDigIt_ProgressCallback)
   private
     rWIA: TWIAManager;
     rWIASource: TWIADevice;
@@ -51,7 +58,7 @@ type
     ResMin,
     ResMax,
     countTakes: Integer;
-    DownloadedFiles: TStringArray;
+    DownloadedFiles: TDigIt_Source_WIA_Files;
     rEnabled,
     UserCancel: Boolean;
     Progress: IDigIt_Progress;
@@ -89,10 +96,6 @@ type
 
     procedure Clear; stdcall;
 
-    //IDigIt_ROArray
-    function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
-
     //IDigIt_ProgressCallback
     procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
 
@@ -110,6 +113,18 @@ var
    WIAPath_Temp: String;
    Source_WIA: TDigIt_Source_WIA = nil;
 
+{ TDigIt_Source_WIA_Files }
+
+function TDigIt_Source_WIA_Files.Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
+begin
+  aData:= nil;
+  try
+     aData:= StrNew(PChar(Get(aIndex)));
+     Result:= True;
+  except
+     Result:= False;
+  end;
+end;
 
 { TDigIt_Source_WIA }
 
@@ -175,13 +190,13 @@ begin
   rWIASource:= nil;
   rEnabled:= True;
   countTakes:= -1;
-  DownloadedFiles:= nil;
+  DownloadedFiles:= TDigIt_Source_WIA_Files.Create;
 end;
 
 destructor TDigIt_Source_WIA.Destroy;
 begin
-  if (rWIA<>nil) then rWIA.Free;
-  DownloadedFiles:= nil;
+  if (rWIA <> nil) then rWIA.Free;
+  if (DownloadedFiles <> nil) then DownloadedFiles.Free;
 
   inherited Destroy;
 end;
@@ -524,7 +539,7 @@ begin
      aData:= nil;
      aDataType:= diDataType_FileName;
 
-     DownloadedFiles:= nil;
+     DownloadedFiles.Clear;
      inc(countTakes);
 
      sessPath:= theBridge.Settings.Path_Session;
@@ -534,7 +549,7 @@ begin
      if WIAParams[DeviceItemIndex].NativeUI
      then begin
             Result:= rWiaSource.DownloadNativeUI(Application.ActiveFormHandle, False,
-                                        curPath, WIA_TakeFileName, DownloadedFiles);
+                                        curPath, WIA_TakeFileName, DownloadedFiles.rList);
           end
      else begin
             UserCancel:= False;
@@ -584,14 +599,14 @@ begin
                  end;
 
             Result:= rWIASource.Download(curPath, WIA_TakeFileName, aExt,
-                                         aFormat, DownloadedFiles);
+                                         aFormat, DownloadedFiles.rList);
           end;
 
      if (Result > 0)
      then begin
             if (Result = 1 )
             then aData:= StrNew(PChar(DownloadedFiles[0]))
-            else aData:= Self as IDigIt_ROArray
+            else aData:= DownloadedFiles as IDigIt_ArrayR_PChars
           end
      else begin
             DeleteDirectory(curPath, False);
@@ -618,19 +633,6 @@ begin
 
   countTakes:= -1;
   DownloadedFiles:= nil;
-end;
-
-function TDigIt_Source_WIA.GetCount: DWord; stdcall;
-begin
-  Result:= Length(DownloadedFiles);
-end;
-
-function TDigIt_Source_WIA.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
-begin
-  Result:= (aIndex < Length(DownloadedFiles));
-  if Result
-  then aData:= StrNew(PChar(DownloadedFiles[aIndex]))
-  else aData:= nil;
 end;
 
 procedure TDigIt_Source_WIA.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;

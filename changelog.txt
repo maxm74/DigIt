@@ -1,7 +1,14 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/10 Solved SaveExt not updated when User Change Format;
+2025/04/11 Use of MM_OpenArrayList classes and interfaces in Sources;
+	   Renamed IDigIt_ROArray to IDigIt_ArrayR_PChars;
+	   Added IDigIt_Source_Items interface for future Source sub Items in Menù;
+	   Sources Twain and WIA use a separeted class for DownloadedFiles;
+	   UI Adjustments for Linux;
+	   Changed File Sorting to flsSortNatural for Linux compatibility;
+
+        10 Solved SaveExt not updated when User Change Format;
            Added SaveImage method in Main;
 	   Use of GetFilesInDir in Source_Folder and old code cleanup;
 	   Added other Useful function in Progress Form;

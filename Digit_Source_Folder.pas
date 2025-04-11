@@ -26,7 +26,7 @@ resourcestring
 
 type
   { TDigIt_Source_Folder }
-  TDigIt_Source_Folder = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source)
+  TDigIt_Source_Folder = class(TNoRefCountObject, IDigIt_Params, IDigIt_ArrayR_PChars, IDigIt_Source)
   protected
     xFiles: TStringList; //A Citation
     Folder: String;
@@ -58,7 +58,7 @@ type
 
     //IDigIt_ROArray
     function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+    function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
 
     //IDigIt_Source
     //Take a Picture and returns FileNames
@@ -167,12 +167,18 @@ begin
   if (xFiles <> nil) then Result:= xFiles.Count;
 end;
 
-function TDigIt_Source_Folder.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+function TDigIt_Source_Folder.Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
 begin
+  aData:= nil;
   Result:= (xFiles <> nil) and (aIndex < xFiles.Count);
-  if Result
-  then aData:= StrNew(PChar(xFiles[aIndex]))
-  else aData:= nil;
+
+  if Result then
+  try
+     aData:= StrNew(PChar(xFiles[aIndex]));
+     Result:= True;
+  except
+     Result:= False;
+  end;
 end;
 
 constructor TDigIt_Source_Folder.Create;
@@ -243,7 +249,7 @@ begin
 
   xFiles:= GetFilesInDir(Folder, False,
                          faAnyFile, BGRARegisteredImageReaderExtension,
-                         flsSortName, False, True);
+                         flsSortNatural, False, True);
 
   if (xFiles <> nil) and (xFiles.Count > 0) then
   Case takeAction of
@@ -252,7 +258,7 @@ begin
        Result:= 1;
     end;
     takeActTake: begin
-       aData:= Self as IDigIt_ROArray;
+       aData:= Self as IDigIt_ArrayR_PChars;
        Result:= xFiles.Count;
     end;
   end;

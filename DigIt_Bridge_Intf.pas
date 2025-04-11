@@ -10,9 +10,10 @@
 unit Digit_Bridge_Intf;
 
 {$mode objfpc}{$H+}
-//{$interfaces corba}
 
 interface
+
+uses MM_OpenArrayList;
 
 const
   DigIt_Source_Kind         = $0000000F;
@@ -80,15 +81,13 @@ type
     //   "GetDisplayName"
     TDigIt_PluginNameProc = function :PChar; stdcall;
 
-  IDigIt_ROArray = Interface
+  //ALWAYS Return a Copy (using StrNew, etc) of your internal String DigIt will free after using it
+  IDigIt_ArrayR_PChars = interface(specialize IOpenArrayR<PChar>)
   ['{D101CADE-C69C-4929-A8DF-1386A8BF4D21}']
-    function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
   end;
 
-  IDigIt_RWArray = Interface(IDigIt_ROArray)
+  IDigIt_ArrayW_PChars = Interface(specialize IOpenArrayW<PChar>)
   ['{D101CADE-C69C-4929-A8DF-1386A8BF4D22}']
-    function Put(const aIndex: DWord; var aData: Pointer): Boolean; stdcall;
   end;
 
   IDigIt_Params = Interface
@@ -127,6 +126,11 @@ type
 
     //Clear internal Data, usually used when we finish processing files
     procedure Clear; stdcall;
+  end;
+
+  { #todo 5 -oMaxM : Get Sub Items so the User can select directly the Device from Menù}
+  IDigIt_Source_Items = interface(specialize IOpenArrayR<PChar>)
+  ['{D101CADE-C69C-4929-A8DF-699AC76DEE01}']
   end;
 
   IDigIt_Sources = Interface

@@ -300,8 +300,8 @@ begin
   begin
     if (pageOptions.ActivePage = tabPDF)
     then begin
-           pageOptions.Height:= 470;
-           Height:= 760;
+           pageOptions.Height:= 480;
+           Height:= 780;
            panelFormatUI.Top:= 70; panelFormatUI.Left:= 108;
            panelFormatUI.Parent:= panelJPeg;
          end
@@ -341,7 +341,7 @@ begin
   try
      xFiles:= GetFilesInDir(BaseDir, Recursive,
                             faAnyFile, BGRARegisteredImageReaderExtension,
-                            flsSortName, False, True);
+                            flsSortNatural, False, True);
 
      len:= xFiles.Count;
      if (len > 0) then

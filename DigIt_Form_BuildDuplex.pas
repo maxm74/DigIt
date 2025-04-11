@@ -35,7 +35,7 @@ type
   { TWizardBuildDuplex }
   Exception_CancelledOp = class (Exception);
 
-  TWizardBuildDuplex = class(TForm, IDigIt_ROArray, IDigIt_ProgressCallback)
+  TWizardBuildDuplex = class(TForm, IDigIt_ArrayR_PChars, IDigIt_ProgressCallback)
     Image1: TImage;
     Image2: TImage;
     animTurn: TImage;
@@ -91,13 +91,13 @@ type
     function CancelStep: Boolean;
     function EndStep: Boolean;
 
-    function Files_Add(var AFiles: TStringArray; AArray: IDigIt_ROArray): Integer; overload;
+    function Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer; overload;
     function Files_Add(var AFiles: TStringArray; AFileName: String): Integer; overload;
 
   public
-    //IDigIt_ROArray
+    //IDigIt_ArrayR_PChars
     function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+    function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
 
     //IDigIt_ProgressCallback
     procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
@@ -166,7 +166,7 @@ var
    res, i,
    oldLength: Integer;
    curImageFile: PChar;
-   curArray: IDigIt_ROArray;
+   curArray: IDigIt_ArrayR_PChars;
 
    procedure CheckCancelledOp;
    begin
@@ -211,7 +211,7 @@ begin
            else
            if (res > 1)
            then begin
-                  curArray:= IDigIt_ROArray(curData);
+                  curArray:= IDigIt_ArrayR_PChars(curData);
                   Files_Add(FrontFiles, curArray);
                 end;
          end;
@@ -237,7 +237,7 @@ begin
             else
             if (res > 1)
             then begin
-                   curArray:= IDigIt_ROArray(curData);
+                   curArray:= IDigIt_ArrayR_PChars(curData);
                    Files_Add(BackFiles, curArray);
                  end;
           end;
@@ -495,7 +495,7 @@ begin
   end;
 end;
 
-function TWizardBuildDuplex.Files_Add(var AFiles: TStringArray; AArray: IDigIt_ROArray): Integer;
+function TWizardBuildDuplex.Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer;
 var
    oldLength, i: Integer;
    curImageFile: PChar;
@@ -600,12 +600,18 @@ begin
   Result:= Length(AllFiles);
 end;
 
-function TWizardBuildDuplex.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
+function TWizardBuildDuplex.Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
 begin
+  aData:= nil;
   Result:= (aIndex < Length(AllFiles));
-  if Result
-  then aData:= StrNew(PChar(AllFiles[aIndex]))
-  else aData:= nil;
+
+  if Result then
+  try
+     aData:= StrNew(PChar(AllFiles[aIndex]));
+     Result:= True;
+  except
+     Result:= False;
+  end;
 end;
 
 procedure TWizardBuildDuplex.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
@@ -636,7 +642,7 @@ begin
      (WizardBuildDuplex.Execute(aDataType, aData) = mrOk) then
   begin
     Result:= Length(WizardBuildDuplex.AllFiles);
-    aData:= WizardBuildDuplex as IDigIt_ROArray;
+    aData:= WizardBuildDuplex as IDigIt_ArrayR_PChars;
   end;
 end;
 

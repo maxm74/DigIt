@@ -425,7 +425,7 @@ type
 
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
-    function SourceFiles_Add(AArray: IDigIt_ROArray): Integer; overload;
+    function SourceFiles_Add(AArray: IDigIt_ArrayR_PChars): Integer; overload;
     function SourceFiles_Add(AFileName: String): Integer; overload;
 
     function CropFile_Full(AFileName: String): Boolean; overload;
@@ -707,7 +707,7 @@ begin
           if (res = 1)
           then curImageFile:= PChar(curData)
           else if (res > 1)
-               then if not(IDigIt_ROArray(curData).Get(0, curImageFile))
+               then if not(IDigIt_ArrayR_PChars(curData).Get(0, curImageFile))
                     then curImageFile:= '';
 
           if (curImageFile <> '') then
@@ -750,7 +750,7 @@ var
    res, i,
    oldLength: Integer;
    curImageFile: PChar;
-   curArray: IDigIt_ROArray;
+   curArray: IDigIt_ArrayR_PChars;
 
 begin
   try
@@ -769,7 +769,7 @@ begin
         begin
           if (res = 1)
           then curImageFile:= PChar(curData)
-          else if (res > 1) then curArray:= IDigIt_ROArray(curData);
+          else if (res > 1) then curArray:= IDigIt_ArrayR_PChars(curData);
 
           Case CropMode of
             diCropFull: begin
@@ -3293,7 +3293,7 @@ begin
 end;
 *)
 
-function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ROArray): Integer;
+function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ArrayR_PChars): Integer;
 var
    oldLength, i: Integer;
    curImageFile: PChar;

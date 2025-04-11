@@ -15,6 +15,7 @@ interface
 
 uses
   simpleipc, SyncIPC, Process, Classes, SysUtils,
+  MM_OpenArrayList,
   Twain, DelphiTwain, DelphiTwainTypes, DelphiTwainUtils,
   Digit_Bridge_Intf, Digit_Source_Twain_Types, DelphiTwain_SelectForm, DelphiTwain_SettingsForm;
 
@@ -26,8 +27,15 @@ resourcestring
   rsTwainExcNotFound = 'Device not found...';
 
 type
+  { TDigIt_Source_WIA_Files}
+
+  TDigIt_Source_Twain_Files = class(specialize TOpenArray<String>, IDigIt_ArrayR_PChars)
+    function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
+  end;
+
   { TDigIt_Source_Twain }
-  TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_ROArray, IDigIt_Source)
+
+  TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source)
   private
     rTwain:TCustomDelphiTwain;
     TwainSource:TTwainSource;
@@ -43,7 +51,7 @@ type
     countTwain_Source,
     countIPC_Source,
     countTakes: Integer;
-    DownloadedFiles: TStringArray;
+    DownloadedFiles: TDigIt_Source_Twain_Files;
     rEnabled: Boolean;
 
     function getCommsClient: TSyncIPCClient;
@@ -97,10 +105,6 @@ type
 
     procedure Clear; stdcall;
 
-    //IDigIt_ROArray
-    function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
-
     constructor Create;
     destructor Destroy; override;
   end;
@@ -115,6 +119,18 @@ var
    TwainPath_Temp: String;
    Source_Twain : TDigIt_Source_Twain = nil;
 
+{ TDigIt_Source_Twain_Files }
+
+function TDigIt_Source_Twain_Files.Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
+begin
+  aData:= nil;
+  try
+     aData:= StrNew(PChar(Get(aIndex)));
+     Result:= True;
+  except
+     Result:= False;
+  end;
+end;
 
 { TDigIt_Source_Twain }
 
@@ -460,7 +476,7 @@ begin
   FillChar(rScannerInfo, Sizeof(rScannerInfo), 0);
   rEnabled:= True;
   countTakes:= -1;
-  DownloadedFiles:= nil;
+  DownloadedFiles:= TDigIt_Source_Twain_Files.Create;
 end;
 
 destructor TDigIt_Source_Twain.Destroy;
@@ -472,7 +488,7 @@ begin
 
   FreeCommsClient;
 
-  DownloadedFiles:= nil;
+  if (DownloadedFiles<>nil) then DownloadedFiles.Free;
 
   inherited Destroy;
 end;
@@ -714,8 +730,6 @@ begin
 end;
 
 function TDigIt_Source_Twain.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
-
-//Take(takeAction: DigIt_Source_TakeAction; MaxDataSize: DWord; const AData: Pointer): DWord; stdcall;
 var
    sessPath,
    curPath,
@@ -729,7 +743,7 @@ begin
      aData:= nil;
      aDataType:= diDataType_FileName;
 
-     DownloadedFiles:= nil;
+     DownloadedFiles.Clear;
      inc(countTakes);
 
      sessPath:= theBridge.Settings.Path_Session;
@@ -798,14 +812,19 @@ begin
             if (Result = 1 )
             then aData:= StrNew(PChar(curPath+TwainFileBase+'.bmp'))
             else begin
-                   SetLength(DownloadedFiles, Result);
+                   (*
+                   SetLength(DownloadedFiles.rList, Result);
 
-                   DownloadedFiles[0]:= curPath+TwainFileBase+'.bmp';
+                   DownloadedFiles.rList[0]:= curPath+TwainFileBase+'.bmp';
 
                    for i:=1 to Result-1 do
-                      DownloadedFiles[i]:= curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp';
+                      DownloadedFiles.rList[i]:= curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp';
+                   *)
+                   DownloadedFiles.Add(curPath+TwainFileBase+'.bmp');
+                   for i:=1 to Result-1 do
+                      DownloadedFiles.Add(curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp');
 
-                   aData:= Self as IDigIt_ROArray;
+                   aData:= DownloadedFiles as IDigIt_ArrayR_PChars;
                  end;
           end
      else begin
@@ -832,19 +851,6 @@ begin
 
   countTakes:= -1;
   DownloadedFiles:= nil;
-end;
-
-function TDigIt_Source_Twain.GetCount: DWord; stdcall;
-begin
-   Result:= Length(DownloadedFiles);
-end;
-
-function TDigIt_Source_Twain.Get(const aIndex: DWord; out aData: Pointer): Boolean; stdcall;
-begin
-  Result:= (aIndex < Length(DownloadedFiles));
-  if Result
-  then aData:= StrNew(PChar(DownloadedFiles[aIndex]))
-  else aData:= nil;
 end;
 
 initialization

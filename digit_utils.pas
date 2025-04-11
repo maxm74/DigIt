@@ -22,13 +22,6 @@ resourcestring
   rsVertical = '   Vertical';
   rsHorizontal = '    Horizontal';
 
-(*function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
-function CreateXMLReader(ADoc: TDOMDocument; const Path: string; var DestroyDriver: boolean): TReader;
-
-procedure WritePersistentToXMLConfig(XMLConfig: TXMLConfig; const Path, AName: string; AData: TPersistent);
-procedure ReadPersistentFromXMLConfig(XMLConfig: TXMLConfig; const Path, AName: string;
-                                      AData: TPersistent; OnFindComponentClass: TFindComponentClassEvent=nil);
-*)
 procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit;
                               AOwner: TComponent; menuPaperSizes: TMenu; menuOnClick: TNotifyEvent;
                               VImageIndex, HImageIndex: Integer);
@@ -47,108 +40,6 @@ implementation
 
 uses Digit_Bridge_Intf, Digit_Bridge_Impl;
 
-(*
-type
-    //Workaround class so we can write a TPersistent using TWriter.WriteRootComponent
-    TPersistentComponent = class(TComponent)
-    protected
-       rData:TPersistent;
-    published
-       property Data:TPersistent read rData write rData;
-    end;
-
-function CreateXMLWriter(ADoc: TDOMDocument; const Path: string; Append: Boolean; var DestroyDriver: boolean): TWriter;
-var
-  Driver: TAbstractObjectWriter;
-begin
-  Driver:=TXMLObjectWriter.Create(ADoc,Path,Append);
-  DestroyDriver:=true;
-  Result:=TWriter.Create(Driver);
-end;
-
-function CreateXMLReader(ADoc: TDOMDocument; const Path: string; var DestroyDriver: boolean): TReader;
-var
-  p: Pointer;
-  Driver: TAbstractObjectReader;
-  DummyStream: TMemoryStream;
-begin
-  DummyStream:=TMemoryStream.Create;
-  try
-    Result:=TReader.Create(DummyStream,256);
-    DestroyDriver:=false;
-    // hack to set a write protected variable.
-    // DestroyDriver:=true; TReader will free it
-    Driver:=TXMLObjectReader.Create(ADoc,Path);
-    p:=@Result.Driver;
-    Result.Driver.Free;
-    TAbstractObjectReader(p^):=Driver;
-  finally
-    DummyStream.Free;
-  end;
-end;
-
-procedure WritePersistentToXMLConfig(XMLConfig: TXMLConfig; const Path, AName: string; AData: TPersistent);
-var
-  Writer: TWriter;
-  DestroyDriver: boolean;
-  tt:TPersistentComponent;
-
-begin
-  Writer:=nil;
-  DestroyDriver:=false;
-  try
-    tt:=TPersistentComponent.Create(nil);
-    tt.Name:=AName;
-    tt.Data :=AData;
-
-    Writer:=CreateXMLWriter(XMLConfig.Document,Path,false,DestroyDriver);
-    XMLConfig.Modified:=true;
-    Writer.WriteRootComponent(tt);
-    XMLConfig.Flush;
-  finally
-    if DestroyDriver and (Writer<>nil)
-    then Writer.Driver.Free;
-    Writer.Free;
-    tt.Free;
-  end;
-end;
-
-procedure ReadPersistentFromXMLConfig(XMLConfig: TXMLConfig; const Path, AName: string;
-                                      AData: TPersistent; OnFindComponentClass: TFindComponentClassEvent=nil);
-var
-  DestroyDriver: Boolean;
-  Reader: TReader;
-  IsInherited: Boolean;
-  AClassName: String;
-  AClass: TComponentClass;
-  tt:TPersistentComponent;
-
-begin
-  if (AData=nil)
-  then raise Exception.Create('ReadPersistentFromXMLConfig AData=nil');
-
-  Reader:=nil;
-  try
-    Reader:=CreateXMLReader(XMLConfig.Document,Path,DestroyDriver);
-    Reader.OnFindComponentClass:=OnFindComponentClass;
-
-    // get root class
-    AClassName:=(Reader.Driver as TXMLObjectReader).GetRootClassName(IsInherited);
-    if (AClassName<>'TPersistentComponent')
-    then raise Exception.Create('Invalid ClassName '+AClassName+' in XML (maybe TPersistentComponent)');
-
-    tt :=TPersistentComponent.Create(nil);
-    tt.Name:=AName;
-    tt.Data:=AData;
-    Reader.ReadRootComponent(tt);
-  finally
-    if DestroyDriver
-    then Reader.Driver.Free;
-    Reader.Free;
-    tt.Free;
-  end;
-end;
-*)
 procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit; AOwner: TComponent; menuPaperSizes: TMenu;
   menuOnClick: TNotifyEvent; VImageIndex, HImageIndex: Integer);
 var
@@ -290,6 +181,14 @@ begin
              StrDispose(curTitle);
            end
       else newItem.Caption:= theBridge.SourcesImpl.Key[i];
+
+      if (curSource^.Inst is IDigIt_Source_Items) then
+      begin
+        { #todo 5 -oMaxM : Get Sub Items so the User can select directly the Device from Menù}
+        {$ifopt D+}
+        newItem.Caption:= newItem.Caption+'*';
+        {$endif}
+      end;
 
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
       newItem.Tag:= i;

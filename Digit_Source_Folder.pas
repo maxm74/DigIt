@@ -243,7 +243,6 @@ function TDigIt_Source_Folder.Take(takeAction: DigIt_Source_TakeAction; out aDat
 begin
   Result:= 0;
   aData:= nil;
-  aDataType:= diDataType_FileName;
 
   if (xFiles <> nil) then xFiles.Free;
 
@@ -256,10 +255,14 @@ begin
     takeActPreview: begin
        aData:= StrNew(PChar(xFiles[0]));
        Result:= 1;
+       aDataType:= diDataType_FileName;
     end;
     takeActTake: begin
-       aData:= Self as IDigIt_ArrayR_PChars;
        Result:= xFiles.Count;
+       (*if (Result = 1 )
+       then aData:= StrNew(PChar(DownloadedFiles[0]))
+       else*) aData:= Self as IDigIt_ArrayR_PChars;
+       aDataType:= diDataType_FileNameArray;
     end;
   end;
 end;

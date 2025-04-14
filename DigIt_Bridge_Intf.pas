@@ -54,8 +54,9 @@ type
 
   //Data Type
   TDigItDataType = (
-    diDataType_FileName, //Filename as a PChar
-    diDataType_Bitmap    //Pointer to a Bitmap
+    diDataType_FileName,      //A Single Filename (PChar)
+    diDataType_FileNameArray, //An IDigIt_Array of Filenames (PChar)
+    diDataType_Bitmap         //Pointer to a Bitmap
   );
 
   IDigIt_Bridge =interface;

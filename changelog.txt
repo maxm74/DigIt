@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/11 Use of MM_OpenArrayList classes and interfaces in Sources;
+2025/04/14 Use of Single Counter;
+	   Added diDataType_FileNameArray to distinguish the returned data in Take;
+	   Added transition from one mode to another depending on the number of Crops;
+	   Added Directly Crop the First File in CustomMode;
+
+        11 Use of MM_OpenArrayList classes and interfaces in Sources;
 	   Renamed IDigIt_ROArray to IDigIt_ArrayR_PChars;
 	   Added IDigIt_Source_Items interface for future Source sub Items in Menù;
 	   Sources Twain and WIA use a separeted class for DownloadedFiles;

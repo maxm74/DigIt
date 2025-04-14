@@ -7,7 +7,6 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
-  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -15,7 +14,7 @@ object DigIt_Main: TDigIt_Main
   OnShow = FormShow
   object imgManipulation: TBGRAImageManipulation
     Left = 288
-    Height = 483
+    Height = 713
     Top = 79
     Width = 873
     Align = alClient
@@ -35,7 +34,7 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCrops: TBCExpandPanel
     Left = 0
-    Height = 483
+    Height = 713
     Top = 79
     Width = 288
     Align = alLeft
@@ -78,7 +77,7 @@ object DigIt_Main: TDigIt_Main
     ButtonPosition = akLeft
     ButtonSize = 20
     Button.Left = 0
-    Button.Height = 483
+    Button.Height = 713
     Button.Top = 0
     Button.Width = 20
     Button.Caption = 'Crop Areas'
@@ -87,7 +86,7 @@ object DigIt_Main: TDigIt_Main
     Button.GlyphLayout = glRight
     AnimationSpeed = 20
     Animated = False
-    object cbBoxList: TComboBox
+    object cbCropList: TComboBox
       Left = 40
       Height = 28
       Top = 212
@@ -96,9 +95,9 @@ object DigIt_Main: TDigIt_Main
       ItemHeight = 20
       Style = csDropDownList
       TabOrder = 0
-      OnChange = cbBoxListChange
+      OnChange = cbCropListChange
     end
-    object btBox_Add: TBGRASpeedButton
+    object btCrop_Add: TBGRASpeedButton
       Left = 190
       Height = 32
       Hint = 'Add a Crop Area'
@@ -108,9 +107,9 @@ object DigIt_Main: TDigIt_Main
       Flat = True
       ShowHint = True
       ParentShowHint = False
-      OnClick = btBox_AddClick
+      OnClick = btCrop_AddClick
     end
-    object btBox_Del: TBGRASpeedButton
+    object btCrop_Del: TBGRASpeedButton
       Left = 222
       Height = 32
       Hint = 'Remove this Crop Area'
@@ -120,7 +119,7 @@ object DigIt_Main: TDigIt_Main
       Flat = True
       ShowHint = True
       ParentShowHint = False
-      OnClick = btBox_DelClick
+      OnClick = btCrop_DelClick
     end
     object panelCropArea: TBCPanel
       Left = 28
@@ -629,48 +628,6 @@ object DigIt_Main: TDigIt_Main
         ParentShowHint = False
         OnClick = btZDownClick
       end
-      object cbCropCounterList: TComboBox
-        Left = 16
-        Height = 28
-        Top = 416
-        Width = 150
-        AutoSize = False
-        ItemHeight = 20
-        Style = csDropDownList
-        TabOrder = 7
-        OnChange = cbCropCounterListChange
-      end
-      object btCropCounter_Add: TBGRASpeedButton
-        Left = 166
-        Height = 32
-        Hint = 'Add a Counter'
-        Top = 416
-        Width = 32
-        Caption = '+'
-        Flat = True
-        ShowHint = True
-        ParentShowHint = False
-        OnClick = btCropCounter_AddClick
-      end
-      object btCropCounter_Del: TBGRASpeedButton
-        Left = 198
-        Height = 32
-        Hint = 'Remove this Counter'
-        Top = 416
-        Width = 32
-        Caption = '-'
-        Flat = True
-        ShowHint = True
-        ParentShowHint = False
-        OnClick = btCropCounter_DelClick
-      end
-      object Label5: TLabel
-        Left = 16
-        Height = 20
-        Top = 395
-        Width = 59
-        Caption = 'Counter :'
-      end
       object edCropAspectPersonal: TEditButton
         Left = 81
         Height = 29
@@ -719,7 +676,7 @@ object DigIt_Main: TDigIt_Main
         MaxLength = 0
         NumGlyphs = 1
         PasswordChar = #0
-        TabOrder = 8
+        TabOrder = 7
         OnButtonClick = btCropApplyAspectRatioClick
       end
       object btPaperSizes: TSpeedButton
@@ -1081,8 +1038,8 @@ object DigIt_Main: TDigIt_Main
   end
   object rollPages: TBCExpandPanel
     Left = 0
-    Height = 250
-    Top = 562
+    Height = 20
+    Top = 792
     Width = 1411
     Align = alBottom
     Background.Color = clBtnFace
@@ -1133,10 +1090,11 @@ object DigIt_Main: TDigIt_Main
     Button.GlyphLayout = glRight
     AnimationSpeed = 20
     Animated = False
+    Collapsed = True
     object tbCaptured: TToolBar
       Left = 1
       Height = 28
-      Top = 21
+      Top = 20
       Width = 1409
       AutoSize = True
       ButtonHeight = 26
@@ -1176,14 +1134,14 @@ object DigIt_Main: TDigIt_Main
       end
       object tbCaptSep1: TToolButton
         Left = 53
-        Height = 8
+        Height = 26
         Top = 2
         Caption = 'tbCaptSep1'
         Style = tbsSeparator
       end
       object tbCaptSep2: TToolButton
         Left = 113
-        Height = 8
+        Height = 26
         Top = 2
         Caption = 'tbCaptSep2'
         Style = tbsSeparator
@@ -1199,8 +1157,8 @@ object DigIt_Main: TDigIt_Main
     end
     object lvCaptured: TListView
       Left = 1
-      Height = 200
-      Top = 49
+      Height = 0
+      Top = 19
       Width = 1409
       Align = alClient
       AutoSort = False
@@ -1229,7 +1187,7 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCounters: TBCExpandPanel
     Left = 1161
-    Height = 483
+    Height = 713
     Top = 79
     Width = 250
     Align = alRight
@@ -1272,7 +1230,7 @@ object DigIt_Main: TDigIt_Main
     ButtonPosition = akLeft
     ButtonSize = 20
     Button.Left = 0
-    Button.Height = 483
+    Button.Height = 713
     Button.Top = 0
     Button.Width = 20
     Button.Caption = 'Page Counters'
@@ -1353,50 +1311,6 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundX = 1
         Rounding.RoundY = 1
       end
-      object BCLabel12: TBCLabel
-        Left = 14
-        Height = 20
-        Top = 2
-        Width = 47
-        Anchors = [akTop, akRight]
-        Background.Gradient1.StartColor = clWhite
-        Background.Gradient1.EndColor = clBlack
-        Background.Gradient1.GradientType = gtLinear
-        Background.Gradient1.Point1XPercent = 0
-        Background.Gradient1.Point1YPercent = 0
-        Background.Gradient1.Point2XPercent = 0
-        Background.Gradient1.Point2YPercent = 100
-        Background.Gradient2.StartColor = clWhite
-        Background.Gradient2.EndColor = clBlack
-        Background.Gradient2.GradientType = gtLinear
-        Background.Gradient2.Point1XPercent = 0
-        Background.Gradient2.Point1YPercent = 0
-        Background.Gradient2.Point2XPercent = 0
-        Background.Gradient2.Point2YPercent = 100
-        Background.Gradient1EndPercent = 35
-        Background.Style = bbsClear
-        Border.Style = bboNone
-        Caption = 'Name :'
-        FontEx.Color = clDefault
-        FontEx.FontQuality = fqSystemClearType
-        FontEx.Shadow = False
-        FontEx.ShadowRadius = 5
-        FontEx.ShadowOffsetX = 5
-        FontEx.ShadowOffsetY = 5
-        FontEx.Style = []
-        Rounding.RoundX = 1
-        Rounding.RoundY = 1
-      end
-      object edCounterName: TEdit
-        Left = 69
-        Height = 29
-        Top = 0
-        Width = 129
-        AutoSize = False
-        AutoSelect = False
-        TabOrder = 0
-        OnEditingDone = edCounterNameEditingDone
-      end
       object BCLabel13: TBCLabel
         Left = 10
         Height = 20
@@ -1438,7 +1352,7 @@ object DigIt_Main: TDigIt_Main
         Width = 129
         AutoSize = False
         AutoSelect = False
-        TabOrder = 1
+        TabOrder = 0
         OnEditingDone = edCounterValueStringPreEditingDone
       end
       object BCLabel14: TBCLabel
@@ -1482,7 +1396,7 @@ object DigIt_Main: TDigIt_Main
         Width = 129
         AutoSize = False
         AutoSelect = False
-        TabOrder = 2
+        TabOrder = 1
         OnEditingDone = edCounterValueStringPostEditingDone
       end
       object Label4: TLabel
@@ -1543,7 +1457,7 @@ object DigIt_Main: TDigIt_Main
         MaxValue = 255
         MinValue = 2
         ParentFont = False
-        TabOrder = 3
+        TabOrder = 2
         Value = 3
         OnChange = edCounterValueStringDigitsChange
       end
@@ -1556,7 +1470,7 @@ object DigIt_Main: TDigIt_Main
         Font.Name = 'Arial'
         MaxValue = -1
         ParentFont = False
-        TabOrder = 4
+        TabOrder = 3
         OnChange = edCounterValueChange
       end
       object lbPrevious: TLabel
@@ -1605,41 +1519,6 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundX = 1
       Rounding.RoundY = 1
       TabOrder = 1
-      object cbCounterList: TComboBox
-        Left = 0
-        Height = 28
-        Top = 10
-        Width = 150
-        AutoSize = False
-        ItemHeight = 20
-        Style = csDropDownList
-        TabOrder = 0
-        OnChange = cbCounterListChange
-      end
-      object btCounter_Add: TBGRASpeedButton
-        Left = 150
-        Height = 32
-        Hint = 'Add a Counter'
-        Top = 10
-        Width = 32
-        Caption = '+'
-        Flat = True
-        ShowHint = True
-        ParentShowHint = False
-        OnClick = btCounter_AddClick
-      end
-      object btCounter_Del: TBGRASpeedButton
-        Left = 182
-        Height = 32
-        Hint = 'Remove this Counter'
-        Top = 10
-        Width = 32
-        Caption = '-'
-        Flat = True
-        ShowHint = True
-        ParentShowHint = False
-        OnClick = btCounter_DelClick
-      end
     end
   end
   object panelTop: TPanel
@@ -1681,7 +1560,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepMenu: TToolButton
         Left = 76
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepMenu'
         Style = tbsSeparator
@@ -1709,7 +1588,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepTake: TToolButton
         Left = 267
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
@@ -1762,7 +1641,7 @@ object DigIt_Main: TDigIt_Main
       Wrapable = False
       object tbSepCrop: TToolButton
         Left = 1
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepCrop'
         Style = tbsSeparator
@@ -1793,7 +1672,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepClear: TToolButton
         Left = 348
-        Height = 8
+        Height = 62
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator

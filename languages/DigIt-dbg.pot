@@ -545,11 +545,6 @@ msgctxt "tdigit_main.bclabel11.caption"
 msgid "Height :"
 msgstr ""
 
-#: tdigit_main.bclabel12.caption
-msgctxt "tdigit_main.bclabel12.caption"
-msgid "Name :"
-msgstr ""
-
 #: tdigit_main.bclabel13.caption
 msgid "Before :"
 msgstr ""
@@ -589,24 +584,6 @@ msgstr ""
 msgid "Digits :"
 msgstr ""
 
-#: tdigit_main.btbox_add.caption
-msgctxt "tdigit_main.btbox_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btbox_add.hint
-msgid "Add a Crop Area"
-msgstr ""
-
-#: tdigit_main.btbox_del.caption
-msgctxt "tdigit_main.btbox_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btbox_del.hint
-msgid "Remove this Crop Area"
-msgstr ""
-
 #: tdigit_main.btcfliphleft.hint
 msgid "Flip Horizzontal Left"
 msgstr ""
@@ -623,52 +600,32 @@ msgstr ""
 msgid "Flip Vertical Up"
 msgstr ""
 
-#: tdigit_main.btcounter_add.caption
-msgctxt "tdigit_main.btcounter_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btcounter_add.hint
-msgctxt "tdigit_main.btcounter_add.hint"
-msgid "Add a Counter"
-msgstr ""
-
-#: tdigit_main.btcounter_del.caption
-msgctxt "tdigit_main.btcounter_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btcounter_del.hint
-msgctxt "tdigit_main.btcounter_del.hint"
-msgid "Remove this Counter"
-msgstr ""
-
-#: tdigit_main.btcropcounter_add.caption
-msgctxt "tdigit_main.btcropcounter_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btcropcounter_add.hint
-msgctxt "tdigit_main.btcropcounter_add.hint"
-msgid "Add a Counter"
-msgstr ""
-
-#: tdigit_main.btcropcounter_del.caption
-msgctxt "tdigit_main.btcropcounter_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btcropcounter_del.hint
-msgctxt "tdigit_main.btcropcounter_del.hint"
-msgid "Remove this Counter"
-msgstr ""
-
 #: tdigit_main.btcropduplicate.hint
 msgid "Duplicate this Area"
 msgstr ""
 
 #: tdigit_main.btcropduplicateop.hint
 msgid "Duplicate when Rotate/Flip"
+msgstr ""
+
+#: tdigit_main.btcrop_add.caption
+msgctxt "tdigit_main.btcrop_add.caption"
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btcrop_add.hint
+msgctxt "tdigit_main.btcrop_add.hint"
+msgid "Add a Crop Area"
+msgstr ""
+
+#: tdigit_main.btcrop_del.caption
+msgctxt "tdigit_main.btcrop_del.caption"
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btcrop_del.hint
+msgctxt "tdigit_main.btcrop_del.hint"
+msgid "Remove this Crop Area"
 msgstr ""
 
 #: tdigit_main.btcrotateleft.hint
@@ -766,10 +723,6 @@ msgstr ""
 
 #: tdigit_main.label4.caption
 msgid "Example :"
-msgstr ""
-
-#: tdigit_main.label5.caption
-msgid "Counter :"
 msgstr ""
 
 #: tdigit_main.label7.caption

@@ -741,7 +741,6 @@ begin
   try
      Result:= 0;
      aData:= nil;
-     aDataType:= diDataType_FileName;
 
      DownloadedFiles.Clear;
      inc(countTakes);
@@ -810,7 +809,10 @@ begin
      if (Result > 0)
      then begin
             if (Result = 1 )
-            then aData:= StrNew(PChar(curPath+TwainFileBase+'.bmp'))
+            then begin
+                   aData:= StrNew(PChar(curPath+TwainFileBase+'.bmp'));
+                   aDataType:= diDataType_FileName;
+                 end
             else begin
                    (*
                    SetLength(DownloadedFiles.rList, Result);
@@ -825,6 +827,7 @@ begin
                       DownloadedFiles.Add(curPath+TwainFileBase+'-'+IntToStr(i)+'.bmp');
 
                    aData:= DownloadedFiles as IDigIt_ArrayR_PChars;
+                   aDataType:= diDataType_FileNameArray;
                  end;
           end
      else begin

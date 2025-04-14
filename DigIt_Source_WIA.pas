@@ -537,7 +537,6 @@ begin
   try
      Result:= 0;
      aData:= nil;
-     aDataType:= diDataType_FileName;
 
      DownloadedFiles.Clear;
      inc(countTakes);
@@ -605,8 +604,14 @@ begin
      if (Result > 0)
      then begin
             if (Result = 1 )
-            then aData:= StrNew(PChar(DownloadedFiles[0]))
-            else aData:= DownloadedFiles as IDigIt_ArrayR_PChars
+            then begin
+                   aData:= StrNew(PChar(DownloadedFiles[0]));
+                   aDataType:= diDataType_FileName;
+                 end
+            else begin
+                   aData:= DownloadedFiles as IDigIt_ArrayR_PChars;
+                   aDataType:= diDataType_FileNameArray;
+                 end;
           end
      else begin
             DeleteDirectory(curPath, False);

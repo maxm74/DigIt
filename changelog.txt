@@ -1,7 +1,14 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/14 Use of Single Counter;
+2025/04/15 Deleted actCrop and using only actCropNext;
+	   First Write of ReTake for FullArea Mode;
+	   Added Params to Counter_Inc/Dec;
+	   Added SourceFiles_Clear method;
+	   Added UI_SelectNext/CurrentCaptured;
+	   Use of UI_SelectNext/CurrentCaptured in Crop Actions;
+
+        14 Use of Single Counter;
 	   Added diDataType_FileNameArray to distinguish the returned data in Take;
 	   Added transition from one mode to another depending on the number of Crops;
 	   Added Directly Crop the First File in CustomMode;

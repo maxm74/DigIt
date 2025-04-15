@@ -69,7 +69,6 @@
 {"hash":142780485,"name":"tdigit_main.acttakere.caption","sourcebytes":[82,101,45,84,97,107,101],"value":"Re-Take"},
 {"hash":205527077,"name":"tdigit_main.acttimertake.caption","sourcebytes":[84,105,109,101,114,32,84,97,107,101],"value":"Timer Take"},
 {"hash":166899979,"name":"tdigit_main.acttakebuildduplex.caption","sourcebytes":[84,97,107,101,32,97,110,100,32,66,117,105,108,100,32,70,114,111,110,116,47,66,97,99,107],"value":"Take and Build Front/Back"},
-{"hash":305504,"name":"tdigit_main.actcrop.caption","sourcebytes":[67,114,111,112],"value":"Crop"},
 {"hash":44030676,"name":"tdigit_main.actcropnext.caption","sourcebytes":[67,114,111,112,32,43,32,78,101,120,116],"value":"Crop + Next"},
 {"hash":347380,"name":"tdigit_main.actcropgonext.caption","sourcebytes":[78,101,120,116],"value":"Next"},
 {"hash":296859,"name":"tdigit_main.actcropgoback.caption","sourcebytes":[66,97,99,107],"value":"Back"},

@@ -91,6 +91,11 @@ msgstr ""
 msgid "Value Previous: %d"
 msgstr ""
 
+#: digit_form_main.rscrop
+msgctxt "digit_form_main.rscrop"
+msgid "Crop (F5)"
+msgstr ""
+
 #: digit_form_main.rscropcust
 msgctxt "digit_form_main.rscropcust"
 msgid "Custom"
@@ -99,6 +104,11 @@ msgstr ""
 #: digit_form_main.rscropfull
 msgctxt "digit_form_main.rscropfull"
 msgid "Full Area"
+msgstr ""
+
+#: digit_form_main.rscropnext
+msgctxt "digit_form_main.rscropnext"
+msgid "Crop + Next (F5)"
 msgstr ""
 
 #: digit_form_main.rscroptodo
@@ -471,10 +481,6 @@ msgstr ""
 msgid "Convert Images to PDF"
 msgstr ""
 
-#: tdigit_main.actcrop.caption
-msgid "Crop"
-msgstr ""
-
 #: tdigit_main.actcropall.caption
 msgid "Crop All"
 msgstr ""
@@ -488,6 +494,7 @@ msgid "Next"
 msgstr ""
 
 #: tdigit_main.actcropnext.caption
+msgctxt "tdigit_main.actcropnext.caption"
 msgid "Crop + Next"
 msgstr ""
 

@@ -853,7 +853,7 @@ begin
   {$endif}
 
   countTakes:= -1;
-  DownloadedFiles:= nil;
+  DownloadedFiles.Clear;
 end;
 
 initialization

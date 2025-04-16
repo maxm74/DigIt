@@ -645,6 +645,18 @@ msgctxt "tdigit_main.btcrotateright.hint"
 msgid "Rotate Right"
 msgstr ""
 
+#: tdigit_main.btpagesizes.hint
+msgid "Page Sizes"
+msgstr ""
+
+#: tdigit_main.btpagesizestocrops.hint
+msgid "Page size to Crops size"
+msgstr ""
+
+#: tdigit_main.btpapersizes.hint
+msgid "Paper Sizes"
+msgstr ""
+
 #: tdigit_main.btpfliph.hint
 msgid "Flip Horizzontal"
 msgstr ""
@@ -696,7 +708,7 @@ msgid "pixels"
 msgstr ""
 
 #: tdigit_main.edpage_unittype.text
-msgid "not defined"
+msgid "full size"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption

@@ -259,9 +259,11 @@ begin
     end;
     takeActTake: begin
        Result:= xFiles.Count;
-       (*if (Result = 1 )
-       then aData:= StrNew(PChar(DownloadedFiles[0]))
-       else*) aData:= Self as IDigIt_ArrayR_PChars;
+
+       if (Result = 1 )
+       then aData:= StrNew(PChar(xFiles[0]))
+       else aData:= Self as IDigIt_ArrayR_PChars;
+
        aDataType:= diDataType_FileNameArray;
     end;
   end;

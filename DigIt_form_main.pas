@@ -255,6 +255,8 @@ type
     procedure btPageSizesClick(Sender: TObject);
     procedure btPageSizesToCropsClick(Sender: TObject);
     procedure btPaperSizesClick(Sender: TObject);
+    procedure btPFlipClick(Sender: TObject);
+    procedure btPRotateClick(Sender: TObject);
     procedure btZBackClick(Sender: TObject);
     procedure btZDownClick(Sender: TObject);
     procedure btZFrontClick(Sender: TObject);
@@ -320,6 +322,10 @@ type
 
     CropMode: TDigItCropMode;
 
+    PageUnitType: Integer;
+    PageRotate: TDigItRotate;
+    PageFlip: TDigItFlip;
+
     rSource: PSourceInfo;
     rSourceParams: IDigIt_Params;
     rSourceName: String;
@@ -358,6 +364,7 @@ type
     procedure UI_SelectCurrentCaptured(AddValue: Integer=0);
     procedure UI_SelectNextCaptured(AddValue: Integer=0);
     procedure UI_FillPageSizes;
+    procedure UI_FillPageRotateFlip;
     procedure UI_UpdateCropAreaList;
     procedure UI_ToolBar;
     procedure UI_ToolBarMods;
@@ -371,6 +378,8 @@ type
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
+    function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItRotate): TBGRABitmap;
+    procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFlip);
 
     procedure XML_LoadWork(IsAutoSave: Boolean);
     procedure XML_SaveWork(IsAutoSave: Boolean);
@@ -633,7 +642,6 @@ end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
-//cc  Counters.Free;
   theBridge.Free;
   SourceFiles:= nil;
   if (SaveWriter <> nil) then SaveWriter.Free;
@@ -675,14 +683,17 @@ end;
 
 procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 var
-   len: Integer;
+   len, i,
+   numCropped: Integer;
+   hasCropped: Boolean;
+   cropped: array of Boolean;
 
 begin
   UI_SelectNextCaptured(-lastLenTaked);
 
   if (MessageDlg('DigIt', Format(rsTakeAgain, [lastLenTaked]),
                  mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-  begin
+  try
     Case CropMode of
       diCropFull: begin
         len:= Length(CapturedFiles);
@@ -692,16 +703,48 @@ begin
       diCropCustom: begin
         len:= Length(SourceFiles);
 
-        //if (iSourceFiles >= 0) and (iSourceFiles >= len) then
+        hasCropped:= (len-lastLenTaked <= lastCropped);
+        if hasCropped
+        then begin
+               SetLength(cropped, lastLenTaked);
+               numCropped:= 0;
+               for i:=0 to lastLenTaked-1 do
+               begin
+                 cropped[i]:= SourceFiles[len-lastLenTaked+i].fCrop;
+                 if cropped[i] then Inc(numCropped);
+               end;
+             end;
+
         if ((len - lastLenTaked) > 0)
         then SetLength(SourceFiles, len-lastLenTaked)
         else SourceFiles:= nil;
 
-        //lastLenTaked:= 0;
       end;
     end;
 
     actTakeExecute(actTakeRe);
+
+    if hasCropped then
+    begin
+      //This works ONLY IF the Crop Area number has not changed in the meantime
+      { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
+      Counter_Dec(numCropped * imgManipulation.CropAreas.Count);
+
+      iSourceFiles:= len-lastLenTaked;
+      LoadImage(SourceFiles[iSourceFiles].fName, False);
+      for i:=0 to Length(cropped)-1 do
+      begin
+        if cropped[i] then
+        begin
+          iSourceFiles:= len-lastLenTaked+i;
+          SourceFiles[iSourceFiles].fCrop:= True;
+          actCropNextExecute(nil);
+        end;
+      end;
+    end;
+
+  finally
+    cropped:= nil;
   end;
 end;
 
@@ -711,13 +754,23 @@ var
    curDataType: TDigItDataType;
    res, i,
    oldLength: Integer;
-//   curImageFile: PChar;
-//   curArray: IDigIt_ArrayR_PChars;
 
 begin
   try
       curData:= nil;
       res:= 0;
+      oldLength:= Length(SourceFiles);
+
+      if (CropMode = diCropCustom) then
+      begin
+        //If we have processed all queue files automatically clear it
+        if (oldLength > 0) and
+           (iSourceFiles >= 0) and (iSourceFiles >= oldLength) then
+        begin
+          SourceFiles_Clear(False);
+          oldLength:= 0;
+        end;
+      end;
 
       if (Sender = actTake) or (Sender = actTakeRe)
       then res:= rSource^.Inst.Take(takeActTake, curDataType, curData)
@@ -748,15 +801,6 @@ begin
               rSource^.Inst.Clear;
             end;
             diCropCustom: begin
-              oldLength:= Length(SourceFiles);
-
-              if (oldLength > 0) and
-                 (iSourceFiles >= 0) and (iSourceFiles >= oldLength) then
-              begin
-                SourceFiles_Clear(False);
-                oldLength:= 0;
-              end;
-
               //Add files to the queue array
               if (curDataType = diDataType_FileName)
               then begin
@@ -767,15 +811,22 @@ begin
 
               lastLenTaked:= res;
 
-              //The queue was empty, Start from the first file
-              if (oldLength = 0) and (Length(SourceFiles) > 0) then
-              begin
-                iSourceFiles:= 0;
-                LoadImage(SourceFiles[0].fName, False);
+              if (Sender = actTakeRe)
+              then begin
+                     if (iSourceFiles > Length(SourceFiles))
+                     then iSourceFiles:= Length(SourceFiles); //Repos iSourceFiles if outside
+                   end
+              else begin
+                     //The queue was empty, Start from the first file
+                     if (oldLength = 0) and (Length(SourceFiles) > 0) then
+                     begin
+                       iSourceFiles:= 0;
+                       LoadImage(SourceFiles[0].fName, False);
 
-                //Crop the First File directly
-                actCropNextExecute(nil);
-              end;
+                       //Crop the First File directly
+                       actCropNextExecute(nil);
+                     end;
+                   end;
             end;
           end;
         end;
@@ -822,6 +873,7 @@ begin
     if (iSourceFiles = lenSources)
     then begin
            //We've already cut the last one, Re Crop the Last File, dec the Counters first
+           { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
            Counter_Dec(imgManipulation.CropAreas.Count);
            imgManipulation.getAllBitmaps(@SaveCallBack, 1, True);
          end
@@ -872,10 +924,9 @@ begin
        inc(new_iSourceFiles);
        if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
        begin
+         { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
          if SourceFiles[new_iSourceFiles].fCrop then Counter_Inc(imgManipulation.CropAreas.Count);
          iSourceFiles:= new_iSourceFiles;
-
-         lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
        end;
      end;
 
@@ -909,6 +960,7 @@ begin
 
        if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
        begin
+         { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
          if SourceFiles[new_iSourceFiles].fCrop then Counter_Dec(imgManipulation.CropAreas.Count);
          iSourceFiles:= new_iSourceFiles;
        end;
@@ -1154,6 +1206,84 @@ begin
   end;
 end;
 
+procedure TDigIt_Main.btPFlipClick(Sender: TObject);
+var
+   oldPageFlip: TDigItFlip;
+
+begin
+  oldPageFlip:= PageFlip;
+
+  if btPFlipV.Down
+  then PageFlip:= flipVertical
+  else
+  if btPFlipH.Down
+  then PageFlip:= flipHorizontal
+  else PageFlip:= flipNone;
+
+  if not(imgManipulation.Empty) then
+  begin
+    //Flip Image to Initial Value
+    FlipImage(imgManipulation.Bitmap, oldPageFlip);
+
+    //Flip Image to New Value
+    FlipImage(imgManipulation.Bitmap, PageFlip);
+
+    imgManipulation.RefreshBitmap;
+  end;
+end;
+
+procedure TDigIt_Main.btPRotateClick(Sender: TObject);
+var
+   oldPageRotate: TDigItRotate;
+   BitmapR,
+   BitmapNewR: TBGRABitmap;
+
+begin
+  oldPageRotate:= PageRotate;
+
+  if btPRotateLeft.Down
+  then PageRotate:= rotLeft90
+  else
+  if btPRotateRight.Down
+  then PageRotate:= rotRight90
+  else
+  if btPRotate180.Down
+  then PageRotate:= rot180
+  else PageRotate:= rotNone;
+
+  if not(imgManipulation.Empty) then
+  try
+    BitmapR:= nil;
+    BitmapNewR:= nil;
+
+    //Retun Image to Initial Value
+    Case oldPageRotate of
+      rotNone: BitmapR:= imgManipulation.Bitmap;
+      rotLeft90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotRight90);
+      rotRight90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotLeft90);
+      rot180: BitmapR:= RotateImage(imgManipulation.Bitmap, rot180);
+    end;
+
+    //Rotate Image to New Value
+    if (PageRotate = rotNone)
+    then begin
+           //BitmapR.InvalidateBitmap;
+           imgManipulation.Bitmap:= BitmapR;
+         end
+    else begin
+           BitmapNewR:= RotateImage(BitmapR, PageRotate);
+           //BitmapNewR.InvalidateBitmap;
+           imgManipulation.Bitmap:= BitmapNewR;
+         end;
+
+  //imgManipulation.Bitmap.InvalidateBitmap;
+
+  finally
+    if (BitmapR <> nil) then BitmapR.Free;
+    if (BitmapNewR <> nil) then BitmapNewR.Free;
+  end;
+end;
+
 procedure TDigIt_Main.ItemSizesClick(Sender: TObject);
 var
    ResUnit: TResolutionUnit;
@@ -1243,7 +1373,7 @@ procedure TDigIt_Main.edPageHeightChange(Sender: TObject);
 begin
   if inFillPagesUI then exit;
 
-  imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex),
+  imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex-1),
                                       edPageWidth.Value, edPageHeight.Value);
 end;
 
@@ -1251,13 +1381,15 @@ procedure TDigIt_Main.edPageWidthChange(Sender: TObject);
 begin
   if inFillPagesUI then exit;
 
-  imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex),
+  imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex-1),
                                       edPageWidth.Value, edPageHeight.Value);
 end;
 
 procedure TDigIt_Main.edPage_UnitTypeChange(Sender: TObject);
 begin
-  if (edPage_UnitType.ItemIndex=0)
+  PageUnitType:= edPage_UnitType.ItemIndex;
+
+  if (PageUnitType = 0)
   then imgManipulation.SetEmptyImageSizeToNull
   else begin
          //if there is a size defined, change only the resolution unit
@@ -1266,6 +1398,7 @@ begin
          else imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex-1),
                                          edPageWidth.Value, edPageHeight.Value);
        end;
+
   UI_FillPageSizes;
 end;
 
@@ -1607,34 +1740,22 @@ begin
 
   if (AImageFile<>'') and FileExists(AImageFile) then
   try
-     BitmapR:= Nil;
-
      Bitmap:= TBGRABitmap.Create;
      Bitmap.LoadFromFile(AImageFile);
 
      //Pre processing Filters
 
+     { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
+
      //Flip
-     if btPFlipH.Down
-     then Bitmap.HorizontalFlip;
-     if btPFlipV.Down
-     then Bitmap.VerticalFlip;
+     FlipImage(Bitmap, PageFlip);
 
      //Rotate
-     if btPRotateLeft.Down
-     then BitmapR:= Bitmap.RotateCCW(True);
-     if btPRotateRight.Down
-     then BitmapR:= Bitmap.RotateCW(True);
-     if btPRotate180.Down
-     then BitmapR:= Bitmap.RotateUD(True);
-
-     { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
+     BitmapR:= RotateImage(Bitmap, PageRotate);
 
      if (BitmapR <> Nil)
      then imgManipulation.Bitmap := BitmapR
      else imgManipulation.Bitmap := Bitmap;
-
-//     imgManipulation.Bitmap.InvalidateBitmap;
 
      LoadedFile:= AImageFile;
 
@@ -1653,6 +1774,24 @@ begin
   imgManipulation.Bitmap:= nil;
   LoadedFile:= '';
   if saveToXML then XML_SaveLoadedImage(nil, True);
+end;
+
+function TDigIt_Main.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItRotate): TBGRABitmap;
+begin
+  Case APageRotate of
+    rotNone: Result:= nil;
+    rotLeft90: Result:= ABitmap.RotateCCW(True);
+    rotRight90: Result:= ABitmap.RotateCW(True);
+    rot180: Result:= ABitmap.RotateUD(True);
+  end;
+end;
+
+procedure TDigIt_Main.FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFlip);
+begin
+  Case APageFlip of
+    flipHorizontal: ABitmap.HorizontalFlip;
+    flipVertical: ABitmap.VerticalFlip;
+  end;
 end;
 
 procedure TDigIt_Main.XML_LoadWork(IsAutoSave: Boolean);
@@ -1697,7 +1836,7 @@ var
    curExt: String;
 
 begin
-  if (rSource <> Nil) and (rSource^.Inst <> Nil) then
+  //if (rSource <> Nil) and (rSource^.Inst <> Nil) then
   try
      if IsAutoSave
      then curExt:= Ext_AutoSess
@@ -1724,7 +1863,10 @@ begin
      //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
      //So we do it after destroying XML.
 
-     if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+     if (rSource <> nil) and
+        (rSource^.Inst <> Nil)
+     then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+
 //     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Destination/Params');
 
      if not(IsAutoSave) then SessionModified:= False;
@@ -1840,6 +1982,8 @@ begin
 
   if (AFileName <> '') then
   try
+     //XML_SaveWork(True);
+
      newPath_Session:= ExtractFilePath(AFileName);
      newSession_File:= ExtractFileNameWithoutExt(ExtractFileName(AFileName));
      ForceDirectories(newPath_Session);
@@ -2019,23 +2163,26 @@ begin
      //Load rSource and its Params
      newSourceName:= aXML.GetValue('Source/Name', '');
 
-     if theBridge.SourcesImpl.Select(newSourceName)
-     then begin
-            if (theBridge.SourcesImpl.Selected <> rSource) then
-            begin
-              { #note -oMaxM : rSource Switched...Do something? }
-            end;
+     if (newSourceName <> '') then
+     begin
+       if theBridge.SourcesImpl.Select(newSourceName)
+       then begin
+              if (theBridge.SourcesImpl.Selected <> rSource) then
+              begin
+                { #note -oMaxM : rSource Switched...Do something? }
+              end;
 
-            rSource:= theBridge.SourcesImpl.Selected;
-            rSourceName:= theBridge.SourcesImpl.SelectedName;
-            rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-            Result:= theBridge.SourcesImpl.SelectedIndex;
-            theBridge.SourcesImpl.LoadSelectedParams(aXML.Filename, 'Source/Params');
-          end
-     else begin
-            MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
-            Result:= theBridge.SourcesImpl.SelectedIndex;
-          end;
+              rSource:= theBridge.SourcesImpl.Selected;
+              rSourceName:= theBridge.SourcesImpl.SelectedName;
+              rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+              Result:= theBridge.SourcesImpl.SelectedIndex;
+              theBridge.SourcesImpl.LoadSelectedParams(aXML.Filename, 'Source/Params');
+            end
+       else begin
+              MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
+              Result:= theBridge.SourcesImpl.SelectedIndex;
+            end;
+      end;
 
   finally
     if aFree then aXML.Free;
@@ -2075,7 +2222,9 @@ begin
          //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
          //So we do it after destroying XML.
 
-         if (rSource <> nil) then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+         if (rSource <> nil) and
+            (rSource^.Inst <> nil)
+         then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
        end;
      end;
 
@@ -2539,29 +2688,22 @@ begin
           then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
-     selButton := aXML.GetValue(XML_PageSettings+'Rotate', -1);
-     Case selButton of
-     0: btPRotateLeft.Down:= True;
-     1: btPRotateRight.Down:= True;
-     2: btPRotate180.Down:= True;
-     else begin
-            btPRotateLeft.Down:= False;
-            btPRotateRight.Down:= False;
-            btPRotate180.Down:= False;
-          end;
-     end;
+     aXML.ReadObject(XML_PageSettings+'Page/', imgManipulation.EmptyImage);
 
-     selButton := aXML.GetValue(XML_PageSettings+'Flip', -1);
-     Case selButton of
-     0: btPFlipV.Down:= True;
-     1: btPFlipH.Down:= True;
-     else begin
-            btPFlipV.Down:=  False;
-            btPFlipH.Down:= False;
-          end;
-     end;
+     PageUnitType := aXML.GetValue(XML_PageSettings+'UnitType', 0);
+     if (imgManipulation.EmptyImage.Width = 0) or
+        (imgManipulation.EmptyImage.Height = 0) then PageUnitType:= 0;
+
+     PageRotate:= rotNone;
+     aXML.GetValue(XML_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItRotate));
+
+     PageFlip:= flipNone;
+     aXML.GetValue(XML_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFlip));
 
   finally
+    UI_FillPageSizes;
+    UI_FillPageRotateFlip;
+
     if aFree then aXML.Free;
   end;
 end;
@@ -2578,22 +2720,11 @@ begin
           then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
-     if btPRotateLeft.Down
-     then aXML.SetValue(XML_PageSettings+'Rotate', 0)
-     else
-     if btPRotateRight.Down
-     then aXML.SetValue(XML_PageSettings+'Rotate', 1)
-     else
-     if btPRotate180.Down
-     then aXML.SetValue(XML_PageSettings+'Rotate', 2)
-     else aXML.SetValue(XML_PageSettings+'Rotate', -1);
+     aXML.WriteObject(XML_PageSettings+'Page/', imgManipulation.EmptyImage);
 
-     if btPFlipV.Down
-     then aXML.SetValue(XML_PageSettings+'Flip', 0)
-     else
-     if btPFlipH.Down
-     then aXML.SetValue(XML_PageSettings+'Flip', 1)
-     else aXML.SetValue(XML_PageSettings+'Flip', -1);
+     aXML.SetValue(XML_PageSettings+'UnitType', PageUnitType);
+     aXML.SetValue(XML_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItRotate));
+     aXML.SetValue(XML_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFlip));
 
      if IsAutoSave then SessionModified:= True;
 
@@ -3387,6 +3518,8 @@ begin
            inFillBoxUI :=False;
         end
    else panelCropArea.Enabled :=False;
+
+   btPageSizesToCrops.Enabled:= (imgManipulation.CropAreas.Count > 0);
 end;
 
 procedure TDigIt_Main.UI_FillCounter;
@@ -3432,28 +3565,59 @@ end;
 
 procedure TDigIt_Main.UI_FillPageSizes;
 begin
-  inFillPagesUI :=True;
+  inFillPagesUI:= True;
 
-  panelPageSize.Enabled:=(edPage_UnitType.ItemIndex>0);
-  if panelPageSize.Enabled
-  then begin
-         edPage_UnitType.ItemIndex :=Integer(imgManipulation.EmptyImage.ResolutionUnit)+1;
+  panelPageSize.Enabled:= (PageUnitType > 0);
 
-         if (imgManipulation.EmptyImage.ResolutionUnit=ruNone)
-         then begin
-                edPageWidth.DecimalPlaces:=0;
-                edPageHeight.DecimalPlaces:=0;
-              end
-         else begin
-               edPageWidth.DecimalPlaces:=3;
-               edPageHeight.DecimalPlaces:=3;
-              end;
+  if panelPageSize.Enabled then
+  begin
+    if (PageUnitType <> Integer(imgManipulation.EmptyImage.ResolutionUnit)+1) then
+    begin
+      imgManipulation.EmptyImage.ResolutionUnit:= TResolutionUnit(PageUnitType-1);
+    end;
 
-         edPageWidth.Value:=imgManipulation.EmptyImage.ResolutionWidth;
-         edPageHeight.Value:=imgManipulation.EmptyImage.ResolutionHeight;
-       end;
+    if (imgManipulation.EmptyImage.ResolutionUnit=ruNone)
+    then begin
+           edPageWidth.DecimalPlaces:=0;
+           edPageHeight.DecimalPlaces:=0;
+         end
+    else begin
+           edPageWidth.DecimalPlaces:=3;
+           edPageHeight.DecimalPlaces:=3;
+         end;
 
-  inFillPagesUI :=False;
+    edPageWidth.Value:= imgManipulation.EmptyImage.ResolutionWidth;
+    edPageHeight.Value:= imgManipulation.EmptyImage.ResolutionHeight;
+  end;
+
+  inFillPagesUI:= False;
+end;
+
+procedure TDigIt_Main.UI_FillPageRotateFlip;
+begin
+  inFillPagesUI:= True;
+
+  Case PageRotate of
+    rotLeft90: btPRotateLeft.Down:= True;
+    rotRight90: btPRotateRight.Down:= True;
+    rot180: btPRotate180.Down:= True;
+    else begin
+      btPRotateLeft.Down:= False;
+      btPRotateRight.Down:= False;
+      btPRotate180.Down:= False;
+    end;
+  end;
+
+  Case PageFlip of
+    flipVertical: btPFlipV.Down:= True;
+    flipHorizontal: btPFlipH.Down:= True;
+    else begin
+         btPFlipV.Down:=  False;
+         btPFlipH.Down:= False;
+    end;
+  end;
+
+  inFillPagesUI:= False;
 end;
 
 procedure TDigIt_Main.UI_UpdateCropAreaList;
@@ -3497,6 +3661,7 @@ begin
                        DirectoryExists(Path_Session_Pictures);
 
          actTake.Enabled:= bCommonCond;
+         actTakeRe.Enabled:= bCommonCond and (lastLenTaked > 0);
          actCrop_Enabled:= bCommonCond and
                            ((lenSources = 1) or (iSourceFiles >= 0) and (iSourceFiles >= lenSources-1));
          actCropNext.Enabled:= bCommonCond and (lenSources > 0);

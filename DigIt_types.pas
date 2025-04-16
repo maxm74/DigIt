@@ -42,6 +42,27 @@ type
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
 
+  TDigItRotate = (
+    rotNone,
+    rotLeft90,
+    rotRight90,
+    rot180
+  );
+
+  TDigItFlip = (
+    flipNone,
+    flipHorizontal,
+    flipVertical
+  );
+
+  TDigItFlip4 = (
+    flipNull,
+    flipHLeft,
+    flipHRight,
+    flipVDown,
+    flipVUp
+  );
+
   TSourceFile = packed record
     fCrop: Boolean;
     fName: String;

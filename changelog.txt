@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/15 Deleted actCrop and using only actCropNext;
+2025/04/16 Solved Sources Wia/Twain Clear exception;
+           First write of Re Take for Custom Mode;
+           First write of PageRotate/Flip;
+
+        15 Deleted actCrop and using only actCropNext;
 	   First Write of ReTake for FullArea Mode;
 	   Added Params to Counter_Inc/Dec;
 	   Added SourceFiles_Clear method;

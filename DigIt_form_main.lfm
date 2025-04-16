@@ -7,6 +7,7 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -682,10 +683,13 @@ object DigIt_Main: TDigIt_Main
       object btPaperSizes: TSpeedButton
         Left = 212
         Height = 28
+        Hint = 'Paper Sizes'
         Top = 160
         Width = 29
         Images = imgListMenu
         ImageIndex = 10
+        ShowHint = True
+        ParentShowHint = False
         OnClick = btPaperSizesClick
       end
       object btCropDuplicateOp: TSpeedButton
@@ -745,14 +749,14 @@ object DigIt_Main: TDigIt_Main
       ItemHeight = 20
       ItemIndex = 0
       Items.Strings = (
-        'not defined'
+        'full size'
         'pixels'
         'inchs'
         'cm'
       )
       Style = csDropDownList
       TabOrder = 2
-      Text = 'not defined'
+      Text = 'full size'
       OnChange = edPage_UnitTypeChange
     end
     object panelPageSize: TBCPanel
@@ -842,10 +846,13 @@ object DigIt_Main: TDigIt_Main
       object btPageSizes: TSpeedButton
         Left = 212
         Height = 28
+        Hint = 'Page Sizes'
         Top = 25
         Width = 29
         Images = imgListMenu
         ImageIndex = 10
+        ShowHint = True
+        ParentShowHint = False
         OnClick = btPageSizesClick
       end
       object edPageHeight: TFloatSpinEdit
@@ -898,8 +905,10 @@ object DigIt_Main: TDigIt_Main
     object btPageSizesToCrops: TSpeedButton
       Left = 240
       Height = 28
-      Top = 20
+      Hint = 'Page size to Crops size'
+      Top = 18
       Width = 29
+      Enabled = False
       Images = imgListMenu
       ImageIndex = 11
       OnClick = btPageSizesToCropsClick
@@ -964,6 +973,7 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btPRotateClick
       end
       object btPRotateRight: TSpeedButton
         Left = 111
@@ -979,6 +989,7 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btPRotateClick
       end
       object btPFlipV: TSpeedButton
         Left = 81
@@ -994,6 +1005,7 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btPFlipClick
       end
       object btPFlipH: TSpeedButton
         Left = 111
@@ -1009,6 +1021,7 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btPFlipClick
       end
       object Label10: TLabel
         Left = 43
@@ -1033,6 +1046,7 @@ object DigIt_Main: TDigIt_Main
         ShowCaption = False
         ShowHint = True
         ParentShowHint = False
+        OnClick = btPRotateClick
       end
     end
   end
@@ -1133,14 +1147,14 @@ object DigIt_Main: TDigIt_Main
       end
       object tbCaptSep1: TToolButton
         Left = 53
-        Height = 26
+        Height = 8
         Top = 2
         Caption = 'tbCaptSep1'
         Style = tbsSeparator
       end
       object tbCaptSep2: TToolButton
         Left = 113
-        Height = 26
+        Height = 8
         Top = 2
         Caption = 'tbCaptSep2'
         Style = tbsSeparator
@@ -1560,7 +1574,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepMenu: TToolButton
         Left = 76
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepMenu'
         Style = tbsSeparator
@@ -1588,7 +1602,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepTake: TToolButton
         Left = 267
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
@@ -1641,7 +1655,7 @@ object DigIt_Main: TDigIt_Main
       Wrapable = False
       object tbSepCrop: TToolButton
         Left = 1
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepCrop'
         Style = tbsSeparator
@@ -1672,7 +1686,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepClear: TToolButton
         Left = 348
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator

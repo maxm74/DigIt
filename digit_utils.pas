@@ -33,8 +33,8 @@ procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: 
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
-procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
-                          var newWidth, newHeight:Integer);
+procedure GetProportionalSize(Width, Height, imgWidth, imgHeight:Integer;
+                              var newWidth, newHeight:Integer);
 
 implementation
 
@@ -259,27 +259,27 @@ begin
          end;
 end;
 
-procedure GetThumnailSize(thumbWidth, thumbHeight, imgWidth, imgHeight:Integer;
-                          var newWidth, newHeight:Integer);
+procedure GetProportionalSize(Width, Height, imgWidth, imgHeight:Integer;
+                              var newWidth, newHeight:Integer);
 var
    rW, rH:Single;
 
 begin
-  if (thumbWidth=0)
+  if (Width=0)
   then rW:=1
-  else rW := imgWidth / thumbWidth;
-  if (thumbHeight=0)
+  else rW := imgWidth / Width;
+  if (Height=0)
   then rH:=1
-  else rH := imgHeight / thumbHeight;
+  else rH := imgHeight / Height;
 
   if (rW > rH)
   then begin
          newHeight := round(imgHeight / rW);
-         newWidth := thumbWidth;
+         newWidth := Width;
        end
   else begin
          newWidth := round(imgWidth / rH);
-         newHeight := thumbHeight;
+         newHeight := Height;
        end;
 end;
 

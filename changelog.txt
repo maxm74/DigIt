@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/16 Solved Sources Wia/Twain Clear exception;
+2025/04/17 Page Size/Rotate/Flip always enabled on right roll;
+           Added Page Fixed Size Combobox;
+           Rotate/Flip reload Image when Changed in UI;
+           Renamed TDigItFlip/Rotate to TDigItFilter_Flip/Rotate;
+           Renamed function GetThumnailSize to GetProportionalSize;
+
+        16 Solved Sources Wia/Twain Clear exception;
            First write of Re Take for Custom Mode;
            First write of PageRotate/Flip;
 

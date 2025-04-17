@@ -88,6 +88,7 @@ type
     BCLabel1: TBCLabel;
     BCLabel10: TBCLabel;
     BCLabel11: TBCLabel;
+    BCLabel12: TBCLabel;
     BCLabel13: TBCLabel;
     BCLabel14: TBCLabel;
     BCLabel2: TBCLabel;
@@ -97,55 +98,29 @@ type
     BCLabel6: TBCLabel;
     BCLabel7: TBCLabel;
     BCLabel8: TBCLabel;
-    imgListCaptured: TImageList;
-    itemTake: TMenuItem;
-    itemTakeAgain: TMenuItem;
-    itemBuildDuplex: TMenuItem;
-    menuDebug: TMenuItem;
-    menuClearXML: TMenuItem;
-    menuImageFormat: TMenuItem;
-    menuExport: TMenuItem;
-    MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
-    menuProjectSaveAs: TMenuItem;
-    menuSaveXML: TMenuItem;
-    menuLoadXML: TMenuItem;
-    panelTop: TPanel;
-    panelCounterList: TBCPanel;
-    btPFlipH: TSpeedButton;
-    btPRotateLeft: TSpeedButton;
-    btPRotateRight: TSpeedButton;
-    btPFlipV: TSpeedButton;
-    btPRotate180: TSpeedButton;
-    imgListImgActions: TImageList;
-    Label10: TLabel;
-    Label9: TLabel;
-    menuDestinations: TPopupMenu;
-    itemCropModeFull: TMenuItem;
-    itemCropModeCustom: TMenuItem;
-    panelPageRotate: TBCPanel;
-    btCrop_Add: TBGRASpeedButton;
-    btCrop_Del: TBGRASpeedButton;
     btCFlipHLeft: TSpeedButton;
     btCFlipHRight: TSpeedButton;
     btCFlipVDown: TSpeedButton;
     btCFlipVUp: TSpeedButton;
     btCropDuplicate: TSpeedButton;
     btCropDuplicateOp: TSpeedButton;
+    btCrop_Add: TBGRASpeedButton;
+    btCrop_Del: TBGRASpeedButton;
     btCRotateLeft: TSpeedButton;
     btCRotateRight: TSpeedButton;
     btPageSizes: TSpeedButton;
     btPageSizesToCrops: TSpeedButton;
     btPaperSizes: TSpeedButton;
+    btPFlipH: TSpeedButton;
+    btPFlipV: TSpeedButton;
+    btPRotate180: TSpeedButton;
+    btPRotateLeft: TSpeedButton;
+    btPRotateRight: TSpeedButton;
     btZBack: TSpeedButton;
     btZDown: TSpeedButton;
     btZFront: TSpeedButton;
     btZUp: TSpeedButton;
     cbCropList: TComboBox;
-    edCounterValue: TSpinEdit;
-    edCounterValueStringDigits: TSpinEdit;
-    edCounterValueStringPost: TEdit;
-    edCounterValueStringPre: TEdit;
     edCropAspectPersonal: TEditButton;
     edCropHeight: TFloatSpinEdit;
     edCropLeft: TFloatSpinEdit;
@@ -156,14 +131,42 @@ type
     edPageHeight: TFloatSpinEdit;
     edPageWidth: TFloatSpinEdit;
     edPage_UnitType: TComboBox;
-    imgListMenu: TImageList;
-    imgListThumb: TBGRAImageList;
+    edPage_Fix: TComboBox;
+    imgListCaptured: TImageList;
+    itemTake: TMenuItem;
+    itemTakeAgain: TMenuItem;
+    itemBuildDuplex: TMenuItem;
     Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
     Label2: TLabel;
     Label3: TLabel;
-    Label4: TLabel;
-    Label7: TLabel;
     Label8: TLabel;
+    Label9: TLabel;
+    menuDebug: TMenuItem;
+    menuClearXML: TMenuItem;
+    menuImageFormat: TMenuItem;
+    menuExport: TMenuItem;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    menuProjectSaveAs: TMenuItem;
+    menuSaveXML: TMenuItem;
+    menuLoadXML: TMenuItem;
+    panelCropArea: TBCPanel;
+    panelPageRotate: TBCPanel;
+    panelPageSize: TBCPanel;
+    panelTop: TPanel;
+    imgListImgActions: TImageList;
+    menuDestinations: TPopupMenu;
+    itemCropModeFull: TMenuItem;
+    itemCropModeCustom: TMenuItem;
+    edCounterValue: TSpinEdit;
+    edCounterValueStringDigits: TSpinEdit;
+    edCounterValueStringPost: TEdit;
+    edCounterValueStringPre: TEdit;
+    imgListMenu: TImageList;
+    imgListThumb: TBGRAImageList;
+    Label4: TLabel;
     imgManipulation: TBGRAImageManipulation;
     imgListMain: TImageList;
     lbCounterExample: TLabel;
@@ -174,10 +177,8 @@ type
     menuOptions: TMenuItem;
     OpenSessionDlg: TOpenDialog;
     panelCounter: TBCPanel;
-    panelCropArea: TBCPanel;
     menuPaperSizes: TPopupMenu;
     menuSources: TPopupMenu;
-    panelPageSize: TBCPanel;
     menuTimerTake: TPopupMenu;
     menuCropMode: TPopupMenu;
     menuTake: TPopupMenu;
@@ -194,7 +195,6 @@ type
     SelectDirectory: TSelectDirectoryDialog;
     Separator2: TMenuItem;
     Separator3: TMenuItem;
-    SpeedButton1: TSpeedButton;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
     tbCapturedPDF: TToolButton;
@@ -323,8 +323,9 @@ type
     CropMode: TDigItCropMode;
 
     PageUnitType: Integer;
-    PageRotate: TDigItRotate;
-    PageFlip: TDigItFlip;
+    PageResize: TDigItFilter_Resize;
+    PageRotate: TDigItFilter_Rotate;
+    PageFlip: TDigItFilter_Flip;
 
     rSource: PSourceInfo;
     rSourceParams: IDigIt_Params;
@@ -378,8 +379,9 @@ type
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
-    function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItRotate): TBGRABitmap;
-    procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFlip);
+    function ResizeImage(ABitmap :TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
+    function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
+    procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
 
     procedure XML_LoadWork(IsAutoSave: Boolean);
     procedure XML_SaveWork(IsAutoSave: Boolean);
@@ -1208,7 +1210,7 @@ end;
 
 procedure TDigIt_Main.btPFlipClick(Sender: TObject);
 var
-   oldPageFlip: TDigItFlip;
+   oldPageFlip: TDigItFilter_Flip;
 
 begin
   oldPageFlip:= PageFlip;
@@ -1222,19 +1224,23 @@ begin
 
   if not(imgManipulation.Empty) then
   begin
-    //Flip Image to Initial Value
-    FlipImage(imgManipulation.Bitmap, oldPageFlip);
+    if FileExists(LoadedFile)
+    then LoadImage(LoadedFile, False)
+    else begin
+           //Flip Image to Initial Value
+           FlipImage(imgManipulation.Bitmap, oldPageFlip);
 
-    //Flip Image to New Value
-    FlipImage(imgManipulation.Bitmap, PageFlip);
+           //Flip Image to New Value
+           FlipImage(imgManipulation.Bitmap, PageFlip);
 
-    imgManipulation.RefreshBitmap;
+           imgManipulation.RefreshBitmap;
+         end;
   end;
 end;
 
 procedure TDigIt_Main.btPRotateClick(Sender: TObject);
 var
-   oldPageRotate: TDigItRotate;
+   oldPageRotate: TDigItFilter_Rotate;
    BitmapR,
    BitmapNewR: TBGRABitmap;
 
@@ -1256,27 +1262,25 @@ begin
     BitmapR:= nil;
     BitmapNewR:= nil;
 
-    //Retun Image to Initial Value
-    Case oldPageRotate of
-      rotNone: BitmapR:= imgManipulation.Bitmap;
-      rotLeft90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotRight90);
-      rotRight90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotLeft90);
-      rot180: BitmapR:= RotateImage(imgManipulation.Bitmap, rot180);
-    end;
-
-    //Rotate Image to New Value
-    if (PageRotate = rotNone)
-    then begin
-           //BitmapR.InvalidateBitmap;
-           imgManipulation.Bitmap:= BitmapR;
-         end
+    if FileExists(LoadedFile)
+    then LoadImage(LoadedFile, False)
     else begin
-           BitmapNewR:= RotateImage(BitmapR, PageRotate);
-           //BitmapNewR.InvalidateBitmap;
-           imgManipulation.Bitmap:= BitmapNewR;
-         end;
+           //Retun Image to Initial Value
+           Case oldPageRotate of
+           rotNone: BitmapR:= imgManipulation.Bitmap;
+           rotLeft90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotRight90);
+           rotRight90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotLeft90);
+           rot180: BitmapR:= RotateImage(imgManipulation.Bitmap, rot180);
+           end;
 
-  //imgManipulation.Bitmap.InvalidateBitmap;
+           //Rotate Image to New Value
+           if (PageRotate = rotNone)
+           then imgManipulation.Bitmap:= BitmapR
+           else begin
+                  BitmapNewR:= RotateImage(BitmapR, PageRotate);
+                  imgManipulation.Bitmap:= BitmapNewR;
+                end;
+         end;
 
   finally
     if (BitmapR <> nil) then BitmapR.Free;
@@ -1776,7 +1780,26 @@ begin
   if saveToXML then XML_SaveLoadedImage(nil, True);
 end;
 
-function TDigIt_Main.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItRotate): TBGRABitmap;
+function TDigIt_Main.ResizeImage(ABitmap: TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
+var
+   newWidth, newHeight:Integer;
+
+begin
+  Result:= nil;
+
+  if (APageResize <> resNone) then
+  begin
+    GetProportionalSize(imgManipulation.EmptyImage.Width, imgManipulation.EmptyImage.Height,
+                      ABitmap.Width, ABitmap.Height, newWidth, newHeight);
+    Case APageResize of
+    resFixedWidth: Result:= nil;
+    resFixedHeight: Result:= nil;
+    resBoth: Result:= nil;
+    end;
+  end;
+end;
+
+function TDigIt_Main.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
 begin
   Case APageRotate of
     rotNone: Result:= nil;
@@ -1786,7 +1809,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFlip);
+procedure TDigIt_Main.FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
 begin
   Case APageFlip of
     flipHorizontal: ABitmap.HorizontalFlip;
@@ -2694,11 +2717,14 @@ begin
      if (imgManipulation.EmptyImage.Width = 0) or
         (imgManipulation.EmptyImage.Height = 0) then PageUnitType:= 0;
 
+     PageResize:= resFixedWidth;
+     aXML.GetValue(XML_PageSettings+'Resize', PageResize, TypeInfo(TDigItFilter_Resize));
+
      PageRotate:= rotNone;
-     aXML.GetValue(XML_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItRotate));
+     aXML.GetValue(XML_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
 
      PageFlip:= flipNone;
-     aXML.GetValue(XML_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFlip));
+     aXML.GetValue(XML_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFilter_Flip));
 
   finally
     UI_FillPageSizes;
@@ -2723,8 +2749,9 @@ begin
      aXML.WriteObject(XML_PageSettings+'Page/', imgManipulation.EmptyImage);
 
      aXML.SetValue(XML_PageSettings+'UnitType', PageUnitType);
-     aXML.SetValue(XML_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItRotate));
-     aXML.SetValue(XML_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFlip));
+     aXML.SetValue(XML_PageSettings+'Resize', PageResize, TypeInfo(TDigItFilter_Resize));
+     aXML.SetValue(XML_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
+     aXML.SetValue(XML_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFilter_Flip));
 
      if IsAutoSave then SessionModified:= True;
 
@@ -3155,23 +3182,16 @@ begin
         tbCrop.Visible:= False;
         imgManipulation.clearCropAreas;
         imgManipulation.Opacity:= 0;
-        //imgManipulation.Enabled:= False;
         rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
         rollCounters.Collapsed:= True;
-
-        panelCounterList.Enabled:= False;
 
         tbCropMode.Caption:= rsCropFull;
       end;
       diCropCustom: begin
         tbCrop.Visible:= True;
         imgManipulation.Opacity:= 128;
-        //imgManipulation.Enabled:= True;
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
         rollCounters.Collapsed:= False;
-
-        panelCounterList.Enabled:= True;
-
         tbCropMode.Caption:= rsCropCust;
       end;
     end;

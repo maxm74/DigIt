@@ -552,6 +552,10 @@ msgctxt "tdigit_main.bclabel11.caption"
 msgid "Height :"
 msgstr ""
 
+#: tdigit_main.bclabel12.caption
+msgid "Fixed side:"
+msgstr ""
+
 #: tdigit_main.bclabel13.caption
 msgid "Before :"
 msgstr ""
@@ -707,6 +711,10 @@ msgstr ""
 msgid "pixels"
 msgstr ""
 
+#: tdigit_main.edpage_fix.text
+msgid "Width"
+msgstr ""
+
 #: tdigit_main.edpage_unittype.text
 msgid "full size"
 msgstr ""
@@ -730,6 +738,10 @@ msgctxt "tdigit_main.label10.caption"
 msgid "Flip :"
 msgstr ""
 
+#: tdigit_main.label11.caption
+msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
 #: tdigit_main.label2.caption
 msgctxt "tdigit_main.label2.caption"
 msgid "Rotate :"
@@ -744,12 +756,8 @@ msgstr ""
 msgid "Example :"
 msgstr ""
 
-#: tdigit_main.label7.caption
-msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgstr ""
-
 #: tdigit_main.label8.caption
-msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgid "Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr ""
 
 #: tdigit_main.label9.caption
@@ -806,7 +814,8 @@ msgid "Aspect Ratio"
 msgstr ""
 
 #: tdigit_main.rollcounters.button.caption
-msgid "Page Counters"
+msgctxt "tdigit_main.rollcounters.button.caption"
+msgid "Page Size & Counter"
 msgstr ""
 
 #: tdigit_main.rollcrops.button.caption

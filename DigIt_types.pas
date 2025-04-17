@@ -42,25 +42,32 @@ type
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
 
-  TDigItRotate = (
+  TDigItFilter_Rotate = (
     rotNone,
     rotLeft90,
     rotRight90,
     rot180
   );
 
-  TDigItFlip = (
+  TDigItFilter_Flip = (
     flipNone,
     flipHorizontal,
     flipVertical
   );
 
-  TDigItFlip4 = (
+  TDigItFilter_Flip4 = (
     flipNull,
     flipHLeft,
     flipHRight,
     flipVDown,
     flipVUp
+  );
+
+  TDigItFilter_Resize = (
+    resFixedWidth,
+    resFixedHeight,
+    resBoth,
+    resNone
   );
 
   TSourceFile = packed record

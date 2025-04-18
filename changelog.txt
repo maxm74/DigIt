@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/17 Page Size/Rotate/Flip always enabled on right roll;
+2025/04/18 Updated Page Resize;
+           Page Rotate/Flip/Resize in LoadImage;
+           Added Target Platform sub paths to Languages;
+
+        17 Page Size/Rotate/Flip always enabled on right roll;
            Added Page Fixed Size Combobox;
            Rotate/Flip reload Image when Changed in UI;
            Renamed TDigItFlip/Rotate to TDigItFilter_Flip/Rotate;

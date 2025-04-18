@@ -460,7 +460,7 @@ implementation
 
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
-  BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
+  BGRAResample, BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
@@ -1378,7 +1378,11 @@ begin
   if inFillPagesUI then exit;
 
   imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex-1),
-                                      edPageWidth.Value, edPageHeight.Value);
+                                    edPageWidth.Value, edPageHeight.Value);
+
+  if not(imgManipulation.Empty) and
+     FileExists(LoadedFile)
+  then LoadImage(LoadedFile, False);
 end;
 
 procedure TDigIt_Main.edPageWidthChange(Sender: TObject);
@@ -1386,7 +1390,11 @@ begin
   if inFillPagesUI then exit;
 
   imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex-1),
-                                      edPageWidth.Value, edPageHeight.Value);
+                                    edPageWidth.Value, edPageHeight.Value);
+
+  if not(imgManipulation.Empty) and
+     FileExists(LoadedFile)
+  then LoadImage(LoadedFile, False);
 end;
 
 procedure TDigIt_Main.edPage_UnitTypeChange(Sender: TObject);
@@ -1394,14 +1402,23 @@ begin
   PageUnitType:= edPage_UnitType.ItemIndex;
 
   if (PageUnitType = 0)
-  then imgManipulation.SetEmptyImageSizeToNull
+  then begin
+         PageResize:= resNone;
+         imgManipulation.SetEmptyImageSizeToNull;
+       end
   else begin
          //if there is a size defined, change only the resolution unit
          if (panelPageSize.Enabled)
          then imgManipulation.EmptyImage.ResolutionUnit:=TResolutionUnit(edPage_UnitType.ItemIndex-1)
          else imgManipulation.SetEmptyImageSize(TResolutionUnit(edPage_UnitType.ItemIndex-1),
                                          edPageWidth.Value, edPageHeight.Value);
+
+         PageResize:= resFixedWidth; {#todo Get Real Value}
        end;
+
+  if not(imgManipulation.Empty) and
+     FileExists(LoadedFile)
+  then LoadImage(LoadedFile, False);
 
   UI_FillPageSizes;
 end;
@@ -1737,13 +1754,14 @@ end;
 function TDigIt_Main.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
 var
    Bitmap,
-   BitmapR :TBGRABitmap;
+   BitmapR:TBGRABitmap;
 
 begin
   Result:= False;
 
   if (AImageFile<>'') and FileExists(AImageFile) then
   try
+     BitmapR:= nil;
      Bitmap:= TBGRABitmap.Create;
      Bitmap.LoadFromFile(AImageFile);
 
@@ -1751,15 +1769,34 @@ begin
 
      { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
 
-     //Flip
-     FlipImage(Bitmap, PageFlip);
+     //Resize
+     if (PageResize <> resNone) then
+     begin
+       BitmapR:= ResizeImage(Bitmap, PageResize);
+       if (BitmapR<>nil) then
+       begin
+         Bitmap.Free;
+         Bitmap:= BitmapR;
+         BitmapR:= nil;
+       end;
+     end;
 
      //Rotate
-     BitmapR:= RotateImage(Bitmap, PageRotate);
+     if (PageRotate <> rotNone) then
+     begin
+       BitmapR:= RotateImage(Bitmap, PageRotate);
+       if (BitmapR<>nil) then
+       begin
+         Bitmap.Free;
+         Bitmap:= BitmapR;
+         BitmapR:= nil;
+       end;
+     end;
 
-     if (BitmapR <> Nil)
-     then imgManipulation.Bitmap := BitmapR
-     else imgManipulation.Bitmap := Bitmap;
+     //Flip
+     if (PageFlip <> flipNone) then FlipImage(Bitmap, PageFlip);
+
+     imgManipulation.Bitmap:= Bitmap;
 
      LoadedFile:= AImageFile;
 
@@ -1769,7 +1806,6 @@ begin
 
   finally
      if (Bitmap <> Nil) then Bitmap.Free;
-     if (BitmapR <> Nil) then BitmapR.Free;
   end;
 end;
 
@@ -1789,6 +1825,7 @@ begin
 
   if (APageResize <> resNone) then
   begin
+    (*
     GetProportionalSize(imgManipulation.EmptyImage.Width, imgManipulation.EmptyImage.Height,
                       ABitmap.Width, ABitmap.Height, newWidth, newHeight);
     Case APageResize of
@@ -1796,6 +1833,13 @@ begin
     resFixedHeight: Result:= nil;
     resBoth: Result:= nil;
     end;
+    *)
+    Result:= ABitmap.Resample(imgManipulation.EmptyImage.ResolutionUnit,
+                              imgManipulation.EmptyImage.ResolutionWidth,
+                              imgManipulation.EmptyImage.ResolutionHeight);
+(*    FineResample(ABitmap, imgManipulation.EmptyImage.ResolutionUnit,
+                 imgManipulation.EmptyImage.ResolutionWidth, imgManipulation.EmptyImage.ResolutionHeight, );
+*)
   end;
 end;
 
@@ -3390,6 +3434,12 @@ begin
   lastLenTaked:= 0;
 
   LoadedFile:= '';
+
+  PageUnitType:= 0;
+  PageResize:= resNone;
+  PageRotate:= rotNone;
+  PageFlip:= flipNone;
+
   CropMode:= diCropNull; //setCropMode works only if there are changes
 end;
 

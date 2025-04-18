@@ -1,0 +1,913 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: digit_form_buildduplex.caption_cancel
+msgctxt "digit_form_buildduplex.caption_cancel"
+msgid "&Cancel"
+msgstr ""
+
+#: digit_form_buildduplex.caption_end
+msgid "&End"
+msgstr ""
+
+#: digit_form_buildduplex.caption_next
+msgctxt "digit_form_buildduplex.caption_next"
+msgid "&Next"
+msgstr ""
+
+#: digit_form_buildduplex.caption_prev
+msgctxt "digit_form_buildduplex.caption_prev"
+msgid "&Back"
+msgstr ""
+
+#: digit_form_buildduplex.msg_confirm_cancelstep
+msgid "Cancel the Operation?"
+msgstr ""
+
+#: digit_form_buildduplex.msg_err_cancelstep
+msgid "Operation aborted by User"
+msgstr ""
+
+#: digit_form_buildduplex.rscancelback
+msgid "Do I cancel the Back Side acquisition I just made?"
+msgstr ""
+
+#: digit_form_buildduplex.rscancelfront
+msgid "Do I cancel the Front Side acquisition I just made?"
+msgstr ""
+
+#: digit_form_buildduplex.rsnopages
+msgid "No Pages in Front or Back Side"
+msgstr ""
+
+#: digit_form_exportfiles.rsconvertimg
+msgid "Converting Images to Images..."
+msgstr ""
+
+#: digit_form_exportfiles.rsconvertpdf
+msgid "Converting Images to PDF..."
+msgstr ""
+
+#: digit_form_exportfiles.rslandscape
+msgid "Landscape"
+msgstr ""
+
+#: digit_form_exportfiles.rsopendirectory
+msgid "Conversion to Images completed, do i Open it?"
+msgstr ""
+
+#: digit_form_exportfiles.rsopensavedpdf
+msgid "Conversion to PDF completed, do i Open it?"
+msgstr ""
+
+#: digit_form_exportfiles.rsportrait
+msgid "Portrait"
+msgstr ""
+
+#: digit_form_main.rsclearcrops
+msgid "Clear Crop Areas ?"
+msgstr ""
+
+#: digit_form_main.rsclearqueue
+msgid "Clear the Work Queue?"
+msgstr ""
+
+#: digit_form_main.rscontinueautowork
+msgid "Continue from Auto Saved Work Session?"
+msgstr ""
+
+#: digit_form_main.rscontinuework
+#, object-pascal-format
+msgid ""
+"Continue from last Work Session?\n"
+"%s"
+msgstr ""
+
+#: digit_form_main.rscounterprev
+#, object-pascal-format
+msgid "Value Previous: %d"
+msgstr ""
+
+#: digit_form_main.rscrop
+msgid "Crop (F5)"
+msgstr ""
+
+#: digit_form_main.rscropcust
+msgctxt "digit_form_main.rscropcust"
+msgid "Custom"
+msgstr ""
+
+#: digit_form_main.rscropfull
+msgctxt "digit_form_main.rscropfull"
+msgid "Full Area"
+msgstr ""
+
+#: digit_form_main.rscropnext
+msgid "Crop + Next (F5)"
+msgstr ""
+
+#: digit_form_main.rscroptodo
+#, object-pascal-format
+msgid "%d files to do"
+msgstr ""
+
+#: digit_form_main.rsdeleteall
+msgid "Delete All Captured Pages?"
+msgstr ""
+
+#: digit_form_main.rsdeleteallfiles
+msgid "Do I also Delete Files from the disk?"
+msgstr ""
+
+#: digit_form_main.rsdeletecaptured
+#, object-pascal-format
+msgid "Delete Captured Page %s ?"
+msgstr ""
+
+#: digit_form_main.rserrincomplete
+msgid "Operation not completed, do I keep the processed files?"
+msgstr ""
+
+#: digit_form_main.rserrloadwork
+#, object-pascal-format
+msgid ""
+"Cannot Load Work Session\n"
+"%s"
+msgstr ""
+
+#: digit_form_main.rserrsavework
+#, object-pascal-format
+msgid ""
+"Cannot Save Work Session\n"
+"%s\n"
+"%s"
+msgstr ""
+
+#: digit_form_main.rsexccreatecounter
+msgid "Failed to Create the Counter"
+msgstr ""
+
+#: digit_form_main.rsmiddlepage
+msgid ""
+"The page is within the already processed range\n"
+"Should I put it in the middle?"
+msgstr ""
+
+#: digit_form_main.rsnewwork
+msgid "Start a New Work Session?"
+msgstr ""
+
+#: digit_form_main.rsnofilesdownloaded
+msgid "NO Files Downloaded "
+msgstr ""
+
+#: digit_form_main.rsnomorefiles
+msgid "There are no more files to process, should I clear the Work Queue?"
+msgstr ""
+
+#: digit_form_main.rsnotimpl
+msgid "Not yet implemented"
+msgstr ""
+
+#: digit_form_main.rssavework
+msgid "Save the Work Session?"
+msgstr ""
+
+#: digit_form_main.rssaveworkcopy
+msgid "Create a Copy of the Work Session or Move it?"
+msgstr ""
+
+#: digit_form_main.rssavingcaptured
+msgid "Saving Captured Files"
+msgstr ""
+
+#: digit_form_main.rssavingdone
+msgid "Saved Done"
+msgstr ""
+
+#: digit_form_main.rssavingsessionfiles
+msgid "Saving Session Files"
+msgstr ""
+
+#: digit_form_main.rssavingsources
+msgid "Saving Sources Files"
+msgstr ""
+
+#: digit_form_main.rssavingswitch
+msgid "Switching to New Work Session"
+msgstr ""
+
+#: digit_form_main.rssavingwork
+msgid "Saving the Work Session"
+msgstr ""
+
+#: digit_form_main.rssourcenotfound
+#, object-pascal-format
+msgid "Source \"%s\" not Found, try Select another from Menù"
+msgstr ""
+
+#: digit_form_main.rssourcenotselected
+#, object-pascal-format
+msgid "Cannot Select Source %d, try Select another from Menù"
+msgstr ""
+
+#: digit_form_main.rstakeagain
+#, object-pascal-format
+msgid "Replace the last %d taked files with a new Take?"
+msgstr ""
+
+#: digit_types.rsprocessed
+#, object-pascal-format
+msgid "Processed %d / %s"
+msgstr ""
+
+#: digit_types.rsprocessing
+#, object-pascal-format
+msgid "Processing %d / %s"
+msgstr ""
+
+#: digit_types.rsprocessingimages
+msgid "Processing Images"
+msgstr ""
+
+#: digit_utils.rsdestination_default
+msgid "Save as Files"
+msgstr ""
+
+#: digit_utils.rshorizontal
+msgid "    Horizontal"
+msgstr ""
+
+#: digit_utils.rsvertical
+msgid "   Vertical"
+msgstr ""
+
+#: tdigit_exportfiles.bclabel9.caption
+msgid "Format :"
+msgstr ""
+
+#: tdigit_exportfiles.btaddfiles.caption
+msgid "Add Files..."
+msgstr ""
+
+#: tdigit_exportfiles.btaddfolder.caption
+msgid "Add Folder..."
+msgstr ""
+
+#: tdigit_exportfiles.btdel.caption
+msgid "Delete"
+msgstr ""
+
+#: tdigit_exportfiles.btdelall.caption
+msgid "Delete All"
+msgstr ""
+
+#: tdigit_exportfiles.btdown.hint
+msgctxt "tdigit_exportfiles.btdown.hint"
+msgid "Down"
+msgstr ""
+
+#: tdigit_exportfiles.btfirst.hint
+msgid "To First"
+msgstr ""
+
+#: tdigit_exportfiles.btlast.hint
+msgid "To Last"
+msgstr ""
+
+#: tdigit_exportfiles.btpaperorientation.hint
+msgid "Paper Orientation"
+msgstr ""
+
+#: tdigit_exportfiles.btup.hint
+msgctxt "tdigit_exportfiles.btup.hint"
+msgid "Up"
+msgstr ""
+
+#: tdigit_exportfiles.caption
+msgid "Export Settings -"
+msgstr ""
+
+#: tdigit_exportfiles.cbpapersize.text
+msgid "Same as the Image Size"
+msgstr ""
+
+#: tdigit_exportfiles.cbresursive.caption
+msgid "Recursive"
+msgstr ""
+
+#: tdigit_exportfiles.cbusejpgasis.caption
+msgid "Use JPeg Files as is"
+msgstr ""
+
+#: tdigit_exportfiles.label1.caption
+msgid "Title :"
+msgstr ""
+
+#: tdigit_exportfiles.label2.caption
+msgid "Author :"
+msgstr ""
+
+#: tdigit_exportfiles.label3.caption
+msgid "Producer :"
+msgstr ""
+
+#: tdigit_exportfiles.label4.caption
+msgid "Keywords :"
+msgstr ""
+
+#: tdigit_exportfiles.label5.caption
+msgid "Paper Size :"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[0].caption
+msgid "File Name"
+msgstr ""
+
+#: tdigit_exportfiles.lvfiles.columns[1].caption
+msgid "Full Path"
+msgstr ""
+
+#: tdigit_exportfiles.opendlg.title
+msgid "Open Existing Files"
+msgstr ""
+
+#: tdigit_exportfiles.openfolder.title
+msgid "Select a Folder"
+msgstr ""
+
+#: tdigit_exportfiles.panelfiles.caption
+msgid " Files "
+msgstr ""
+
+#: tdigit_exportfiles.panelinfos.caption
+msgid " Infos "
+msgstr ""
+
+#: tdigit_exportfiles.paneljpeg.caption
+msgid " Image Options "
+msgstr ""
+
+#: tdigit_exportfiles.panelsaveformat.caption
+msgid " Save Options "
+msgstr ""
+
+#: tdigit_exportfiles.savepdf.title
+msgid "Save PDF as"
+msgstr ""
+
+#: tdigit_exportfiles.tabimg.caption
+msgid "tabIMG"
+msgstr ""
+
+#: tdigit_exportfiles.tabpdf.caption
+msgid "tabPDF"
+msgstr ""
+
+#: tdigit_main.actcaptureddelete.caption
+msgid "Delete Selected Page"
+msgstr ""
+
+#: tdigit_main.actcaptureddeleteall.caption
+msgid "Delete All Pages"
+msgstr ""
+
+#: tdigit_main.actcapturedrotateleft.caption
+msgctxt "tdigit_main.actcapturedrotateleft.caption"
+msgid "Rotate Left"
+msgstr ""
+
+#: tdigit_main.actcapturedrotateright.caption
+msgctxt "tdigit_main.actcapturedrotateright.caption"
+msgid "Rotate Right"
+msgstr ""
+
+#: tdigit_main.actclearqueue.caption
+msgid "Clear Work Queue"
+msgstr ""
+
+#: tdigit_main.actconvertfiles.caption
+msgid "Convert Images"
+msgstr ""
+
+#: tdigit_main.actconvertpdf.caption
+msgid "Convert Images to PDF"
+msgstr ""
+
+#: tdigit_main.actcropall.caption
+msgid "Crop All"
+msgstr ""
+
+#: tdigit_main.actcropgoback.caption
+msgid "Back"
+msgstr ""
+
+#: tdigit_main.actcropgonext.caption
+msgid "Next"
+msgstr ""
+
+#: tdigit_main.actcropnext.caption
+msgid "Crop + Next"
+msgstr ""
+
+#: tdigit_main.actoptions.caption
+msgid "Options ..."
+msgstr ""
+
+#: tdigit_main.actpreview.caption
+msgid "Preview"
+msgstr ""
+
+#: tdigit_main.actsessionnew.caption
+msgid "New Work Session ..."
+msgstr ""
+
+#: tdigit_main.actsessionopen.caption
+msgid "Open Work Session ..."
+msgstr ""
+
+#: tdigit_main.actsessionsave.caption
+msgid "Save Work Session"
+msgstr ""
+
+#: tdigit_main.actsessionsaveas.caption
+msgid "Save Work Session as ..."
+msgstr ""
+
+#: tdigit_main.acttake.caption
+msgid "Take"
+msgstr ""
+
+#: tdigit_main.acttakebuildduplex.caption
+msgid "Take and Build Front/Back"
+msgstr ""
+
+#: tdigit_main.acttakere.caption
+msgid "Re-Take"
+msgstr ""
+
+#: tdigit_main.acttimertake.caption
+msgid "Timer Take"
+msgstr ""
+
+#: tdigit_main.bclabel1.caption
+msgid "Left :"
+msgstr ""
+
+#: tdigit_main.bclabel10.caption
+msgctxt "tdigit_main.bclabel10.caption"
+msgid "Width :"
+msgstr ""
+
+#: tdigit_main.bclabel11.caption
+msgctxt "tdigit_main.bclabel11.caption"
+msgid "Height :"
+msgstr ""
+
+#: tdigit_main.bclabel12.caption
+msgid "Fixed side:"
+msgstr ""
+
+#: tdigit_main.bclabel13.caption
+msgid "Before :"
+msgstr ""
+
+#: tdigit_main.bclabel14.caption
+msgid "After :"
+msgstr ""
+
+#: tdigit_main.bclabel2.caption
+msgid "Top :"
+msgstr ""
+
+#: tdigit_main.bclabel3.caption
+msgctxt "tdigit_main.bclabel3.caption"
+msgid "Width :"
+msgstr ""
+
+#: tdigit_main.bclabel4.caption
+msgctxt "tdigit_main.bclabel4.caption"
+msgid "Height :"
+msgstr ""
+
+#: tdigit_main.bclabel5.caption
+msgid "Unit :"
+msgstr ""
+
+#: tdigit_main.bclabel6.caption
+msgid "Name :"
+msgstr ""
+
+#: tdigit_main.bclabel7.caption
+msgid "Value :"
+msgstr ""
+
+#: tdigit_main.bclabel8.caption
+msgid "Digits :"
+msgstr ""
+
+#: tdigit_main.btcfliphleft.hint
+msgid "Flip Horizzontal Left"
+msgstr ""
+
+#: tdigit_main.btcfliphright.hint
+msgid "Flip Horizzontal Right"
+msgstr ""
+
+#: tdigit_main.btcflipvdown.hint
+msgid "Flip Vertical Down"
+msgstr ""
+
+#: tdigit_main.btcflipvup.hint
+msgid "Flip Vertical Up"
+msgstr ""
+
+#: tdigit_main.btcropduplicate.hint
+msgid "Duplicate this Area"
+msgstr ""
+
+#: tdigit_main.btcropduplicateop.hint
+msgid "Duplicate when Rotate/Flip"
+msgstr ""
+
+#: tdigit_main.btcrop_add.caption
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btcrop_add.hint
+msgid "Add a Crop Area"
+msgstr ""
+
+#: tdigit_main.btcrop_del.caption
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btcrop_del.hint
+msgid "Remove this Crop Area"
+msgstr ""
+
+#: tdigit_main.btcrotateleft.hint
+msgctxt "tdigit_main.btcrotateleft.hint"
+msgid "Rotate Left"
+msgstr ""
+
+#: tdigit_main.btcrotateright.hint
+msgctxt "tdigit_main.btcrotateright.hint"
+msgid "Rotate Right"
+msgstr ""
+
+#: tdigit_main.btpagesizes.hint
+msgid "Page Sizes"
+msgstr ""
+
+#: tdigit_main.btpagesizestocrops.hint
+msgid "Page size to Crops size"
+msgstr ""
+
+#: tdigit_main.btpapersizes.hint
+msgid "Paper Sizes"
+msgstr ""
+
+#: tdigit_main.btpfliph.hint
+msgid "Flip Horizzontal"
+msgstr ""
+
+#: tdigit_main.btpflipv.hint
+msgid "Flip Vertical"
+msgstr ""
+
+#: tdigit_main.btprotate180.hint
+msgid "Rotate 180°"
+msgstr ""
+
+#: tdigit_main.btprotateleft.hint
+msgctxt "tdigit_main.btprotateleft.hint"
+msgid "Rotate Left"
+msgstr ""
+
+#: tdigit_main.btprotateright.hint
+msgctxt "tdigit_main.btprotateright.hint"
+msgid "Rotate Right"
+msgstr ""
+
+#: tdigit_main.btzback.hint
+msgid "To Back"
+msgstr ""
+
+#: tdigit_main.btzdown.hint
+msgctxt "tdigit_main.btzdown.hint"
+msgid "Down"
+msgstr ""
+
+#: tdigit_main.btzfront.hint
+msgid "To Front"
+msgstr ""
+
+#: tdigit_main.btzup.hint
+msgctxt "tdigit_main.btzup.hint"
+msgid "Up"
+msgstr ""
+
+#: tdigit_main.caption
+msgid "DigIt"
+msgstr ""
+
+#: tdigit_main.edcropunit_type.text
+msgid "pixels"
+msgstr ""
+
+#: tdigit_main.edpage_fix.text
+msgid "Width"
+msgstr ""
+
+#: tdigit_main.edpage_unittype.text
+msgid "full size"
+msgstr ""
+
+#: tdigit_main.itemcropmodecustom.caption
+msgctxt "tdigit_main.itemcropmodecustom.caption"
+msgid "Custom"
+msgstr ""
+
+#: tdigit_main.itemcropmodefull.caption
+msgctxt "tdigit_main.itemcropmodefull.caption"
+msgid "Full Area"
+msgstr ""
+
+#: tdigit_main.label1.caption
+msgid "Z Order :"
+msgstr ""
+
+#: tdigit_main.label10.caption
+msgctxt "tdigit_main.label10.caption"
+msgid "Flip :"
+msgstr ""
+
+#: tdigit_main.label11.caption
+msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
+#: tdigit_main.label2.caption
+msgctxt "tdigit_main.label2.caption"
+msgid "Rotate :"
+msgstr ""
+
+#: tdigit_main.label3.caption
+msgctxt "tdigit_main.label3.caption"
+msgid "Flip :"
+msgstr ""
+
+#: tdigit_main.label4.caption
+msgid "Example :"
+msgstr ""
+
+#: tdigit_main.label8.caption
+msgid "Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
+#: tdigit_main.label9.caption
+msgctxt "tdigit_main.label9.caption"
+msgid "Rotate :"
+msgstr ""
+
+#: tdigit_main.lbcounterexample.caption
+msgid "000"
+msgstr ""
+
+#: tdigit_main.lbprevious.caption
+msgid "Value Previous: "
+msgstr ""
+
+#: tdigit_main.menuclearxml.caption
+msgid "Clear XML"
+msgstr ""
+
+#: tdigit_main.menudebug.caption
+msgid "Debug"
+msgstr ""
+
+#: tdigit_main.menuexport.caption
+msgid "Tools"
+msgstr ""
+
+#: tdigit_main.menuimageformat.caption
+msgid "ImageFormatForm"
+msgstr ""
+
+#: tdigit_main.menuloadxml.caption
+msgid "Load XML"
+msgstr ""
+
+#: tdigit_main.menusavexml.caption
+msgid "Save XML"
+msgstr ""
+
+#: tdigit_main.menutimertakeconfig.caption
+msgid "Config Timer"
+msgstr ""
+
+#: tdigit_main.menutimertakestop.caption
+msgid "Stop Timer"
+msgstr ""
+
+#: tdigit_main.opensessiondlg.title
+msgid "Open Existing Session"
+msgstr ""
+
+#: tdigit_main.rgcropaspect.caption
+msgid "Aspect Ratio"
+msgstr ""
+
+#: tdigit_main.rollcounters.button.caption
+msgid "Page Size & Counter"
+msgstr ""
+
+#: tdigit_main.rollcrops.button.caption
+msgid "Crop Areas"
+msgstr ""
+
+#: tdigit_main.rollpages.button.caption
+msgid "Captured Pages"
+msgstr ""
+
+#: tdigit_main.savesessiondlg.title
+msgid "Save Session as"
+msgstr ""
+
+#: tdigit_main.separator2.hint
+msgid "Test Big Separator"
+msgstr ""
+
+#: tdigit_main.tbcaptsep1.caption
+msgid "tbCaptSep1"
+msgstr ""
+
+#: tdigit_main.tbcaptsep2.caption
+msgid "tbCaptSep2"
+msgstr ""
+
+#: tdigit_main.tbcaptured.caption
+msgid "tbCaptured"
+msgstr ""
+
+#: tdigit_main.tbcapturedpdf.caption
+msgid "Export to PDF"
+msgstr ""
+
+#: tdigit_main.tbcapturedtoimg.caption
+msgid "Export to Images"
+msgstr ""
+
+#: tdigit_main.tbcrop.caption
+msgid "tbCrop"
+msgstr ""
+
+#: tdigit_main.tbcropmode.caption
+msgid "Crop Mode"
+msgstr ""
+
+#: tdigit_main.tbdestination.caption
+msgctxt "tdigit_main.tbdestination.caption"
+msgid "Destination..."
+msgstr ""
+
+#: tdigit_main.tbmain.caption
+msgid "tbMain"
+msgstr ""
+
+#: tdigit_main.tbmenu.caption
+msgid "Menù"
+msgstr ""
+
+#: tdigit_main.tbsepclear.caption
+msgid "tbSepClear"
+msgstr ""
+
+#: tdigit_main.tbsepcrop.caption
+msgid "tbSepCrop"
+msgstr ""
+
+#: tdigit_main.tbsepmenu.caption
+msgid "tbSepMenu"
+msgstr ""
+
+#: tdigit_main.tbseptake.caption
+msgid "tbSepTake"
+msgstr ""
+
+#: tdigit_main.tbsource.caption
+msgctxt "tdigit_main.tbsource.caption"
+msgid "Source..."
+msgstr ""
+
+#: tdigit_progress.capcurrent.caption
+msgid "Current"
+msgstr ""
+
+#: tdigit_progress.caption
+msgid "DigIt_Progress"
+msgstr ""
+
+#: tdigit_progress.captotal.caption
+msgid "Total"
+msgstr ""
+
+#: tdigit_progress.labtotal.caption
+msgid "TotalL"
+msgstr ""
+
+#: tdigit_templates.bcpanel1.caption
+msgid "BCPanel1"
+msgstr ""
+
+#: tdigit_templates.caption
+msgid "DigIt_Templates"
+msgstr ""
+
+#: twizardbuildduplex.btcancel.caption
+msgctxt "twizardbuildduplex.btcancel.caption"
+msgid "&Cancel"
+msgstr ""
+
+#: twizardbuildduplex.btnext.caption
+msgctxt "twizardbuildduplex.btnext.caption"
+msgid "&Next"
+msgstr ""
+
+#: twizardbuildduplex.btprev.caption
+msgctxt "twizardbuildduplex.btprev.caption"
+msgid "&Back"
+msgstr ""
+
+#: twizardbuildduplex.caption
+msgid "Build Front/Back..."
+msgstr ""
+
+#: twizardbuildduplex.label1.caption
+msgid "Insert Front Side Pages"
+msgstr ""
+
+#: twizardbuildduplex.label2.caption
+msgctxt "twizardbuildduplex.label2.caption"
+msgid "Click Next when ready"
+msgstr ""
+
+#: twizardbuildduplex.label4.caption
+msgctxt "twizardbuildduplex.label4.caption"
+msgid "Click Next when ready"
+msgstr ""
+
+#: twizardbuildduplex.label5.caption
+msgid "Finished... Click End to Build Front/Back Pages"
+msgstr ""
+
+#: twizardbuildduplex.label6.caption
+msgid "Select what type of collage you want to make"
+msgstr ""
+
+#: twizardbuildduplex.lbbackside.caption
+msgid "Turn all the Pages over so the Back Side is visible"
+msgstr ""
+
+#: twizardbuildduplex.lbbackside1.caption
+msgid "Insert Back Side Pages"
+msgstr ""
+
+#: twizardbuildduplex.rbonesided.caption
+msgid "One-sided to Two-sided pages"
+msgstr ""
+
+#: twizardbuildduplex.rbtwosided.caption
+msgid "Two-sided to Two-sided pages"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet1.caption
+msgid "TabSheet1"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet2.caption
+msgid "TabSheet2"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet3.caption
+msgid "TabSheet3"
+msgstr ""
+
+#: twizardbuildduplex.tabsheet4.caption
+msgid "TabSheet4"
+msgstr ""
+
+#: twizardbuildduplex.tbdestination.caption
+msgctxt "twizardbuildduplex.tbdestination.caption"
+msgid "Destination..."
+msgstr ""
+
+#: twizardbuildduplex.tbsource.caption
+msgctxt "twizardbuildduplex.tbsource.caption"
+msgid "Source..."
+msgstr ""
+
+#: twizardbuildduplex.tbwizard.caption
+msgid "tbWizard"
+msgstr ""
+

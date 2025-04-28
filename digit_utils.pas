@@ -33,8 +33,9 @@ procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: 
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
-procedure GetProportionalSize(Width, Height, imgWidth, imgHeight:Integer;
-                              var newWidth, newHeight:Integer);
+procedure GetProportionalSize(Width, Height, imgWidth, imgHeight: Integer;
+                              var newWidth, newHeight: Integer);
+function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
 
 implementation
 
@@ -259,28 +260,41 @@ begin
          end;
 end;
 
-procedure GetProportionalSize(Width, Height, imgWidth, imgHeight:Integer;
-                              var newWidth, newHeight:Integer);
+procedure GetProportionalSize(Width, Height, imgWidth, imgHeight: Integer;
+                              var newWidth, newHeight: Integer);
 var
    rW, rH:Single;
 
 begin
-  if (Width=0)
-  then rW:=1
-  else rW := imgWidth / Width;
-  if (Height=0)
-  then rH:=1
-  else rH := imgHeight / Height;
+  if (Width = 0)
+  then rW:= 1
+  else rW:= imgWidth/Width;
+
+  if (Height = 0)
+  then rH:= 1
+  else rH:= imgHeight/Height;
 
   if (rW > rH)
   then begin
-         newHeight := round(imgHeight / rW);
-         newWidth := Width;
+         newHeight:= Round(imgHeight/rW);
+         newWidth:= Width;
        end
   else begin
-         newWidth := round(imgWidth / rH);
-         newHeight := Height;
+         newWidth:= Round(imgWidth/rH);
+         newHeight:= Height;
        end;
+end;
+
+function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
+var
+   r: Single;
+
+begin
+  if (ASide = 0)
+  then r:= 1
+  else r:= imgSide/ASide;
+
+  Result:= Round(imgOtherSide/r);
 end;
 
 end.

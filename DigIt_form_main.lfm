@@ -268,7 +268,7 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundY = 1
       TabOrder = 0
       object BCLabel7: TBCLabel
-        Left = 35
+        Left = 36
         Height = 20
         Top = 107
         Width = 43
@@ -472,10 +472,10 @@ object DigIt_Main: TDigIt_Main
         Visible = False
       end
     end
-    object panelPageSize: TBCPanel
+    object panelPageRotate: TBCPanel
       Left = 28
-      Height = 119
-      Top = 289
+      Height = 60
+      Top = 270
       Width = 240
       Background.Color = clBtnFace
       Background.Gradient1.StartColor = clWhite
@@ -498,7 +498,6 @@ object DigIt_Main: TDigIt_Main
       BevelOuter = bvNone
       BevelWidth = 1
       Border.Style = bboNone
-      Enabled = False
       FontEx.Color = clDefault
       FontEx.FontQuality = fqSystemClearType
       FontEx.Shadow = False
@@ -510,210 +509,6 @@ object DigIt_Main: TDigIt_Main
       Rounding.RoundX = 1
       Rounding.RoundY = 1
       TabOrder = 1
-      object BCLabel10: TBCLabel
-        Left = 27
-        Height = 20
-        Top = 15
-        Width = 47
-        Anchors = [akTop, akRight]
-        Background.Gradient1.StartColor = clWhite
-        Background.Gradient1.EndColor = clBlack
-        Background.Gradient1.GradientType = gtLinear
-        Background.Gradient1.Point1XPercent = 0
-        Background.Gradient1.Point1YPercent = 0
-        Background.Gradient1.Point2XPercent = 0
-        Background.Gradient1.Point2YPercent = 100
-        Background.Gradient2.StartColor = clWhite
-        Background.Gradient2.EndColor = clBlack
-        Background.Gradient2.GradientType = gtLinear
-        Background.Gradient2.Point1XPercent = 0
-        Background.Gradient2.Point1YPercent = 0
-        Background.Gradient2.Point2XPercent = 0
-        Background.Gradient2.Point2YPercent = 100
-        Background.Gradient1EndPercent = 35
-        Background.Style = bbsClear
-        Border.Style = bboNone
-        Caption = 'Width :'
-        FontEx.Color = clDefault
-        FontEx.FontQuality = fqSystemClearType
-        FontEx.Shadow = False
-        FontEx.ShadowRadius = 5
-        FontEx.ShadowOffsetX = 5
-        FontEx.ShadowOffsetY = 5
-        FontEx.Style = []
-        Rounding.RoundX = 1
-        Rounding.RoundY = 1
-      end
-      object edPageWidth: TFloatSpinEdit
-        Left = 81
-        Height = 25
-        Top = 13
-        Width = 129
-        Font.Color = clWindowText
-        Font.Name = 'Arial'
-        ParentFont = False
-        TabOrder = 0
-        Value = 21
-        OnChange = edPageWidthChange
-      end
-      object btPageSizes: TSpeedButton
-        Left = 213
-        Height = 28
-        Hint = 'Page Sizes'
-        Top = 28
-        Width = 29
-        Images = imgListMenu
-        ImageIndex = 10
-        ShowHint = True
-        ParentShowHint = False
-        OnClick = btPageSizesClick
-      end
-      object edPageHeight: TFloatSpinEdit
-        Left = 81
-        Height = 25
-        Top = 48
-        Width = 129
-        Font.Color = clWindowText
-        Font.Name = 'Arial'
-        ParentFont = False
-        TabOrder = 1
-        Value = 29.7
-        OnChange = edPageHeightChange
-      end
-      object BCLabel11: TBCLabel
-        Left = 22
-        Height = 20
-        Top = 50
-        Width = 52
-        Anchors = [akTop, akRight]
-        Background.Gradient1.StartColor = clWhite
-        Background.Gradient1.EndColor = clBlack
-        Background.Gradient1.GradientType = gtLinear
-        Background.Gradient1.Point1XPercent = 0
-        Background.Gradient1.Point1YPercent = 0
-        Background.Gradient1.Point2XPercent = 0
-        Background.Gradient1.Point2YPercent = 100
-        Background.Gradient2.StartColor = clWhite
-        Background.Gradient2.EndColor = clBlack
-        Background.Gradient2.GradientType = gtLinear
-        Background.Gradient2.Point1XPercent = 0
-        Background.Gradient2.Point1YPercent = 0
-        Background.Gradient2.Point2XPercent = 0
-        Background.Gradient2.Point2YPercent = 100
-        Background.Gradient1EndPercent = 35
-        Background.Style = bbsClear
-        Border.Style = bboNone
-        Caption = 'Height :'
-        FontEx.Color = clDefault
-        FontEx.FontQuality = fqSystemClearType
-        FontEx.Shadow = False
-        FontEx.ShadowRadius = 5
-        FontEx.ShadowOffsetX = 5
-        FontEx.ShadowOffsetY = 5
-        FontEx.Style = []
-        Rounding.RoundX = 1
-        Rounding.RoundY = 1
-      end
-      object edPage_Fix: TComboBox
-        Left = 81
-        Height = 28
-        Top = 79
-        Width = 129
-        AutoSize = False
-        ItemHeight = 20
-        ItemIndex = 0
-        Items.Strings = (
-          'Width'
-          'Height'
-          'Both'
-        )
-        Style = csDropDownList
-        TabOrder = 2
-        Text = 'Width'
-      end
-      object BCLabel12: TBCLabel
-        Left = 5
-        Height = 20
-        Top = 84
-        Width = 69
-        Anchors = [akTop, akRight]
-        Background.Gradient1.StartColor = clWhite
-        Background.Gradient1.EndColor = clBlack
-        Background.Gradient1.GradientType = gtLinear
-        Background.Gradient1.Point1XPercent = 0
-        Background.Gradient1.Point1YPercent = 0
-        Background.Gradient1.Point2XPercent = 0
-        Background.Gradient1.Point2YPercent = 100
-        Background.Gradient2.StartColor = clWhite
-        Background.Gradient2.EndColor = clBlack
-        Background.Gradient2.GradientType = gtLinear
-        Background.Gradient2.Point1XPercent = 0
-        Background.Gradient2.Point1YPercent = 0
-        Background.Gradient2.Point2XPercent = 0
-        Background.Gradient2.Point2YPercent = 100
-        Background.Gradient1EndPercent = 35
-        Background.Style = bbsClear
-        Border.Style = bboNone
-        Caption = 'Fixed side:'
-        FontEx.Color = clDefault
-        FontEx.FontQuality = fqSystemClearType
-        FontEx.Shadow = False
-        FontEx.ShadowRadius = 5
-        FontEx.ShadowOffsetX = 5
-        FontEx.ShadowOffsetY = 5
-        FontEx.Style = []
-        Rounding.RoundX = 1
-        Rounding.RoundY = 1
-      end
-    end
-    object btPageSizesToCrops: TSpeedButton
-      Left = 240
-      Height = 28
-      Hint = 'Page size to Crops size'
-      Top = 266
-      Width = 29
-      Enabled = False
-      Images = imgListMenu
-      ImageIndex = 11
-      OnClick = btPageSizesToCropsClick
-    end
-    object panelPageRotate: TBCPanel
-      Left = 28
-      Height = 60
-      Top = 410
-      Width = 240
-      Background.Color = clBtnFace
-      Background.Gradient1.StartColor = clWhite
-      Background.Gradient1.EndColor = clBlack
-      Background.Gradient1.GradientType = gtLinear
-      Background.Gradient1.Point1XPercent = 0
-      Background.Gradient1.Point1YPercent = 0
-      Background.Gradient1.Point2XPercent = 0
-      Background.Gradient1.Point2YPercent = 100
-      Background.Gradient2.StartColor = clWhite
-      Background.Gradient2.EndColor = clBlack
-      Background.Gradient2.GradientType = gtLinear
-      Background.Gradient2.Point1XPercent = 0
-      Background.Gradient2.Point1YPercent = 0
-      Background.Gradient2.Point2XPercent = 0
-      Background.Gradient2.Point2YPercent = 100
-      Background.Gradient1EndPercent = 35
-      Background.Style = bbsColor
-      BevelInner = bvNone
-      BevelOuter = bvNone
-      BevelWidth = 1
-      Border.Style = bboNone
-      FontEx.Color = clDefault
-      FontEx.FontQuality = fqSystemClearType
-      FontEx.Shadow = False
-      FontEx.ShadowRadius = 5
-      FontEx.ShadowOffsetX = 5
-      FontEx.ShadowOffsetY = 5
-      FontEx.Style = []
-      ParentBackground = False
-      Rounding.RoundX = 1
-      Rounding.RoundY = 1
-      TabOrder = 2
       object Label9: TLabel
         Left = 23
         Height = 20
@@ -813,31 +608,12 @@ object DigIt_Main: TDigIt_Main
         OnClick = btPRotateClick
       end
     end
-    object edPage_UnitType: TComboBox
-      Left = 109
-      Height = 28
-      Top = 266
-      Width = 129
-      AutoSize = False
-      ItemHeight = 20
-      ItemIndex = 0
-      Items.Strings = (
-        'full size'
-        'pixels'
-        'inchs'
-        'cm'
-      )
-      Style = csDropDownList
-      TabOrder = 3
-      Text = 'full size'
-      OnChange = edPage_UnitTypeChange
-    end
     object Label8: TLabel
       Left = 45
       Height = 20
       Top = 248
-      Width = 239
-      Caption = 'Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗'
+      Width = 223
+      Caption = 'Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗'
       Font.Style = [fsBold]
       ParentFont = False
     end
@@ -849,6 +625,264 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗'
       Font.Style = [fsBold]
       ParentFont = False
+    end
+    object edPage_UnitType: TComboBox
+      Left = 108
+      Height = 28
+      Top = 336
+      Width = 129
+      AutoSize = False
+      ItemHeight = 20
+      ItemIndex = 0
+      Items.Strings = (
+        'full size'
+        'pixels'
+        'inchs'
+        'cm'
+      )
+      Style = csDropDownList
+      TabOrder = 2
+      Text = 'full size'
+      OnChange = edPage_UnitTypeChange
+    end
+    object btPageSizesToCrops: TSpeedButton
+      Left = 239
+      Height = 28
+      Hint = 'Page size to Crops size'
+      Top = 336
+      Width = 29
+      Enabled = False
+      Images = imgListMenu
+      ImageIndex = 11
+      OnClick = btPageSizesToCropsClick
+    end
+    object panelPageSize: TBCPanel
+      Left = 27
+      Height = 119
+      Top = 359
+      Width = 215
+      Background.Color = clBtnFace
+      Background.Gradient1.StartColor = clWhite
+      Background.Gradient1.EndColor = clBlack
+      Background.Gradient1.GradientType = gtLinear
+      Background.Gradient1.Point1XPercent = 0
+      Background.Gradient1.Point1YPercent = 0
+      Background.Gradient1.Point2XPercent = 0
+      Background.Gradient1.Point2YPercent = 100
+      Background.Gradient2.StartColor = clWhite
+      Background.Gradient2.EndColor = clBlack
+      Background.Gradient2.GradientType = gtLinear
+      Background.Gradient2.Point1XPercent = 0
+      Background.Gradient2.Point1YPercent = 0
+      Background.Gradient2.Point2XPercent = 0
+      Background.Gradient2.Point2YPercent = 100
+      Background.Gradient1EndPercent = 35
+      Background.Style = bbsColor
+      BevelInner = bvNone
+      BevelOuter = bvNone
+      BevelWidth = 1
+      Border.Style = bboNone
+      Enabled = False
+      FontEx.Color = clDefault
+      FontEx.FontQuality = fqSystemClearType
+      FontEx.Shadow = False
+      FontEx.ShadowRadius = 5
+      FontEx.ShadowOffsetX = 5
+      FontEx.ShadowOffsetY = 5
+      FontEx.Style = []
+      ParentBackground = False
+      Rounding.RoundX = 1
+      Rounding.RoundY = 1
+      TabOrder = 3
+      object BCLabel10: TBCLabel
+        Left = 30
+        Height = 20
+        Top = 15
+        Width = 47
+        Anchors = [akTop, akRight]
+        Background.Gradient1.StartColor = clWhite
+        Background.Gradient1.EndColor = clBlack
+        Background.Gradient1.GradientType = gtLinear
+        Background.Gradient1.Point1XPercent = 0
+        Background.Gradient1.Point1YPercent = 0
+        Background.Gradient1.Point2XPercent = 0
+        Background.Gradient1.Point2YPercent = 100
+        Background.Gradient2.StartColor = clWhite
+        Background.Gradient2.EndColor = clBlack
+        Background.Gradient2.GradientType = gtLinear
+        Background.Gradient2.Point1XPercent = 0
+        Background.Gradient2.Point1YPercent = 0
+        Background.Gradient2.Point2XPercent = 0
+        Background.Gradient2.Point2YPercent = 100
+        Background.Gradient1EndPercent = 35
+        Background.Style = bbsClear
+        Border.Style = bboNone
+        Caption = 'Width :'
+        FontEx.Color = clDefault
+        FontEx.FontQuality = fqSystemClearType
+        FontEx.Shadow = False
+        FontEx.ShadowRadius = 5
+        FontEx.ShadowOffsetX = 5
+        FontEx.ShadowOffsetY = 5
+        FontEx.Style = []
+        Rounding.RoundX = 1
+        Rounding.RoundY = 1
+      end
+      object edPageWidth: TFloatSpinEdit
+        Left = 81
+        Height = 25
+        Top = 13
+        Width = 129
+        Font.Color = clWindowText
+        Font.Name = 'Arial'
+        ParentFont = False
+        TabOrder = 0
+        Value = 21
+        OnChange = edPageWidthChange
+      end
+      object edPageHeight: TFloatSpinEdit
+        Left = 81
+        Height = 25
+        Top = 48
+        Width = 129
+        Font.Color = clWindowText
+        Font.Name = 'Arial'
+        ParentFont = False
+        TabOrder = 1
+        Value = 29.7
+        OnChange = edPageHeightChange
+      end
+      object BCLabel11: TBCLabel
+        Left = 25
+        Height = 20
+        Top = 50
+        Width = 52
+        Anchors = [akTop, akRight]
+        Background.Gradient1.StartColor = clWhite
+        Background.Gradient1.EndColor = clBlack
+        Background.Gradient1.GradientType = gtLinear
+        Background.Gradient1.Point1XPercent = 0
+        Background.Gradient1.Point1YPercent = 0
+        Background.Gradient1.Point2XPercent = 0
+        Background.Gradient1.Point2YPercent = 100
+        Background.Gradient2.StartColor = clWhite
+        Background.Gradient2.EndColor = clBlack
+        Background.Gradient2.GradientType = gtLinear
+        Background.Gradient2.Point1XPercent = 0
+        Background.Gradient2.Point1YPercent = 0
+        Background.Gradient2.Point2XPercent = 0
+        Background.Gradient2.Point2YPercent = 100
+        Background.Gradient1EndPercent = 35
+        Background.Style = bbsClear
+        Border.Style = bboNone
+        Caption = 'Height :'
+        FontEx.Color = clDefault
+        FontEx.FontQuality = fqSystemClearType
+        FontEx.Shadow = False
+        FontEx.ShadowRadius = 5
+        FontEx.ShadowOffsetX = 5
+        FontEx.ShadowOffsetY = 5
+        FontEx.Style = []
+        Rounding.RoundX = 1
+        Rounding.RoundY = 1
+      end
+      object edPage_Fix: TComboBox
+        Left = 81
+        Height = 28
+        Top = 79
+        Width = 129
+        AutoSize = False
+        ItemHeight = 20
+        ItemIndex = 0
+        Items.Strings = (
+          'Width'
+          'Height'
+          'Both'
+        )
+        Style = csDropDownList
+        TabOrder = 2
+        Text = 'Width'
+      end
+      object BCLabel12: TBCLabel
+        Left = 8
+        Height = 20
+        Top = 84
+        Width = 69
+        Anchors = [akTop, akRight]
+        Background.Gradient1.StartColor = clWhite
+        Background.Gradient1.EndColor = clBlack
+        Background.Gradient1.GradientType = gtLinear
+        Background.Gradient1.Point1XPercent = 0
+        Background.Gradient1.Point1YPercent = 0
+        Background.Gradient1.Point2XPercent = 0
+        Background.Gradient1.Point2YPercent = 100
+        Background.Gradient2.StartColor = clWhite
+        Background.Gradient2.EndColor = clBlack
+        Background.Gradient2.GradientType = gtLinear
+        Background.Gradient2.Point1XPercent = 0
+        Background.Gradient2.Point1YPercent = 0
+        Background.Gradient2.Point2XPercent = 0
+        Background.Gradient2.Point2YPercent = 100
+        Background.Gradient1EndPercent = 35
+        Background.Style = bbsClear
+        Border.Style = bboNone
+        Caption = 'Fixed side:'
+        FontEx.Color = clDefault
+        FontEx.FontQuality = fqSystemClearType
+        FontEx.Shadow = False
+        FontEx.ShadowRadius = 5
+        FontEx.ShadowOffsetX = 5
+        FontEx.ShadowOffsetY = 5
+        FontEx.Style = []
+        Rounding.RoundX = 1
+        Rounding.RoundY = 1
+      end
+    end
+    object btPageSizes: TSpeedButton
+      Left = 239
+      Height = 28
+      Hint = 'Page Sizes'
+      Top = 390
+      Width = 29
+      Images = imgListMenu
+      ImageIndex = 10
+      ShowHint = True
+      ParentShowHint = False
+      OnClick = btPageSizesClick
+    end
+    object BCLabel15: TBCLabel
+      Left = 69
+      Height = 20
+      Top = 338
+      Width = 34
+      Anchors = [akTop, akRight]
+      Background.Gradient1.StartColor = clWhite
+      Background.Gradient1.EndColor = clBlack
+      Background.Gradient1.GradientType = gtLinear
+      Background.Gradient1.Point1XPercent = 0
+      Background.Gradient1.Point1YPercent = 0
+      Background.Gradient1.Point2XPercent = 0
+      Background.Gradient1.Point2YPercent = 100
+      Background.Gradient2.StartColor = clWhite
+      Background.Gradient2.EndColor = clBlack
+      Background.Gradient2.GradientType = gtLinear
+      Background.Gradient2.Point1XPercent = 0
+      Background.Gradient2.Point1YPercent = 0
+      Background.Gradient2.Point2XPercent = 0
+      Background.Gradient2.Point2YPercent = 100
+      Background.Gradient1EndPercent = 35
+      Background.Style = bbsClear
+      Border.Style = bboNone
+      Caption = 'Size :'
+      FontEx.Color = clDefault
+      FontEx.FontQuality = fqSystemClearType
+      FontEx.Shadow = False
+      FontEx.ShadowRadius = 5
+      FontEx.ShadowOffsetX = 5
+      FontEx.ShadowOffsetY = 5
+      FontEx.Style = []
+      Rounding.RoundX = 1
+      Rounding.RoundY = 1
     end
   end
   object panelTop: TPanel

@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/18 Updated Page Resize;
+2025/04/28 Updated ResizeImage;
+           Resize is the Last Filter in LoadImage;
+           UI Moved Page Resize Panel after Flip;
+           PageSizes Menù Always Enabled;
+
+        18 Updated Page Resize;
            Page Rotate/Flip/Resize in LoadImage;
            Added Target Platform sub paths to Languages;
 

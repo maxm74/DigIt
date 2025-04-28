@@ -564,6 +564,10 @@ msgstr ""
 msgid "After :"
 msgstr ""
 
+#: tdigit_main.bclabel15.caption
+msgid "Size :"
+msgstr ""
+
 #: tdigit_main.bclabel2.caption
 msgid "Top :"
 msgstr ""
@@ -757,7 +761,7 @@ msgid "Example :"
 msgstr ""
 
 #: tdigit_main.label8.caption
-msgid "Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr ""
 
 #: tdigit_main.label9.caption

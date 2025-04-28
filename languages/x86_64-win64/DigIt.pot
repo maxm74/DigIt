@@ -91,6 +91,10 @@ msgstr ""
 msgid "Value Previous: %d"
 msgstr ""
 
+#: digit_form_main.rscrop
+msgid "Crop (F5)"
+msgstr ""
+
 #: digit_form_main.rscropcust
 msgctxt "digit_form_main.rscropcust"
 msgid "Custom"
@@ -99,6 +103,10 @@ msgstr ""
 #: digit_form_main.rscropfull
 msgctxt "digit_form_main.rscropfull"
 msgid "Full Area"
+msgstr ""
+
+#: digit_form_main.rscropnext
+msgid "Crop + Next (F5)"
 msgstr ""
 
 #: digit_form_main.rscroptodo
@@ -469,10 +477,6 @@ msgstr ""
 msgid "Convert Images to PDF"
 msgstr ""
 
-#: tdigit_main.actcrop.caption
-msgid "Crop"
-msgstr ""
-
 #: tdigit_main.actcropall.caption
 msgid "Crop All"
 msgstr ""
@@ -545,7 +549,7 @@ msgstr ""
 
 #: tdigit_main.bclabel12.caption
 msgctxt "tdigit_main.bclabel12.caption"
-msgid "Name :"
+msgid "Fixed side:"
 msgstr ""
 
 #: tdigit_main.bclabel13.caption
@@ -587,24 +591,6 @@ msgstr ""
 msgid "Digits :"
 msgstr ""
 
-#: tdigit_main.btbox_add.caption
-msgctxt "tdigit_main.btbox_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btbox_add.hint
-msgid "Add a Crop Area"
-msgstr ""
-
-#: tdigit_main.btbox_del.caption
-msgctxt "tdigit_main.btbox_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btbox_del.hint
-msgid "Remove this Crop Area"
-msgstr ""
-
 #: tdigit_main.btcfliphleft.hint
 msgid "Flip Horizzontal Left"
 msgstr ""
@@ -621,52 +607,32 @@ msgstr ""
 msgid "Flip Vertical Up"
 msgstr ""
 
-#: tdigit_main.btcounter_add.caption
-msgctxt "tdigit_main.btcounter_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btcounter_add.hint
-msgctxt "tdigit_main.btcounter_add.hint"
-msgid "Add a Counter"
-msgstr ""
-
-#: tdigit_main.btcounter_del.caption
-msgctxt "tdigit_main.btcounter_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btcounter_del.hint
-msgctxt "tdigit_main.btcounter_del.hint"
-msgid "Remove this Counter"
-msgstr ""
-
-#: tdigit_main.btcropcounter_add.caption
-msgctxt "tdigit_main.btcropcounter_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btcropcounter_add.hint
-msgctxt "tdigit_main.btcropcounter_add.hint"
-msgid "Add a Counter"
-msgstr ""
-
-#: tdigit_main.btcropcounter_del.caption
-msgctxt "tdigit_main.btcropcounter_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btcropcounter_del.hint
-msgctxt "tdigit_main.btcropcounter_del.hint"
-msgid "Remove this Counter"
-msgstr ""
-
 #: tdigit_main.btcropduplicate.hint
 msgid "Duplicate this Area"
 msgstr ""
 
 #: tdigit_main.btcropduplicateop.hint
 msgid "Duplicate when Rotate/Flip"
+msgstr ""
+
+#: tdigit_main.btcrop_add.caption
+msgctxt "tdigit_main.btcrop_add.caption"
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btcrop_add.hint
+msgctxt "tdigit_main.btcrop_add.hint"
+msgid "Add a Crop Area"
+msgstr ""
+
+#: tdigit_main.btcrop_del.caption
+msgctxt "tdigit_main.btcrop_del.caption"
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btcrop_del.hint
+msgctxt "tdigit_main.btcrop_del.hint"
+msgid "Remove this Crop Area"
 msgstr ""
 
 #: tdigit_main.btcrotateleft.hint
@@ -677,6 +643,18 @@ msgstr ""
 #: tdigit_main.btcrotateright.hint
 msgctxt "tdigit_main.btcrotateright.hint"
 msgid "Rotate Right"
+msgstr ""
+
+#: tdigit_main.btpagesizes.hint
+msgid "Page Sizes"
+msgstr ""
+
+#: tdigit_main.btpagesizestocrops.hint
+msgid "Page size to Crops size"
+msgstr ""
+
+#: tdigit_main.btpapersizes.hint
+msgid "Paper Sizes"
 msgstr ""
 
 #: tdigit_main.btpfliph.hint
@@ -727,8 +705,12 @@ msgstr ""
 msgid "pixels"
 msgstr ""
 
+#: tdigit_main.edpage_fix.text
+msgid "Width"
+msgstr ""
+
 #: tdigit_main.edpage_unittype.text
-msgid "not defined"
+msgid "full size"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption
@@ -750,6 +732,10 @@ msgctxt "tdigit_main.label10.caption"
 msgid "Flip :"
 msgstr ""
 
+#: tdigit_main.label11.caption
+msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
 #: tdigit_main.label2.caption
 msgctxt "tdigit_main.label2.caption"
 msgid "Rotate :"
@@ -764,16 +750,8 @@ msgstr ""
 msgid "Example :"
 msgstr ""
 
-#: tdigit_main.label5.caption
-msgid "Counter :"
-msgstr ""
-
-#: tdigit_main.label7.caption
-msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgstr ""
-
 #: tdigit_main.label8.caption
-msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgid "Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr ""
 
 #: tdigit_main.label9.caption
@@ -830,7 +808,7 @@ msgid "Aspect Ratio"
 msgstr ""
 
 #: tdigit_main.rollcounters.button.caption
-msgid "Page Counters"
+msgid "Page Size & Counter"
 msgstr ""
 
 #: tdigit_main.rollcrops.button.caption

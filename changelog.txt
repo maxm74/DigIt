@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/28 Updated ResizeImage;
+2025/04/29 Changed Counter Value to DWord;
+           Added method CropFiles and Counter_Assign;
+           ReTake/GoNext/GoBack Use Counter and CropCount stored in SourceFile;
+
+        28 Updated ResizeImage;
            Resize is the Last Filter in LoadImage;
            UI Moved Page Resize Panel after Flip;
            PageSizes Menù Always Enabled;

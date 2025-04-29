@@ -71,7 +71,8 @@ type
   );
 
   TSourceFile = packed record
-    fCrop: Boolean;
+    cCount,
+    cStart: DWord;
     fName: String;
   end;
   TSourceFileArray = array of TSourceFile;

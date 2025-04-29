@@ -510,17 +510,21 @@ msgstr "Converti Immagini in PDF"
 msgid "Crop All"
 msgstr "Taglia Tutti"
 
-#: tdigit_main.actcropgoback.caption
-msgid "Back"
-msgstr "Indietro"
-
-#: tdigit_main.actcropgonext.caption
-msgid "Next"
-msgstr "Avanti"
-
 #: tdigit_main.actcropnext.caption
 msgid "Crop + Next"
 msgstr "Taglia + Avanti (F5)"
+
+#: tdigit_main.actgoback.caption
+#, fuzzy
+msgctxt "tdigit_main.actgoback.caption"
+msgid "Back"
+msgstr "Indietro"
+
+#: tdigit_main.actgonext.caption
+#, fuzzy
+msgctxt "tdigit_main.actgonext.caption"
+msgid "Next"
+msgstr "Avanti"
 
 #: tdigit_main.actoptions.caption
 msgid "Options ..."
@@ -590,6 +594,10 @@ msgstr "Prima :"
 #: tdigit_main.bclabel14.caption
 msgid "After :"
 msgstr "Dopo :"
+
+#: tdigit_main.bclabel15.caption
+msgid "Size :"
+msgstr ""
 
 #: tdigit_main.bclabel2.caption
 msgid "Top :"
@@ -788,7 +796,7 @@ msgstr "Esempio :"
 #: tdigit_main.label8.caption
 #, fuzzy
 #| msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgid "Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr "Pagina ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label9.caption

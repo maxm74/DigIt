@@ -1013,7 +1013,7 @@ object DigIt_Main: TDigIt_Main
       object tbCropPrev: TToolButton
         Left = 161
         Top = 0
-        Action = actCropGoBack
+        Action = actGoBack
         AutoSize = True
       end
       object tbCropAll: TToolButton
@@ -1050,7 +1050,7 @@ object DigIt_Main: TDigIt_Main
       object tbCropBack: TToolButton
         Left = 99
         Top = 0
-        Action = actCropGoNext
+        Action = actGoNext
       end
     end
   end
@@ -2791,19 +2791,19 @@ object DigIt_Main: TDigIt_Main
       ShortCut = 116
       OnExecute = actCropNextExecute
     end
-    object actCropGoNext: TAction
+    object actGoNext: TAction
       Caption = 'Next'
       Enabled = False
       ImageIndex = 13
       ShortCut = 117
-      OnExecute = actCropGoNextExecute
+      OnExecute = actGoNextExecute
     end
-    object actCropGoBack: TAction
+    object actGoBack: TAction
       Caption = 'Back'
       Enabled = False
       ImageIndex = 14
       ShortCut = 118
-      OnExecute = actCropGoBackExecute
+      OnExecute = actGoBackExecute
     end
     object actCropAll: TAction
       Caption = 'Crop All'

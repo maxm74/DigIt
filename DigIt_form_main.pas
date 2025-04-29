@@ -62,10 +62,10 @@ type
   { TDigIt_Main }
 
   TDigIt_Main = class(TForm)
-    actCropGoBack: TAction;
+    actGoBack: TAction;
     actCropAll: TAction;
     actClearQueue: TAction;
-    actCropGoNext: TAction;
+    actGoNext: TAction;
     actCapturedDeleteAll: TAction;
     actCapturedDelete: TAction;
     actConvertFiles: TAction;
@@ -242,8 +242,8 @@ type
     procedure actTakeExecute(Sender: TObject);
     procedure actTimerTakeExecute(Sender: TObject);
     procedure actCropNextExecute(Sender: TObject);
-    procedure actCropGoNextExecute(Sender: TObject);
-    procedure actCropGoBackExecute(Sender: TObject);
+    procedure actGoNextExecute(Sender: TObject);
+    procedure actGoBackExecute(Sender: TObject);
     procedure actCropAllExecute(Sender: TObject);
     procedure actClearQueueExecute(Sender: TObject);
     procedure btCFlipHLeftClick(Sender: TObject);
@@ -356,6 +356,7 @@ type
 
     procedure Counter_Dec(AValue: Integer);
     procedure Counter_Inc(AValue: Integer);
+    procedure Counter_Assign(AValue: Integer);
 
     procedure SetSessionModified(AValue: Boolean);
 
@@ -430,7 +431,7 @@ type
     function CropFile_Full(AFileName: String; isReTake: Boolean): Boolean; overload;
     procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean); overload;
 
-    procedure Pages_InsertMiddle(ASourceFileIndex: Integer);
+    procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
 
     procedure SetSaveWriter(AFormat: TBGRAImageFormat);
     procedure SetDefaultStartupValues;
@@ -464,7 +465,7 @@ implementation
 
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
-  BGRAResample, BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
+  BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
@@ -689,10 +690,9 @@ end;
 
 procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 var
-   len, i,
-   numCropped: Integer;
+   len, i: Integer;
    hasCropped: Boolean;
-   cropped: array of Boolean;
+   oldSourceFiles: TSourceFileArray;
 
 begin
   UI_SelectNextCaptured(-lastLenTaked);
@@ -703,23 +703,20 @@ begin
     Case CropMode of
       diCropFull: begin
         len:= Length(CapturedFiles);
+        hasCropped:= False;
 
         Counter_Dec(lastLenTaked);
       end;
       diCropCustom: begin
         len:= Length(SourceFiles);
-
         hasCropped:= (len-lastLenTaked <= lastCropped);
-        if hasCropped
-        then begin
-               SetLength(cropped, lastLenTaked);
-               numCropped:= 0;
-               for i:=0 to lastLenTaked-1 do
-               begin
-                 cropped[i]:= SourceFiles[len-lastLenTaked+i].fCrop;
-                 if cropped[i] then Inc(numCropped);
-               end;
-             end;
+
+        if hasCropped then
+        begin
+          SetLength(oldSourceFiles, lastLenTaked);
+          for i:=0 to lastLenTaked-1 do
+            oldSourceFiles[i]:= SourceFiles[len-lastLenTaked+i];
+        end;
 
         if ((len - lastLenTaked) > 0)
         then SetLength(SourceFiles, len-lastLenTaked)
@@ -734,23 +731,29 @@ begin
     begin
       //This works ONLY IF the Crop Area number has not changed in the meantime
       { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
-      Counter_Dec(numCropped * imgManipulation.CropAreas.Count);
+      //Counter_Dec(numCropped * imgManipulation.CropAreas.Count);
 
       iSourceFiles:= len-lastLenTaked;
-      LoadImage(SourceFiles[iSourceFiles].fName, False);
-      for i:=0 to Length(cropped)-1 do
+      for i:=0 to Length(oldSourceFiles)-1 do
       begin
-        if cropped[i] then
+        if (oldSourceFiles[i].cCount > 0) then
         begin
           iSourceFiles:= len-lastLenTaked+i;
-          SourceFiles[iSourceFiles].fCrop:= True;
-          actCropNextExecute(nil);
+          SourceFiles[iSourceFiles].cStart:= oldSourceFiles[i].cStart;
+          SourceFiles[iSourceFiles].cCount:= oldSourceFiles[i].cCount;
+          LoadImage(SourceFiles[iSourceFiles].fName, False);
+          CropFiles(iSourceFiles, True);
         end;
       end;
     end;
 
   finally
-    cropped:= nil;
+    oldSourceFiles:= nil;
+    XML_SaveSource_CapturedFiles(nil, True);
+
+    UI_SelectCurrentCaptured;
+    UI_FillCounter;
+    UI_ToolBar;
   end;
 end;
 
@@ -770,7 +773,8 @@ begin
       if (CropMode = diCropCustom) then
       begin
         //If we have processed all queue files automatically clear it
-        if (oldLength > 0) and
+        if not(Sender = actTakeRe) and
+           (oldLength > 0) and
            (iSourceFiles >= 0) and (iSourceFiles >= oldLength) then
         begin
           SourceFiles_Clear(False);
@@ -876,28 +880,13 @@ begin
     lenSources:= Length(SourceFiles);
     if (iSourceFiles = -1) then iSourceFiles:= 0;
 
-    if (iSourceFiles = lenSources)
-    then begin
-           //We've already cut the last one, Re Crop the Last File, dec the Counters first
-           { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
-           Counter_Dec(imgManipulation.CropAreas.Count);
-           imgManipulation.getAllBitmaps(@SaveCallBack, 1, True);
-         end
+    if (iSourceFiles = lenSources) or
+       (SourceFiles[iSourceFiles].cCount > 0)
+    then CropFiles(iSourceFiles, True) //Re Crop
     else begin
-           if SourceFiles[iSourceFiles].fCrop
-           then imgManipulation.getAllBitmaps(@SaveCallBack, 1, True) //Re Crop, Counters is already decremented by GoBack
-           else begin  //(lastCropped < iSourceFiles)
-                  if (lastCropped > iSourceFiles) then
-                  begin
-                    if (MessageDlg('DigIt', rsMiddlePage, mtConfirmation, [mbYes, mbCancel], 0) = mrCancel)
-                    then exit
-                    else begin Pages_InsertMiddle(iSourceFiles); exit; end;
-                   end;
-                  imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
-                  SourceFiles[iSourceFiles].fCrop:= True;
+           CropFiles(iSourceFiles, False);
 
-                  if (iSourceFiles > lastCropped) then lastCropped:= iSourceFiles;
-                end;
+           if (iSourceFiles > lastCropped) then lastCropped:= iSourceFiles;
 
            inc(iSourceFiles);
          end;
@@ -918,7 +907,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actCropGoNextExecute(Sender: TObject);
+procedure TDigIt_Main.actGoNextExecute(Sender: TObject);
 var
    new_iSourceFiles: Integer;
 
@@ -930,8 +919,8 @@ begin
        inc(new_iSourceFiles);
        if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
        begin
-         { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
-         if SourceFiles[new_iSourceFiles].fCrop then Counter_Inc(imgManipulation.CropAreas.Count);
+         if (SourceFiles[new_iSourceFiles].cCount > 0)
+         then Counter_Assign(SourceFiles[new_iSourceFiles].cStart);
          iSourceFiles:= new_iSourceFiles;
        end;
      end;
@@ -946,7 +935,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.actCropGoBackExecute(Sender: TObject);
+procedure TDigIt_Main.actGoBackExecute(Sender: TObject);
 var
    new_iSourceFiles: Integer;
 
@@ -956,18 +945,14 @@ begin
      if (new_iSourceFiles > 0) then
      begin
        //We've already cut the last one, start with the penultimate one
-       if (new_iSourceFiles >= Length(SourceFiles)) then
-       begin
-         new_iSourceFiles:= Length(SourceFiles)-1;
-         Counter_Dec(imgManipulation.CropAreas.Count);
-       end;
+       if (new_iSourceFiles >= Length(SourceFiles)) then new_iSourceFiles:= Length(SourceFiles)-1;
 
        dec(new_iSourceFiles);
 
        if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
        begin
-         { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
-         if SourceFiles[new_iSourceFiles].fCrop then Counter_Dec(imgManipulation.CropAreas.Count);
+         if (SourceFiles[new_iSourceFiles].cCount > 0)
+         then Counter_Assign(SourceFiles[new_iSourceFiles].cStart);
          iSourceFiles:= new_iSourceFiles;
        end;
      end;
@@ -1008,6 +993,14 @@ begin
   try
     Finished:= False;
     c:= Length(SourceFiles);
+
+    if (lastCropped > -1) then
+    begin
+      iSourceFiles:= lastCropped+1;
+      LoadImage(SourceFiles[iSourceFiles].fName, False);
+      Counter_Assign(SourceFiles[lastCropped].cStart+SourceFiles[lastCropped].cCount);
+    end;
+
     cStr:= IntToStr(c);
     DigIt_Progress.ProgressShow(rsProcessingImages, iSourceFiles, c);
 
@@ -1017,8 +1010,7 @@ begin
       Application.ProcessMessages;
       if DigIt_Progress.Cancelled then break;
 
-      imgManipulation.getAllBitmaps(@SaveCallBack, 0, True);
-      SourceFiles[iSourceFiles].fCrop:= True;
+      CropFiles(iSourceFiles, False);
       inc(iSourceFiles);
 
       Finished:= CheckEndOfFiles;
@@ -1026,7 +1018,7 @@ begin
       then if not(LoadImage(SourceFiles[iSourceFiles].fName, False))
            then begin
                   { #todo -oMaxM : do something if LoadImage Fails? }
-                  break; //UserCancel:= True;
+                  break;
                 end;
 
       lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
@@ -1526,16 +1518,11 @@ end;
 
 procedure TDigIt_Main.actCapturedDeleteAllExecute(Sender: TObject);
 var
-   captItem: TListItem;
-   curFileName: String;
    i: Integer;
-   nofileBMP: TBitmap;
 
 begin
   if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
-     nofileBMP:=TBitmap.Create;
-
      //Delete all File in FileSystem ?
      if (MessageDlg('DigIt', rsDeleteAllFiles, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
      then for i:=0 to Length(CapturedFiles)-1 do
@@ -1647,8 +1634,6 @@ begin
      UI_ThumbnailUpdate(captItem.Index, rotatedBitmap);
 
      //Update the Thumbnail in ListView
-     //lvCaptured.Selected:= nil;
-     //lvCaptured.Selected:= captItem;
      oIndex:= captItem.ImageIndex;
      captItem.ImageIndex:= -1;
      captItem.ImageIndex:= oIndex;
@@ -1680,8 +1665,6 @@ begin
      UI_ThumbnailUpdate(captItem.Index, rotatedBitmap);
 
      //Update the Thumbnail in ListView
-     //lvCaptured.Selected:= nil;
-     //lvCaptured.Selected:= captItem;
      oIndex:= captItem.ImageIndex;
      captItem.ImageIndex:= -1;
      captItem.ImageIndex:= oIndex;
@@ -1712,13 +1695,14 @@ var
 begin
   //Increment the Counter Value
   Counter.Value:= Counter.Value+1;
+
   inc(iCapturedFiles);
 
   //Save File
   savedFile:= SaveImage(Bitmap, Counter.GetValue);
 
   captItem:= nil;
-  if (AUserData = 0)
+  if (Boolean(AUserData) = False)
   then begin
          //Crop, add file to Captured List and in Thumbnails
          iCapturedFiles:= Length(CapturedFiles);
@@ -2376,7 +2360,8 @@ begin
      for i:=0 to iCount-1 do
      begin
        curItemPath :=XML_SourceFiles+'Item' + IntToStr(i)+'/';
-       SourceFiles[i].fCrop:= aXML.GetValue(curItemPath+'fCrop', False);
+       SourceFiles[i].cCount:= aXML.GetValue(curItemPath+'cCount', 0);
+       SourceFiles[i].cStart:= aXML.GetValue(curItemPath+'cStart', 0);
        SourceFiles[i].fName:= RelativePathToFullPath(Path_Session, aXML.GetValue(curItemPath+'fName', ''));
      end;
 
@@ -2408,7 +2393,8 @@ begin
      for i:=0 to Length(SourceFiles)-1 do
      begin
        curItemPath :=XML_SourceFiles+'Item' + IntToStr(i)+'/';
-       aXML.SetValue(curItemPath+'fCrop', SourceFiles[i].fCrop);
+       aXML.SetValue(curItemPath+'cCount', SourceFiles[i].cCount);
+       aXML.SetValue(curItemPath+'cStart', SourceFiles[i].cStart);
        aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(Path_Session, SourceFiles[i].fName));
      end;
 
@@ -3341,7 +3327,8 @@ begin
       begin
         if AArray.Get(i, curImageFile) then
         begin
-          SourceFiles[oldLength+i].fCrop:= False;
+          SourceFiles[oldLength+i].cCount:= 0;
+          SourceFiles[oldLength+i].cStart:= 0;
           SourceFiles[oldLength+i].fName:= curImageFile;
           StrDispose(curImageFile);
         end;
@@ -3361,7 +3348,8 @@ begin
     //Add files to end of Array SourceFiles
     oldLength:= Length(SourceFiles);
     SetLength(SourceFiles, oldLength+1);
-    SourceFiles[oldLength].fCrop:= False;
+    SourceFiles[oldLength].cCount:= 0;
+    SourceFiles[oldLength].cStart:= 0;
     SourceFiles[oldLength].fName:= AFileName;
     Result:= 1;
     lastLenTaked:= 1;
@@ -3450,10 +3438,43 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.Pages_InsertMiddle(ASourceFileIndex: Integer);
+procedure TDigIt_Main.CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
+var
+   oldCount: DWord;
+
 begin
-  { #todo 5 -oMaxM : Re index the crops starting from the lastCropped }
-  MessageDlg(rsNotImpl, mtInformation, [mbOk], 0);
+  iSourceFiles:= ASourceFileIndex;
+
+  if isReTake
+  then begin
+         oldCount:= SourceFiles[iSourceFiles].cCount;
+         if (oldCount <> imgManipulation.CropAreas.Count) then
+         begin
+           if (oldCount < imgManipulation.CropAreas.Count)
+           then begin
+                  { #todo 10 -oMaxM : Re index - add space for more files }
+                  MessageDlg('DigIt', 'To-Do: add space for more files', mtInformation, [mbOk], 0);
+                end
+           else begin
+                  { #todo 10 -oMaxM : Re index - delete extra files }
+                  MessageDlg('DigIt', 'To-Do: delete extra files', mtInformation, [mbOk], 0);
+                end;
+         end;
+
+         Counter_Assign(SourceFiles[iSourceFiles].cStart);
+       end
+  else begin
+         if (iSourceFiles < lastCropped) then
+         begin
+           { #todo 10 -oMaxM : Re index - delete extra files }
+           MessageDlg('DigIt', 'To-Do: insert files', mtInformation, [mbOk], 0);
+         end;
+
+         SourceFiles[iSourceFiles].cStart:= Counter.Value;
+       end;
+
+  imgManipulation.getAllBitmaps(@SaveCallBack, Integer(isReTake), True);
+  SourceFiles[iSourceFiles].cCount:= imgManipulation.CropAreas.Count;
 end;
 
 procedure TDigIt_Main.SetSaveWriter(AFormat: TBGRAImageFormat);
@@ -3553,6 +3574,13 @@ begin
     inc(iCapturedFiles, AValue);
     if (iCapturedFiles > Length(CapturedFiles)-1) then iCapturedFiles:= Length(CapturedFiles)-1;
   end;
+end;
+
+procedure TDigIt_Main.Counter_Assign(AValue: Integer);
+begin
+  Counter.Value:= AValue;
+  iCapturedFiles:= AValue-1;
+  if (iCapturedFiles > Length(CapturedFiles)-1) then iCapturedFiles:= Length(CapturedFiles)-1;
 end;
 
 procedure TDigIt_Main.SetSessionModified(AValue: Boolean);
@@ -3788,8 +3816,8 @@ begin
                            ((lenSources = 1) or (iSourceFiles >= 0) and (iSourceFiles >= lenSources-1));
          actCropNext.Enabled:= bCommonCond and (lenSources > 0);
                                //bCommonCond and (lenSources > 1) and (iSourceFiles >= 0) and (iSourceFiles < lenSources-1);
-         actCropGoNext.Enabled:= actCropNext.Enabled and not(actCrop_Enabled);
-         actCropGoBack.Enabled:= bCommonCond and (lenSources > 1) and (iSourceFiles > 0) and (iSourceFiles <= lenSources);
+         actGoNext.Enabled:= actCropNext.Enabled and not(actCrop_Enabled);
+         actGoBack.Enabled:= bCommonCond and (lenSources > 1) and (iSourceFiles > 0) and (iSourceFiles <= lenSources);
          actCropAll.Enabled:= actCropNext.Enabled and not(actCrop_Enabled);
 
          actClearQueue.Enabled:= bCommonCond and (lenSources > 0);

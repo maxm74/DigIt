@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/04/29 Changed Counter Value to DWord;
+2025/04/30 Added SourceFiles_Add StartIndex param;
+           Fixed ReTake bugs in CustomMode;
+           Release of 0.2 beta;
+
+        29 Changed Counter Value to DWord;
            Added method CropFiles and Counter_Assign;
            ReTake/GoNext/GoBack Use Counter and CropCount stored in SourceFile;
 

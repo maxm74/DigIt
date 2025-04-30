@@ -206,7 +206,7 @@ msgstr ""
 
 #: digit_form_main.rssourcenotfound
 #, object-pascal-format
-msgid "Source \"%s\" not Found, try Select another from Menù"
+msgid "Source %s not Found, try Select another from Menù"
 msgstr ""
 
 #: digit_form_main.rssourcenotselected

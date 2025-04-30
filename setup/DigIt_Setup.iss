@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "DigIt"
-#define MyAppVersion "0.1"
+#define MyAppVersion "0.2"
 #define MyAppPublisher "Massimo Magnano"
 #define MyAppURL "https://github.com/maxm74/DigIt"
 #define MyAppExeName "DigIt.exe"
@@ -24,17 +24,19 @@ DisableProgramGroupPage=yes
 LicenseFile=C:\Programming\Lazarus\Projects\DigIt\LICENSE
 OutputDir=C:\Programming\Lazarus\Projects\DigIt\bin\setup\{#MyAppVersion}
 OutputBaseFilename=DigIt_Setup_{#MyAppVersion}_x86_64-win64
-SetupIconFile=C:\Programming\Lazarus\Projects\DigIt\DigIt.ico
+SetupIconFile=C:\Programming\Lazarus\Projects\DigIt\images\digit-icon-setup.ico
+UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma
 SolidCompression=yes
+ChangesAssociations=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; OnlyBelowVersion: 0,6.1
 
 [Files]
 Source: "C:\Programming\Lazarus\Projects\DigIt\bin\x86_64-win64\DigIt.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -46,6 +48,12 @@ Source: "C:\Programming\Lazarus\Projects\DigIt\languages\all\*"; DestDir: "{app}
 Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
+
+[Registry]
+Root: HKCR; Subkey: ".digs"; ValueData: "{#MyAppName}"; Flags: uninsdeletevalue; ValueType: string; ValueName: ""
+Root: HKCR; Subkey: "{#MyAppName}"; ValueData: "{#MyAppName} Session";  Flags: uninsdeletekey; ValueType: string; ValueName: ""
+Root: HKCR; Subkey: "{#MyAppName}\DefaultIcon"; ValueData: "{app}\{#MyAppExeName},1"; ValueType: string; ValueName: ""
+Root: HKCR; Subkey: "{#MyAppName}\shell\open\command"; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; ValueType: string; ValueName: ""
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

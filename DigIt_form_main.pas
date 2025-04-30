@@ -52,7 +52,7 @@ resourcestring
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
-  rsSourceNotFound = 'Source "%s" not Found, try Select another from Menù';
+  rsSourceNotFound = 'Source %s not Found, try Select another from Menù';
   rsSourceNotSelected = 'Cannot Select Source %d, try Select another from Menù';
   rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
@@ -424,8 +424,8 @@ type
 
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
-    function SourceFiles_Add(AArray: IDigIt_ArrayR_PChars): Integer; overload;
-    function SourceFiles_Add(AFileName: String): Integer; overload;
+    function SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer; overload;
+    function SourceFiles_Add(AFileName: String; AStartIndex: Integer): Integer; overload;
     procedure SourceFiles_Clear(ClearSourceInst: Boolean);
 
     function CropFile_Full(AFileName: String; isReTake: Boolean): Boolean; overload;
@@ -690,65 +690,45 @@ end;
 
 procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 var
-   len, i: Integer;
+   len, i,
+   numTaked: Integer;
    hasCropped: Boolean;
-   oldSourceFiles: TSourceFileArray;
 
 begin
-  UI_SelectNextCaptured(-lastLenTaked);
+  if (CropMode = diCropFull) then UI_SelectCurrentCaptured(-lastLenTaked);
 
   if (MessageDlg('DigIt', Format(rsTakeAgain, [lastLenTaked]),
                  mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
     Case CropMode of
       diCropFull: begin
-        len:= Length(CapturedFiles);
-        hasCropped:= False;
-
         Counter_Dec(lastLenTaked);
+        actTakeExecute(actTakeRe);
       end;
       diCropCustom: begin
         len:= Length(SourceFiles);
-        hasCropped:= (len-lastLenTaked <= lastCropped);
+        numTaked:= lastLenTaked;
+        hasCropped:= (len-numTaked <= lastCropped);
+
+        actTakeExecute(actTakeRe);
 
         if hasCropped then
         begin
-          SetLength(oldSourceFiles, lastLenTaked);
-          for i:=0 to lastLenTaked-1 do
-            oldSourceFiles[i]:= SourceFiles[len-lastLenTaked+i];
-        end;
-
-        if ((len - lastLenTaked) > 0)
-        then SetLength(SourceFiles, len-lastLenTaked)
-        else SourceFiles:= nil;
-
-      end;
-    end;
-
-    actTakeExecute(actTakeRe);
-
-    if hasCropped then
-    begin
-      //This works ONLY IF the Crop Area number has not changed in the meantime
-      { #todo 10 -oMaxM : Store Counter Value in SourceFiles so we can get away from Crop Area count?? }
-      //Counter_Dec(numCropped * imgManipulation.CropAreas.Count);
-
-      iSourceFiles:= len-lastLenTaked;
-      for i:=0 to Length(oldSourceFiles)-1 do
-      begin
-        if (oldSourceFiles[i].cCount > 0) then
-        begin
-          iSourceFiles:= len-lastLenTaked+i;
-          SourceFiles[iSourceFiles].cStart:= oldSourceFiles[i].cStart;
-          SourceFiles[iSourceFiles].cCount:= oldSourceFiles[i].cCount;
-          LoadImage(SourceFiles[iSourceFiles].fName, False);
-          CropFiles(iSourceFiles, True);
+          iSourceFiles:= len-numTaked;
+          for i:=len-numTaked to len-1 do
+          begin
+            if (SourceFiles[i].cCount > 0) then
+            begin
+              iSourceFiles:= i;
+              LoadImage(SourceFiles[i].fName, False);
+              CropFiles(i, True);
+            end;
+          end;
         end;
       end;
     end;
 
   finally
-    oldSourceFiles:= nil;
     XML_SaveSource_CapturedFiles(nil, True);
 
     UI_SelectCurrentCaptured;
@@ -761,7 +741,8 @@ procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
    curData: Pointer;
    curDataType: TDigItDataType;
-   res, i,
+   res,
+   StartIndex,
    oldLength: Integer;
 
 begin
@@ -802,7 +783,7 @@ begin
                      StrDispose(PChar(curData));
                    end
               else begin
-                     res:= SourceFiles_Add(IDigIt_ArrayR_PChars(curData));
+                     res:= SourceFiles_Add(IDigIt_ArrayR_PChars(curData), -1);
                      CropFile_Full(0, (Sender = actTakeRe));
                    end;
 
@@ -811,15 +792,17 @@ begin
               rSource^.Inst.Clear;
             end;
             diCropCustom: begin
+              if (Sender = actTakeRe)
+              then StartIndex:= oldLength-lastLenTaked
+              else StartIndex:= oldLength;
+
               //Add files to the queue array
               if (curDataType = diDataType_FileName)
               then begin
-                     res:= SourceFiles_Add(PChar(curData));
+                     res:= SourceFiles_Add(PChar(curData), StartIndex);
                      StrDispose(PChar(curData));
                    end
-              else res:= SourceFiles_Add(IDigIt_ArrayR_PChars(curData));
-
-              lastLenTaked:= res;
+              else res:= SourceFiles_Add(IDigIt_ArrayR_PChars(curData), StartIndex);
 
               if (Sender = actTakeRe)
               then begin
@@ -837,6 +820,8 @@ begin
                        actCropNextExecute(nil);
                      end;
                    end;
+
+              lastLenTaked:= res;
             end;
           end;
         end;
@@ -846,8 +831,11 @@ begin
   finally
     XML_SaveWork(True);
 
-    UI_ToolBar;
-    UI_FillCounter;
+    if not(Sender = actTakeRe) then
+    begin
+      UI_ToolBar;
+      UI_FillCounter;
+    end;
 
     DigIt_Progress.Hide;
     FreeAndNil(WizardBuildDuplex);
@@ -3308,7 +3296,7 @@ begin
 end;
 *)
 
-function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ArrayR_PChars): Integer;
+function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer;
 var
    oldLength, i: Integer;
    curImageFile: PChar;
@@ -3317,27 +3305,27 @@ begin
   Result:= 0;
   if (AArray <> nil) then
   begin
-    //Add files to end of Array SourceFiles
     oldLength:= Length(SourceFiles);
     Result:= AArray.GetCount;
     if (Result > 0) then
     begin
-      SetLength(SourceFiles, oldLength+Result);
+      if (AStartIndex < 0) or (AStartIndex > oldLength)
+      then AStartIndex:= oldLength;
+
+      //Add more space, if needed, to end of Array SourceFiles
+      if (AStartIndex+Result > oldLength) then SetLength(SourceFiles, AStartIndex+Result);
+
       for i:=0 to Result-1 do
-      begin
         if AArray.Get(i, curImageFile) then
         begin
-          SourceFiles[oldLength+i].cCount:= 0;
-          SourceFiles[oldLength+i].cStart:= 0;
-          SourceFiles[oldLength+i].fName:= curImageFile;
+          SourceFiles[AStartIndex+i].fName:= curImageFile;
           StrDispose(curImageFile);
         end;
-      end;
     end;
   end;
 end;
 
-function TDigIt_Main.SourceFiles_Add(AFileName: String): Integer;
+function TDigIt_Main.SourceFiles_Add(AFileName: String; AStartIndex: Integer): Integer;
 var
    oldLength: Integer;
 
@@ -3347,12 +3335,15 @@ begin
   begin
     //Add files to end of Array SourceFiles
     oldLength:= Length(SourceFiles);
-    SetLength(SourceFiles, oldLength+1);
-    SourceFiles[oldLength].cCount:= 0;
-    SourceFiles[oldLength].cStart:= 0;
-    SourceFiles[oldLength].fName:= AFileName;
+
+    if (AStartIndex < 0) or (AStartIndex > oldLength)
+    then AStartIndex:= oldLength;
+
+    //Add more space, if needed, to end of Array SourceFiles
+    if (AStartIndex+1 > oldLength) then SetLength(SourceFiles, AStartIndex+1);
+
+    SourceFiles[AStartIndex].fName:= AFileName;
     Result:= 1;
-    lastLenTaked:= 1;
   end;
 end;
 

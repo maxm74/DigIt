@@ -102,6 +102,10 @@ msgstr ""
 msgid "Value Previous: %d"
 msgstr "Valore Precedente: %d"
 
+#: digit_form_main.rscrop
+msgid "Crop (F5)"
+msgstr "Taglia (F5)"
+
 #: digit_form_main.rscropcust
 msgctxt "digit_form_main.rscropcust"
 msgid "Custom"
@@ -111,6 +115,10 @@ msgstr "Personalizzata"
 msgctxt "digit_form_main.rscropfull"
 msgid "Full Area"
 msgstr "Area Intera"
+
+#: digit_form_main.rscropnext
+msgid "Crop + Next (F5)"
+msgstr "Taglia + Avanti (F5)"
 
 #: digit_form_main.rscroptodo
 #, object-pascal-format
@@ -216,13 +224,13 @@ msgstr "Salvando la Sessione Lavoro"
 
 #: digit_form_main.rssourcenotfound
 #, object-pascal-format
-msgid "Source \"%s\" not Found, try Select another from Menù"
-msgstr "Sorgente \"%s\" non Trovata, prova a Selezionarne un'altra dal Menù"
+msgid "Source %s not Found, try Select another from Menù"
+msgstr "Sorgente %s non Trovata, prova a Selezionarne un'altra dal Menù"
 
 #: digit_form_main.rssourcenotselected
 #, object-pascal-format
 msgid "Cannot Select Source %d, try Select another from Menù"
-msgstr "Impossibile Selezionare la Sorgente \"%d, prova a Selezionarne un'altra dal Menù"
+msgstr "Impossibile Selezionare la Sorgente %d, prova a Selezionarne un'altra dal Menù"
 
 #: digit_form_main.rstakeagain
 #, object-pascal-format
@@ -356,7 +364,6 @@ msgid "Delete All"
 msgstr "Elimina Tutto"
 
 #: tdigit_exportfiles.btdown.hint
-#, fuzzy
 msgctxt "tdigit_exportfiles.btdown.hint"
 msgid "Down"
 msgstr "Giù"
@@ -374,13 +381,12 @@ msgid "Paper Orientation"
 msgstr "Orientamento Carta"
 
 #: tdigit_exportfiles.btup.hint
-#, fuzzy
 msgctxt "tdigit_exportfiles.btup.hint"
 msgid "Up"
 msgstr "Su"
 
 #: tdigit_exportfiles.caption
-msgid "Export Settings - "
+msgid "Export Settings -"
 msgstr "Impostazioni Esportazione -"
 
 #: tdigit_exportfiles.cbpapersize.text
@@ -421,18 +427,17 @@ msgstr "Dimensione Carta :"
 
 #: tdigit_exportfiles.lvfiles.columns[0].caption
 msgid "File Name"
-msgstr ""
+msgstr "Nome File"
 
 #: tdigit_exportfiles.lvfiles.columns[1].caption
 msgid "Full Path"
-msgstr ""
+msgstr "Cartella"
 
 #: tdigit_exportfiles.opendlg.title
 msgid "Open Existing Files"
 msgstr "Apri File Esistenti"
 
 #: tdigit_exportfiles.openfolder.title
-#, fuzzy
 msgctxt "tdigit_exportfiles.openfolder.title"
 msgid "Select a Folder"
 msgstr "Seleziona una Cartella"
@@ -448,6 +453,10 @@ msgstr ""
 #: tdigit_exportfiles.paneljpeg.caption
 msgid " Image Options "
 msgstr " Opzioni immagine "
+
+#: tdigit_exportfiles.panelsaveformat.caption
+msgid " Save Options "
+msgstr " Opzioni Salvataggio "
 
 #: tdigit_exportfiles.savepdf.title
 msgctxt "tdigit_exportfiles.savepdf.title"
@@ -492,25 +501,23 @@ msgstr "Converti Immagini"
 msgid "Convert Images to PDF"
 msgstr "Converti Immagini in PDF"
 
-#: tdigit_main.actcrop.caption
-msgid "Crop"
-msgstr "Taglia (F5)"
-
 #: tdigit_main.actcropall.caption
 msgid "Crop All"
 msgstr "Taglia Tutti"
 
-#: tdigit_main.actcropgoback.caption
-msgid "Back"
-msgstr "Indietro"
-
-#: tdigit_main.actcropgonext.caption
-msgid "Next"
-msgstr "Avanti"
-
 #: tdigit_main.actcropnext.caption
 msgid "Crop + Next"
 msgstr "Taglia + Avanti (F5)"
+
+#: tdigit_main.actgoback.caption
+msgctxt "tdigit_main.actgoback.caption"
+msgid "Back"
+msgstr "Indietro"
+
+#: tdigit_main.actgonext.caption
+msgctxt "tdigit_main.actgonext.caption"
+msgid "Next"
+msgstr "Avanti"
 
 #: tdigit_main.actoptions.caption
 msgid "Options ..."
@@ -568,8 +575,8 @@ msgstr "Altezza :"
 
 #: tdigit_main.bclabel12.caption
 msgctxt "tdigit_main.bclabel12.caption"
-msgid "Name :"
-msgstr "Nome :"
+msgid "Fixed side:"
+msgstr "Lato fisso:"
 
 #: tdigit_main.bclabel13.caption
 msgid "Before :"
@@ -578,6 +585,10 @@ msgstr "Prima :"
 #: tdigit_main.bclabel14.caption
 msgid "After :"
 msgstr "Dopo :"
+
+#: tdigit_main.bclabel15.caption
+msgid "Size :"
+msgstr "Misura :"
 
 #: tdigit_main.bclabel2.caption
 msgid "Top :"
@@ -610,24 +621,6 @@ msgstr "Valore :"
 msgid "Digits :"
 msgstr "Cifre :"
 
-#: tdigit_main.btbox_add.caption
-msgctxt "tdigit_main.btbox_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btbox_add.hint
-msgid "Add a Crop Area"
-msgstr "Aggiungi un'Area di Taglio"
-
-#: tdigit_main.btbox_del.caption
-msgctxt "tdigit_main.btbox_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btbox_del.hint
-msgid "Remove this Crop Area"
-msgstr "Rimuovi questa Area di Taglio"
-
 #: tdigit_main.btcfliphleft.hint
 msgid "Flip Horizzontal Left"
 msgstr "Ribalta Orizzontalmente a Sinistra"
@@ -644,46 +637,6 @@ msgstr "Ribalta Verticalmente in Giù"
 msgid "Flip Vertical Up"
 msgstr "Ribalta Verticalmente in Su"
 
-#: tdigit_main.btcounter_add.caption
-msgctxt "tdigit_main.btcounter_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btcounter_add.hint
-msgctxt "tdigit_main.btcounter_add.hint"
-msgid "Add a Counter"
-msgstr "Aggiungi un Contatore"
-
-#: tdigit_main.btcounter_del.caption
-msgctxt "tdigit_main.btcounter_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btcounter_del.hint
-msgctxt "tdigit_main.btcounter_del.hint"
-msgid "Remove this Counter"
-msgstr "Rimuovi questo Contatore"
-
-#: tdigit_main.btcropcounter_add.caption
-msgctxt "tdigit_main.btcropcounter_add.caption"
-msgid "+"
-msgstr ""
-
-#: tdigit_main.btcropcounter_add.hint
-msgctxt "tdigit_main.btcropcounter_add.hint"
-msgid "Add a Counter"
-msgstr "Aggiungi un Contatore"
-
-#: tdigit_main.btcropcounter_del.caption
-msgctxt "tdigit_main.btcropcounter_del.caption"
-msgid "-"
-msgstr ""
-
-#: tdigit_main.btcropcounter_del.hint
-msgctxt "tdigit_main.btcropcounter_del.hint"
-msgid "Remove this Counter"
-msgstr "Rimuovi questo Contatore"
-
 #: tdigit_main.btcropduplicate.hint
 msgid "Duplicate this Area"
 msgstr "Duplica quest'Area"
@@ -691,6 +644,26 @@ msgstr "Duplica quest'Area"
 #: tdigit_main.btcropduplicateop.hint
 msgid "Duplicate when Rotate/Flip"
 msgstr "Duplica quando Ruota/Ribalta"
+
+#: tdigit_main.btcrop_add.caption
+msgctxt "tdigit_main.btcrop_add.caption"
+msgid "+"
+msgstr ""
+
+#: tdigit_main.btcrop_add.hint
+msgctxt "tdigit_main.btcrop_add.hint"
+msgid "Add a Crop Area"
+msgstr "Aggiungi Area di Taglio"
+
+#: tdigit_main.btcrop_del.caption
+msgctxt "tdigit_main.btcrop_del.caption"
+msgid "-"
+msgstr ""
+
+#: tdigit_main.btcrop_del.hint
+msgctxt "tdigit_main.btcrop_del.hint"
+msgid "Remove this Crop Area"
+msgstr "Rimuovi questa Area di Taglio"
 
 #: tdigit_main.btcrotateleft.hint
 msgctxt "tdigit_main.btcrotateleft.hint"
@@ -701,6 +674,18 @@ msgstr "Ruota a Sinistra"
 msgctxt "tdigit_main.btcrotateright.hint"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
+
+#: tdigit_main.btpagesizes.hint
+msgid "Page Sizes"
+msgstr "Misure Pagine"
+
+#: tdigit_main.btpagesizestocrops.hint
+msgid "Page size to Crops size"
+msgstr "Misura Pagina a Misura Tagli"
+
+#: tdigit_main.btpapersizes.hint
+msgid "Paper Sizes"
+msgstr "Misure Pagine"
 
 #: tdigit_main.btpfliph.hint
 msgid "Flip Horizzontal"
@@ -750,9 +735,13 @@ msgstr "DigIt"
 msgid "pixels"
 msgstr "pixels"
 
+#: tdigit_main.edpage_fix.text
+msgid "Width"
+msgstr "Larghezza"
+
 #: tdigit_main.edpage_unittype.text
-msgid "not defined"
-msgstr "non definita"
+msgid "full size"
+msgstr "dimensione intera"
 
 #: tdigit_main.itemcropmodecustom.caption
 msgctxt "tdigit_main.itemcropmodecustom.caption"
@@ -773,6 +762,10 @@ msgctxt "tdigit_main.label10.caption"
 msgid "Flip :"
 msgstr "Ribalta :"
 
+#: tdigit_main.label11.caption
+msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
 #: tdigit_main.label2.caption
 msgctxt "tdigit_main.label2.caption"
 msgid "Rotate :"
@@ -787,17 +780,9 @@ msgstr "Ribalta :"
 msgid "Example :"
 msgstr "Esempio :"
 
-#: tdigit_main.label5.caption
-msgid "Counter :"
-msgstr "Contatore :"
-
-#: tdigit_main.label7.caption
-msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgstr "Aree Taglio ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-
 #: tdigit_main.label8.caption
-msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgstr "Pagina ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr "Pagina ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label9.caption
 msgctxt "tdigit_main.label9.caption"
@@ -805,10 +790,8 @@ msgid "Rotate :"
 msgstr "Ruota :"
 
 #: tdigit_main.lbcounterexample.caption
-#, fuzzy
-#| msgid "00"
 msgid "000"
-msgstr "00"
+msgstr "000"
 
 #: tdigit_main.lbprevious.caption
 msgid "Value Previous: "
@@ -824,7 +807,7 @@ msgstr ""
 
 #: tdigit_main.menuexport.caption
 msgid "Tools"
-msgstr ""
+msgstr "Strumenti"
 
 #: tdigit_main.menuimageformat.caption
 msgid "ImageFormatForm"
@@ -855,8 +838,8 @@ msgid "Aspect Ratio"
 msgstr "Proporzioni"
 
 #: tdigit_main.rollcounters.button.caption
-msgid "Page Counters"
-msgstr "Contatori Pagina"
+msgid "Page Size & Counter"
+msgstr "Misura Pagina & Contatore"
 
 #: tdigit_main.rollcrops.button.caption
 msgid "Crop Areas"
@@ -869,6 +852,10 @@ msgstr "Pagine Catturate"
 #: tdigit_main.savesessiondlg.title
 msgid "Save Session as"
 msgstr "Salva Sessione come"
+
+#: tdigit_main.separator2.hint
+msgid "Test Big Separator"
+msgstr ""
 
 #: tdigit_main.tbcaptsep1.caption
 msgid "tbCaptSep1"
@@ -885,6 +872,10 @@ msgstr ""
 #: tdigit_main.tbcapturedpdf.caption
 msgid "Export to PDF"
 msgstr "Esporta in PDF"
+
+#: tdigit_main.tbcapturedtoimg.caption
+msgid "Export to Images"
+msgstr "Esporta come Immagini"
 
 #: tdigit_main.tbcrop.caption
 msgid "tbCrop"

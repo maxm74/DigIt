@@ -572,7 +572,6 @@ begin
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
-    itemCropModeCustom.Enabled:= True;
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
 //    MenuMain.OwnerDraw:= True;
@@ -590,14 +589,22 @@ begin
 
   sessLoaded:= False;
   try
-     XML_OptionsLoad_Session(nil, optPath_Session, optFile_Session);
-
-     //If in Options there is a Session Opened then Open It
-     if (optPath_Session <> '') and (optFile_Session <> '') and
-        FileExists(optPath_Session+optFile_Session+Ext_Sess) and
-        (MessageDlg('DigIt', Format(rsContinueWork, [optPath_Session+optFile_Session]),
+     if FileExists(ParamStr(1)) and
+        (MessageDlg('DigIt', Format(rsContinueWork, [ParamStr(1)]),
                     mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-     then sessLoaded:= XML_LoadSessionFile(optPath_Session, optFile_Session);
+     then sessLoaded:= XML_LoadSessionFile(ParamStr(1));
+
+     if not(sessLoaded) then
+     begin
+       XML_OptionsLoad_Session(nil, optPath_Session, optFile_Session);
+
+       //If in Options there is a Session Opened then Open It
+       if (optPath_Session <> '') and (optFile_Session <> '') and
+          FileExists(optPath_Session+optFile_Session+Ext_Sess) and
+          (MessageDlg('DigIt', Format(rsContinueWork, [optPath_Session+optFile_Session]),
+                      mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+       then sessLoaded:= XML_LoadSessionFile(optPath_Session, optFile_Session);
+     end;
 
      if not(sessLoaded) then
      begin

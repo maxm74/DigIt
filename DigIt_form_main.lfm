@@ -2776,6 +2776,7 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Timer Take'
       Enabled = False
       ImageIndex = 9
+      Visible = False
       OnExecute = actTimerTakeExecute
     end
     object actTakeBuildDuplex: TAction
@@ -4236,7 +4237,6 @@ object DigIt_Main: TDigIt_Main
     object itemCropModeCustom: TMenuItem
       Tag = 1
       Caption = 'Custom'
-      Enabled = False
       ImageIndex = 1
       OnClick = itemCropModeClick
     end

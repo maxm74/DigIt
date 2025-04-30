@@ -12,9 +12,11 @@
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
+        <DpiAware Value="True"/>
         <TextName Value="MaxM.DigIt.DigIt"/>
         <TextDesc Value="Application to automatically scan and cut images."/>
       </XPManifest>
+      <Icon Value="0"/>
       <Resources Count="2">
         <Resource_0 FileName="images\digit-icon.ico" Type="ICON" ResourceName="DIGIT-ICON"/>
         <Resource_1 FileName="images\digit-icon-files.ico" Type="ICON" ResourceName="DIGIT-ICON-FILES"/>

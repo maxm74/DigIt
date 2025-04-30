@@ -3,6 +3,7 @@ DigIt CHANGE LOG
 
 2025/04/30 Added SourceFiles_Add StartIndex param;
            Fixed ReTake bugs in CustomMode;
+           Added Open .digs File in FormShow;
            Release of 0.2 beta;
 
         29 Changed Counter Value to DWord;

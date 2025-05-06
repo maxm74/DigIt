@@ -1,6 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
+2025/05/06 ResizeImage use of ConvertSizeToResolutionUnit renamed function and HalfUp
+
 2025/04/30 Added SourceFiles_Add StartIndex param;
            Fixed ReTake bugs in CustomMode;
            Added Open .digs File in FormShow;

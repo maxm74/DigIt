@@ -1857,12 +1857,21 @@ begin
            pixelHeight:= imgManipulation.EmptyImage.Height;
          end
     else begin
+           (*
            newWidth:= imgManipulation.EmptyImage.ResolutionWidth;
            newHeight:= imgManipulation.EmptyImage.ResolutionHeight;
            ResolutionConvertSize(imgManipulation.EmptyImage.ResolutionUnit, ABitmap.ResolutionUnit,
                                  newWidth, newHeight, ABitmap.ResolutionX, ABitmap.ResolutionY);
-           pixelWidth:= Round(newWidth*ABitmap.ResolutionX);
-           pixelHeight:= Round(newHeight*ABitmap.ResolutionY);
+           *)
+           newWidth:= ConvertSizeToResolutionUnit(imgManipulation.EmptyImage.ResolutionUnit,
+                                                  imgManipulation.EmptyImage.ResolutionWidth,
+                                                  ABitmap.ResolutionUnit);
+           newHeight:= ConvertSizeToResolutionUnit(imgManipulation.EmptyImage.ResolutionUnit,
+                                                  imgManipulation.EmptyImage.ResolutionHeight,
+                                                  ABitmap.ResolutionUnit);
+
+           pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
+           pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
          end;
 
     Case APageResize of

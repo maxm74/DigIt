@@ -21,7 +21,7 @@ resourcestring
   rsProcessed = 'Processed %d / %s';
 
 const
-  DigIt_Version = '0.1.0';
+  DigIt_Version = '0.2.0';
 
   Ext_Sess  = '.digs';
   Ext_Thumb = '.digt';
@@ -29,7 +29,7 @@ const
   Ext_AutoThumb = '.digat';
 
   File_DefSession = 'digit';
-  File_Options = 'digit.xml';
+  File_Options = 'digit.cfg';
 
   XML_SourceFiles   = 'SourceFiles/';
   XML_CapturedFiles = 'CapturedFiles/';
@@ -105,7 +105,7 @@ initialization
    Path_Temp:= GetTempDir(False)+'DigIt'+DirectorySeparator;
 //   Path_Temp:= Path_Config+'tmp'+DirectorySeparator;
 
-   Path_DefSession:= Path_Config;
+   Path_DefSession:= Path_Config+'Session'+DirectorySeparator;
    Path_DefSession_Scan:= Path_DefSession+'Scan'+DirectorySeparator;
    Path_DefSession_Pictures:= Path_DefSession+'Pictures'+DirectorySeparator;
 

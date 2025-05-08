@@ -374,6 +374,7 @@ type
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure UI_ThumbnailUpdate(AIndex: Integer; AFileName: String); overload;
     procedure UI_ThumbnailUpdate(AIndex: Integer; ABitmap: TBGRABitmap); overload;
+    procedure UI_Caption;
 
                                             //Only the File Part, Path and Ext are added automatically
     function SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
@@ -611,7 +612,6 @@ begin
        //ask for open AutoSave if exists
        if FileExists(Path_DefSession+File_DefSession+Ext_AutoSess) then
        begin
-         sessLoaded:= True;
          if (MessageDlg('DigIt', rsContinueAutoWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
          then begin
                 XML_LoadWork(True);
@@ -624,8 +624,9 @@ begin
        end;
      end;
 
-     if not(sessLoaded)
-     then setCropMode(diCropFull);
+     if not(sessLoaded) then setCropMode(diCropFull);
+
+     if (Path_Session = Path_DefSession) then XML_OptionsSave_Session(nil, '', '');
 
   except
     Path_Session:= Path_DefSession;
@@ -635,7 +636,10 @@ begin
     SetDefaultStartupValues;
 
     setCropMode(diCropFull);
+    XML_OptionsSave_Session(nil, '', '');
   end;
+
+  UI_Caption;
 end;
 
 procedure TDigIt_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1546,8 +1550,11 @@ begin
 
      end;
      *)
-    if (MessageDlg('DigIt', rsNewWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-    then XML_ClearWork(False);
+    if (MessageDlg('DigIt', rsNewWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes) then
+    begin
+      XML_ClearWork(False);
+      XML_OptionsSave_Session(nil, Path_Session, Session_File);
+    end;
 
    finally
    end;
@@ -1562,15 +1569,23 @@ begin
      mrCancel: exit;
      end;
 
-     if OpenSessionDlg.Execute then XML_LoadSessionFile(OpenSessionDlg.FileName);
+     if OpenSessionDlg.Execute then
+     begin
+       XML_LoadSessionFile(OpenSessionDlg.FileName);
+       XML_OptionsSave_Session(nil, Path_Session, Session_File);
+     end;
+
   finally
   end;
 end;
 
 procedure TDigIt_Main.actSessionSaveAsExecute(Sender: TObject);
 begin
-  if SaveSessionDlg.Execute
-  then XML_SaveSessionFile(SaveSessionDlg.FileName);
+  if SaveSessionDlg.Execute then
+  begin
+    XML_SaveSessionFile(SaveSessionDlg.FileName);
+    XML_OptionsSave_Session(nil, Path_Session, Session_File);
+  end;
 end;
 
 procedure TDigIt_Main.actSessionSaveExecute(Sender: TObject);
@@ -1596,11 +1611,7 @@ begin
      if canSave then
      begin
        if (Path_Session = Path_DefSession)
-       then begin
-              //Save As...
-              if SaveSessionDlg.Execute
-              then XML_SaveSessionFile(SaveSessionDlg.FileName);
-            end
+       then actSessionSaveAs.Execute
        else XML_SaveWork(False);
      end;
 
@@ -1857,12 +1868,6 @@ begin
            pixelHeight:= imgManipulation.EmptyImage.Height;
          end
     else begin
-           (*
-           newWidth:= imgManipulation.EmptyImage.ResolutionWidth;
-           newHeight:= imgManipulation.EmptyImage.ResolutionHeight;
-           ResolutionConvertSize(imgManipulation.EmptyImage.ResolutionUnit, ABitmap.ResolutionUnit,
-                                 newWidth, newHeight, ABitmap.ResolutionX, ABitmap.ResolutionY);
-           *)
            newWidth:= ConvertSizeToResolutionUnit(imgManipulation.EmptyImage.ResolutionUnit,
                                                   imgManipulation.EmptyImage.ResolutionWidth,
                                                   ABitmap.ResolutionUnit);
@@ -2031,24 +2036,24 @@ var
 
 begin
   try
-    Result:= False;
+     Result:= False;
 
-    oldPath_Session:= Path_Session;
-    oldPath_Session_Scan:= Path_Session_Scan;
-    oldPath_Session_Pictures:= Path_Session_Pictures;
-    oldSession_File:= Session_File;
+     oldPath_Session:= Path_Session;
+     oldPath_Session_Scan:= Path_Session_Scan;
+     oldPath_Session_Pictures:= Path_Session_Pictures;
+     oldSession_File:= Session_File;
 
-    Path_Session:= APath;
-    Path_Session_Scan:= Path_Session+'Scan'+DirectorySeparator;
-    Path_Session_Pictures:= Path_Session+'Pictures'+DirectorySeparator;
-    Session_File:= AFile;
+     Path_Session:= APath;
+     Path_Session_Scan:= Path_Session+'Scan'+DirectorySeparator;
+     Path_Session_Pictures:= Path_Session+'Pictures'+DirectorySeparator;
+     Session_File:= AFile;
 
-    XML_LoadWork(False);
+     XML_LoadWork(False);
 
-    Result:= True;
+     Result:= True;
 
   except
-    Result:= False;
+     Result:= False;
   end;
 
   if not(Result) then
@@ -2086,7 +2091,6 @@ var
 begin
   Result:= False;
   try
-
   if (AFileName <> '') then
   try
      //XML_SaveWork(True);
@@ -2227,10 +2231,6 @@ begin
      imgListThumb_Changed:= True;
 
      XML_SaveWork(False);
-
-     if (Path_Session = Path_DefSession)
-     then Caption :='DigIt'
-     else Caption :='DigIt'+' - '+Session_File;
 
      DigIt_Progress.ProgressSetTotal(rsSavingDone, 5);
      Result:= True;
@@ -3591,19 +3591,12 @@ begin
 end;
 
 procedure TDigIt_Main.SetSessionModified(AValue: Boolean);
-var
-   addStr: String;
-
 begin
   if (rSessionModified = AValue) then exit;
 
   rSessionModified:= AValue;
 
-  if rSessionModified then addStr:= '* ' else  addStr:= '';
-
-  if (Path_Session = Path_DefSession)
-  then Caption:= addStr+'DigIt'
-  else Caption:= addStr+'DigIt'+' - '+Session_File;
+  UI_Caption;
 end;
 
 procedure TDigIt_Main.UI_DestinationMenuClick(Sender: TObject);
@@ -3930,6 +3923,18 @@ begin
   else imgListThumb.ReplaceProportionally(CapturedFiles[AIndex].iIndex, ABitmap.Bitmap);
 
   imgListThumb_Changed:= True;
+end;
+
+procedure TDigIt_Main.UI_Caption;
+var
+   addStr: String;
+
+begin
+  if rSessionModified then addStr:= '* ' else  addStr:= '';
+
+  if (Path_Session = Path_DefSession)
+  then Caption :=addStr+'DigIt'
+  else Caption :=addStr+'DigIt'+' - '+Session_File;
 end;
 
 end.

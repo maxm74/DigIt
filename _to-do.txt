@@ -1,21 +1,16 @@
 Bugs:
   Area Intera
       cambio Valore uno in meno non sostituisce le icone su Captured
-   
   
 Main:
-  Lasciare una sola ComboBox dei contatori (legata al Crop Selezionato) ?
-
-  CropAreas non mantiene il formato Pixel (GrayScale/Palette/BN)
-
-  Salvare la sessione più spesso
-
   riprendi sessione : barra di captured alla fine
   
   Take/Preview con Countdown
   Take automatico, Giorni della Settimana con Checkbox e Orari (eventuali notifiche via email,etc)
- 
-  Tasto per creare una cartella numerata -> incrementa il foldercounter 
+
+  ???
+  Tasto per creare una cartella numerata
+  -> incrementa il foldercounter
       -> crea una cartella con il nome (CartellaSalvataggio)\foldercounter 
       -> azzera i contatori 
       -> il take salva in questa cartella.

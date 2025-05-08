@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/06 ResizeImage use of ConvertSizeToResolutionUnit renamed function and HalfUp
+2025/05/08 Save of Opened Session in Config File;
+           Changed Default Session Path;
+           Added UI_Caption method;
+
+        06 ResizeImage use of ConvertSizeToResolutionUnit renamed function and HalfUp
 
 2025/04/30 Added SourceFiles_Add StartIndex param;
            Fixed ReTake bugs in CustomMode;

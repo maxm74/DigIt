@@ -305,6 +305,7 @@ type
 
     procedure tbCapturedPDFClick(Sender: TObject);
     procedure tbCapturedToImgClick(Sender: TObject);
+    procedure MenuSourcePopup(Sender: TObject);
 
   private
     { private declarations }
@@ -569,7 +570,7 @@ begin
 
   SetDefaultStartupValues;
 
-  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick);
+  //BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
@@ -3250,6 +3251,12 @@ end;
 procedure TDigIt_Main.tbCapturedToImgClick(Sender: TObject);
 begin
   TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, False);
+end;
+
+procedure TDigIt_Main.MenuSourcePopup(Sender: TObject);
+begin
+  menuSources.Items.Clear;
+  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick);
 end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);

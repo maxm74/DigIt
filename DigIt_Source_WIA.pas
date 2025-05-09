@@ -43,7 +43,10 @@ type
 
   { TDigIt_Source_WIA }
 
-  TDigIt_Source_WIA = class(TNoRefCountObject, IDigIt_Params, IDigIt_Source, IDigIt_ProgressCallback)
+  TDigIt_Source_WIA = class(TNoRefCountObject,
+                            IDigIt_Params,
+                            IDigIt_Source, IDigIt_Source_Items,
+                            IDigIt_ProgressCallback)
   private
     rWIA: TWIAManager;
     rWIASource: TWIADevice;
@@ -96,7 +99,11 @@ type
 
     procedure Clear; stdcall;
 
-    //IDigIt_ProgressCallback
+    //IDigIt_Source_Items Implementation
+    function GetCount: DWord; stdcall;
+    function Get(const AIndex: DWord; out aData: PChar): Boolean; stdcall;
+
+    //IDigIt_ProgressCallback Implementation
     procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
 
     constructor Create;
@@ -638,6 +645,42 @@ begin
 
   countTakes:= -1;
   DownloadedFiles.Clear;
+end;
+
+function TDigIt_Source_WIA.GetCount: DWord; stdcall;
+begin
+  Result:= 0;
+  if (getWIA <> nil) then
+  try
+     rWia.EnumAll:= False;
+     Result:= rWia.DevicesCount;
+
+  except
+    Result:= 0;
+  end;
+end;
+
+function TDigIt_Source_WIA.Get(const AIndex: DWord; out aData: PChar): Boolean; stdcall;
+var
+   curDevice: TWIADevice;
+
+begin
+  Result:= False;
+  aData:= nil;
+
+  if (getWIA <> nil) then
+  try
+     curDevice:= rWia.Devices[AIndex];
+
+     if (curDevice <> nil) then
+     begin
+       aData:= StrNew(PChar(curDevice.Manufacturer+' '+curDevice.Name));
+     end;
+
+  except
+    Result:= False;
+    aData:= nil;
+  end;
 end;
 
 procedure TDigIt_Source_WIA.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;

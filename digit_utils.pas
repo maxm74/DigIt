@@ -161,10 +161,14 @@ end;
 
 procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent);
 var
-   i, res  :Integer;
-   newItem :TMenuItem;
-   curSource:PSourceInfo;
-   curTitle:PChar;
+   i, iSub,
+   cSub, res: Integer;
+   newItem,
+   newSubItem: TMenuItem;
+   curSource: PSourceInfo;
+   curSourceItems: IDigIt_Source_Items;
+   curTitle,
+   subTitle: PChar;
 
 begin
   for i:=0 to theBridge.SourcesImpl.Count-1 do
@@ -189,6 +193,29 @@ begin
         {$ifopt D+}
         newItem.Caption:= newItem.Caption+'*';
         {$endif}
+
+        curSourceItems:= (curSource^.Inst as IDigIt_Source_Items);
+        cSub:= curSourceItems.GetCount;
+        if (cSub > 0) then
+        begin
+          newSubItem:= TMenuItem.Create(AOwner);
+          newSubItem.Caption:='-';
+          newSubItem.Tag:= -1;
+          menuSources.Items.Add(newSubItem);
+
+          for iSub:=0 to cSub-1 do
+          begin
+            subTitle:= '';
+            if curSourceItems.Get(iSub, subTitle) and (subTitle <> '') then
+            begin
+              newSubItem:= TMenuItem.Create(AOwner);
+              newSubItem.Caption:= subTitle;
+              StrDispose(subTitle);
+              newSubItem.Tag:= -1;
+              menuSources.Items.Add(newSubItem);
+            end;
+          end;
+        end;
       end;
 
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;

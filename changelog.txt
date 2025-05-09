@@ -1,7 +1,9 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/08 Save of Opened Session in Config File;
+2025/05/09 First Tests for Source Sub Items
+
+	08 Save of Opened Session in Config File;
            Changed Default Session Path;
            Added UI_Caption method;
 

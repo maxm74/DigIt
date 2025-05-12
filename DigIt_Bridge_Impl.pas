@@ -80,7 +80,7 @@ type
     constructor Create;
 
     function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(SourceIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
+    function Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
 
     function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
 
@@ -425,6 +425,8 @@ begin
   if (SourceName <> '') then
   try
      newSourceI:= FindByKey(SourceName);
+     if (newSourceI > -1) then Result:= Select(newSourceI, -1, GetUserParams);
+     (*
      newSource:= Data[newSourceI];
 
      if (newSource <> nil) then
@@ -439,15 +441,17 @@ begin
        rSelectedIndex:= newSourceI;
        Result:= True;
       end;
+      *)
 
   except
     Result:= False;
   end;
 end;
 
-function TDigIt_Sources.Select(SourceIndex: Integer; GetUserParams: Boolean): Boolean;
+function TDigIt_Sources.Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
 var
    newSource: PSourceInfo =nil;
+   curSourceItems: IDigIt_Source_Items;
 
 begin
   Result:= False;
@@ -457,16 +461,24 @@ begin
 
      if (newSource <> nil) then
      begin
-       if GetUserParams and
-          not((newSource^.Inst.Params = nil) or newSource^.Inst.Params.GetFromUser)
-       then exit;
+       if GetUserParams then
+       begin
+         if (newSource^.Inst is IDigIt_Source_Items)
+         then Result:= (newSource^.Inst as IDigIt_Source_Items).Select(newSourceSubIndex)
+         else Result:= True;
 
-       rSelected:= newSource;
-       rSelectedParams :=newSource^.Inst.Params;
-       rSelectedName:= rList[SourceIndex].Key;
-       rSelectedIndex:= SourceIndex;
-       Result:= True;
-      end;
+         if Result then Result:= (newSource^.Inst.Params <> nil) and newSource^.Inst.Params.GetFromUser;
+       end
+       else Result:= True;
+
+       if Result then
+       begin
+         rSelected:= newSource;
+         rSelectedParams :=newSource^.Inst.Params;
+         rSelectedName:= rList[SourceIndex].Key;
+         rSelectedIndex:= SourceIndex;
+       end;
+     end;
 
   except
     Result:= False;

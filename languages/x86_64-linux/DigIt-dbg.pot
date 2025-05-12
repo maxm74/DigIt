@@ -203,7 +203,7 @@ msgstr ""
 
 #: digit_form_main.rssourcenotfound
 #, object-pascal-format
-msgid "Source \"%s\" not Found, try Select another from Menù"
+msgid "Source %s not Found, try Select another from Menù"
 msgstr ""
 
 #: digit_form_main.rssourcenotselected
@@ -398,16 +398,18 @@ msgstr ""
 msgid "Crop All"
 msgstr ""
 
-#: tdigit_main.actcropgoback.caption
+#: tdigit_main.actcropnext.caption
+msgid "Crop + Next"
+msgstr ""
+
+#: tdigit_main.actgoback.caption
+msgctxt "tdigit_main.actgoback.caption"
 msgid "Back"
 msgstr ""
 
-#: tdigit_main.actcropgonext.caption
+#: tdigit_main.actgonext.caption
+msgctxt "tdigit_main.actgonext.caption"
 msgid "Next"
-msgstr ""
-
-#: tdigit_main.actcropnext.caption
-msgid "Crop + Next"
 msgstr ""
 
 #: tdigit_main.actoptions.caption
@@ -474,6 +476,10 @@ msgstr ""
 
 #: tdigit_main.bclabel14.caption
 msgid "After :"
+msgstr ""
+
+#: tdigit_main.bclabel15.caption
+msgid "Size :"
 msgstr ""
 
 #: tdigit_main.bclabel2.caption
@@ -662,7 +668,7 @@ msgid "Example :"
 msgstr ""
 
 #: tdigit_main.label8.caption
-msgid "Page Size ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgid "Page ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr ""
 
 #: tdigit_main.label9.caption

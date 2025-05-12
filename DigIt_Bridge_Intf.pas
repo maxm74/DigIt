@@ -129,9 +129,15 @@ type
     procedure Clear; stdcall;
   end;
 
-  { #todo 5 -oMaxM : Get Sub Items so the User can select directly the Device from Menù}
+  //Get Sub Items so the User can select directly the Device from Menù
   IDigIt_Source_Items = interface(specialize IOpenArrayR<PChar>)
   ['{D101CADE-C69C-4929-A8DF-699AC76DEE01}']
+
+    //Select Sub Item, if called with aIndex=-1 then Show User Dialog to Select it
+    function Select(aIndex: Integer): Boolean; stdcall;
+
+    //Is aIndex Sub Item the Current Selected?
+    function Selected(aIndex: Integer): Boolean; stdcall;
   end;
 
   IDigIt_Sources = Interface

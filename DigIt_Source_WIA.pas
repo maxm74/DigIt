@@ -102,6 +102,8 @@ type
     //IDigIt_Source_Items Implementation
     function GetCount: DWord; stdcall;
     function Get(const AIndex: DWord; out aData: PChar): Boolean; stdcall;
+    function Select(aIndex: Integer): Boolean; stdcall;
+    function Selected(aIndex: Integer): Boolean; stdcall;
 
     //IDigIt_ProgressCallback Implementation
     procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
@@ -240,9 +242,7 @@ end;
 
 function TDigIt_Source_WIA.GetFromUser: Boolean; stdcall;
 var
-  newItemIndex,
-  newDeviceIndex: Integer;
-  newWIASource: TWIADevice;
+  newItemIndex: Integer;
   initPar: TInitialItemValues;
 
 begin
@@ -250,32 +250,21 @@ begin
 
   if (getWIA <> nil) then
   try
-     rWia.EnumAll:= False;
-
-     //Open the Select Device Dialog
-     newDeviceIndex:= rWia.SelectDeviceDialog;
-     if (newDeviceIndex > -1) then
+     if (rWIASource <> nil) then
      begin
-       //Select the Device
-       rWia.SelectedDeviceIndex:= newDeviceIndex;
-       newWIASource:= rWia.SelectedDevice;
-       if (newWIASource = nil) then raise Exception.Create(rsWIAExcConnect);
+       newItemIndex:= rWIASource.SelectedItemIndex;
 
-       //if not(newWIASource.GetParamsCapabilities(WIACap) then raise Exception.Create('Error Get Params Capabilities');;
-
-       newItemIndex:= newWIASource.SelectedItemIndex;
-
-       //If Device is different start with Default Values  { #note 5 -oMaxM : Store Params for others devices in XML? }
-       if (DeviceID <> newWIASource.ID)
+       //If Device is different start with Default Values  { #note 5 -oMaxM : Load Params from others devices in XML? }
+       if (DeviceID <> rWIASource.ID)
        then initPar:= initDefault
        else initPar:= initParams;
 
        //Select Scanner Item and Settings to use
-       Result:= TWIASettingsSource.Execute(newWIASource, newItemIndex, initParams, WIAParams);
-       if Result
-       then SelectSourceItem(newWIASource, newItemIndex);
+       Result:= TWIASettingsSource.Execute(rWIASource, newItemIndex, initPar, WIAParams);
+       if Result then SelectSourceItem(rWIASource, newItemIndex);
+     end
+     else raise Exception.Create(rsWIAExcConnect);
 
-     end;
   finally
   end;
 end;
@@ -358,7 +347,7 @@ begin
     until (aIndex > -1);
 
     if (aIndex = -1)
-    then Result:= GetFromUser //User has selected Abort, Get Another Device from List
+    then Result:= Select(-1) and GetFromUser //User has selected Abort, Get Another Device from List and it's Params
     else begin
            SelectSourceItem(curSource, aIndex);
            Result:= (curSource <> nil);
@@ -671,8 +660,9 @@ begin
   if (getWIA <> nil) then
   try
      curDevice:= rWia.Devices[AIndex];
+     Result:= (curDevice <> nil);
 
-     if (curDevice <> nil) then
+     if Result then
      begin
        aData:= StrNew(PChar(curDevice.Manufacturer+' '+curDevice.Name));
      end;
@@ -680,6 +670,50 @@ begin
   except
     Result:= False;
     aData:= nil;
+  end;
+end;
+
+function TDigIt_Source_WIA.Select(aIndex: Integer): Boolean; stdcall;
+var
+   curDevice: TWIADevice;
+
+begin
+  Result:= False;
+
+  if (getWIA <> nil) then
+  try
+     curDevice:= rWia.Devices[aIndex];
+     Result:= (curDevice <> nil);
+
+     //Tell User using Select Device Dialog
+     if not(Result) then
+     begin
+       rWia.EnumAll:= False;
+
+       aIndex:= rWia.SelectDeviceDialog;
+       Result:= (aIndex > -1);
+     end;
+
+     if Result then rWia.SelectedDeviceIndex:= aIndex; //Select the Device
+     curDevice:= rWia.SelectedDevice;
+     Result:= (curDevice <> nil);
+     if Result then SelectSourceItem(curDevice, curDevice.SelectedItemIndex);
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Source_WIA.Selected(aIndex: Integer): Boolean; stdcall;
+begin
+  Result:= False;
+
+  if (getWIA <> nil) then
+  try
+     Result:= (rWIASource <> nil) and (rWia.Devices[aIndex] = rWIASource);
+
+  except
+    Result:= False;
   end;
 end;
 

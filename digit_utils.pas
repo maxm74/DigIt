@@ -15,7 +15,8 @@ interface
 
 uses
   Classes, SysUtils, ComCtrls, DOM, XMLConf, Laz2_DOM, Laz_XMLStreaming, Laz2_XMLCfg,
-  FPImage, Menus, DigIt_types, BGRAPapers;
+  FPImage, Menus, BGRAPapers,
+  DigIt_types, Digit_Bridge_Intf, Digit_Bridge_Impl;
 
 resourcestring
   rsDestination_Default = 'Save as Files';
@@ -29,7 +30,12 @@ procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit;
 procedure PaperSizesMenuTag_decode(ATag:Integer; var ResUnit: TResolutionUnit; var Paper: TPaperSize);
 function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 
-procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent);
+procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent;
+                           ASelectedSource: PSourceInfo);
+
+procedure SourcesMenuTag_decode(ATag: Integer; var Index, SubIndex: Integer);
+function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
+
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
@@ -38,8 +44,6 @@ procedure GetProportionalSize(Width, Height, imgWidth, imgHeight: Integer;
 function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
 
 implementation
-
-uses Digit_Bridge_Intf, Digit_Bridge_Impl;
 
 procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit; AOwner: TComponent; menuPaperSizes: TMenu;
   menuOnClick: TNotifyEvent; VImageIndex, HImageIndex: Integer);
@@ -159,16 +163,17 @@ begin
 end;
 
 
-procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent);
+procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent;
+                           ASelectedSource: PSourceInfo);
 var
    i, iSub,
    cSub, res: Integer;
    newItem,
-   newSubItem: TMenuItem;
+   newSep: TMenuItem;
    curSource: PSourceInfo;
    curSourceItems: IDigIt_Source_Items;
-   curTitle,
-   subTitle: PChar;
+   curTitle: PChar;
+   curSelected: Boolean;
 
 begin
   for i:=0 to theBridge.SourcesImpl.Count-1 do
@@ -187,44 +192,70 @@ begin
            end
       else newItem.Caption:= theBridge.SourcesImpl.Key[i];
 
-      if (curSource^.Inst is IDigIt_Source_Items) then
-      begin
-        { #todo 5 -oMaxM : Get Sub Items so the User can select directly the Device from Menù}
-        {$ifopt D+}
-        newItem.Caption:= newItem.Caption+'*';
-        {$endif}
+      newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
+      newItem.Tag:= SourcesMenuTag_encode(i, -1);
+      newItem.OnClick:= menuOnClick;
+      newItem.Enabled:= curSource^.Inst.Enabled;
 
+      curSelected:= (curSource = ASelectedSource);
+      menuSources.Items.Add(newItem);
+      newItem.Default:= curSelected;
+
+      if newItem.Enabled and (curSource^.Inst is IDigIt_Source_Items) then
+      begin
+        //Get Sub Items so the User can select directly the Device from Menù
         curSourceItems:= (curSource^.Inst as IDigIt_Source_Items);
         cSub:= curSourceItems.GetCount;
         if (cSub > 0) then
         begin
-          newSubItem:= TMenuItem.Create(AOwner);
-          newSubItem.Caption:='-';
-          newSubItem.Tag:= -1;
-          menuSources.Items.Add(newSubItem);
+          newSep:= TMenuItem.Create(AOwner);
+          newSep.Caption:= '-';
+          menuSources.Items.Add(newSep);
 
+          res:= 0;
           for iSub:=0 to cSub-1 do
           begin
-            subTitle:= '';
-            if curSourceItems.Get(iSub, subTitle) and (subTitle <> '') then
+            curTitle:= '';
+            if curSourceItems.Get(iSub, curTitle) and (curTitle <> '') then
             begin
-              newSubItem:= TMenuItem.Create(AOwner);
-              newSubItem.Caption:= subTitle;
-              StrDispose(subTitle);
-              newSubItem.Tag:= -1;
-              menuSources.Items.Add(newSubItem);
+              inc(res);
+              newItem:= TMenuItem.Create(AOwner);
+              newItem.Caption:= curTitle;
+              StrDispose(curTitle);
+              newItem.Tag:= SourcesMenuTag_encode(i, iSub);
+              newItem.OnClick:= menuOnClick;
+              menuSources.Items.Add(newItem);
+              newItem.Default:= curSelected and curSourceItems.Selected(iSub);
             end;
           end;
+
+          if (res > 0)
+          then begin
+                 newSep:= TMenuItem.Create(AOwner);
+                 newSep.Caption:= '-';
+                 menuSources.Items.Add(newSep);
+               end
+          else menuSources.Items.Delete(menuSources.Items.IndexOf(newSep));
         end;
       end;
-
-      newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
-      newItem.Tag:= i;
-      newItem.OnClick:= menuOnClick;
-      newItem.Enabled:= curSource^.Inst.Enabled;
-      menuSources.Items.Add(newItem);
     end;
   end;
+end;
+
+procedure SourcesMenuTag_decode(ATag: Integer; var Index, SubIndex: Integer);
+begin
+  SubIndex:= (ATag and $FFFF);
+  Index:= (ATag and $FFFF0000) shr 16;
+  if (Index = $FFFF) then Index:= -1;
+  if (SubIndex = $FFFF) then SubIndex:= -1;
+end;
+
+function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
+begin
+  if (Index < 0) then Index:= $FFFF;
+  if (SubIndex < 0) then SubIndex:= $FFFF;
+
+  Result:= (Index shl 16) or SubIndex;
 end;
 
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);

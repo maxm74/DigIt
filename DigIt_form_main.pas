@@ -421,7 +421,7 @@ type
     procedure XML_OptionsLoad_Session(aXML: TRttiXMLConfig; var APath, AFile: String);
     procedure XML_OptionsSave_Session(aXML: TRttiXMLConfig; const APath, AFile: String);
 
-    function Source_Select(newSourceIndex: Integer): Boolean;
+    function Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
     function Destination_Select(newDestinationIndex: Integer): Boolean;
 
     procedure setCropMode(ANewCropMode: TDigItCropMode);
@@ -2953,26 +2953,26 @@ begin
   end;
 end;
 
-function TDigIt_Main.Source_Select(newSourceIndex: Integer): Boolean;
+function TDigIt_Main.Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
 begin
   Result:= False;
   try
-     if theBridge.SourcesImpl.Select(newSourceIndex, True)
-     then begin
-            if (theBridge.SourcesImpl.Selected <> rSource) then
-            begin
-              { #note -oMaxM : rSource Switched...Do something? }
-            end;
+     if theBridge.SourcesImpl.Select(newSourceIndex, newSourceSubIndex, True) then
+     begin
+       if (theBridge.SourcesImpl.Selected <> rSource) then
+       begin
+         { #note -oMaxM : rSource Switched...Do something? }
+       end;
 
-            rSource:= theBridge.SourcesImpl.Selected;
-            rSourceName:= theBridge.SourcesImpl.SelectedName;
-            rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+       rSource:= theBridge.SourcesImpl.Selected;
+       rSourceName:= theBridge.SourcesImpl.SelectedName;
+       rSourceParams:= theBridge.SourcesImpl.SelectedParams;
 
-            XML_SaveSource(nil, True);
+       XML_SaveSource(nil, True);
 
-            Result:= True;
-          end
-     else MessageDlg('DigIt', Format(rsSourceNotSelected, [newSourceIndex]), mtInformation, [mbOk], 0);
+       Result:= True;
+     end;
+     //else MessageDlg('DigIt', Format(rsSourceNotSelected, [newSourceIndex]), mtInformation, [mbOk], 0);
 
   except
     Result:= False;
@@ -3256,7 +3256,7 @@ end;
 procedure TDigIt_Main.MenuSourcePopup(Sender: TObject);
 begin
   menuSources.Items.Clear;
-  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick);
+  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, Source);
 end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
@@ -3619,14 +3619,18 @@ begin
 end;
 
 procedure TDigIt_Main.UI_SourceMenuClick(Sender: TObject);
+var
+   newSourceIndex,
+   newSourceSubIndex: Integer;
+
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
-  begin
-    if Source_Select(TMenuItem(Sender).Tag) then
-    begin
-      TMenuItem(Sender).Default:= True;
-      UI_ToolBar;
-    end;
+  try
+    SourcesMenuTag_decode(TMenuItem(Sender).Tag, newSourceIndex, newSourceSubIndex);
+    Source_Select(newSourceIndex, newSourceSubIndex);
+
+  finally
+    UI_ToolBar;
   end;
 end;
 

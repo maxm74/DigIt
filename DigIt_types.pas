@@ -30,10 +30,11 @@ const
 
   File_DefSession = 'digit';
   File_Options = 'digit.cfg';
+  File_Profiles = 'profiles.cfg';
 
-  XML_SourceFiles   = 'SourceFiles/';
-  XML_CapturedFiles = 'CapturedFiles/';
-  XML_PageSettings  = 'PageSettings/';
+  SES_SourceFiles   = 'SourceFiles/';
+  SES_CapturedFiles = 'CapturedFiles/';
+  SES_PageSettings  = 'PageSettings/';
 
 type
   TDigItCropMode = (

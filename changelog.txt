@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/12 Added Select Source sub Items in Bridge and WIA Source;
+2025/05/14 Renamed XML_ methods;
+           Added Profiles Array and file;
+
+        12 Added Select Source sub Items in Bridge and WIA Source;
            Added Sub Items in BuildSourcesMenu and MainForm;
 
         09 First Tests for Source Sub Items

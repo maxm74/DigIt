@@ -150,6 +150,9 @@ type
     menuExport: TMenuItem;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    itemProfiles: TMenuItem;
+    itemProfiles_Add: TMenuItem;
+    itemProfiles_Remove: TMenuItem;
     menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
     menuLoadXML: TMenuItem;
@@ -196,6 +199,8 @@ type
     SelectDirectory: TSelectDirectoryDialog;
     Separator2: TMenuItem;
     Separator3: TMenuItem;
+    Separator4: TMenuItem;
+    Separator5: TMenuItem;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
     tbCapturedPDF: TToolButton;
@@ -352,6 +357,8 @@ type
     iCapturedFiles: Integer;
     SourceFiles: TSourceFileArray;
     CapturedFiles: TCapturedFileArray;
+
+    selectedProfile: Integer;
     Profiles: TStringArray;
 
     function GetCurrentCropArea: TCropArea;
@@ -472,7 +479,7 @@ implementation
 
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
-  BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
+  BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
   MM_StrUtils,
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
@@ -575,10 +582,22 @@ begin
 
   SetDefaultStartupValues;
 
-  //BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick);
+  //Test: REmove IT
+  SetLength(Profiles, 5);
+  Profiles[0]:= 'Test Profile 0';
+  Profiles[1]:= 'Test Profile 1';
+  Profiles[2]:= 'Test Profile 2 caio';
+  Profiles[3]:= 'Test Profile 3 sempronio';
+  Profiles[4]:= 'Test Profile 4 Pluto';
+  selectedProfile:= 2;
+
+  BuildProfilesMenu(Self, itemProfiles, nil, selectedProfile, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
+    imgManipulation.Rulers_Show:= True;
+    imgManipulation.Rulers_Unit:= ruPixelsPerCentimeter;
+
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
 //    MenuMain.OwnerDraw:= True;
@@ -1874,12 +1893,12 @@ begin
            pixelHeight:= imgManipulation.EmptyImage.Height;
          end
     else begin
-           newWidth:= ConvertSizeToResolutionUnit(imgManipulation.EmptyImage.ResolutionUnit,
-                                                  imgManipulation.EmptyImage.ResolutionWidth,
-                                                  ABitmap.ResolutionUnit);
-           newHeight:= ConvertSizeToResolutionUnit(imgManipulation.EmptyImage.ResolutionUnit,
-                                                  imgManipulation.EmptyImage.ResolutionHeight,
-                                                  ABitmap.ResolutionUnit);
+           newWidth:= PhysicalSizeConvert(imgManipulation.EmptyImage.ResolutionUnit,
+                                          imgManipulation.EmptyImage.ResolutionWidth,
+                                          ABitmap.ResolutionUnit);
+           newHeight:= PhysicalSizeConvert(imgManipulation.EmptyImage.ResolutionUnit,
+                                           imgManipulation.EmptyImage.ResolutionHeight,
+                                           ABitmap.ResolutionUnit);
 
            pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
            pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
@@ -3304,7 +3323,6 @@ end;
 
 procedure TDigIt_Main.MenuSourcePopup(Sender: TObject);
 begin
-  menuSources.Items.Clear;
   BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, Source);
 end;
 
@@ -3568,6 +3586,7 @@ begin
   iCapturedFiles:= -1;
   lastCropped:= -1;
   lastLenTaked:= 0;
+  selectedProfile:= -1;
 
   LoadedFile:= '';
 

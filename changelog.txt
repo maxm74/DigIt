@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/14 Renamed XML_ methods;
+2025/05/22 Added Profiles Menu Item;
+           Moved PhysicalSizeConvert from BGRABitmap  (see argument about this on github);
+
+        14 Renamed XML_ methods;
            Added Profiles Array and file;
 
         12 Added Select Source sub Items in Bridge and WIA Source;

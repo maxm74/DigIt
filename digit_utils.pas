@@ -30,18 +30,29 @@ procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit;
 procedure PaperSizesMenuTag_decode(ATag:Integer; var ResUnit: TResolutionUnit; var Paper: TPaperSize);
 function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 
-procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent;
+procedure BuildSourcesMenu(AOwner: TComponent;
+                           menuSources: TMenu; menuSourcesOnClick: TNotifyEvent;
                            ASelectedSource: PSourceInfo);
 
 procedure SourcesMenuTag_decode(ATag: Integer; var Index, SubIndex: Integer);
 function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
 
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
+
+procedure BuildProfilesMenu(AOwner: TComponent;
+                            itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
+                            selectedProfile: Integer; Profiles: TStringArray);
+
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
 procedure GetProportionalSize(Width, Height, imgWidth, imgHeight: Integer;
                               var newWidth, newHeight: Integer);
 function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
+
+{** Convert PhysicalSize to/from Cm/Inch}
+function PhysicalSizeConvert(ASourceUnit: TResolutionUnit; ASourceSize: Single;
+                             ATargetUnit: TResolutionUnit=ruPixelsPerInch;
+                             AResolution: Single = 96): Single;
 
 implementation
 
@@ -162,8 +173,8 @@ begin
   Result :=(Byte(ResUnit) shl 17) or (Byte(vert) shl 16) or (pIndex shl 8) or iIndex;
 end;
 
-
-procedure BuildSourcesMenu(AOwner: TComponent; menuSources: TMenu; menuOnClick: TNotifyEvent;
+procedure BuildSourcesMenu(AOwner: TComponent;
+                           menuSources: TMenu; menuSourcesOnClick: TNotifyEvent;
                            ASelectedSource: PSourceInfo);
 var
    i, iSub,
@@ -176,6 +187,9 @@ var
    curSelected: Boolean;
 
 begin
+  for i:=2 to menuSources.Items.Count-1 do
+    menuSources.Items.Delete(2);
+
   for i:=0 to theBridge.SourcesImpl.Count-1 do
   begin
     curSource:= theBridge.SourcesImpl.Data[i];
@@ -194,7 +208,7 @@ begin
 
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
       newItem.Tag:= SourcesMenuTag_encode(i, -1);
-      newItem.OnClick:= menuOnClick;
+      newItem.OnClick:= menuSourcesOnClick;
       newItem.Enabled:= curSource^.Inst.Enabled;
 
       curSelected:= (curSource = ASelectedSource);
@@ -223,7 +237,7 @@ begin
               newItem.Caption:= curTitle;
               StrDispose(curTitle);
               newItem.Tag:= SourcesMenuTag_encode(i, iSub);
-              newItem.OnClick:= menuOnClick;
+              newItem.OnClick:= menuSourcesOnClick;
               menuSources.Items.Add(newItem);
               newItem.Default:= curSelected and curSourceItems.Selected(iSub);
             end;
@@ -302,6 +316,36 @@ begin
   *)
 end;
 
+procedure BuildProfilesMenu(AOwner: TComponent;
+                            itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
+                            selectedProfile: Integer; Profiles: TStringArray);
+var
+   i, iSub,
+   cSub, res: Integer;
+   newItem,
+   newSep: TMenuItem;
+   curSource: PSourceInfo;
+   curSourceItems: IDigIt_Source_Items;
+   curTitle: PChar;
+   curSelected: Boolean;
+
+begin
+  for i:=3 to itemProfiles.Count-1 do
+    itemProfiles.Delete(3);
+
+  for i:=0 to Length(Profiles)-1 do
+  begin
+    newItem:= TMenuItem.Create(AOwner);
+
+    newItem.Caption:= Profiles[i];
+    //newItem.ImageIndex:= ;
+    newItem.Tag:= i;
+    newItem.OnClick:= itemOnClick;
+    itemProfiles.Add(newItem);
+    newItem.Default:= (i = selectedProfile);
+  end;
+end;
+
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 var
    i: Integer;
@@ -353,6 +397,24 @@ begin
   else r:= imgSide/ASide;
 
   Result:= Round(imgOtherSide/r);
+end;
+
+function PhysicalSizeConvert(ASourceUnit: TResolutionUnit; ASourceSize: Single;
+                             ATargetUnit: TResolutionUnit; AResolution: Single): Single;
+begin
+  Result:= ASourceSize;
+  // already in expected unit
+  if ASourceUnit = ATargetUnit then exit;
+
+  // checks if resolution is ill-defined
+  if (ATargetUnit = ruNone) and (AResolution < 2) then AResolution:= 96; // assume legacy 96 DPI
+
+  case ASourceUnit of
+    ruPixelsPerCentimeter: Result:= ASourceSize/2.54; // from Cm to Inch
+    ruPixelsPerInch: Result:= ASourceSize*2.54;       // from Inch to Cm
+   else {ruNone}
+    Result:= ASourceSize / AResolution                // from Pixels
+  end;
 end;
 
 end.

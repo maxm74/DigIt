@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/22 Added Profiles Menu Item;
+2025/05/26 Added IsAutoSave in LoadSession;
+           Clear AutoSaved Files when Close and User do not save Session;
+           Asks user whether to read a session's autosave if date\time is greater;
+
+        22 Added Profiles Menu Item;
            Moved PhysicalSizeConvert from BGRABitmap  (see argument about this on github);
 
         14 Renamed XML_ methods;

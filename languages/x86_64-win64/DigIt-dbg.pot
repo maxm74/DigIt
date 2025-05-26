@@ -75,7 +75,10 @@ msgid "Clear the Work Queue?"
 msgstr ""
 
 #: digit_form_main.rscontinueautowork
-msgid "Continue from Auto Saved Work Session?"
+#, object-pascal-format
+msgid ""
+"Continue from Auto Saved Work Session?\n"
+"%s"
 msgstr ""
 
 #: digit_form_main.rscontinuework

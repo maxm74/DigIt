@@ -729,6 +729,18 @@ msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr ""
 
+#: tdigit_main.itemprofiles.caption
+msgid "Profiles"
+msgstr ""
+
+#: tdigit_main.itemprofiles_add.caption
+msgid "Add"
+msgstr ""
+
+#: tdigit_main.itemprofiles_remove.caption
+msgid "Remove"
+msgstr ""
+
 #: tdigit_main.label1.caption
 msgid "Z Order :"
 msgstr ""

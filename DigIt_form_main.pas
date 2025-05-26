@@ -25,7 +25,7 @@ uses
 resourcestring
   rsNewWork = 'Start a New Work Session?';
   rsContinueWork = 'Continue from last Work Session?'#13#10'%s';
-  rsContinueAutoWork = 'Continue from Auto Saved Work Session?';
+  rsContinueAutoWork = 'Continue from Auto Saved Work Session?'#13#10'%s';
   rsSaveWork = 'Save the Work Session?';
   rsSavingWork = 'Saving the Work Session';
   rsSavingSources = 'Saving Sources Files';
@@ -398,7 +398,7 @@ type
     function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
     procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
 
-    function LoadSessionFile(APath, AFile: String): Boolean; overload;
+    function LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean=False): Boolean; overload;
     function LoadSessionFile(AFileName: String): Boolean; overload;
     function SaveSessionFile(AFileName: String): Boolean;
 
@@ -582,6 +582,7 @@ begin
 
   SetDefaultStartupValues;
 
+  {$ifopt D+}
   //Test: REmove IT
   SetLength(Profiles, 5);
   Profiles[0]:= 'Test Profile 0';
@@ -590,6 +591,7 @@ begin
   Profiles[3]:= 'Test Profile 3 sempronio';
   Profiles[4]:= 'Test Profile 4 Pluto';
   selectedProfile:= 2;
+  {$endif}
 
   BuildProfilesMenu(Self, itemProfiles, nil, selectedProfile, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
@@ -615,6 +617,8 @@ begin
 
   sessLoaded:= False;
   try
+     //CFG_Load;
+
      if FileExists(ParamStr(1)) and
         (MessageDlg('DigIt', Format(rsContinueWork, [ParamStr(1)]),
                     mtConfirmation, [mbYes, mbNo], 0)=mrYes)
@@ -622,14 +626,25 @@ begin
 
      if not(sessLoaded) then
      begin
+       {#to-do : CFG_Load must Create a Record like Settings, Use IT}
        CFG_Load_LastSession(nil, optPath_Session, optFile_Session);
 
        //If in Options there is a Session Opened then Open It
        if (optPath_Session <> '') and (optFile_Session <> '') and
-          FileExists(optPath_Session+optFile_Session+Ext_Sess) and
-          (MessageDlg('DigIt', Format(rsContinueWork, [optPath_Session+optFile_Session]),
-                      mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-       then sessLoaded:= LoadSessionFile(optPath_Session, optFile_Session);
+          FileExists(optPath_Session+optFile_Session+Ext_Sess) then
+       begin
+         //If there is an AutoSave with a date later than the session date ask user
+         if FileExists(optPath_Session+optFile_Session+Ext_AutoSess) and
+            (FileAge(optPath_Session+optFile_Session+Ext_AutoSess) > FileAge(optPath_Session+optFile_Session+Ext_Sess)) and
+            (MessageDlg('DigIt', Format(rsContinueAutoWork, [optPath_Session+optFile_Session]),
+                        mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+         then sessLoaded:= LoadSessionFile(optPath_Session, optFile_Session, True);
+
+         if not(sessLoaded) and
+           (MessageDlg('DigIt', Format(rsContinueWork, [optPath_Session+optFile_Session]),
+                       mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+         then sessLoaded:= LoadSessionFile(optPath_Session, optFile_Session);
+       end;
      end;
 
      if not(sessLoaded) then
@@ -637,7 +652,7 @@ begin
        //ask for open AutoSave if exists
        if FileExists(Path_DefSession+File_DefSession+Ext_AutoSess) then
        begin
-         if (MessageDlg('DigIt', rsContinueAutoWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
+         if (MessageDlg('DigIt', Format(rsContinueAutoWork, ['<no name>']), mtConfirmation, [mbYes, mbNo], 0)=mrYes)
          then begin
                 SES_Load(True);
                 sessLoaded:= True;
@@ -1633,12 +1648,15 @@ begin
           end
      else canSave:= True;
 
-     if canSave then
-     begin
-       if (Path_Session = Path_DefSession)
-       then actSessionSaveAs.Execute
-       else SES_Save(False);
-     end;
+     if canSave
+     then begin
+            if (Path_Session = Path_DefSession)
+            then actSessionSaveAs.Execute
+            else SES_Save(False);
+          end
+     else begin
+            if (Path_Session = Path_DefSession) then SES_ClearAutoSave(True);
+          end;
 
   finally
   end;
@@ -1931,7 +1949,8 @@ begin
   end;
 end;
 
-function TDigIt_Main.LoadSessionFile(APath, AFile: String): Boolean;
+function TDigIt_Main.LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean
+  ): Boolean;
 var
    oldPath_Session,
    oldPath_Session_Scan,
@@ -1952,7 +1971,7 @@ begin
      Path_Session_Pictures:= Path_Session+'Pictures'+DirectorySeparator;
      Session_File:= AFile;
 
-     SES_Load(False);
+     SES_Load(IsAutoSave);
 
      Result:= True;
 
@@ -2247,31 +2266,33 @@ begin
   DeleteDirectory(Path_DefSession_Scan, True);
   DeleteDirectory(Path_DefSession_Pictures, True);
 
-  if not(AFromStartup) then
-  try
-     SetDefaultSessionValues;
-     SetDefaultStartupValues;
+  if AFromStartup
+  then begin
+       end
+  else try
+          SetDefaultSessionValues;
+          SetDefaultStartupValues;
 
-     //Clear Source Queque
-     //rSource^.Inst.Clear;
+          //Clear Source Queque
+          //rSource^.Inst.Clear;
 
-     //Clear Captured Array and ListView
-     ClearCaptured;
+          //Clear Captured Array and ListView
+          ClearCaptured;
 
-     //This would be like a Full Area Template
-     imgManipulation.Bitmap:= nil;
-     if (CropMode = diCropCustom) then imgManipulation.clearCropAreas;
+          //This would be like a Full Area Template
+          imgManipulation.Bitmap:= nil;
+          if (CropMode = diCropCustom) then imgManipulation.clearCropAreas;
 
-     //Reset Counter
-     Counter.Reset;
+          //Reset Counter
+          Counter.Reset;
 
-     setCropMode(diCropFull);
+          setCropMode(diCropFull);
 
-     Caption :='DigIt';
+          Caption :='DigIt';
 
-  finally
-    UI_FillCounter;
-  end;
+       finally
+         UI_FillCounter;
+       end;
 
   UI_ToolBar;
 end;

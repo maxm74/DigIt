@@ -695,6 +695,7 @@ begin
     actSessionSaveExecute(nil);
 
     CanClose:= not(dlgRes = mrCancel);
+    closing:= CanClose;
   end;
 end;
 
@@ -1655,7 +1656,10 @@ begin
             else SES_Save(False);
           end
      else begin
-            if (Path_Session = Path_DefSession) then SES_ClearAutoSave(True);
+            //If we are really closing the Application then Clear AutoSave
+            if (Sender = nil) and not(dlgRes = mrCancel) and
+               (Path_Session = Path_DefSession)
+            then SES_ClearAutoSave(True);
           end;
 
   finally

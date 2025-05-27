@@ -85,8 +85,13 @@ msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinueautowork
-msgid "Continue from Auto Saved Work Session?"
-msgstr "Continuo dalla Sessione Lavoro Salvata in Automatico?"
+#, object-pascal-format
+msgid ""
+"Continue from Auto Saved Work Session?\n"
+"%s"
+msgstr ""
+"Continuo dalla Sessione Lavoro Salvata in Automatico?\n"
+"%s"
 
 #: digit_form_main.rscontinuework
 #, object-pascal-format
@@ -753,6 +758,18 @@ msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr "Area Intera"
 
+#: tdigit_main.itemprofiles.caption
+msgid "Profiles"
+msgstr "Profili"
+
+#: tdigit_main.itemprofiles_add.caption
+msgid "Add"
+msgstr "Aggiungi"
+
+#: tdigit_main.itemprofiles_remove.caption
+msgid "Remove"
+msgstr "Rimuovi"
+
 #: tdigit_main.label1.caption
 msgid "Z Order :"
 msgstr "Ordine Z :"
@@ -764,7 +781,7 @@ msgstr "Ribalta :"
 
 #: tdigit_main.label11.caption
 msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgstr ""
+msgstr "Contatore ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label2.caption
 msgctxt "tdigit_main.label2.caption"

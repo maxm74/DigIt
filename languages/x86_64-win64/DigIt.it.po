@@ -85,8 +85,13 @@ msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinueautowork
-msgid "Continue from Auto Saved Work Session?"
-msgstr "Continuo dalla Sessione Lavoro Salvata in Automatico?"
+#, object-pascal-format
+msgid ""
+"Continue from Auto Saved Work Session?\n"
+"%s"
+msgstr ""
+"Continuo dalla Sessione Lavoro Salvata in Automatico?\n"
+"%s"
 
 #: digit_form_main.rscontinuework
 #, object-pascal-format
@@ -223,8 +228,7 @@ msgid "Saving the Work Session"
 msgstr "Salvando la Sessione Lavoro"
 
 #: digit_form_main.rssourcenotfound
-#, object-pascal-format, fuzzy
-#| msgid "Source \"%s\" not Found, try Select another from Menù"
+#, object-pascal-format
 msgid "Source %s not Found, try Select another from Menù"
 msgstr "Sorgente %s non Trovata, prova a Selezionarne un'altra dal Menù"
 
@@ -756,15 +760,15 @@ msgstr "Area Intera"
 
 #: tdigit_main.itemprofiles.caption
 msgid "Profiles"
-msgstr ""
+msgstr "Profili"
 
 #: tdigit_main.itemprofiles_add.caption
 msgid "Add"
-msgstr ""
+msgstr "Aggiungi"
 
 #: tdigit_main.itemprofiles_remove.caption
 msgid "Remove"
-msgstr ""
+msgstr "Rimuovi"
 
 #: tdigit_main.label1.caption
 msgid "Z Order :"
@@ -777,7 +781,7 @@ msgstr "Ribalta :"
 
 #: tdigit_main.label11.caption
 msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
-msgstr ""
+msgstr "Contatore ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label2.caption
 msgctxt "tdigit_main.label2.caption"
@@ -1043,4 +1047,3 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
-

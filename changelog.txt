@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/26 Added IsAutoSave in LoadSession;
+2025/05/27 Solved Cancel Closing Erase AutoSave;
+           Updated Languages
+
+        26 Added IsAutoSave in LoadSession;
            Clear AutoSaved Files when Close and User do not save Session;
            Asks user whether to read a session's autosave if date\time is greater;
 

@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/27 Solved Cancel Closing Erase AutoSave;
+2025/05/28 Renamed Unit DigIt_Counters;
+           Moved TDigIt_Settings in a new Unit DigIt_Settings;
+           Moved MainForm CFG_Load/Save methods to TDigIt_Settings;
+           Added Select and Save with XML Params in TDigIt_Sources and
+           Use of it in MainForm SES_Load/SaveSource;
+
+        27 Solved Cancel Closing Erase AutoSave;
            Updated Languages
 
         26 Added IsAutoSave in LoadSession;

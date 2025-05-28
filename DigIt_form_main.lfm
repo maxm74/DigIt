@@ -2858,8 +2858,8 @@ object DigIt_Main: TDigIt_Main
   object MenuMain: TPopupMenu
     Images = imgListMain
     ImagesWidth = 32
-    Left = 530
-    Top = 410
+    Left = 528
+    Top = 408
     object menuProjectNew: TMenuItem
       Action = actSessionNew
     end
@@ -2917,6 +2917,11 @@ object DigIt_Main: TDigIt_Main
       object menuClearXML: TMenuItem
         Tag = 2
         Caption = 'Clear XML'
+        OnClick = menuDebugClick
+      end
+      object menuSaveSettings: TMenuItem
+        Tag = 3
+        Caption = 'Save Settings'
         OnClick = menuDebugClick
       end
     end

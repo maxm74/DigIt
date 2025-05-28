@@ -1,4 +1,4 @@
-unit DigIt_Counters;
+unit DigIt_Counter;
 
 {$mode ObjFPC}{$H+}
 

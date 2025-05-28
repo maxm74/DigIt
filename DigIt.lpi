@@ -126,7 +126,7 @@
         <PackageName Value="LCL"/>
       </Item7>
     </RequiredPackages>
-    <Units Count="18">
+    <Units Count="19">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -147,7 +147,7 @@
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="DigIt_Counters.pas"/>
+        <Filename Value="DigIt_Settings.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
@@ -216,6 +216,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit17>
+      <Unit18>
+        <Filename Value="DigIt_Counter.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit18>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -20,7 +20,8 @@ uses
   BGRABitmap, BGRABitmapTypes, BGRAPapers,
   BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList,
   BCExpandPanels,BGRAFlashProgressBar,
-  DigIt_Types, DigIt_Utils, DigIt_Counters, Digit_Bridge_Intf, Digit_Bridge_Impl;
+  DigIt_Types, DigIt_Utils, Digit_Bridge_Intf, Digit_Bridge_Impl,
+  DigIt_Counter, DigIt_Settings;
 
 resourcestring
   rsNewWork = 'Start a New Work Session?';
@@ -153,6 +154,7 @@ type
     itemProfiles: TMenuItem;
     itemProfiles_Add: TMenuItem;
     itemProfiles_Remove: TMenuItem;
+    menuSaveSettings: TMenuItem;
     menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
     menuLoadXML: TMenuItem;
@@ -361,6 +363,8 @@ type
     selectedProfile: Integer;
     Profiles: TStringArray;
 
+    Settings: TDigIt_Settings; //An Alias of theBridge.SettingsImpl
+
     function GetCurrentCropArea: TCropArea;
 
     procedure Counter_Dec(AValue: Integer);
@@ -424,11 +428,6 @@ type
     procedure SES_SavePageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-
-    procedure CFG_Load;
-    procedure CFG_Save;
-    procedure CFG_Load_LastSession(aXML: TRttiXMLConfig; var APath, AFile: String);
-    procedure CFG_Save_LastSession(aXML: TRttiXMLConfig; const APath, AFile: String);
 
     procedure PROF_Load;
     procedure PROF_Save;
@@ -575,6 +574,8 @@ begin
   rDestinationName:= '';
   //  rDestinationParams:= nil;
 
+  Settings:= theBridge.SettingsImpl;
+  Settings.Load(nil);
 
   SetSaveWriter(ifJpeg);
 
@@ -617,8 +618,6 @@ begin
 
   sessLoaded:= False;
   try
-     //CFG_Load;
-
      if FileExists(ParamStr(1)) and
         (MessageDlg('DigIt', Format(rsContinueWork, [ParamStr(1)]),
                     mtConfirmation, [mbYes, mbNo], 0)=mrYes)
@@ -626,8 +625,8 @@ begin
 
      if not(sessLoaded) then
      begin
-       {#to-do : CFG_Load must Create a Record like Settings, Use IT}
-       CFG_Load_LastSession(nil, optPath_Session, optFile_Session);
+       optPath_Session:= Settings.StartupSession_Path;
+       optFile_Session:= Settings.StartupSession_File;
 
        //If in Options there is a Session Opened then Open It
        if (optPath_Session <> '') and (optFile_Session <> '') and
@@ -666,7 +665,7 @@ begin
 
      if not(sessLoaded) then setCropMode(diCropFull);
 
-     if (Path_Session = Path_DefSession) then CFG_Save_LastSession(nil, '', '');
+     if (Path_Session = Path_DefSession) then Settings.Save_StartupSession(nil, '', '');
 
   except
     Path_Session:= Path_DefSession;
@@ -676,7 +675,7 @@ begin
     SetDefaultStartupValues;
 
     setCropMode(diCropFull);
-    CFG_Save_LastSession(nil, '', '');
+    Settings.Save_StartupSession(nil, '', '');
   end;
 
   UI_Caption;
@@ -704,6 +703,7 @@ begin
   theBridge.Free;
   SourceFiles:= nil;
   if (SaveWriter <> nil) then SaveWriter.Free;
+  Counter.Free;
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
@@ -1594,7 +1594,7 @@ begin
     if (MessageDlg('DigIt', rsNewWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes) then
     begin
       SES_ClearAutoSave(False);
-      CFG_Save_LastSession(nil, Path_Session, Session_File);
+      Settings.Save_StartupSession(nil, Path_Session, Session_File);
     end;
 
    finally
@@ -1613,7 +1613,7 @@ begin
      if OpenSessionDlg.Execute then
      begin
        LoadSessionFile(OpenSessionDlg.FileName);
-       CFG_Save_LastSession(nil, Path_Session, Session_File);
+       Settings.Save_StartupSession(nil, Path_Session, Session_File);
      end;
 
   finally
@@ -1625,7 +1625,7 @@ begin
   if SaveSessionDlg.Execute then
   begin
     SaveSessionFile(SaveSessionDlg.FileName);
-    CFG_Save_LastSession(nil, Path_Session, Session_File);
+    Settings.Save_StartupSession(nil, Path_Session, Session_File);
   end;
 end;
 
@@ -2316,6 +2316,7 @@ begin
 
      Result:= -1;
 
+     (* oldcode
      //Load rSource and its Params
      newSourceName:= aXML.GetValue('Source/Name', '');
 
@@ -2339,6 +2340,23 @@ begin
               Result:= theBridge.SourcesImpl.SelectedIndex;
             end;
       end;
+      *)
+      if theBridge.SourcesImpl.Select(aXML, '', newSourceName)
+      then begin
+             if (rSourceName <> newSourceName) then
+             begin
+               { #note -oMaxM : rSource Switched...Do something? }
+             end;
+
+             rSource:= theBridge.SourcesImpl.Selected;
+             rSourceName:= theBridge.SourcesImpl.SelectedName;
+             rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+             Result:= theBridge.SourcesImpl.SelectedIndex;
+           end
+      else begin
+             MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
+             Result:= theBridge.SourcesImpl.SelectedIndex;
+           end;
 
   finally
     if aFree then aXML.Free;
@@ -2362,6 +2380,7 @@ begin
        aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+curExt);
      end;
 
+     (* oldcode
      //Save rSource and its Params
      aXML.SetValue('Source/Name', rSourceName);
      aXML.DeletePath('Source/Params/');
@@ -2382,6 +2401,26 @@ begin
             (rSource^.Inst <> nil)
          then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
        end;
+     end;
+     *)
+
+     if theBridge.SourcesImpl.Save(aXML, '', False) then
+     begin
+       if aFree then
+       begin
+         aXML.Free; aXML:= nil;
+
+         //Cannot use SaveParams=True in theBridge.SourcesImpl.Save
+         //FPC Bug?
+         //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
+         //So we do it after destroying XML.
+
+         if (rSource <> nil) and
+            (rSource^.Inst <> nil)
+         then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+       end;
+
+       if IsAutoSave then SessionModified:= True;
      end;
 
   finally
@@ -2941,66 +2980,6 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.CFG_Load;
-var
-   aXML: TRttiXMLConfig;
-
-begin
-  try
-     aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
-
-  finally
-    aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.CFG_Save;
-var
-   aXML: TRttiXMLConfig;
-
-begin
-  try
-     aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
-
-  finally
-    aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.CFG_Load_LastSession(aXML: TRttiXMLConfig; var APath, AFile: String);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree then aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
-
-     APath:= SetDirSeparators(aXML.GetValue('LastSession/Path', ''));
-     AFile:= SetDirSeparators(aXML.GetValue('LastSession/File', ''));
-
-  finally
-     if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.CFG_Save_LastSession(aXML: TRttiXMLConfig; const APath, AFile: String);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree then aXML:= TRttiXMLConfig.Create(Path_Config+File_Options);
-
-     aXML.SetValue('LastSession/Path', APath);
-     aXML.SetValue('LastSession/File', AFile);
-
-  finally
-     if aFree then aXML.Free;
-  end;
-end;
-
 procedure TDigIt_Main.PROF_Load;
 var
    aXML: TRttiXMLConfig;
@@ -3211,6 +3190,7 @@ begin
     0: SES_Load(True);
     1: SES_Save(True);
     2: SES_ClearAutoSave(False);
+    3: Settings.Save(nil);
   end;
 end;
 

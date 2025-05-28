@@ -73,7 +73,10 @@ msgid "Clear the Work Queue?"
 msgstr ""
 
 #: digit_form_main.rscontinueautowork
-msgid "Continue from Auto Saved Work Session?"
+#, object-pascal-format
+msgid ""
+"Continue from Auto Saved Work Session?\n"
+"%s"
 msgstr ""
 
 #: digit_form_main.rscontinuework
@@ -640,6 +643,18 @@ msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr ""
 
+#: tdigit_main.itemprofiles.caption
+msgid "Profiles"
+msgstr ""
+
+#: tdigit_main.itemprofiles_add.caption
+msgid "Add"
+msgstr ""
+
+#: tdigit_main.itemprofiles_remove.caption
+msgid "Remove"
+msgstr ""
+
 #: tdigit_main.label1.caption
 msgid "Z Order :"
 msgstr ""
@@ -702,6 +717,10 @@ msgstr ""
 
 #: tdigit_main.menuloadxml.caption
 msgid "Load XML"
+msgstr ""
+
+#: tdigit_main.menusavesettings.caption
+msgid "Save Settings"
 msgstr ""
 
 #: tdigit_main.menusavexml.caption

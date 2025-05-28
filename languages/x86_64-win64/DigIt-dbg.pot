@@ -814,6 +814,10 @@ msgstr ""
 msgid "Load XML"
 msgstr ""
 
+#: tdigit_main.menusavesettings.caption
+msgid "Save Settings"
+msgstr ""
+
 #: tdigit_main.menusavexml.caption
 msgid "Save XML"
 msgstr ""

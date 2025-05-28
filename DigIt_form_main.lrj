@@ -94,6 +94,7 @@
 {"hash":91642412,"name":"tdigit_main.menuloadxml.caption","sourcebytes":[76,111,97,100,32,88,77,76],"value":"Load XML"},
 {"hash":147282572,"name":"tdigit_main.menusavexml.caption","sourcebytes":[83,97,118,101,32,88,77,76],"value":"Save XML"},
 {"hash":193206076,"name":"tdigit_main.menuclearxml.caption","sourcebytes":[67,108,101,97,114,32,88,77,76],"value":"Clear XML"},
+{"hash":87462179,"name":"tdigit_main.menusavesettings.caption","sourcebytes":[83,97,118,101,32,83,101,116,116,105,110,103,115],"value":"Save Settings"},
 {"hash":170803540,"name":"tdigit_main.actcapturedrotateleft.caption","sourcebytes":[82,111,116,97,116,101,32,76,101,102,116],"value":"Rotate Left"},
 {"hash":47076692,"name":"tdigit_main.actcapturedrotateright.caption","sourcebytes":[82,111,116,97,116,101,32,82,105,103,104,116],"value":"Rotate Right"},
 {"hash":248217221,"name":"tdigit_main.actcaptureddelete.caption","sourcebytes":[68,101,108,101,116,101,32,83,101,108,101,99,116,101,100,32,80,97,103,101],"value":"Delete Selected Page"},

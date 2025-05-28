@@ -14,7 +14,7 @@ unit Digit_Bridge_Impl;
 interface
 
 uses
-  Classes, SysUtils, Digit_Bridge_Intf, MM_OpenArrayList;
+  Classes, SysUtils, Laz2_XMLCfg, Digit_Bridge_Intf, MM_OpenArrayList, DigIt_Settings;
 
 type
   TPluginInfo = record
@@ -81,8 +81,11 @@ type
 
     function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
     function Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
+    function Select(aXML: TRttiXMLConfig; APath: String; var newSourceName: String): Boolean; overload;
 
-    function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
+    function Save(SourceIndex: Integer; aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean; overload;
+    function Save(aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean; overload;
+    //function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
 
     property Selected: PSourceInfo read rSelected;
     property SelectedIndex: Integer read rSelectedIndex;
@@ -127,22 +130,6 @@ type
 
   *)
 
-  { TDigIt_Settings }
-
-  TDigIt_Settings = class(TNoRefCountObject, IDigIt_Settings)
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    //Path consts                 { #note 10 -oMaxM : Test in External LIBRARY }
-    function Path_Application: PChar; stdcall;
-    function Path_Config: PChar; stdcall;
-    function Path_Temp: PChar; stdcall;
-    function Path_Session: PChar; stdcall;
-    function Path_Session_Scan: PChar; stdcall;
-    function Path_Session_Pictures: PChar; stdcall;
-  end;
-
   { TDigIt_Bridge }
 
   TDigIt_Bridge = class(TNoRefCountObject, IDigIt_Bridge)
@@ -162,10 +149,9 @@ type
     function Progress: IDigIt_Progress; stdcall;
 
     //Internal Use only
-    function SourcesImpl: TDigIt_Sources;
-    //function DestinationsImpl: TDigIt_Destinations;
-    function SettingsImpl: TDigIt_Settings;
-    function Plugins: TDigIt_Plugins;
+    property SourcesImpl: TDigIt_Sources read rSources;
+    property SettingsImpl: TDigIt_Settings read rSettings;
+    property Plugins: TDigIt_Plugins read rPlugins;
   end;
 
 var
@@ -426,7 +412,8 @@ begin
   try
      newSourceI:= FindByKey(SourceName);
      if (newSourceI > -1) then Result:= Select(newSourceI, -1, GetUserParams);
-     (*
+
+     (* oldcode
      newSource:= Data[newSourceI];
 
      if (newSource <> nil) then
@@ -485,6 +472,81 @@ begin
   end;
 end;
 
+function TDigIt_Sources.Select(aXML: TRttiXMLConfig; APath: String; var newSourceName: String): Boolean;
+begin
+  Result:= False;
+
+  if (aXML <> nil) then
+  try
+     //Load a New Source and its Params
+     newSourceName:= aXML.GetValue(APath+'Source/Name', '');
+
+     if Select(newSourceName) then
+     begin
+        Result:= True;
+
+        if (rSelectedParams <> nil) then
+        begin
+          Result:= rSelectedParams.Load(PChar(aXML.Filename), PChar(APath+'Source/Params'));
+          if Result then Result:= rSelectedParams.OnSet;
+        end;
+     end;
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Sources.Save(SourceIndex: Integer; aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean;
+var
+   curSource: PSourceInfo =nil;
+
+begin
+  Result:= False;
+
+  if (aXML <> nil) then
+  try
+     curSource:= Data[SourceIndex];
+
+     if (curSource <> nil) then
+     begin
+       //Save ASource Source and its Params
+       aXML.SetValue(APath+'Source/Name', rList[SourceIndex].Key);
+       aXML.DeletePath(APath+'Source/Params/');
+
+       if SaveParams and (curSource^.Inst <> nil)
+       then curSource^.Inst.Params.Save(PChar(aXML.Filename), PChar(APath+'Source/Params'));
+
+       Result:= True;
+     end;
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Sources.Save(aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean;
+begin
+  Result:= False;
+
+  if (aXML <> nil) then
+  try
+     //Save Selected Source and its Params
+     aXML.SetValue(APath+'Source/Name', rSelectedName);
+     aXML.DeletePath(APath+'Source/Params/');
+
+     if SaveParams and
+       (rSelected <> nil) and (rSelected^.Inst <> nil)
+     then rSelected^.Inst.Params.Save(PChar(aXML.Filename), PChar(APath+'Source/Params'));
+
+     Result:= True;
+
+  except
+    Result:= False;
+  end;
+end;
+
+(* oldcode
 function TDigIt_Sources.LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
 begin
   Result:= False;
@@ -497,6 +559,7 @@ begin
     Result:= False;
   end;
 end;
+*)
 
 function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
 var
@@ -711,48 +774,6 @@ end;
 *)
 *)
 
-{ TDigIt_Settings }
-
-constructor TDigIt_Settings.Create;
-begin
-  inherited Create;
-end;
-
-destructor TDigIt_Settings.Destroy;
-begin
-  inherited Destroy;
-end;
-
-function TDigIt_Settings.Path_Application: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Application);
-end;
-
-function TDigIt_Settings.Path_Config: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Config);
-end;
-
-function TDigIt_Settings.Path_Temp: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Temp);
-end;
-
-function TDigIt_Settings.Path_Session_Pictures: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Session_Pictures);
-end;
-
-function TDigIt_Settings.Path_Session: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Session);
-end;
-
-function TDigIt_Settings.Path_Session_Scan: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Session_Scan);
-end;
-
 { TDigIt_Bridge }
 
 constructor TDigIt_Bridge.Create;
@@ -795,28 +816,6 @@ end;
 function TDigIt_Bridge.Progress: IDigIt_Progress; stdcall;
 begin
   Result:= DigIt_Progress as IDigIt_Progress;
-end;
-
-function TDigIt_Bridge.SourcesImpl: TDigIt_Sources;
-begin
-  Result:= rSources;
-end;
-
-(*
-function TDigIt_Bridge.DestinationsImpl: TDigIt_Destinations;
-begin
-  Result:= rDestinations;
-end;
-*)
-
-function TDigIt_Bridge.SettingsImpl: TDigIt_Settings;
-begin
-  Result:= rSettings;
-end;
-
-function TDigIt_Bridge.Plugins: TDigIt_Plugins;
-begin
-  Result:= rPlugins;
 end;
 
 initialization

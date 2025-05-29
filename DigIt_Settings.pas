@@ -71,7 +71,7 @@ begin
   Result:= False;
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Options);
+     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
      aXML.ReadObject(SET_Path, Self);
 
@@ -90,7 +90,7 @@ begin
   Result:= False;
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Options);
+     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
      aXML.WriteObject(SET_Path, Self);
 
@@ -108,7 +108,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Options);
+     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
      APath:= SetDirSeparators(aXML.GetValue(SET_Path+'StartupSession_Path', ''));
      AFile:= SetDirSeparators(aXML.GetValue(SET_Path+'StartupSession_File', ''));
@@ -128,7 +128,7 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Options);
+     if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
      rStartupSession_Path:= SetDirSeparators(APath);
      rStartupSession_File:= SetDirSeparators(AFile);

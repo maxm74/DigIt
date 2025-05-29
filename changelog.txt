@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/05/28 Renamed Unit DigIt_Counters;
+2025/05/29 Added XMLRoot_Path and XML_File param to Load/Save Source;
+           Load Last Used Source at Startup;
+           Save Last Used Source when User Select;
+           Changed const File_Options to File_Config;
+           Removed selectedProfile var;
+
+        28 Renamed Unit DigIt_Counters;
            Moved TDigIt_Settings in a new Unit DigIt_Settings;
            Moved MainForm CFG_Load/Save methods to TDigIt_Settings;
            Added Select and Save with XML Params in TDigIt_Sources and

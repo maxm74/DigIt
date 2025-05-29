@@ -742,12 +742,9 @@ msgstr ""
 msgid "Profiles"
 msgstr ""
 
-#: tdigit_main.itemprofiles_add.caption
-msgid "Add"
-msgstr ""
-
-#: tdigit_main.itemprofiles_remove.caption
-msgid "Remove"
+#: tdigit_main.itemprofiles_edit.caption
+msgctxt "tdigit_main.itemprofiles_edit.caption"
+msgid "Edit..."
 msgstr ""
 
 #: tdigit_main.label1.caption
@@ -812,6 +809,10 @@ msgstr ""
 
 #: tdigit_main.menuloadxml.caption
 msgid "Load XML"
+msgstr ""
+
+#: tdigit_main.menusaveprofiles.caption
+msgid "Save Profiles"
 msgstr ""
 
 #: tdigit_main.menusavesettings.caption

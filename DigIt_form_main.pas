@@ -152,8 +152,8 @@ type
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     itemProfiles: TMenuItem;
-    itemProfiles_Add: TMenuItem;
-    itemProfiles_Remove: TMenuItem;
+    itemProfiles_Edit: TMenuItem;
+    menuSaveProfiles: TMenuItem;
     menuSaveSettings: TMenuItem;
     menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
@@ -360,7 +360,6 @@ type
     SourceFiles: TSourceFileArray;
     CapturedFiles: TCapturedFileArray;
 
-    selectedProfile: Integer;
     Profiles: TStringArray;
 
     Settings: TDigIt_Settings; //An Alias of theBridge.SettingsImpl
@@ -410,8 +409,10 @@ type
     procedure SES_Save(IsAutoSave: Boolean);
     procedure SES_ClearAutoSave(AFromStartup: Boolean);
 
-    function SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
-    procedure SES_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    function SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
+                            XMLRoot_Path: String=''; XML_File: String=''): Integer;
+    procedure SES_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
+                             XMLRoot_Path: String=''; XML_File: String='');
     procedure SES_LoadSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_SaveSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     function SES_LoadDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
@@ -583,18 +584,8 @@ begin
 
   SetDefaultStartupValues;
 
-  {$ifopt D+}
-  //Test: REmove IT
-  SetLength(Profiles, 5);
-  Profiles[0]:= 'Test Profile 0';
-  Profiles[1]:= 'Test Profile 1';
-  Profiles[2]:= 'Test Profile 2 caio';
-  Profiles[3]:= 'Test Profile 3 sempronio';
-  Profiles[4]:= 'Test Profile 4 Pluto';
-  selectedProfile:= 2;
-  {$endif}
-
-  BuildProfilesMenu(Self, itemProfiles, nil, selectedProfile, Profiles);
+  PROF_Load;
+  BuildProfilesMenu(Self, itemProfiles, nil, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
@@ -618,6 +609,7 @@ begin
 
   sessLoaded:= False;
   try
+     //1) If Application is started with a Session File Param then Open It
      if FileExists(ParamStr(1)) and
         (MessageDlg('DigIt', Format(rsContinueWork, [ParamStr(1)]),
                     mtConfirmation, [mbYes, mbNo], 0)=mrYes)
@@ -625,10 +617,10 @@ begin
 
      if not(sessLoaded) then
      begin
+       //2) If in Settings there is a Session Opened then Open It
        optPath_Session:= Settings.StartupSession_Path;
        optFile_Session:= Settings.StartupSession_File;
 
-       //If in Options there is a Session Opened then Open It
        if (optPath_Session <> '') and (optFile_Session <> '') and
           FileExists(optPath_Session+optFile_Session+Ext_Sess) then
        begin
@@ -648,7 +640,7 @@ begin
 
      if not(sessLoaded) then
      begin
-       //ask for open AutoSave if exists
+       //3 Ask to Open AutoSave in AppData if exists
        if FileExists(Path_DefSession+File_DefSession+Ext_AutoSess) then
        begin
          if (MessageDlg('DigIt', Format(rsContinueAutoWork, ['<no name>']), mtConfirmation, [mbYes, mbNo], 0)=mrYes)
@@ -663,7 +655,12 @@ begin
        end;
      end;
 
-     if not(sessLoaded) then setCropMode(diCropFull);
+     if not(sessLoaded) then
+     begin
+       //4 Set Last Used Source with it's Params
+       SES_LoadSource(nil, False, '', Path_Config+File_Config);
+       setCropMode(diCropFull);
+     end;
 
      if (Path_Session = Path_DefSession) then Settings.Save_StartupSession(nil, '', '');
 
@@ -2301,7 +2298,8 @@ begin
   UI_ToolBar;
 end;
 
-function TDigIt_Main.SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
+function TDigIt_Main.SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
+                                    XMLRoot_Path: String; XML_File: String): Integer;
 var
    aFree: Boolean;
    newSourceName: String;
@@ -2309,10 +2307,18 @@ var
 begin
   try
      aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
+     if aFree then
+     begin
+       if (XML_File = '') then //Use Session File
+       begin
+         if IsAutoSave
+         then XML_File:= Path_Session+Session_File+Ext_AutoSess
+         else XML_File:= Path_Session+Session_File+Ext_Sess;
+       end;
+
+       aXML:= TRttiXMLConfig.Create(XML_File);
+     end
+     else XML_File:= aXML.Filename;
 
      Result:= -1;
 
@@ -2341,7 +2347,7 @@ begin
             end;
       end;
       *)
-      if theBridge.SourcesImpl.Select(aXML, '', newSourceName)
+      if theBridge.SourcesImpl.Select(aXML, XMLRoot_Path, newSourceName)
       then begin
              if (rSourceName <> newSourceName) then
              begin
@@ -2353,7 +2359,8 @@ begin
              rSourceParams:= theBridge.SourcesImpl.SelectedParams;
              Result:= theBridge.SourcesImpl.SelectedIndex;
            end
-      else begin
+      else if (newSourceName <> '') then
+           begin
              MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
              Result:= theBridge.SourcesImpl.SelectedIndex;
            end;
@@ -2363,22 +2370,26 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.SES_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Main.SES_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
+                                     XMLRoot_Path: String; XML_File: String);
 var
    aFree: Boolean;
-   curExt: String;
 
 begin
   try
      aFree:= (aXML = nil);
      if aFree then
      begin
-       if IsAutoSave
-       then curExt:= Ext_AutoSess
-       else curExt:= Ext_Sess;
+       if (XML_File = '') then //Use Session File
+       begin
+         if IsAutoSave
+         then XML_File:= Path_Session+Session_File+Ext_AutoSess
+         else XML_File:= Path_Session+Session_File+Ext_Sess;
+       end;
 
-       aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+curExt);
-     end;
+       aXML:= TRttiXMLConfig.Create(XML_File);
+     end
+     else XML_File:= aXML.Filename;
 
      (* oldcode
      //Save rSource and its Params
@@ -2404,7 +2415,7 @@ begin
      end;
      *)
 
-     if theBridge.SourcesImpl.Save(aXML, '', False) then
+     if theBridge.SourcesImpl.Save(aXML, XMLRoot_Path, False) then
      begin
        if aFree then
        begin
@@ -2417,7 +2428,7 @@ begin
 
          if (rSource <> nil) and
             (rSource^.Inst <> nil)
-         then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+         then rSource^.Inst.Params.Save(PChar(XML_File), PChar(XMLRoot_Path+'Source/Params'));
        end;
 
        if IsAutoSave then SessionModified:= True;
@@ -3007,9 +3018,18 @@ procedure TDigIt_Main.PROF_Save;
 var
    aXML: TRttiXMLConfig;
    i, iCount: Integer;
+   curPath: String;
 
 begin
   try
+    //Test Only REMOVE IT
+    SetLength(Profiles, 5);
+    Profiles[0]:= 'Test Profile 0';
+    Profiles[1]:= 'Test Profile 1';
+    Profiles[2]:= 'Test Caio';
+    Profiles[3]:= 'Test Sempronio';
+    Profiles[4]:= 'Test Pluto';
+
      aXML:= TRttiXMLConfig.Create(Path_Config+File_Profiles);
 
      //Save SourceFiles array
@@ -3017,11 +3037,20 @@ begin
      aXML.SetValue('Profiles/Count', Length(Profiles));
      for i:=0 to Length(Profiles)-1 do
      begin
-       aXML.SetValue('Profiles/Item'+IntToStr(i)+'/Name', Profiles[i]);
+       curPath:= 'Profiles/Item'+IntToStr(i)+'/';
+       aXML.SetValue(curPath+'Name', Profiles[i]);
+     end;
+     aXML.Free; aXML:= nil;
+
+     //Test Only REMOVE IT
+     for i:=0 to Length(Profiles)-1 do
+     begin
+       curPath:= 'Profiles/Item'+IntToStr(i)+'/';
+       SES_SaveSource(nil, False, curPath, Path_Config+File_Profiles);
      end;
 
   finally
-    aXML.Free;
+    if (aXML<>nil) then aXML.Free;
   end;
 end;
 
@@ -3040,7 +3069,11 @@ begin
        rSourceName:= theBridge.SourcesImpl.SelectedName;
        rSourceParams:= theBridge.SourcesImpl.SelectedParams;
 
+       //Save Used Source in AutoSave
        SES_SaveSource(nil, True);
+
+       //Save Last Used Source in Settings
+       SES_SaveSource(nil, False, '', Path_Config+File_Config);
 
        Result:= True;
      end;
@@ -3191,6 +3224,7 @@ begin
     1: SES_Save(True);
     2: SES_ClearAutoSave(False);
     3: Settings.Save(nil);
+    4: PROF_Save;
   end;
 end;
 
@@ -3591,7 +3625,6 @@ begin
   iCapturedFiles:= -1;
   lastCropped:= -1;
   lastLenTaked:= 0;
-  selectedProfile:= -1;
 
   LoadedFile:= '';
 

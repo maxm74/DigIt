@@ -41,7 +41,7 @@ procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; men
 
 procedure BuildProfilesMenu(AOwner: TComponent;
                             itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
-                            selectedProfile: Integer; Profiles: TStringArray);
+                            Profiles: TStringArray);
 
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
@@ -317,8 +317,8 @@ begin
 end;
 
 procedure BuildProfilesMenu(AOwner: TComponent;
-                            itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
-                            selectedProfile: Integer; Profiles: TStringArray);
+                           itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
+                           Profiles: TStringArray);
 var
    i, iSub,
    cSub, res: Integer;
@@ -342,7 +342,6 @@ begin
     newItem.Tag:= i;
     newItem.OnClick:= itemOnClick;
     itemProfiles.Add(newItem);
-    newItem.Default:= (i = selectedProfile);
   end;
 end;
 

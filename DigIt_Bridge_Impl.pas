@@ -81,10 +81,10 @@ type
 
     function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
     function Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(aXML: TRttiXMLConfig; APath: String; var newSourceName: String): Boolean; overload;
+    function Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; var newSourceName: String): Boolean; overload;
 
-    function Save(SourceIndex: Integer; aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean; overload;
-    function Save(aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean; overload;
+    function Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
+    function Save(aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
     //function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
 
     property Selected: PSourceInfo read rSelected;
@@ -472,14 +472,14 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Select(aXML: TRttiXMLConfig; APath: String; var newSourceName: String): Boolean;
+function TDigIt_Sources.Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; var newSourceName: String): Boolean;
 begin
   Result:= False;
 
   if (aXML <> nil) then
   try
      //Load a New Source and its Params
-     newSourceName:= aXML.GetValue(APath+'Source/Name', '');
+     newSourceName:= aXML.GetValue(XMLRoot_Path+'Source/Name', '');
 
      if Select(newSourceName) then
      begin
@@ -487,7 +487,7 @@ begin
 
         if (rSelectedParams <> nil) then
         begin
-          Result:= rSelectedParams.Load(PChar(aXML.Filename), PChar(APath+'Source/Params'));
+          Result:= rSelectedParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
           if Result then Result:= rSelectedParams.OnSet;
         end;
      end;
@@ -497,7 +497,7 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Save(SourceIndex: Integer; aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean;
+function TDigIt_Sources.Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean;
 var
    curSource: PSourceInfo =nil;
 
@@ -511,11 +511,11 @@ begin
      if (curSource <> nil) then
      begin
        //Save ASource Source and its Params
-       aXML.SetValue(APath+'Source/Name', rList[SourceIndex].Key);
-       aXML.DeletePath(APath+'Source/Params/');
+       aXML.SetValue(XMLRoot_Path+'Source/Name', rList[SourceIndex].Key);
+       aXML.DeletePath(XMLRoot_Path+'Source/Params/');
 
        if SaveParams and (curSource^.Inst <> nil)
-       then curSource^.Inst.Params.Save(PChar(aXML.Filename), PChar(APath+'Source/Params'));
+       then curSource^.Inst.Params.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
 
        Result:= True;
      end;
@@ -525,19 +525,19 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Save(aXML: TRttiXMLConfig; APath: String; SaveParams: Boolean): Boolean;
+function TDigIt_Sources.Save(aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean;
 begin
   Result:= False;
 
   if (aXML <> nil) then
   try
      //Save Selected Source and its Params
-     aXML.SetValue(APath+'Source/Name', rSelectedName);
-     aXML.DeletePath(APath+'Source/Params/');
+     aXML.SetValue(XMLRoot_Path+'Source/Name', rSelectedName);
+     aXML.DeletePath(XMLRoot_Path+'Source/Params/');
 
      if SaveParams and
        (rSelected <> nil) and (rSelected^.Inst <> nil)
-     then rSelected^.Inst.Params.Save(PChar(aXML.Filename), PChar(APath+'Source/Params'));
+     then rSelected^.Inst.Params.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
 
      Result:= True;
 

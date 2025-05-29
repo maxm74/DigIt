@@ -29,7 +29,7 @@ const
   Ext_AutoThumb = '.digat';
 
   File_DefSession = 'digit';
-  File_Options = 'digit.cfg';
+  File_Config = 'digit.cfg';
   File_Profiles = 'profiles.cfg';
 
   SES_SourceFiles   = 'SourceFiles/';

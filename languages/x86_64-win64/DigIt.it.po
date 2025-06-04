@@ -762,13 +762,9 @@ msgstr "Area Intera"
 msgid "Profiles"
 msgstr "Profili"
 
-#: tdigit_main.itemprofiles_add.caption
-msgid "Add"
-msgstr "Aggiungi"
-
-#: tdigit_main.itemprofiles_remove.caption
-msgid "Remove"
-msgstr "Rimuovi"
+#: tdigit_main.itemprofiles_edit.caption
+msgid "Edit..."
+msgstr ""
 
 #: tdigit_main.label1.caption
 msgid "Z Order :"
@@ -832,6 +828,10 @@ msgstr ""
 
 #: tdigit_main.menuloadxml.caption
 msgid "Load XML"
+msgstr ""
+
+#: tdigit_main.menusaveprofiles.caption
+msgid "Save Profiles"
 msgstr ""
 
 #: tdigit_main.menusavesettings.caption

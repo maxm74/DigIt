@@ -337,10 +337,12 @@ msgid "Add Folder..."
 msgstr ""
 
 #: tdigit_exportfiles.btdel.caption
+msgctxt "tdigit_exportfiles.btdel.caption"
 msgid "Delete"
 msgstr ""
 
 #: tdigit_exportfiles.btdelall.caption
+msgctxt "tdigit_exportfiles.btdelall.caption"
 msgid "Delete All"
 msgstr ""
 
@@ -739,6 +741,7 @@ msgid "Full Area"
 msgstr ""
 
 #: tdigit_main.itemprofiles.caption
+msgctxt "tdigit_main.itemprofiles.caption"
 msgid "Profiles"
 msgstr ""
 
@@ -920,6 +923,57 @@ msgstr ""
 #: tdigit_main.tbsource.caption
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
+msgstr ""
+
+#: tdigit_profiles.btaddfiles1.caption
+msgid "Add ..."
+msgstr ""
+
+#: tdigit_profiles.btdel.caption
+msgctxt "tdigit_profiles.btdel.caption"
+msgid "Delete"
+msgstr ""
+
+#: tdigit_profiles.btdelall.caption
+msgctxt "tdigit_profiles.btdelall.caption"
+msgid "Delete All"
+msgstr ""
+
+#: tdigit_profiles.btdown.hint
+msgctxt "tdigit_profiles.btdown.hint"
+msgid "Down"
+msgstr ""
+
+#: tdigit_profiles.bteditprofile.caption
+msgid "Edit ..."
+msgstr ""
+
+#: tdigit_profiles.btfirst.hint
+msgctxt "tdigit_profiles.btfirst.hint"
+msgid "To First"
+msgstr ""
+
+#: tdigit_profiles.btlast.hint
+msgctxt "tdigit_profiles.btlast.hint"
+msgid "To Last"
+msgstr ""
+
+#: tdigit_profiles.btup.hint
+msgctxt "tdigit_profiles.btup.hint"
+msgid "Up"
+msgstr ""
+
+#: tdigit_profiles.caption
+msgctxt "tdigit_profiles.caption"
+msgid "Profiles"
+msgstr ""
+
+#: tdigit_profiles.lvprofiles.columns[0].caption
+msgid "Title"
+msgstr ""
+
+#: tdigit_profiles.lvprofiles.columns[1].caption
+msgid "Source"
 msgstr ""
 
 #: tdigit_progress.capcurrent.caption

@@ -31,13 +31,8 @@ type
     procedure Save_StartupSession(aXML: TRttiXMLConfig; const APath, AFile: String);
 
     //IDigIt_Settings implementation
-    //Path consts                 { #note 10 -oMaxM : Test in External LIBRARY }
-    function Path_Application: PChar; stdcall;
-    function Path_Config: PChar; stdcall;
-    function Path_Temp: PChar; stdcall;
-    function Path_Session: PChar; stdcall;
-    function Path_Session_Scan: PChar; stdcall;
-    function Path_Session_Pictures: PChar; stdcall;
+    //Path consts: High Byte = Category, Low Byte = Path
+    function Path(const APathID: Word): PChar; stdcall; { #note 10 -oMaxM : Test in External LIBRARY }
 
   published
     property StartupSession_Path: String read rStartupSession_Path write rStartupSession_Path;
@@ -144,36 +139,19 @@ end;
 
 { TDigIt_Settings }
 
-function TDigIt_Settings.Path_Application: PChar; stdcall;
+function TDigIt_Settings.Path(const APathID: Word): PChar; stdcall;
 begin
-  Result:= PChar(DigIt_Types.Path_Application);
-end;
+  Case APathID of
+  ID_Path_Application: Result:= PChar(Path_Application);
+  ID_Path_Config: Result:= PChar(Path_Config);
+  ID_Path_Temp: Result:= PChar(Path_Temp);
 
-function TDigIt_Settings.Path_Config: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Config);
+  ID_Path_Session: Result:= PChar(Path_Session);
+  ID_Path_Session_Scan: Result:= PChar(Path_Session_Scan);
+  ID_Path_Session_Pictures: Result:= PChar(Path_Session_Pictures);
+  else Result:= nil;
+  end
 end;
-
-function TDigIt_Settings.Path_Temp: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Temp);
-end;
-
-function TDigIt_Settings.Path_Session_Pictures: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Session_Pictures);
-end;
-
-function TDigIt_Settings.Path_Session: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Session);
-end;
-
-function TDigIt_Settings.Path_Session_Scan: PChar; stdcall;
-begin
-  Result:= PChar(DigIt_Types.Path_Session_Scan);
-end;
-
 
 end.
 

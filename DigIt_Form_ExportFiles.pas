@@ -687,6 +687,7 @@ var
    Dest: String;
 
 begin
+  Result:= False;
   try
      if (DigIt_ExportFiles = nil)
      then DigIt_ExportFiles:= TDigIt_ExportFiles.Create(nil);
@@ -694,8 +695,6 @@ begin
      if (DigIt_ExportFiles <> nil) then
      with DigIt_ExportFiles do
      try
-       Result:= False;
-
        panelFiles.Visible:= (ACapturedFiles = nil);
 
        SaveFormat:= ifJpeg;

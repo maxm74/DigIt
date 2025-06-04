@@ -13,9 +13,9 @@ type
 
   TDigIt_Templates = class(TForm)
     BCPanel1: TBCPanel;
-    BCPanel2: TBCPanel;
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
+    btCancel: TBitBtn;
+    btOk: TBitBtn;
+    panelButtons: TBCPanel;
     TreeView1: TTreeView;
   private
 

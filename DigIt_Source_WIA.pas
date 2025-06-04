@@ -537,8 +537,8 @@ begin
      DownloadedFiles.Clear;
      inc(countTakes);
 
-     sessPath:= theBridge.Settings.Path_Session;
-     WIAPath_Temp:= theBridge.Settings.Path_Session_Scan+'wia'+DirectorySeparator;
+     sessPath:= theBridge.Settings.Path(ID_Path_Session);
+     WIAPath_Temp:= theBridge.Settings.Path(ID_Path_Session_Scan)+'wia'+DirectorySeparator;
      curPath:= WIAPath_Temp+IntToStr(countTakes)+DirectorySeparator;
 
      if WIAParams[DeviceItemIndex].NativeUI
@@ -627,7 +627,6 @@ var
 
 begin
   {$ifopt D-}
-  WIAPath_Temp:= theBridge.Settings.Path_Session_Scan+'wia'+DirectorySeparator;
   for i:=0 to countTakes do
     DeleteDirectory(WIAPath_Temp+IntToStr(i)+DirectorySeparator, False);
   {$endif}
@@ -725,7 +724,7 @@ end;
 
 initialization
   try
-     WIAPath_Temp:= theBridge.Settings.Path_Session_Scan+'wia'+DirectorySeparator;
+     WIAPath_Temp:= theBridge.Settings.Path(ID_Path_Session_Scan)+'wia'+DirectorySeparator;
 
      Source_WIA:= TDigIt_Source_WIA.Create;
      theBridge.Sources.Register(DigIt_Source_WIA_Name, Source_WIA);

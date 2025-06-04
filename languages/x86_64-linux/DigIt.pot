@@ -423,12 +423,10 @@ msgid "Crop + Next"
 msgstr ""
 
 #: tdigit_main.actgoback.caption
-msgctxt "tdigit_main.actgoback.caption"
 msgid "Back"
 msgstr ""
 
 #: tdigit_main.actgonext.caption
-msgctxt "tdigit_main.actgonext.caption"
 msgid "Next"
 msgstr ""
 

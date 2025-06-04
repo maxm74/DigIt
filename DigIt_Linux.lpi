@@ -17,6 +17,10 @@
         <TextDesc Value="Application to automatically scan and cut images."/>
       </XPManifest>
       <Icon Value="0"/>
+      <Resources Count="2">
+        <Resource_0 FileName="images\digit-icon.ico" Type="ICON" ResourceName="DIGIT-ICON"/>
+        <Resource_1 FileName="images\digit-icon-files.ico" Type="ICON" ResourceName="DIGIT-ICON-FILES"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N Value="True"/>
@@ -24,7 +28,7 @@
     </i18n>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="1"/>
+      <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
       <Attributes pvaPreRelease="True"/>
       <StringTable CompanyName="MaxM" LegalCopyright="2025 Massimo Magnano" ProductName="DigIt"/>
@@ -110,9 +114,9 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="16">
+    <Units Count="18">
       <Unit0>
-        <Filename Value="DigIt_Linux.lpr"/>
+        <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -131,67 +135,78 @@
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="DigIt_Types.pas"/>
+        <Filename Value="DigIt_Settings.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
+        <Filename Value="DigIt_Types.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit5>
+      <Unit6>
         <Filename Value="DigIt_Form_Templates.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Templates"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="_to-do.txt"/>
-        <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
+        <Filename Value="_to-do.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit7>
+      <Unit8>
         <Filename Value="DigIt_Bridge_Intf.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Bridge_Intf"/>
-      </Unit7>
-      <Unit8>
+      </Unit8>
+      <Unit9>
         <Filename Value="DigIt_Bridge_Impl.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Digit_Bridge_Impl"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="DigIt_Sources.pas"/>
-        <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="DigIt_Destinations.pas"/>
+        <Filename Value="DigIt_Sources.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
+        <Filename Value="DigIt_Destinations.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
+      <Unit12>
         <Filename Value="DigIt_Form_Progress.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_Progress"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit11>
-      <Unit12>
+      </Unit12>
+      <Unit13>
         <Filename Value="DigIt_Form_BuildDuplex.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="WizardBuildDuplex"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit12>
-      <Unit13>
+      </Unit13>
+      <Unit14>
+        <Filename Value="Digit_Source_Folder.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit14>
+      <Unit15>
         <Filename Value="DigIt_Form_ExportFiles.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_ExportFiles"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit13>
-      <Unit14>
+      </Unit15>
+      <Unit16>
         <Filename Value="DigIt_Counter.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="DigIt_Settings.pas"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="DigIt_Form_Profiles.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit15>
+        <ComponentName Value="DigIt_Profiles"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

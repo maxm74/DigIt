@@ -3171,6 +3171,7 @@ object DigIt_Main: TDigIt_Main
       object itemProfiles_Edit: TMenuItem
         Caption = 'Edit...'
         ImageIndex = 17
+        OnClick = itemProfiles_EditClick
       end
       object Separator5: TMenuItem
         Caption = '-'

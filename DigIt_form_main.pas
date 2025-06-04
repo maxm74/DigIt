@@ -273,6 +273,7 @@ type
     procedure edPageWidthChange(Sender: TObject);
     procedure edPage_UnitTypeChange(Sender: TObject);
     procedure itemCropModeClick(Sender: TObject);
+    procedure itemProfiles_EditClick(Sender: TObject);
     procedure lvCapturedDblClick(Sender: TObject);
     procedure lvCapturedSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
@@ -430,9 +431,6 @@ type
     procedure SES_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 
-    procedure PROF_Load;
-    procedure PROF_Save;
-
     function Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
     function Destination_Select(newDestinationIndex: Integer): Boolean;
 
@@ -484,7 +482,7 @@ uses
   DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
   DigIt_Form_ExportFiles,
-  DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex;
+  DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
 
 
 { TDigIt_Main }
@@ -584,7 +582,7 @@ begin
 
   SetDefaultStartupValues;
 
-  PROF_Load;
+  TDigIt_Profiles.LoadFromXML(Path_Config+File_Profiles, Profiles);
   BuildProfilesMenu(Self, itemProfiles, nil, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
@@ -887,7 +885,7 @@ begin
     end;
 
     DigIt_Progress.Hide;
-    FreeAndNil(WizardBuildDuplex);
+    WizardBuildDuplex.Free; WizardBuildDuplex:= nil;
   end;
 end;
 
@@ -1461,6 +1459,17 @@ end;
 procedure TDigIt_Main.itemCropModeClick(Sender: TObject);
 begin
   setCropMode(TDigItCropMode(TMenuItem(Sender).Tag));
+end;
+
+procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);
+begin
+  if TDigIt_Profiles.Execute(Path_Config+File_Profiles) then
+  try
+     //DigIt_Profiles.SaveXML();
+
+  finally
+    DigIt_Profiles.Free; DigIt_Profiles:= nil;
+  end;
 end;
 
 procedure TDigIt_Main.lvCapturedDblClick(Sender: TObject);
@@ -2991,69 +3000,6 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.PROF_Load;
-var
-   aXML: TRttiXMLConfig;
-   i, iCount: Integer;
-
-begin
-  try
-     aXML:= TRttiXMLConfig.Create(Path_Config+File_Profiles);
-
-     //Load Profiles
-     Profiles:= nil; //Avoid possible data overlaps by eliminating any existing array
-     iCount:= aXML.GetValue('Profiles/Count', 0);
-     SetLength(Profiles, iCount);
-     for i:=0 to iCount-1 do
-     begin
-       Profiles[i]:= aXML.GetValue('Profiles/Item'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
-     end;
-
-  finally
-    aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.PROF_Save;
-var
-   aXML: TRttiXMLConfig;
-   i, iCount: Integer;
-   curPath: String;
-
-begin
-  try
-    //Test Only REMOVE IT
-    SetLength(Profiles, 5);
-    Profiles[0]:= 'Test Profile 0';
-    Profiles[1]:= 'Test Profile 1';
-    Profiles[2]:= 'Test Caio';
-    Profiles[3]:= 'Test Sempronio';
-    Profiles[4]:= 'Test Pluto';
-
-     aXML:= TRttiXMLConfig.Create(Path_Config+File_Profiles);
-
-     //Save SourceFiles array
-     aXML.DeletePath('Profiles/');
-     aXML.SetValue('Profiles/Count', Length(Profiles));
-     for i:=0 to Length(Profiles)-1 do
-     begin
-       curPath:= 'Profiles/Item'+IntToStr(i)+'/';
-       aXML.SetValue(curPath+'Name', Profiles[i]);
-     end;
-     aXML.Free; aXML:= nil;
-
-     //Test Only REMOVE IT
-     for i:=0 to Length(Profiles)-1 do
-     begin
-       curPath:= 'Profiles/Item'+IntToStr(i)+'/';
-       SES_SaveSource(nil, False, curPath, Path_Config+File_Profiles);
-     end;
-
-  finally
-    if (aXML<>nil) then aXML.Free;
-  end;
-end;
-
 function TDigIt_Main.Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
 begin
   Result:= False;
@@ -3224,7 +3170,7 @@ begin
     1: SES_Save(True);
     2: SES_ClearAutoSave(False);
     3: Settings.Save(nil);
-    4: PROF_Save;
+//    4: PROF_Save;
   end;
 end;
 

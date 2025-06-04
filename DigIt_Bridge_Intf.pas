@@ -45,6 +45,16 @@ const
   DigIt_PluginInitProcName = 'DigIt_Plugin_Init';
   DigIt_PluginReleaseProcName = 'DigIt_Plugin_Release';
 
+  //Settings Path Consts: High Byte = Category, Low Byte = Path
+  ID_Path_Application = $00;
+  ID_Path_Config      = $10;
+  ID_Path_Temp        = $20;
+
+  ID_Path_Session          = $30;
+  ID_Path_Session_Scan     = $31;
+  ID_Path_Session_Pictures = $32;
+
+
 type
   //Interface Kind
   TDigItInterfaceKind = (
@@ -175,13 +185,8 @@ type
 
   IDigIt_Settings = Interface
   ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
-    //Path consts
-    function Path_Application: PChar; stdcall;
-    function Path_Config: PChar; stdcall;
-    function Path_Temp: PChar; stdcall;
-    function Path_Session: PChar; stdcall;
-    function Path_Session_Scan: PChar; stdcall;
-    function Path_Session_Pictures: PChar; stdcall;
+    //Path Consts: High Byte = Category, Low Byte = Path
+    function Path(const APathID: Word): PChar; stdcall;
   end;
 
   IDigIt_ProgressCallback = Interface

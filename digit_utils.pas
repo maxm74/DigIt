@@ -320,18 +320,13 @@ procedure BuildProfilesMenu(AOwner: TComponent;
                            itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
                            Profiles: TStringArray);
 var
-   i, iSub,
-   cSub, res: Integer;
-   newItem,
-   newSep: TMenuItem;
-   curSource: PSourceInfo;
-   curSourceItems: IDigIt_Source_Items;
-   curTitle: PChar;
-   curSelected: Boolean;
+   i: Integer;
+   newItem: TMenuItem;
 
 begin
-  for i:=3 to itemProfiles.Count-1 do
-    itemProfiles.Delete(3);
+  //Delete old Profiles MenuItem if any
+  for i:=2 to itemProfiles.Count-1 do
+    itemProfiles.Delete(2);
 
   for i:=0 to Length(Profiles)-1 do
   begin

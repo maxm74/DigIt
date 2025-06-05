@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/04 Replaced IDigIt_Settings.Path_XXX functions with a single function Path;
+2025/06/05 Changed Profile List Item Name;
+           Added Profiles Reorder;
+
+        04 Replaced IDigIt_Settings.Path_XXX functions with a single function Path;
            Added Profiles Edit Form (to finish);
 
 2025/05/29 Added XMLRoot_Path and XML_File param to Load/Save Source;

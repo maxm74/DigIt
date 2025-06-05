@@ -35,15 +35,13 @@ type
       Selected: Boolean);
 
   private
-    XML: TRttiXMLConfig;
+    XMLFilename: String;
 
     procedure UI_EnableButtons;
-    procedure UI_LoadFromXML(const AFilename: String);
-
-    function SaveToXML(const AFilename: String): Boolean;
+    procedure UI_LoadFromXML;
 
   public
-    class function Execute(const AFilename: String):Boolean;
+    class function Execute(const AFilename: String; var ATitleArray: TStringArray):Boolean;
     class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
   end;
 
@@ -61,10 +59,9 @@ uses Laz2_DOM, FileUtil;
 procedure TDigIt_Profiles.btUpDownClick(Sender: TObject);
 var
    curItem: TListItem;
-   oldIndex: Integer;
-   curNodeStr: String;
-   curNode, newNode: TDomNode;
-   itemLineNodeList, TempNodeList: TDOMNodeList;
+   oldIndex, newIndex: Integer;
+   fileStr: RTLString;
+   theFile: TStringStream;
 
 begin
   curItem:= lvProfiles.Selected;
@@ -84,21 +81,26 @@ begin
 
     lvProfiles.EndUpdate;
 
-  (* FIND A WAY To Exchange Items or Works directly with String File
+    try
+      newIndex:= curItem.Index;
 
-    itemLineNodeList:= XML.FindNode('Profiles/', True).GetChildNodes;
+      theFile:= TStringStream.Create();
+      theFile.LoadFromFile(XMLFilename);
+      fileStr:= theFile.DataString;
+      fileStr:= StringReplace(fileStr, 'Profile_'+IntToStr(newIndex), 'Profile_X', [rfReplaceAll, rfIgnoreCase]);
+      fileStr:= StringReplace(fileStr, 'Profile_'+IntToStr(oldIndex), 'Profile_'+IntToStr(newIndex), [rfReplaceAll, rfIgnoreCase]);
+      fileStr:= StringReplace(fileStr, 'Profile_X', 'Profile_'+IntToStr(oldIndex), [rfReplaceAll, rfIgnoreCase]);
+      theFile.Seek(0, soFromBeginning);
+      {$IF SIZEOF(CHAR)=1}
+        theFile.WriteAnsiString(fileStr);
+      {$ELSE}
+        theFile.WriteUnicodeString(fileStr);
+      {$ENDIF}
+      theFile.SaveToFile(XMLFilename);
 
-    curNode:= itemLineNodeList[curItem.Index];
-    curNodeStr:= curNode.TextContent;
-
-//    itemLineNodeList[curItem.Index]:= itemLineNodeList[oldIndex];
-//    itemLineNodeList[oldIndex]:= curNode;
-
-    XML.SetValue('Profiles/Item'+IntToStr(curItem.Index)+'/', 'Profiles/ItemXXX/');
-    XML.SetValue('Profiles/Item'+IntToStr(oldIndex)+'/', 'Profiles/Item'+IntToStr(curItem.Index)+'/');
-    XML.SetValue('Profiles/ItemXXX/', 'Profiles/Item'+IntToStr(oldIndex)+'/');
-  *)
-    XML.Flush;
+    finally
+      theFile.Free;
+    end;
 
   finally
     UI_EnableButtons;
@@ -115,6 +117,7 @@ var
    i: Integer;
    dup: Boolean;
    curPath: String;
+   XML: TRttiXMLConfig;
 
 begin
   //Avoid Duplicates
@@ -124,10 +127,11 @@ begin
 
   if dup
   then AValue:= Item.Caption
-  else begin
-        curPath:= 'Profiles/Item'+IntToStr(Item.Index)+'/';
-        XML.SetValue(curPath+'Name', AValue);
-        XML.Flush;
+  else try
+          XML:= TRttiXMLConfig.Create(XMLFilename);
+          XML.SetValue('Profiles/Profile_'+IntToStr(Item.Index)+'/'+'Name', AValue);
+       finally
+          XML.Free;
        end;
 end;
 
@@ -150,14 +154,15 @@ begin
   btLast.Enabled:= btDown.Enabled;
 end;
 
-procedure TDigIt_Profiles.UI_LoadFromXML(const AFilename: String);
+procedure TDigIt_Profiles.UI_LoadFromXML;
 var
    i, iCount: Integer;
    curItem: TListItem;
+   XML: TRttiXMLConfig;
 
 begin
   try
-     XML:= TRttiXMLConfig.Create(AFilename);
+     XML:= TRttiXMLConfig.Create(XMLFilename);
 
      lvProfiles.Clear;
 
@@ -166,16 +171,17 @@ begin
      for i:=0 to iCount-1 do
      begin
        curItem:= lvProfiles.Items.Add;
-       curItem.Caption:= XML.GetValue('Profiles/Item'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
-       curItem.SubItems.Add(XML.GetValue('Profiles/Item'+IntToStr(i)+'/Source/Name', ''));
+       curItem.Caption:= XML.GetValue('Profiles/Profile_'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
+       curItem.SubItems.Add(XML.GetValue('Profiles/Profile_'+IntToStr(i)+'/Source/Name', ''));
      end;
 
   finally
+    XML.Free;
     UI_EnableButtons;
   end;
 end;
 
-class function TDigIt_Profiles.Execute(const AFilename: String): Boolean;
+class function TDigIt_Profiles.Execute(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 var
    i: Integer;
 
@@ -190,7 +196,8 @@ begin
      try
         if CopyFile(AFilename, AFilename+'.tmp') then
         begin
-          UI_LoadFromXML(AFilename+'.tmp');
+          XMLFilename:= AFilename+'.tmp';
+          UI_LoadFromXML;
 
           Result:= (ShowModal = mrOk);
 
@@ -198,11 +205,11 @@ begin
           begin
             Result:= CopyFile(AFilename+'.tmp', AFilename);
             DeleteFile(AFilename+'.tmp');
+            Result:= LoadFromXML(AFilename, ATitleArray);
           end;
         end;
 
      finally
-       XML.Free;
      end;
 
   finally
@@ -226,52 +233,13 @@ begin
      SetLength(ATitleArray, iCount);
      for i:=0 to iCount-1 do
      begin
-       ATitleArray[i]:= aXML.GetValue('Profiles/Item'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
+       ATitleArray[i]:= aXML.GetValue('Profiles/Profile_'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
      end;
 
      Result:= True;
 
   finally
     aXML.Free;
-  end;
-end;
-
-function TDigIt_Profiles.SaveToXML(const AFilename: String): Boolean;
-var
-   i, iCount: Integer;
-   curPath: String;
-
-begin
-  try
- (*   //Test Only REMOVE IT
-    SetLength(Profiles, 5);
-    Profiles[0]:= 'Test Profile 0';
-    Profiles[1]:= 'Test Profile 1';
-    Profiles[2]:= 'Test Caio';
-    Profiles[3]:= 'Test Sempronio';
-    Profiles[4]:= 'Test Pluto';
-
-     XML:= TRttiXMLConfig.Create(AFilename);
-
-     //Save SourceFiles array
-     aXML.DeletePath('Profiles/');
-     aXML.SetValue('Profiles/Count', Length(Profiles));
-     for i:=0 to Length(Profiles)-1 do
-     begin
-       curPath:= 'Profiles/Item'+IntToStr(i)+'/';
-       aXML.SetValue(curPath+'Name', Profiles[i]);
-     end;
-     aXML.Free; aXML:= nil;
-
-     //Test Only REMOVE IT
-     for i:=0 to Length(Profiles)-1 do
-     begin
-       curPath:= 'Profiles/Item'+IntToStr(i)+'/';
-       SES_SaveSource(nil, False, curPath, Path_Config+File_Profiles);
-     end;
-   *)
-  finally
-  //  if (aXML<>nil) then aXML.Free;
   end;
 end;
 

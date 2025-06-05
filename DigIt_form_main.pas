@@ -375,6 +375,7 @@ type
 
     procedure UI_DestinationMenuClick(Sender: TObject);
     procedure UI_SourceMenuClick(Sender: TObject);
+    procedure UI_ProfileMenuClick(Sender: TObject);
     procedure UI_FillCropArea(ACropArea :TCropArea);
     procedure UI_FillCounter;
     procedure UI_SelectCurrentCaptured(AddValue: Integer=0);
@@ -583,7 +584,7 @@ begin
   SetDefaultStartupValues;
 
   TDigIt_Profiles.LoadFromXML(Path_Config+File_Profiles, Profiles);
-  BuildProfilesMenu(Self, itemProfiles, nil, Profiles);
+  BuildProfilesMenu(Self, itemProfiles, @UI_ProfileMenuClick, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
@@ -1463,9 +1464,9 @@ end;
 
 procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);
 begin
-  if TDigIt_Profiles.Execute(Path_Config+File_Profiles) then
+  if TDigIt_Profiles.Execute(Path_Config+File_Profiles, Profiles) then
   try
-     //DigIt_Profiles.SaveXML();
+     BuildProfilesMenu(Self, itemProfiles, @UI_ProfileMenuClick, Profiles);
 
   finally
     DigIt_Profiles.Free; DigIt_Profiles:= nil;
@@ -3684,6 +3685,11 @@ begin
   finally
     UI_ToolBar;
   end;
+end;
+
+procedure TDigIt_Main.UI_ProfileMenuClick(Sender: TObject);
+begin
+
 end;
 
 procedure TDigIt_Main.UI_FillCropArea(ACropArea: TCropArea);

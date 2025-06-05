@@ -11,6 +11,7 @@ object DigIt_Profiles: TDigIt_Profiles
   ClientWidth = 550
   DesignTimePPI = 120
   Position = poScreenCenter
+  LCLVersion = '4.99.0.0'
   OnShow = FormShow
   object panelButtons: TBCPanel
     Left = 0
@@ -122,13 +123,13 @@ object DigIt_Profiles: TDigIt_Profiles
           AutoSize = True
           Caption = 'Title'
           MinWidth = 100
-          Width = 49
+          Width = 100
         end      
         item
           AutoSize = True
           Caption = 'Source'
           MinWidth = 100
-          Width = 65
+          Width = 100
         end>
       HideSelection = False
       IconOptions.Arrangement = iaLeft

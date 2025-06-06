@@ -151,13 +151,14 @@ type
     menuExport: TMenuItem;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
-    itemProfiles: TMenuItem;
     itemProfiles_Edit: TMenuItem;
+    Separator4: TMenuItem;
     menuSaveProfiles: TMenuItem;
     menuSaveSettings: TMenuItem;
     menuProjectSaveAs: TMenuItem;
     menuSaveXML: TMenuItem;
     menuLoadXML: TMenuItem;
+    menuProfiles: TPopupMenu;
     panelCropArea: TBCPanel;
     panelPageRotate: TBCPanel;
     panelPageSize: TBCPanel;
@@ -201,8 +202,6 @@ type
     SelectDirectory: TSelectDirectoryDialog;
     Separator2: TMenuItem;
     Separator3: TMenuItem;
-    Separator4: TMenuItem;
-    Separator5: TMenuItem;
     tbCaptured: TToolBar;
     tbCapturedRotateLeft: TToolButton;
     tbCapturedPDF: TToolButton;
@@ -232,6 +231,7 @@ type
     tbCaptSep1: TToolButton;
     tbCaptSep2: TToolButton;
     tbCapturedToImg: TToolButton;
+    tbProfiles: TToolButton;
 
     procedure actCapturedDeleteAllExecute(Sender: TObject);
     procedure actCapturedDeleteExecute(Sender: TObject);
@@ -584,7 +584,7 @@ begin
   SetDefaultStartupValues;
 
   TDigIt_Profiles.LoadFromXML(Path_Config+File_Profiles, Profiles);
-  BuildProfilesMenu(Self, itemProfiles, @UI_ProfileMenuClick, Profiles);
+  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
@@ -1466,7 +1466,7 @@ procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);
 begin
   if TDigIt_Profiles.Execute(Path_Config+File_Profiles, Profiles) then
   try
-     BuildProfilesMenu(Self, itemProfiles, @UI_ProfileMenuClick, Profiles);
+     BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
 
   finally
     DigIt_Profiles.Free; DigIt_Profiles:= nil;

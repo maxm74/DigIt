@@ -40,7 +40,7 @@ function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
 
 procedure BuildProfilesMenu(AOwner: TComponent;
-                            itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
+                            menuProfiles: TMenu; itemOnClick: TNotifyEvent;
                             Profiles: TStringArray);
 
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
@@ -317,7 +317,7 @@ begin
 end;
 
 procedure BuildProfilesMenu(AOwner: TComponent;
-                           itemProfiles: TMenuItem; itemOnClick: TNotifyEvent;
+                           menuProfiles: TMenu; itemOnClick: TNotifyEvent;
                            Profiles: TStringArray);
 var
    i: Integer;
@@ -325,10 +325,10 @@ var
 
 begin
   //Delete old Profiles MenuItem if any
-  for i:=2 to itemProfiles.Count-1 do
-    itemProfiles.Delete(2);
+  for i:=1 to menuProfiles.Items.Count-2 do
+    menuProfiles.Items.Delete(0);
 
-  for i:=0 to Length(Profiles)-1 do
+  for i:=Length(Profiles)-1 downto 0 do
   begin
     newItem:= TMenuItem.Create(AOwner);
 
@@ -336,7 +336,7 @@ begin
     //newItem.ImageIndex:= ;
     newItem.Tag:= i;
     newItem.OnClick:= itemOnClick;
-    itemProfiles.Add(newItem);
+    menuProfiles.Items.Insert(0, newItem);
   end;
 end;
 

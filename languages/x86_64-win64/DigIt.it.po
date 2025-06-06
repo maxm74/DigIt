@@ -361,10 +361,12 @@ msgid "Add Folder..."
 msgstr "Aggiungi Cartella..."
 
 #: tdigit_exportfiles.btdel.caption
+msgctxt "tdigit_exportfiles.btdel.caption"
 msgid "Delete"
 msgstr "Elimina"
 
 #: tdigit_exportfiles.btdelall.caption
+msgctxt "tdigit_exportfiles.btdelall.caption"
 msgid "Delete All"
 msgstr "Elimina Tutto"
 
@@ -374,10 +376,12 @@ msgid "Down"
 msgstr "Giù"
 
 #: tdigit_exportfiles.btfirst.hint
+msgctxt "tdigit_exportfiles.btfirst.hint"
 msgid "To First"
 msgstr "All'Inizio"
 
 #: tdigit_exportfiles.btlast.hint
+msgctxt "tdigit_exportfiles.btlast.hint"
 msgid "To Last"
 msgstr "Alla Fine"
 
@@ -758,13 +762,9 @@ msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr "Area Intera"
 
-#: tdigit_main.itemprofiles.caption
-msgid "Profiles"
-msgstr "Profili"
-
 #: tdigit_main.itemprofiles_edit.caption
 msgid "Edit..."
-msgstr ""
+msgstr "Modifica..."
 
 #: tdigit_main.label1.caption
 msgid "Z Order :"
@@ -919,6 +919,10 @@ msgstr ""
 msgid "Menù"
 msgstr ""
 
+#: tdigit_main.tbprofiles.caption
+msgid "Profiles..."
+msgstr "Profili..."
+
 #: tdigit_main.tbsepclear.caption
 msgid "tbSepClear"
 msgstr ""
@@ -939,6 +943,57 @@ msgstr ""
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
+
+#: tdigit_profiles.btaddfiles1.caption
+msgid "Add ..."
+msgstr "Aggiungi ..."
+
+#: tdigit_profiles.btdel.caption
+msgctxt "tdigit_profiles.btdel.caption"
+msgid "Delete"
+msgstr "Elimina"
+
+#: tdigit_profiles.btdelall.caption
+msgctxt "tdigit_profiles.btdelall.caption"
+msgid "Delete All"
+msgstr "Elimina Tutto"
+
+#: tdigit_profiles.btdown.hint
+msgctxt "tdigit_profiles.btdown.hint"
+msgid "Down"
+msgstr "Giù"
+
+#: tdigit_profiles.bteditprofile.caption
+msgid "Edit ..."
+msgstr "Modifica ..."
+
+#: tdigit_profiles.btfirst.hint
+msgctxt "tdigit_profiles.btfirst.hint"
+msgid "To First"
+msgstr "All'Inizio"
+
+#: tdigit_profiles.btlast.hint
+msgctxt "tdigit_profiles.btlast.hint"
+msgid "To Last"
+msgstr "Alla Fine"
+
+#: tdigit_profiles.btup.hint
+msgctxt "tdigit_profiles.btup.hint"
+msgid "Up"
+msgstr "Su"
+
+#: tdigit_profiles.caption
+msgctxt "tdigit_profiles.caption"
+msgid "Profiles"
+msgstr "Profili"
+
+#: tdigit_profiles.lvprofiles.columns[0].caption
+msgid "Title"
+msgstr "Titolo"
+
+#: tdigit_profiles.lvprofiles.columns[1].caption
+msgid "Source"
+msgstr "Sorgente"
 
 #: tdigit_progress.capcurrent.caption
 msgctxt "tdigit_progress.capcurrent.caption"
@@ -1051,4 +1106,3 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
-

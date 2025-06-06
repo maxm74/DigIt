@@ -740,11 +740,6 @@ msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr ""
 
-#: tdigit_main.itemprofiles.caption
-msgctxt "tdigit_main.itemprofiles.caption"
-msgid "Profiles"
-msgstr ""
-
 #: tdigit_main.itemprofiles_edit.caption
 msgctxt "tdigit_main.itemprofiles_edit.caption"
 msgid "Edit..."
@@ -902,6 +897,10 @@ msgstr ""
 
 #: tdigit_main.tbmenu.caption
 msgid "Menù"
+msgstr ""
+
+#: tdigit_main.tbprofiles.caption
+msgid "Profiles..."
 msgstr ""
 
 #: tdigit_main.tbsepclear.caption

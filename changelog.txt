@@ -1,7 +1,9 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/05 Changed Profile List Item Name;
+2025/06/06 Separated the profile menu into a new ToolButton
+
+        05 Changed Profile List Item Name;
            Added Profiles Reorder;
 
         04 Replaced IDigIt_Settings.Path_XXX functions with a single function Path;

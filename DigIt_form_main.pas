@@ -2272,40 +2272,43 @@ var
    nofileBMP: TBitmap;
 
 begin
-  DeleteFile(Path_DefSession+File_DefSession+Ext_AutoSess);
-  DeleteFile(Path_DefSession+File_DefSession+Ext_AutoThumb);
-  DeleteDirectory(Path_DefSession_Scan, True);
-  DeleteDirectory(Path_DefSession_Pictures, True);
+  try
+     DeleteFile(Path_DefSession+File_DefSession+Ext_AutoSess);
+     DeleteFile(Path_DefSession+File_DefSession+Ext_AutoThumb);
+     DeleteDirectory(Path_DefSession_Scan, True);
+     DeleteDirectory(Path_DefSession_Pictures, True);
 
-  if AFromStartup
-  then begin
-       end
-  else try
-          SetDefaultSessionValues;
-          SetDefaultStartupValues;
+     if AFromStartup
+     then begin
+          end
+     else try
+             SetDefaultSessionValues;
+             SetDefaultStartupValues;
 
-          //Clear Source Queque
-          //rSource^.Inst.Clear;
+             //Clear Source Queque
+             //rSource^.Inst.Clear;
 
-          //Clear Captured Array and ListView
-          ClearCaptured;
+             //Clear Captured Array and ListView
+             ClearCaptured;
 
-          //This would be like a Full Area Template
-          imgManipulation.Bitmap:= nil;
-          if (CropMode = diCropCustom) then imgManipulation.clearCropAreas;
+             //This would be like a Full Area Template
+             imgManipulation.Bitmap:= nil;
+             if (CropMode = diCropCustom) then imgManipulation.clearCropAreas;
 
-          //Reset Counter
-          Counter.Reset;
+             //Reset Counter
+             Counter.Reset;
 
-          setCropMode(diCropFull);
-
-          Caption :='DigIt';
+             setCropMode(diCropFull);
 
        finally
          UI_FillCounter;
        end;
 
-  UI_ToolBar;
+
+  finally
+    UI_ToolBar;
+    UI_Caption;
+  end;
 end;
 
 function TDigIt_Main.SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
@@ -2332,48 +2335,23 @@ begin
 
      Result:= -1;
 
-     (* oldcode
-     //Load rSource and its Params
-     newSourceName:= aXML.GetValue('Source/Name', '');
-
-     if (newSourceName <> '') then
-     begin
-       if theBridge.SourcesImpl.Select(newSourceName)
-       then begin
-              if (theBridge.SourcesImpl.Selected <> rSource) then
-              begin
-                { #note -oMaxM : rSource Switched...Do something? }
-              end;
-
-              rSource:= theBridge.SourcesImpl.Selected;
-              rSourceName:= theBridge.SourcesImpl.SelectedName;
-              rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-              Result:= theBridge.SourcesImpl.SelectedIndex;
-              theBridge.SourcesImpl.LoadSelectedParams(aXML.Filename, 'Source/Params');
-            end
-       else begin
-              MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
-              Result:= theBridge.SourcesImpl.SelectedIndex;
+     if theBridge.SourcesImpl.Select(aXML, XMLRoot_Path, newSourceName)
+     then begin
+            if (rSourceName <> newSourceName) then
+            begin
+              { #note -oMaxM : rSource Switched...Do something? }
             end;
-      end;
-      *)
-      if theBridge.SourcesImpl.Select(aXML, XMLRoot_Path, newSourceName)
-      then begin
-             if (rSourceName <> newSourceName) then
-             begin
-               { #note -oMaxM : rSource Switched...Do something? }
-             end;
 
-             rSource:= theBridge.SourcesImpl.Selected;
-             rSourceName:= theBridge.SourcesImpl.SelectedName;
-             rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-             Result:= theBridge.SourcesImpl.SelectedIndex;
-           end
-      else if (newSourceName <> '') then
-           begin
-             MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
-             Result:= theBridge.SourcesImpl.SelectedIndex;
-           end;
+            rSource:= theBridge.SourcesImpl.Selected;
+            rSourceName:= theBridge.SourcesImpl.SelectedName;
+            rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+            Result:= theBridge.SourcesImpl.SelectedIndex;
+          end
+     else if (newSourceName <> '') then
+          begin
+            MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
+            Result:= theBridge.SourcesImpl.SelectedIndex;
+          end;
 
   finally
     if aFree then aXML.Free;
@@ -2400,30 +2378,6 @@ begin
        aXML:= TRttiXMLConfig.Create(XML_File);
      end
      else XML_File:= aXML.Filename;
-
-     (* oldcode
-     //Save rSource and its Params
-     aXML.SetValue('Source/Name', rSourceName);
-     aXML.DeletePath('Source/Params/');
-
-     if IsAutoSave then
-     begin
-       SessionModified:= True;
-
-       if aFree then
-       begin
-         aXML.Free; aXML:= nil;
-
-         //FPC Bug?
-         //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
-         //So we do it after destroying XML.
-
-         if (rSource <> nil) and
-            (rSource^.Inst <> nil)
-         then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
-       end;
-     end;
-     *)
 
      if theBridge.SourcesImpl.Save(aXML, XMLRoot_Path, False) then
      begin
@@ -3684,12 +3638,22 @@ begin
 
   finally
     UI_ToolBar;
+    UI_Caption;
   end;
 end;
 
 procedure TDigIt_Main.UI_ProfileMenuClick(Sender: TObject);
 begin
+  if (Sender<>nil) and (Sender is TMenuItem) then
+  try
+    SES_LoadSource(nil, False,
+                   PROF_Item+IntToStr(TMenuItem(Sender).Tag)+'/',
+                   Path_Config+File_Profiles);
 
+  finally
+    UI_ToolBar;
+    UI_Caption;
+  end;
 end;
 
 procedure TDigIt_Main.UI_FillCropArea(ACropArea: TCropArea);
@@ -3996,14 +3960,19 @@ end;
 
 procedure TDigIt_Main.UI_Caption;
 var
-   addStr: String;
+   capStr: String;
 
 begin
-  if rSessionModified then addStr:= '* ' else  addStr:= '';
+  if rSessionModified then capStr:= '* ' else  capStr:= '';
 
   if (Path_Session = Path_DefSession)
-  then Caption :=addStr+'DigIt'
-  else Caption :=addStr+'DigIt'+' - '+Session_File;
+  then capStr:= capStr+'DigIt'
+  else capStr:= capStr+'DigIt'+' - '+Session_File;
+
+  {#todo 2 -oMaxM : Really Use something like rSource^.Inst.UI_SourceTitle + (rSourceName) }
+  if (rSourceName <> '') then capStr:= capStr+'  ('+rSourceName+')';
+
+  Caption:= capStr;
 end;
 
 end.

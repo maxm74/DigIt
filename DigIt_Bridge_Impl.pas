@@ -413,23 +413,6 @@ begin
      newSourceI:= FindByKey(SourceName);
      if (newSourceI > -1) then Result:= Select(newSourceI, -1, GetUserParams);
 
-     (* oldcode
-     newSource:= Data[newSourceI];
-
-     if (newSource <> nil) then
-     begin
-       if GetUserParams and
-          not((newSource^.Inst.Params = nil) or newSource^.Inst.Params.GetFromUser)
-       then exit;
-
-       rSelected:= newSource;
-       rSelectedParams :=newSource^.Inst.Params;
-       rSelectedName:= SourceName;
-       rSelectedIndex:= newSourceI;
-       Result:= True;
-      end;
-      *)
-
   except
     Result:= False;
   end;
@@ -545,21 +528,6 @@ begin
     Result:= False;
   end;
 end;
-
-(* oldcode
-function TDigIt_Sources.LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
-begin
-  Result:= False;
-  if (rSelectedParams <> nil) and (XMLFileName <> '') and (XMLPath <> '') then
-  try
-     Result:= rSelectedParams.Load(PChar(XMLFileName), PChar(XMLPath));
-     if Result then Result:= rSelectedParams.OnSet;
-
-  except
-    Result:= False;
-  end;
-end;
-*)
 
 function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
 var

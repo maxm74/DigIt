@@ -8,8 +8,10 @@ uses
   Classes, SysUtils, Forms, Controls, Buttons, ComCtrls, ExtCtrls, Laz2_XMLCfg,
   BCPanel, BCListBox;
 
-type
+const
+  PROF_Item = 'Profiles/Profile_';
 
+type
   { TDigIt_Profiles }
 
   TDigIt_Profiles = class(TForm)
@@ -129,7 +131,7 @@ begin
   then AValue:= Item.Caption
   else try
           XML:= TRttiXMLConfig.Create(XMLFilename);
-          XML.SetValue('Profiles/Profile_'+IntToStr(Item.Index)+'/'+'Name', AValue);
+          XML.SetValue(PROF_Item+IntToStr(Item.Index)+'/'+'Name', AValue);
        finally
           XML.Free;
        end;
@@ -171,8 +173,8 @@ begin
      for i:=0 to iCount-1 do
      begin
        curItem:= lvProfiles.Items.Add;
-       curItem.Caption:= XML.GetValue('Profiles/Profile_'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
-       curItem.SubItems.Add(XML.GetValue('Profiles/Profile_'+IntToStr(i)+'/Source/Name', ''));
+       curItem.Caption:= XML.GetValue(PROF_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
+       curItem.SubItems.Add(XML.GetValue(PROF_Item+IntToStr(i)+'/Source/Name', ''));
      end;
 
   finally
@@ -233,7 +235,7 @@ begin
      SetLength(ATitleArray, iCount);
      for i:=0 to iCount-1 do
      begin
-       ATitleArray[i]:= aXML.GetValue('Profiles/Profile_'+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
+       ATitleArray[i]:= aXML.GetValue(PROF_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
      end;
 
      Result:= True;

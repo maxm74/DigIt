@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/06 Separated the profile menu into a new ToolButton
+2025/06/13 Added Load of a Profile from Menù;
+           Added PROF_Item const;
+           Added SourceName to Caption (really may be Scanner Name);
+
+        06 Separated the profile menu into a new ToolButton
 
         05 Changed Profile List Item Name;
            Added Profiles Reorder;

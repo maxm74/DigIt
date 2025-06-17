@@ -107,5 +107,6 @@
 {"hash":234671922,"name":"tdigit_main.menutimertakeconfig.caption","sourcebytes":[67,111,110,102,105,103,32,84,105,109,101,114],"value":"Config Timer"},
 {"hash":48547185,"name":"tdigit_main.itemcropmodefull.caption","sourcebytes":[70,117,108,108,32,65,114,101,97],"value":"Full Area"},
 {"hash":78424925,"name":"tdigit_main.itemcropmodecustom.caption","sourcebytes":[67,117,115,116,111,109],"value":"Custom"},
+{"hash":43366734,"name":"tdigit_main.itemprofiles_addcurrent.caption","sourcebytes":[65,100,100,32,67,117,114,114,101,110,116,32,83,111,117,114,99,101,46,46,46],"value":"Add Current Source..."},
 {"hash":196112718,"name":"tdigit_main.itemprofiles_edit.caption","sourcebytes":[69,100,105,116,46,46,46],"value":"Edit..."}
 ]}

@@ -224,6 +224,19 @@ msgstr ""
 msgid "Replace the last %d taked files with a new Take?"
 msgstr ""
 
+#: digit_form_profiles.rsprofiles_addcurrent
+msgctxt "digit_form_profiles.rsprofiles_addcurrent"
+msgid "Add Current Source..."
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_invalidtitle_exists
+msgid "Profile Title already exists"
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_title
+msgid "Profile Title :"
+msgstr ""
+
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
 msgstr ""
@@ -738,6 +751,11 @@ msgstr ""
 #: tdigit_main.itemcropmodefull.caption
 msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
+msgstr ""
+
+#: tdigit_main.itemprofiles_addcurrent.caption
+msgctxt "tdigit_main.itemprofiles_addcurrent.caption"
+msgid "Add Current Source..."
 msgstr ""
 
 #: tdigit_main.itemprofiles_edit.caption

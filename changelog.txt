@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/13 Added Load of a Profile from Menù;
+2025/06/17 Added Summary in Twain/WIA Sources (first version);
+           Added Add Current Source in Profiles Menù;
+
+        13 Added Load of a Profile from Menù;
            Added PROF_Item const;
            Added SourceName to Caption (really may be Scanner Name);
 

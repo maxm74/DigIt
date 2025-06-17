@@ -152,6 +152,7 @@ type
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     itemProfiles_Edit: TMenuItem;
+    itemProfiles_AddCurrent: TMenuItem;
     Separator4: TMenuItem;
     menuSaveProfiles: TMenuItem;
     menuSaveSettings: TMenuItem;
@@ -273,6 +274,7 @@ type
     procedure edPageWidthChange(Sender: TObject);
     procedure edPage_UnitTypeChange(Sender: TObject);
     procedure itemCropModeClick(Sender: TObject);
+    procedure itemProfiles_AddCurrentClick(Sender: TObject);
     procedure itemProfiles_EditClick(Sender: TObject);
     procedure lvCapturedDblClick(Sender: TObject);
     procedure lvCapturedSelectItem(Sender: TObject; Item: TListItem;
@@ -1460,6 +1462,17 @@ end;
 procedure TDigIt_Main.itemCropModeClick(Sender: TObject);
 begin
   setCropMode(TDigItCropMode(TMenuItem(Sender).Tag));
+end;
+
+procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
+begin
+  if TDigIt_Profiles.Add(Profiles, Source, SourceParams, SourceName) then
+  try
+     BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
+
+  finally
+    DigIt_Profiles.Free; DigIt_Profiles:= nil;
+  end;
 end;
 
 procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);

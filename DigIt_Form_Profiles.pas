@@ -5,8 +5,14 @@ unit DigIt_Form_Profiles;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Buttons, ComCtrls, ExtCtrls, Laz2_XMLCfg,
-  BCPanel, BCListBox;
+  Classes, SysUtils, Graphics, Forms, Controls, Buttons, ComCtrls, ExtCtrls, Laz2_XMLCfg,
+  BCPanel, BCListBox,
+  Digit_Bridge_Intf, Digit_Bridge_Impl;
+
+resourcestring
+  rsProfiles_AddCurrent = 'Add Current Source...';
+  rsProfiles_Title = 'Profile Title :';
+  rsProfiles_InvalidTitle_Exists = 'Profile Title already exists';
 
 const
   PROF_Item = 'Profiles/Profile_';
@@ -43,8 +49,11 @@ type
     procedure UI_LoadFromXML;
 
   public
-    class function Execute(const AFilename: String; var ATitleArray: TStringArray):Boolean;
+    class function Execute(const AFilename: String; var ATitleArray: TStringArray): Boolean;
     class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+
+    class function Add(var ATitleArray: TStringArray;
+                       ASource: PSourceInfo; ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
   end;
 
 var
@@ -54,7 +63,7 @@ implementation
 
 {$R *.lfm}
 
-uses Laz2_DOM, FileUtil;
+uses Laz2_DOM, FileUtil, MM_StrUtils, MM_Form_EditText;
 
 { TDigIt_Profiles }
 
@@ -242,6 +251,44 @@ begin
 
   finally
     aXML.Free;
+  end;
+end;
+
+//I do it this way to not enable nestedprocvars switch
+var
+   chkTitleArray: TStringArray;
+
+function AddCheck(const AText: String; var AStatusText: String; var AStatusColor: TColor): Boolean;
+begin
+  Result:= not(StringArrayFind(AText, chkTitleArray, True));
+  if Result
+  then begin
+         AStatusColor:= clDefault;
+         AStatusText:= '';
+       end
+  else begin
+         AStatusColor:= clRed;
+         AStatusText:= rsProfiles_InvalidTitle_Exists;
+       end;
+end;
+
+class function TDigIt_Profiles.Add(var ATitleArray: TStringArray;
+  ASource: PSourceInfo; ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
+
+var
+   newProfileTitle: String;
+
+begin
+  chkTitleArray:= ATitleArray;
+
+  Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
+  if Result then
+  begin
+    Result:= False;
+    try
+
+    finally
+    end;
   end;
 end;
 

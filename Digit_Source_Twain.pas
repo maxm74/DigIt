@@ -636,8 +636,22 @@ begin
 end;
 
 function TDigIt_Source_Twain.Summary(out ASummary: PChar): Integer; stdcall;
+var
+   res: String;
+
 begin
   Result:= 0;
+
+  if (rScannerInfo.ProductName <> '') then
+  begin
+    res:= rScannerInfo.ProductName;
+    if (rParams.PaperFeed = pfFeeder)
+    then res:= res+' ('+rsFeeder+')'
+    else res:= res+' ('+rsFlatbed+')';
+
+    ASummary:= StrNew(PChar(res+' - '+rsTwainName));
+    Result:= Length(ASummary);
+  end;
 end;
 
 function TDigIt_Source_Twain.OnSet: Boolean; stdcall;

@@ -472,8 +472,20 @@ begin
 end;
 
 function TDigIt_Source_WIA.Summary(out ASummary: PChar): Integer; stdcall;
+var
+   res: String;
+
 begin
   Result:= 0;
+
+  if (DeviceName <> '') then
+  begin
+    res:= DeviceName;
+    if (DeviceItemName <> '') then res:= res+' ('+DeviceItemName+')';
+
+    ASummary:= StrNew(PChar(res+' - '+rsWIAName));
+    Result:= Length(ASummary);
+  end;
 end;
 
 function TDigIt_Source_WIA.Flags: TDigItInterfaceKind; stdcall;

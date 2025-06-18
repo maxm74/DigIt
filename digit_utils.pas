@@ -316,17 +316,19 @@ begin
   *)
 end;
 
-procedure BuildProfilesMenu(AOwner: TComponent;
-                           menuProfiles: TMenu; itemOnClick: TNotifyEvent;
-                           Profiles: TStringArray);
+procedure BuildProfilesMenu(AOwner: TComponent; menuProfiles: TMenu;
+                            itemOnClick: TNotifyEvent; Profiles: TStringArray);
 var
    i: Integer;
    newItem: TMenuItem;
 
 begin
   //Delete old Profiles MenuItem if any
-  for i:=1 to menuProfiles.Items.Count-2 do
+  for i:=1 to menuProfiles.Items.Count-3 do
     menuProfiles.Items.Delete(0);
+
+  //Hide or Show Separator whether or not there are Profiles
+  menuProfiles.Items[0].Visible:= (Length(Profiles) > 0);
 
   for i:=Length(Profiles)-1 downto 0 do
   begin

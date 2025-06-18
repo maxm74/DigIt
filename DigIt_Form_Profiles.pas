@@ -35,6 +35,7 @@ type
     imgList: TImageList;
     lvProfiles: TListView;
     panelButtons: TBCPanel;
+    procedure btDelAllClick(Sender: TObject);
     procedure btUpDownClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure lvProfilesEdited(Sender: TObject; Item: TListItem;
@@ -52,7 +53,7 @@ type
     class function Execute(const AFilename: String; var ATitleArray: TStringArray): Boolean;
     class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 
-    class function Add(var ATitleArray: TStringArray;
+    class function Add(const AFilename: String; var ATitleArray: TStringArray;
                        ASource: PSourceInfo; ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
   end;
 
@@ -95,6 +96,7 @@ begin
     try
       newIndex:= curItem.Index;
 
+      { #note : Work directly with the text file, Maybe there is a better way to exchange two items}
       theFile:= TStringStream.Create();
       theFile.LoadFromFile(XMLFilename);
       fileStr:= theFile.DataString;
@@ -115,6 +117,24 @@ begin
 
   finally
     UI_EnableButtons;
+  end;
+end;
+
+procedure TDigIt_Profiles.btDelAllClick(Sender: TObject);
+var
+   aXML: TRttiXMLConfig;
+
+begin
+  try
+     lvProfiles.Clear;
+
+     aXML:= TRttiXMLConfig.CreateClean(XMLFilename);
+
+     //Set Selected Profile
+     aXML.SetValue('Profiles/Count', 0);
+
+  finally
+    aXML.Free;
   end;
 end;
 
@@ -194,7 +214,7 @@ end;
 
 class function TDigIt_Profiles.Execute(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 var
-   i: Integer;
+   aSelected: Integer;
 
 begin
   Result:= False;
@@ -228,7 +248,8 @@ begin
   end;
 end;
 
-class function TDigIt_Profiles.LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+class function TDigIt_Profiles.LoadFromXML(const AFilename: String;
+  var ATitleArray: TStringArray): Boolean;
 var
    aXML: TRttiXMLConfig;
    i, iCount: Integer;
@@ -256,11 +277,11 @@ end;
 
 //I do it this way to not enable nestedprocvars switch
 var
-   chkTitleArray: TStringArray;
+   chkTitleArray: ^TStringArray;
 
 function AddCheck(const AText: String; var AStatusText: String; var AStatusColor: TColor): Boolean;
 begin
-  Result:= not(StringArrayFind(AText, chkTitleArray, True));
+  Result:= not(StringArrayFind(AText, chkTitleArray^, True));
   if Result
   then begin
          AStatusColor:= clDefault;
@@ -272,23 +293,84 @@ begin
        end;
 end;
 
-class function TDigIt_Profiles.Add(var ATitleArray: TStringArray;
-  ASource: PSourceInfo; ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
+class function TDigIt_Profiles.Add(const AFilename: String;
+  var ATitleArray: TStringArray; ASource: PSourceInfo;
+  ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
 
 var
-   newProfileTitle: String;
+   newProfileTitleP: PChar;
+   newProfileTitle,
+   curXMPath: String;
+   aXML: TRttiXMLConfig;
+   res, iCount: Integer;
 
 begin
-  chkTitleArray:= ATitleArray;
+  if (ASource <> nil) then
+  try
+     chkTitleArray:= @ATitleArray;
 
-  Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
-  if Result then
-  begin
-    Result:= False;
-    try
+     //First tell to Params a Description then to Source
+     newProfileTitleP:= ''; res:= 0;
+     if (ASourceParams <> nil) then
+     begin
+       res:= ASourceParams.Summary(newProfileTitleP);
+       if (res >0 ) and (newProfileTitleP <> '') then
+       begin
+         newProfileTitle:= newProfileTitleP;
+         StrDispose(newProfileTitleP);
+         newProfileTitleP:= '';
+       end;
+     end;
 
-    finally
-    end;
+     res:= ASource^.Inst.UI_Title(newProfileTitleP);
+     if (res >0 ) and (newProfileTitleP <> '') then
+     begin
+       if (newProfileTitle = '')
+       then newProfileTitle:= newProfileTitleP
+       else newProfileTitle:= newProfileTitle+' - '+newProfileTitleP;
+
+       StrDispose(newProfileTitleP);
+       newProfileTitleP:= '';
+     end;
+
+     Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
+     if Result then
+     begin
+       Result:= False;
+       try
+          aXML:= TRttiXMLConfig.Create(AFilename);
+
+          //Load Profiles Count
+          iCount:= aXML.GetValue('Profiles/Count', 0);
+
+          curXMPath:= PROF_Item+IntToStr(iCount)+'/';
+
+          //Add new Profile as Last
+          aXML.SetValue(curXMPath+'Name', newProfileTitle);
+          aXML.SetValue('Profiles/Count', iCount+1);
+
+          //Save Source
+          aXML.SetValue(curXMPath+'Source/Name', ASourceName);
+          aXML.DeletePath(curXMPath+'Source/Params/');
+
+       finally
+         aXML.Free; aXML:= nil;
+       end;
+
+       //FPC Bug?
+       //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
+       //So we do it after destroying XML.
+
+       if (ASourceParams <> nil)
+       then ASourceParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
+
+       SetLength(ATitleArray, iCount+1);
+       ATitleArray[iCount]:= newProfileTitle;
+       Result:= True;
+     end;
+
+  finally
+    if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
   end;
 end;
 

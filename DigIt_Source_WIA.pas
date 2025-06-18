@@ -483,7 +483,7 @@ begin
     res:= DeviceName;
     if (DeviceItemName <> '') then res:= res+' ('+DeviceItemName+')';
 
-    ASummary:= StrNew(PChar(res+' - '+rsWIAName));
+    ASummary:= StrNew(PChar(res));
     Result:= Length(ASummary);
   end;
 end;

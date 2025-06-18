@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/17 Added Summary in Twain/WIA Sources (first version);
+2025/06/18 Completed Profiles method Add from SourceInfo;
+           Hide or Show Separator whether or not there are Profiles;
+           Changed Settings var name and use of Sub Objects Read/Write (see merge req to lazarus 494);
+           Wia/Twain Source don't return SourceName in Summary;
+
+        17 Added Summary in Twain/WIA Sources (first version);
            Added Add Current Source in Profiles Menù;
 
         13 Added Load of a Profile from Menù;

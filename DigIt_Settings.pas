@@ -11,15 +11,29 @@ const
   SET_Path = 'Settings/';
 
 type
+
+  { TSessionSettings }
+
+  TSessionSettings = class(TPersistent)
+  protected
+    rStartup_Path,
+    rStartup_File: String;
+    rConfirmSaveOnClose: Boolean;
+
+  published
+    property Startup_Path: String read rStartup_Path write rStartup_Path;
+    property Startup_File: String read rStartup_File write rStartup_File;
+    property ConfirmSaveOnClose: Boolean read rConfirmSaveOnClose write rConfirmSaveOnClose;
+  end;
+
   { TDigIt_Settings }
   TDigIt_Settings = class(TNoRefCountObject, IDigIt_Settings)
   protected
-    rStartupSession_Path,
-    rStartupSession_File: String;
-    rStartupProfile: Integer;
+    rSession: TSessionSettings;
 
   public
     constructor Create;
+    destructor Destroy; override;
 
     procedure Default;
 
@@ -27,7 +41,7 @@ type
     function Save(aXML: TRttiXMLConfig): Boolean;
 
     //Useful to avoid having to read/write everything
-    procedure Load_StartupSession(aXML: TRttiXMLConfig; var APath, AFile: String);
+    //procedure Load_StartupSession(aXML: TRttiXMLConfig; var APath, AFile: String);
     procedure Save_StartupSession(aXML: TRttiXMLConfig; const APath, AFile: String);
 
     //IDigIt_Settings implementation
@@ -35,9 +49,7 @@ type
     function Path(const APathID: Word): PChar; stdcall; { #note 10 -oMaxM : Test in External LIBRARY }
 
   published
-    property StartupSession_Path: String read rStartupSession_Path write rStartupSession_Path;
-    property StartupSession_File: String read rStartupSession_File write rStartupSession_File;
-    property StartupProfile: Integer read rStartupProfile write rStartupProfile;
+    property Session: TSessionSettings read rSession;
   end;
 
 implementation
@@ -48,14 +60,23 @@ constructor TDigIt_Settings.Create;
 begin
   inherited Create;
 
+  rSession:= TSessionSettings.Create;
+
   Default;
+end;
+
+destructor TDigIt_Settings.Destroy;
+begin
+  rSession.Free;
+
+  inherited Destroy;
 end;
 
 procedure TDigIt_Settings.Default;
 begin
-  rStartupSession_Path:= '';
-  rStartupSession_File:= '';
-  rStartupProfile:= -1;
+  rSession.Startup_Path:= '';
+  rSession.Startup_File:= '';
+  rSession.ConfirmSaveOnClose:= True;
 end;
 
 function TDigIt_Settings.Load(aXML: TRttiXMLConfig): Boolean;
@@ -68,7 +89,7 @@ begin
      aFree:= (aXML = nil);
      if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
-     aXML.ReadObject(SET_Path, Self);
+     aXML.ReadObject(SET_Path, Self, nil, '', False);
 
      Result:= True;
 
@@ -87,7 +108,7 @@ begin
      aFree:= (aXML = nil);
      if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
-     aXML.WriteObject(SET_Path, Self);
+     aXML.WriteObject(SET_Path, Self, nil, '', False);
 
      Result:= True;
 
@@ -96,6 +117,7 @@ begin
   end;
 end;
 
+(* oldcode
 procedure TDigIt_Settings.Load_StartupSession(aXML: TRttiXMLConfig; var APath, AFile: String);
 var
    aFree: Boolean;
@@ -115,6 +137,7 @@ begin
      if aFree then aXML.Free;
   end;
 end;
+*)
 
 procedure TDigIt_Settings.Save_StartupSession(aXML: TRttiXMLConfig; const APath, AFile: String);
 var
@@ -125,11 +148,11 @@ begin
      aFree:= (aXML = nil);
      if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
-     rStartupSession_Path:= SetDirSeparators(APath);
-     rStartupSession_File:= SetDirSeparators(AFile);
+     rSession.Startup_Path:= SetDirSeparators(APath);
+     rSession.Startup_File:= SetDirSeparators(AFile);
 
-     aXML.SetValue(SET_Path+'StartupSession_Path', rStartupSession_Path);
-     aXML.SetValue(SET_Path+'StartupSession_File', rStartupSession_File);
+     aXML.SetValue(SET_Path+'Session/Startup_Path', rSession.Startup_Path);
+     aXML.SetValue(SET_Path+'Session/Startup_File', rSession.Startup_File);
 
   finally
      if aFree then aXML.Free;

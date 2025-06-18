@@ -378,6 +378,7 @@ type
     procedure UI_DestinationMenuClick(Sender: TObject);
     procedure UI_SourceMenuClick(Sender: TObject);
     procedure UI_ProfileMenuClick(Sender: TObject);
+
     procedure UI_FillCropArea(ACropArea :TCropArea);
     procedure UI_FillCounter;
     procedure UI_SelectCurrentCaptured(AddValue: Integer=0);
@@ -619,8 +620,8 @@ begin
      if not(sessLoaded) then
      begin
        //2) If in Settings there is a Session Opened then Open It
-       optPath_Session:= Settings.StartupSession_Path;
-       optFile_Session:= Settings.StartupSession_File;
+       optPath_Session:= Settings.Session.Startup_Path;
+       optFile_Session:= Settings.Session.Startup_File;
 
        if (optPath_Session <> '') and (optFile_Session <> '') and
           FileExists(optPath_Session+optFile_Session+Ext_Sess) then
@@ -688,10 +689,13 @@ begin
   begin
     SES_Save(True);
 
-    //Save Current Session ?
-    actSessionSaveExecute(nil);
+    if Settings.Session.ConfirmSaveOnClose then
+    begin
+      //Save Current Session ?
+      actSessionSaveExecute(nil);
+      CanClose:= not(dlgRes = mrCancel);
+    end;
 
-    CanClose:= not(dlgRes = mrCancel);
     closing:= CanClose;
   end;
 end;
@@ -1466,12 +1470,12 @@ end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
 begin
-  if TDigIt_Profiles.Add(Profiles, Source, SourceParams, SourceName) then
+  if TDigIt_Profiles.Add(Path_Config+File_Profiles, Profiles, Source, SourceParams, SourceName) then
   try
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
+     menuProfiles.Items[Length(Profiles)-1].Default:= True;
 
   finally
-    DigIt_Profiles.Free; DigIt_Profiles:= nil;
   end;
 end;
 
@@ -3137,7 +3141,12 @@ begin
     0: SES_Load(True);
     1: SES_Save(True);
     2: SES_ClearAutoSave(False);
-    3: Settings.Save(nil);
+    3: begin
+         //Settings.Session.Startup_File:= 'testSess';
+         //Settings.Session.Startup_Path:= 'c:\tmp\testSess\';
+         Settings.Session.ConfirmSaveOnClose:= False;
+         Settings.Save(nil);
+    end;
 //    4: PROF_Save;
   end;
 end;
@@ -3659,9 +3668,12 @@ procedure TDigIt_Main.UI_ProfileMenuClick(Sender: TObject);
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   try
-    SES_LoadSource(nil, False,
-                   PROF_Item+IntToStr(TMenuItem(Sender).Tag)+'/',
-                   Path_Config+File_Profiles);
+    if (SES_LoadSource(nil, False,
+                      PROF_Item+IntToStr(TMenuItem(Sender).Tag)+'/',
+                      Path_Config+File_Profiles) > -1) then
+    begin
+      TMenuItem(Sender).Default:= True;
+    end;
 
   finally
     UI_ToolBar;
@@ -3846,6 +3858,7 @@ var
 begin
   bCommonCond:= (rSource<>nil) and (rSource^.Inst <> nil);
   actPreview.Enabled:= bCommonCond;
+  itemProfiles_AddCurrent.Enabled:= bCommonCond;
 
   lenCaptured:= Length(CapturedFiles);
 
@@ -3983,7 +3996,7 @@ begin
   else capStr:= capStr+'DigIt'+' - '+Session_File;
 
   {#todo 2 -oMaxM : Really Use something like rSource^.Inst.UI_SourceTitle + (rSourceName) }
-  if (rSourceName <> '') then capStr:= capStr+'  ('+rSourceName+')';
+  //if (rSourceName <> '') then capStr:= capStr+'  ('+rSourceName+')';
 
   Caption:= capStr;
 end;

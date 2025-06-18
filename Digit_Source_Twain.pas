@@ -649,7 +649,7 @@ begin
     then res:= res+' ('+rsFeeder+')'
     else res:= res+' ('+rsFlatbed+')';
 
-    ASummary:= StrNew(PChar(res+' - '+rsTwainName));
+    ASummary:= StrNew(PChar(res));
     Result:= Length(ASummary);
   end;
 end;

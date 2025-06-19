@@ -116,7 +116,7 @@ implementation
 
 {$R *.lfm}
 
-uses LCLIntf, LazFileUtils,
+uses LCLIntf, LazFileUtils, DigIt_Utils,
      MM_StrUtils, MM_FilesUtils,
      BGRAReadJpeg, BGRAWriteJpeg, BGRAWriteTiff, fpPDF, BGRAPdf,
      BGRAFormatUI, DigIt_Form_Progress;
@@ -705,15 +705,17 @@ begin
        then begin
               Caption:= Caption+' PDF';
               pageOptions.ActivePage:= tabPDF;
+              ActiveControl:= edTitle;
 
               edTitle.Text:= ATitle;
-              edAuthor.Text:= 'MaxM';
+              edAuthor.Text:= GetUserName;
               edProducer.Text:= Application.Title;
               edKeyWords.Text:= '';
             end
        else begin
               Caption:= Caption+' Image';
               pageOptions.ActivePage:= tabIMG;
+              ActiveControl:= cbSaveFormat;
 
               if not(TBGRAFormatUIContainer.BuildSaveFormats(cbSaveFormat, SaveFormat) > 0)
               then raise Exception.Create('No Writers Registered...');

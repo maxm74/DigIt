@@ -49,7 +49,7 @@ type
     function Path(const APathID: Word): PChar; stdcall; { #note 10 -oMaxM : Test in External LIBRARY }
 
   published
-    property Session: TSessionSettings read rSession;
+    property Session: TSessionSettings read rSession write rSession;
   end;
 
 implementation
@@ -89,7 +89,7 @@ begin
      aFree:= (aXML = nil);
      if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
-     aXML.ReadObject(SET_Path, Self, nil, '', False);
+     aXML.ReadObject(SET_Path, Self);
 
      Result:= True;
 
@@ -108,7 +108,7 @@ begin
      aFree:= (aXML = nil);
      if aFree then aXML:= TRttiXMLConfig.Create(DigIt_Types.Path_Config+File_Config);
 
-     aXML.WriteObject(SET_Path, Self, nil, '', False);
+     aXML.WriteObject(SET_Path, Self);
 
      Result:= True;
 

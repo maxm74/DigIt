@@ -54,7 +54,15 @@ function PhysicalSizeConvert(ASourceUnit: TResolutionUnit; ASourceSize: Single;
                              ATargetUnit: TResolutionUnit=ruPixelsPerInch;
                              AResolution: Single = 96): Single;
 
+function GetUserName: String;
+
 implementation
+
+{$ifdef Windows}
+uses Windows;
+{$else}
+uses users, baseunix;
+{$endif}
 
 procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit; AOwner: TComponent; menuPaperSizes: TMenu;
   menuOnClick: TNotifyEvent; VImageIndex, HImageIndex: Integer);
@@ -187,8 +195,7 @@ var
    curSelected: Boolean;
 
 begin
-  for i:=2 to menuSources.Items.Count-1 do
-    menuSources.Items.Delete(2);
+  menuSources.Items.Clear;
 
   for i:=0 to theBridge.SourcesImpl.Count-1 do
   begin
@@ -413,5 +420,24 @@ begin
   end;
 end;
 
+function GetUserName: String;
+{$ifdef WINDOWS}
+var
+  nSize: DWord;
+{$endif}
+
+begin
+  {$ifdef WINDOWS}
+  nSize := 1024;
+  SetLength(Result, nSize);
+  if Windows.GetUserName(PChar(Result), nSize) then
+  begin
+    SetLength(Result, nSize - 1)
+  end
+  else Result:= '';
+  {$else}
+  Result:= users.GetUserName(fpgetuid);
+  {$endif}
+end;
 end.
 

@@ -689,12 +689,9 @@ begin
   begin
     SES_Save(True);
 
-    if Settings.Session.ConfirmSaveOnClose then
-    begin
-      //Save Current Session ?
-      actSessionSaveExecute(nil);
-      CanClose:= not(dlgRes = mrCancel);
-    end;
+    //Save Current Session ?
+    actSessionSaveExecute(nil);
+    CanClose:= not(dlgRes = mrCancel);
 
     closing:= CanClose;
   end;
@@ -1661,7 +1658,7 @@ begin
   try
      if (Sender = nil)
      then begin
-            if SessionModified
+            if Settings.Session.ConfirmSaveOnClose and SessionModified
             then begin
                    dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
                    canSave:= (dlgRes=mrYes);
@@ -3142,9 +3139,9 @@ begin
     1: SES_Save(True);
     2: SES_ClearAutoSave(False);
     3: begin
-         //Settings.Session.Startup_File:= 'testSess';
-         //Settings.Session.Startup_Path:= 'c:\tmp\testSess\';
-         Settings.Session.ConfirmSaveOnClose:= False;
+         Settings.Session.Startup_File:= 'testSess';
+         Settings.Session.Startup_Path:= 'c:\tmp\testSess\';
+         Settings.Session.ConfirmSaveOnClose:= True;
          Settings.Save(nil);
     end;
 //    4: PROF_Save;

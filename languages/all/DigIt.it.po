@@ -86,20 +86,16 @@ msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinueautowork
 #, object-pascal-format
-msgid ""
-"Continue from Auto Saved Work Session?\n"
+msgid "Continue from Auto Saved Work Session?\n"
 "%s"
-msgstr ""
-"Continuo dalla Sessione Lavoro Salvata in Automatico?\n"
+msgstr "Continuo dalla Sessione Lavoro Salvata in Automatico?\n"
 "%s"
 
 #: digit_form_main.rscontinuework
 #, object-pascal-format
-msgid ""
-"Continue from last Work Session?\n"
+msgid "Continue from last Work Session?\n"
 "%s"
-msgstr ""
-"Continuo dall'ultima Sessione Lavoro?\n"
+msgstr "Continuo dall'ultima Sessione Lavoro?\n"
 "%s"
 
 #: digit_form_main.rscounterprev
@@ -149,21 +145,17 @@ msgstr "Operazione non completata, conservo i file elaborati?"
 
 #: digit_form_main.rserrloadwork
 #, object-pascal-format
-msgid ""
-"Cannot Load Work Session\n"
+msgid "Cannot Load Work Session\n"
 "%s"
-msgstr ""
-"Impossibile Caricare la Sessione Lavoro\n"
+msgstr "Impossibile Caricare la Sessione Lavoro\n"
 "%s"
 
 #: digit_form_main.rserrsavework
 #, object-pascal-format
-msgid ""
-"Cannot Save Work Session\n"
+msgid "Cannot Save Work Session\n"
 "%s\n"
 "%s"
-msgstr ""
-"Impossibile Salvare la Sessione Lavoro\n"
+msgstr "Impossibile Salvare la Sessione Lavoro\n"
 "%s\n"
 "%s"
 
@@ -172,11 +164,9 @@ msgid "Failed to Create the Counter"
 msgstr "Impossibile Creare il Contatore"
 
 #: digit_form_main.rsmiddlepage
-msgid ""
-"The page is within the already processed range\n"
+msgid "The page is within the already processed range\n"
 "Should I put it in the middle?"
-msgstr ""
-"La pagina rientra nell'intervallo già elaborato\n"
+msgstr "La pagina rientra nell'intervallo già elaborato\n"
 "Dovrei metterla al centro?"
 
 #: digit_form_main.rsnewwork
@@ -242,17 +232,28 @@ msgstr "Impossibile Selezionare la Sorgente %d, prova a Selezionarne un'altra da
 msgid "Replace the last %d taked files with a new Take?"
 msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
 
+#: digit_form_profiles.rsprofiles_addcurrent
+msgctxt "digit_form_profiles.rsprofiles_addcurrent"
+msgid "Add Current Source..."
+msgstr "Aggiungi Sorgente Attuale..."
+
+#: digit_form_profiles.rsprofiles_invalidtitle_exists
+msgid "Profile Title already exists"
+msgstr "Titolo del Profilo già esistente"
+
+#: digit_form_profiles.rsprofiles_title
+msgid "Profile Title :"
+msgstr "Titolo Profilo :"
+
 #: digit_source_folder.digit_source_folder_namel
 msgid "Folder Pictures"
 msgstr "Cartella di Immagini"
 
 #: digit_source_folder.rsfoldnotfound
 #, object-pascal-format
-msgid ""
-"Folder not found...\n"
+msgid "Folder not found...\n"
 "%s"
-msgstr ""
-"Cartella non trovata...\n"
+msgstr "Cartella non trovata...\n"
 "%s"
 
 #: digit_source_folder.rsfoldselect
@@ -295,13 +296,11 @@ msgstr "Annullando l'acquisizione"
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
-msgid ""
-"Device found \n"
+msgid "Device found \n"
 "%s %s\n"
 "but Item %s not...\n"
 "Select the First Item %s ?"
-msgstr ""
-"Dispositivo trovato\n"
+msgstr "Dispositivo trovato\n"
 "\"%s %s\n"
 "ma l'Elemento %s no...\n"
 "Selezionare il primo Elemento %s?"
@@ -361,10 +360,12 @@ msgid "Add Folder..."
 msgstr "Aggiungi Cartella..."
 
 #: tdigit_exportfiles.btdel.caption
+msgctxt "tdigit_exportfiles.btdel.caption"
 msgid "Delete"
 msgstr "Elimina"
 
 #: tdigit_exportfiles.btdelall.caption
+msgctxt "tdigit_exportfiles.btdelall.caption"
 msgid "Delete All"
 msgstr "Elimina Tutto"
 
@@ -374,10 +375,12 @@ msgid "Down"
 msgstr "Giù"
 
 #: tdigit_exportfiles.btfirst.hint
+msgctxt "tdigit_exportfiles.btfirst.hint"
 msgid "To First"
 msgstr "All'Inizio"
 
 #: tdigit_exportfiles.btlast.hint
+msgctxt "tdigit_exportfiles.btlast.hint"
 msgid "To Last"
 msgstr "Alla Fine"
 
@@ -758,17 +761,14 @@ msgctxt "tdigit_main.itemcropmodefull.caption"
 msgid "Full Area"
 msgstr "Area Intera"
 
-#: tdigit_main.itemprofiles.caption
-msgid "Profiles"
-msgstr "Profili"
+#: tdigit_main.itemprofiles_addcurrent.caption
+msgctxt "tdigit_main.itemprofiles_addcurrent.caption"
+msgid "Add Current Source..."
+msgstr "Aggiungi Sorgente Attuale..."
 
-#: tdigit_main.itemprofiles_add.caption
-msgid "Add"
-msgstr "Aggiungi"
-
-#: tdigit_main.itemprofiles_remove.caption
-msgid "Remove"
-msgstr "Rimuovi"
+#: tdigit_main.itemprofiles_edit.caption
+msgid "Edit..."
+msgstr "Modifica..."
 
 #: tdigit_main.label1.caption
 msgid "Z Order :"
@@ -832,6 +832,14 @@ msgstr ""
 
 #: tdigit_main.menuloadxml.caption
 msgid "Load XML"
+msgstr ""
+
+#: tdigit_main.menusaveprofiles.caption
+msgid "Save Profiles"
+msgstr ""
+
+#: tdigit_main.menusavesettings.caption
+msgid "Save Settings"
 msgstr ""
 
 #: tdigit_main.menusavexml.caption
@@ -915,6 +923,10 @@ msgstr ""
 msgid "Menù"
 msgstr ""
 
+#: tdigit_main.tbprofiles.caption
+msgid "Profiles..."
+msgstr "Profili..."
+
 #: tdigit_main.tbsepclear.caption
 msgid "tbSepClear"
 msgstr ""
@@ -935,6 +947,57 @@ msgstr ""
 msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
+
+#: tdigit_profiles.btaddfiles1.caption
+msgid "Add ..."
+msgstr "Aggiungi ..."
+
+#: tdigit_profiles.btdel.caption
+msgctxt "tdigit_profiles.btdel.caption"
+msgid "Delete"
+msgstr "Elimina"
+
+#: tdigit_profiles.btdelall.caption
+msgctxt "tdigit_profiles.btdelall.caption"
+msgid "Delete All"
+msgstr "Elimina Tutto"
+
+#: tdigit_profiles.btdown.hint
+msgctxt "tdigit_profiles.btdown.hint"
+msgid "Down"
+msgstr "Giù"
+
+#: tdigit_profiles.bteditprofile.caption
+msgid "Edit ..."
+msgstr "Modifica ..."
+
+#: tdigit_profiles.btfirst.hint
+msgctxt "tdigit_profiles.btfirst.hint"
+msgid "To First"
+msgstr "All'Inizio"
+
+#: tdigit_profiles.btlast.hint
+msgctxt "tdigit_profiles.btlast.hint"
+msgid "To Last"
+msgstr "Alla Fine"
+
+#: tdigit_profiles.btup.hint
+msgctxt "tdigit_profiles.btup.hint"
+msgid "Up"
+msgstr "Su"
+
+#: tdigit_profiles.caption
+msgctxt "tdigit_profiles.caption"
+msgid "Profiles"
+msgstr "Profili"
+
+#: tdigit_profiles.lvprofiles.columns[0].caption
+msgid "Title"
+msgstr "Titolo"
+
+#: tdigit_profiles.lvprofiles.columns[1].caption
+msgid "Source"
+msgstr "Sorgente"
 
 #: tdigit_progress.capcurrent.caption
 msgctxt "tdigit_progress.capcurrent.caption"
@@ -1319,21 +1382,17 @@ msgstr "Dimensione Personalizzata"
 
 #: wia_settingsform.rserrorselecting
 #, object-pascal-format
-msgid ""
-"Error Selecting Item %s of %s\n"
+msgid "Error Selecting Item %s of %s\n"
 "Try to Select another Source Item"
-msgstr ""
-"Errore Selezionando l'Elemento %s di %s\n"
+msgstr "Errore Selezionando l'Elemento %s di %s\n"
 "Prova a Selezionare un altro Elemento della Sorgente"
 
 #: wia_settingsform.rserrorselectingint
 #, object-pascal-format
-msgid ""
-"Error Selecting Item [%d] of %s\n"
+msgid "Error Selecting Item [%d] of %s\n"
 "%s\n"
 "Try to Select another Source Item"
-msgstr ""
-"Errore Selezionando l'Elemento [%d] di %s\n"
+msgstr "Errore Selezionando l'Elemento [%d] di %s\n"
 "%s\n"
 "Prova a Selezionare un altro Elemento della Sorgente"
 
@@ -1361,3 +1420,4 @@ msgstr "Orizzontale"
 msgctxt "wia_settingsform.rsportrait"
 msgid "Portrait"
 msgstr "Verticale"
+

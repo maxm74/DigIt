@@ -1,10 +1,10 @@
 (*******************************************************************************
 **                                  DigIt                                     **
 **                                                                            **
-**          (s) 2024 Massimo Magnano                                          **
+**          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Bridge Engine Implementation                                             **
+**   Main Bridge Implementation                                               **
 *******************************************************************************)
 
 unit Digit_Bridge_Impl;
@@ -14,7 +14,9 @@ unit Digit_Bridge_Impl;
 interface
 
 uses
-  Classes, SysUtils, Laz2_XMLCfg, Digit_Bridge_Intf, MM_OpenArrayList, DigIt_Settings;
+  Classes, SysUtils, Laz2_XMLCfg,
+  MM_OpenArrayList,
+  Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings;
 
 type
   TPluginInfo = record
@@ -58,41 +60,6 @@ type
     property Name [const aIndex: Integer]: String read GetPluginName;
   end;
 
-  { TDigIt_Sources }
-
-  TSourceInfo = record
-    Flags: DWord;
-    Inst: IDigIt_Source;
-  end;
-  PSourceInfo = ^TSourceInfo;
-
-  TDigIt_Sources = class(specialize TOpenArrayList<TSourceInfo, String>, IDigIt_Sources)
-    function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
-  protected
-    rSelected: PSourceInfo;
-    rSelectedName: String;
-    rSelectedIndex: Integer;
-    rSelectedParams: IDigIt_Params;
-
-    function FreeElement(var aData: TSourceInfo): Boolean; override;
-
-  public
-    constructor Create;
-
-    function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; var newSourceName: String): Boolean; overload;
-
-    function Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
-    function Save(aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
-    //function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
-
-    property Selected: PSourceInfo read rSelected;
-    property SelectedIndex: Integer read rSelectedIndex;
-    property SelectedName: String read rSelectedName;
-    property SelectedParams: IDigIt_Params read rSelectedParams;
-  end;
-
   { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
   (*
 
@@ -134,8 +101,6 @@ type
 
   TDigIt_Bridge = class(TNoRefCountObject, IDigIt_Bridge)
   protected
-    rSettings: TDigIt_Settings;
-    rSources: TDigIt_Sources;
     //rDestinations: TDigIt_Destinations;
     rPlugins: TDigIt_Plugins;
 
@@ -149,8 +114,6 @@ type
     function Progress: IDigIt_Progress; stdcall;
 
     //Internal Use only
-    property SourcesImpl: TDigIt_Sources read rSources;
-    property SettingsImpl: TDigIt_Settings read rSettings;
     property Plugins: TDigIt_Plugins read rPlugins;
   end;
 
@@ -372,217 +335,6 @@ begin
   then Result:= FreeLibrary(rPluginsList[Index].LibHandle);
 end;
 
-{ TDigIt_Sources }
-
-function TDigIt_Sources.FreeElement(var aData: TSourceInfo): Boolean;
-begin
-  Result:= False;
-  try
-     if (aData.Inst <> nil)
-     then aData.Inst.Release;
-
-     Result:= True;
-
-  finally
-    //MaxM: When the open array is freed the compiler frees the contents of the record using rtti,
-    //      a very dangerous thing for us.
-    FillChar(aData, SizeOf(aData), 0);
-  end;
-end;
-
-constructor TDigIt_Sources.Create;
-begin
-  inherited Create;
-
-  rSelected:= nil;
-  rSelectedName:= '';
-  rSelectedIndex:= -1;
-  rSelectedParams:= nil;
-end;
-
-function TDigIt_Sources.Select(SourceName: String; GetUserParams: Boolean): Boolean;
-var
-   newSourceI: Integer;
-   newSource: PSourceInfo =nil;
-
-begin
-  Result:= False;
-
-  if (SourceName <> '') then
-  try
-     newSourceI:= FindByKey(SourceName);
-     if (newSourceI > -1) then Result:= Select(newSourceI, -1, GetUserParams);
-
-  except
-    Result:= False;
-  end;
-end;
-
-function TDigIt_Sources.Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
-var
-   newSource: PSourceInfo =nil;
-   curSourceItems: IDigIt_Source_Items;
-
-begin
-  Result:= False;
-
-  try
-     newSource:= Data[SourceIndex];
-
-     if (newSource <> nil) then
-     begin
-       if GetUserParams then
-       begin
-         if (newSource^.Inst is IDigIt_Source_Items)
-         then Result:= (newSource^.Inst as IDigIt_Source_Items).Select(newSourceSubIndex)
-         else Result:= True;
-
-         if Result then Result:= (newSource^.Inst.Params <> nil) and newSource^.Inst.Params.GetFromUser;
-       end
-       else Result:= True;
-
-       if Result then
-       begin
-         rSelected:= newSource;
-         rSelectedParams :=newSource^.Inst.Params;
-         rSelectedName:= rList[SourceIndex].Key;
-         rSelectedIndex:= SourceIndex;
-       end;
-     end;
-
-  except
-    Result:= False;
-  end;
-end;
-
-function TDigIt_Sources.Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; var newSourceName: String): Boolean;
-begin
-  Result:= False;
-
-  if (aXML <> nil) then
-  try
-     //Load a New Source and its Params
-     newSourceName:= aXML.GetValue(XMLRoot_Path+'Source/Name', '');
-
-     if Select(newSourceName) then
-     begin
-        Result:= True;
-
-        if (rSelectedParams <> nil) then
-        begin
-          Result:= rSelectedParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-          if Result then Result:= rSelectedParams.OnSet;
-        end;
-     end;
-
-  except
-    Result:= False;
-  end;
-end;
-
-function TDigIt_Sources.Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean;
-var
-   curSource: PSourceInfo =nil;
-
-begin
-  Result:= False;
-
-  if (aXML <> nil) then
-  try
-     curSource:= Data[SourceIndex];
-
-     if (curSource <> nil) then
-     begin
-       //Save ASource Source and its Params
-       aXML.SetValue(XMLRoot_Path+'Source/Name', rList[SourceIndex].Key);
-       aXML.DeletePath(XMLRoot_Path+'Source/Params/');
-
-       if SaveParams and (curSource^.Inst <> nil)
-       then curSource^.Inst.Params.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-
-       Result:= True;
-     end;
-
-  except
-    Result:= False;
-  end;
-end;
-
-function TDigIt_Sources.Save(aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean;
-begin
-  Result:= False;
-
-  if (aXML <> nil) then
-  try
-     //Save Selected Source and its Params
-     aXML.SetValue(XMLRoot_Path+'Source/Name', rSelectedName);
-     aXML.DeletePath(XMLRoot_Path+'Source/Params/');
-
-     if SaveParams and
-       (rSelected <> nil) and (rSelected^.Inst <> nil)
-     then rSelected^.Inst.Params.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-
-     Result:= True;
-
-  except
-    Result:= False;
-  end;
-end;
-
-function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
-var
-   newData: TSourceInfo;
-
-begin
-  Result:= False;
-  if (aClass = nil) then exit;
-
-  //If the Class cannot Init don't register it and Release
-  if (aClass.Init)
-  then begin
-         newData.Inst:= aClass;
-         Result:= (Add(aName, newData) > -1);
-       end
-  else aClass.Release;
-end;
-(*
-function TDigIt_Sources.UnRegister(const aName: String): Boolean;
-var
-   r : Integer;
-
-begin
-  Result:= False;
-
-  r:= Find(aName);
-  if (r > -1) then
-  begin
-    { #todo 10 -oMaxM : Free the Instances?  }
-    Result:= FreeElement(r);
-
-    Delete(rSourcesList, r, 1);
-    Result:= True;
-  end;
-end;
-
-function TDigIt_Sources.UnRegister(const aClass: IDigIt_Source): Boolean;
-var
-   r : Integer;
-
-begin
-  Result:= False;
-
-  r:= Find(aClass);
-  if (r > -1) then
-  begin
-    { #todo 10 -oMaxM : Free the Instances?  }
-    Result:= FreeElement(r);
-
-    Delete(rSourcesList, r, 1);
-    Result:= True;
-  end;
-end;
-*)
-
 { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
 (*
 
@@ -749,15 +501,15 @@ begin
   inherited Create;
 
   rPlugins:= TDigIt_Plugins.Create;
-  rSettings:= TDigIt_Settings.Create;
-  rSources:= TDigIt_Sources.Create;
+  DigIt_Settings.Settings:= TDigIt_Settings.Create;
+  DigIt_Sources.Sources:= TDigIt_Sources.Create;
   //rDestinations:= TDigIt_Destinations.Create;
 end;
 
 destructor TDigIt_Bridge.Destroy;
 begin
-  rSources.Free;
-  rSettings.Free;
+  DigIt_Sources.Sources.Free; DigIt_Sources.Sources:= nil;
+  DigIt_Settings.Settings.Free; DigIt_Settings.Settings:= nil;
   rPlugins.Free;
   //rDestinations.free;
 
@@ -766,7 +518,7 @@ end;
 
 function TDigIt_Bridge.Sources: IDigIt_Sources; stdcall;
 begin
-  Result:= rSources as IDigIt_Sources;
+  Result:= DigIt_Sources.Sources as IDigIt_Sources;
 end;
 
 (*
@@ -778,7 +530,7 @@ end;
 
 function TDigIt_Bridge.Settings: IDigIt_Settings; stdcall;
 begin
-  Result:= rSettings as IDigIt_Settings;
+  Result:= DigIt_Settings.Settings as IDigIt_Settings;
 end;
 
 function TDigIt_Bridge.Progress: IDigIt_Progress; stdcall;

@@ -1,3 +1,12 @@
+(*******************************************************************************
+**                                  DigIt                                     **
+**                                                                            **
+**          (s) 2025 Massimo Magnano                                          **
+**                                                                            **
+********************************************************************************
+**   Profiles Editing Form                                                    **
+*******************************************************************************)
+
 unit DigIt_Form_Profiles;
 
 {$mode ObjFPC}{$H+}
@@ -7,7 +16,7 @@ interface
 uses
   Classes, SysUtils, Graphics, Forms, Controls, Buttons, ComCtrls, ExtCtrls, Laz2_XMLCfg,
   BCPanel, BCListBox,
-  Digit_Bridge_Intf, Digit_Bridge_Impl;
+  Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources;
 
 resourcestring
   rsProfiles_AddCurrent = 'Add Current Source...';
@@ -18,9 +27,11 @@ const
   PROF_Item = 'Profiles/Profile_';
 
 type
-  { TDigIt_Profiles }
+  { TDigIt_Profiles_Form }
 
-  TDigIt_Profiles = class(TForm)
+  {# TO-DO : SEPARATE GRAPHICS FROM Profiles Logic (new DigIt_Profiles class and file)}
+
+  TDigIt_Profiles_Form = class(TForm)
     BCPanel1: TBCPanel;
     btAddFiles1: TSpeedButton;
     btCancel: TBitBtn;
@@ -58,7 +69,7 @@ type
   end;
 
 var
-  DigIt_Profiles: TDigIt_Profiles=nil;
+  DigIt_Profiles_Form: TDigIt_Profiles_Form=nil;
 
 implementation
 
@@ -66,9 +77,9 @@ implementation
 
 uses Laz2_DOM, FileUtil, MM_StrUtils, MM_Form_EditText;
 
-{ TDigIt_Profiles }
+{ TDigIt_Profiles_Form }
 
-procedure TDigIt_Profiles.btUpDownClick(Sender: TObject);
+procedure TDigIt_Profiles_Form.btUpDownClick(Sender: TObject);
 var
    curItem: TListItem;
    oldIndex, newIndex: Integer;
@@ -120,7 +131,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Profiles.btDelAllClick(Sender: TObject);
+procedure TDigIt_Profiles_Form.btDelAllClick(Sender: TObject);
 var
    aXML: TRttiXMLConfig;
 
@@ -138,12 +149,12 @@ begin
   end;
 end;
 
-procedure TDigIt_Profiles.FormShow(Sender: TObject);
+procedure TDigIt_Profiles_Form.FormShow(Sender: TObject);
 begin
   if (lvProfiles.Items.Count > 0) then lvProfiles.ItemIndex:= 0;
 end;
 
-procedure TDigIt_Profiles.lvProfilesEdited(Sender: TObject; Item: TListItem; var AValue: string);
+procedure TDigIt_Profiles_Form.lvProfilesEdited(Sender: TObject; Item: TListItem; var AValue: string);
 var
    i: Integer;
    dup: Boolean;
@@ -166,12 +177,12 @@ begin
        end;
 end;
 
-procedure TDigIt_Profiles.lvProfilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+procedure TDigIt_Profiles_Form.lvProfilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
   UI_EnableButtons;
 end;
 
-procedure TDigIt_Profiles.UI_EnableButtons;
+procedure TDigIt_Profiles_Form.UI_EnableButtons;
 var
    lvCount: Integer;
 
@@ -185,7 +196,7 @@ begin
   btLast.Enabled:= btDown.Enabled;
 end;
 
-procedure TDigIt_Profiles.UI_LoadFromXML;
+procedure TDigIt_Profiles_Form.UI_LoadFromXML;
 var
    i, iCount: Integer;
    curItem: TListItem;
@@ -212,18 +223,18 @@ begin
   end;
 end;
 
-class function TDigIt_Profiles.Execute(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+class function TDigIt_Profiles_Form.Execute(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 var
    aSelected: Integer;
 
 begin
   Result:= False;
   try
-     if (DigIt_Profiles=nil)
-     then DigIt_Profiles :=TDigIt_Profiles.Create(nil);
+     if (DigIt_Profiles_Form=nil)
+     then DigIt_Profiles_Form :=TDigIt_Profiles_Form.Create(nil);
 
-     if (DigIt_Profiles <> nil) then
-     with DigIt_Profiles do
+     if (DigIt_Profiles_Form <> nil) then
+     with DigIt_Profiles_Form do
      try
         if CopyFile(AFilename, AFilename+'.tmp') then
         begin
@@ -244,11 +255,11 @@ begin
      end;
 
   finally
-    DigIt_Profiles.Free; DigIt_Profiles:= nil;
+    DigIt_Profiles_Form.Free; DigIt_Profiles_Form:= nil;
   end;
 end;
 
-class function TDigIt_Profiles.LoadFromXML(const AFilename: String;
+class function TDigIt_Profiles_Form.LoadFromXML(const AFilename: String;
   var ATitleArray: TStringArray): Boolean;
 var
    aXML: TRttiXMLConfig;
@@ -293,7 +304,7 @@ begin
        end;
 end;
 
-class function TDigIt_Profiles.Add(const AFilename: String;
+class function TDigIt_Profiles_Form.Add(const AFilename: String;
   var ATitleArray: TStringArray; ASource: PSourceInfo;
   ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
 

@@ -1,13 +1,13 @@
 {"version":1,"strings":[
-{"hash":157091763,"name":"tdigit_profiles.caption","sourcebytes":[80,114,111,102,105,108,101,115],"value":"Profiles"},
-{"hash":5966629,"name":"tdigit_profiles.lvprofiles.columns[0].caption","sourcebytes":[84,105,116,108,101],"value":"Title"},
-{"hash":94816405,"name":"tdigit_profiles.lvprofiles.columns[1].caption","sourcebytes":[83,111,117,114,99,101],"value":"Source"},
-{"hash":184956350,"name":"tdigit_profiles.bteditprofile.caption","sourcebytes":[69,100,105,116,32,46,46,46],"value":"Edit ..."},
-{"hash":78392485,"name":"tdigit_profiles.btdel.caption","sourcebytes":[68,101,108,101,116,101],"value":"Delete"},
-{"hash":212069388,"name":"tdigit_profiles.btdelall.caption","sourcebytes":[68,101,108,101,116,101,32,65,108,108],"value":"Delete All"},
-{"hash":21826580,"name":"tdigit_profiles.btfirst.hint","sourcebytes":[84,111,32,70,105,114,115,116],"value":"To First"},
-{"hash":185936116,"name":"tdigit_profiles.btlast.hint","sourcebytes":[84,111,32,76,97,115,116],"value":"To Last"},
-{"hash":1472,"name":"tdigit_profiles.btup.hint","sourcebytes":[85,112],"value":"Up"},
-{"hash":308958,"name":"tdigit_profiles.btdown.hint","sourcebytes":[68,111,119,110],"value":"Down"},
-{"hash":128332110,"name":"tdigit_profiles.btaddfiles1.caption","sourcebytes":[65,100,100,32,46,46,46],"value":"Add ..."}
+{"hash":157091763,"name":"tdigit_profiles_form.caption","sourcebytes":[80,114,111,102,105,108,101,115],"value":"Profiles"},
+{"hash":5966629,"name":"tdigit_profiles_form.lvprofiles.columns[0].caption","sourcebytes":[84,105,116,108,101],"value":"Title"},
+{"hash":94816405,"name":"tdigit_profiles_form.lvprofiles.columns[1].caption","sourcebytes":[83,111,117,114,99,101],"value":"Source"},
+{"hash":184956350,"name":"tdigit_profiles_form.bteditprofile.caption","sourcebytes":[69,100,105,116,32,46,46,46],"value":"Edit ..."},
+{"hash":78392485,"name":"tdigit_profiles_form.btdel.caption","sourcebytes":[68,101,108,101,116,101],"value":"Delete"},
+{"hash":212069388,"name":"tdigit_profiles_form.btdelall.caption","sourcebytes":[68,101,108,101,116,101,32,65,108,108],"value":"Delete All"},
+{"hash":21826580,"name":"tdigit_profiles_form.btfirst.hint","sourcebytes":[84,111,32,70,105,114,115,116],"value":"To First"},
+{"hash":185936116,"name":"tdigit_profiles_form.btlast.hint","sourcebytes":[84,111,32,76,97,115,116],"value":"To Last"},
+{"hash":1472,"name":"tdigit_profiles_form.btup.hint","sourcebytes":[85,112],"value":"Up"},
+{"hash":308958,"name":"tdigit_profiles_form.btdown.hint","sourcebytes":[68,111,119,110],"value":"Down"},
+{"hash":128332110,"name":"tdigit_profiles_form.btaddfiles1.caption","sourcebytes":[65,100,100,32,46,46,46],"value":"Add ..."}
 ]}

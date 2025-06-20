@@ -2,12 +2,12 @@ object WizardBuildDuplex: TWizardBuildDuplex
   Left = 324
   Height = 500
   Top = 167
-  Width = 656
+  Width = 696
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Build Front/Back...'
   ClientHeight = 500
-  ClientWidth = 656
+  ClientWidth = 696
   Color = clBtnFace
   DesignTimePPI = 120
   Font.Color = clWindowText
@@ -21,27 +21,27 @@ object WizardBuildDuplex: TWizardBuildDuplex
   object Panel1: TPanel
     Left = 0
     Height = 80
-    Top = 320
-    Width = 525
+    Top = 420
+    Width = 696
     Align = alBottom
     BevelOuter = bvNone
     ClientHeight = 80
-    ClientWidth = 525
+    ClientWidth = 696
     ParentBackground = False
     TabOrder = 0
     object Panel2: TPanel
-      Left = 110
-      Height = 64
+      Left = 281
+      Height = 80
       Top = 0
       Width = 415
       Align = alRight
       BevelOuter = bvNone
-      ClientHeight = 64
+      ClientHeight = 80
       ClientWidth = 415
       ParentBackground = False
       TabOrder = 0
       object btNext: TBitBtn
-        Left = 129
+        Left = 160
         Height = 50
         Top = 20
         Width = 125
@@ -311,7 +311,7 @@ object WizardBuildDuplex: TWizardBuildDuplex
         OnClick = btNextClick
       end
       object btPrev: TBitBtn
-        Left = 1
+        Left = 32
         Height = 50
         Top = 20
         Width = 125
@@ -855,9 +855,9 @@ object WizardBuildDuplex: TWizardBuildDuplex
     end
     object tbWizard: TToolBar
       Left = 0
-      Height = 80
+      Height = 62
       Top = 0
-      Width = 219
+      Width = 285
       Align = alNone
       ButtonHeight = 62
       ButtonWidth = 62
@@ -869,7 +869,7 @@ object WizardBuildDuplex: TWizardBuildDuplex
       TabOrder = 1
       Wrapable = False
       object tbSource: TToolButton
-        Left = 1
+        Left = 88
         Top = 0
         Caption = 'Source...'
         DropdownMenu = DigIt_Main.menuSources
@@ -877,34 +877,42 @@ object WizardBuildDuplex: TWizardBuildDuplex
         Style = tbsButtonDrop
       end
       object tbDestination: TToolButton
-        Left = 90
+        Left = 172
         Top = 0
         Caption = 'Destination...'
         DropdownMenu = DigIt_Main.menuDestinations
         ImageIndex = 5
         Style = tbsButtonDrop
       end
+      object tbProfiles: TToolButton
+        Left = 1
+        Top = 0
+        Caption = 'Profiles...'
+        DropdownMenu = DigIt_Main.menuProfiles
+        ImageIndex = 25
+        Style = tbsButtonDrop
+      end
     end
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 336
+    Height = 420
     Top = 0
-    Width = 525
-    ActivePage = TabSheet4
+    Width = 696
+    ActivePage = TabSheet2
     Align = alClient
     ShowTabs = False
-    TabIndex = 3
+    TabIndex = 1
     TabOrder = 1
     object TabSheet1: TTabSheet
       Caption = 'TabSheet1'
-      ClientHeight = 328
-      ClientWidth = 517
+      ClientHeight = 412
+      ClientWidth = 688
       object Label6: TLabel
         Left = 10
-        Height = 19
+        Height = 24
         Top = 40
-        Width = 341
+        Width = 427
         Caption = 'Select what type of collage you want to make'
         Font.Color = clWindowText
         Font.Height = -20
@@ -914,9 +922,9 @@ object WizardBuildDuplex: TWizardBuildDuplex
       end
       object rbOneSided: TRadioButton
         Left = 250
-        Height = 22
+        Height = 27
         Top = 250
-        Width = 233
+        Width = 293
         Caption = 'One-sided to Two-sided pages'
         Font.Color = clWindowText
         Font.Height = -20
@@ -926,9 +934,9 @@ object WizardBuildDuplex: TWizardBuildDuplex
       end
       object rbTwoSided: TRadioButton
         Left = 250
-        Height = 22
+        Height = 27
         Top = 120
-        Width = 233
+        Width = 294
         Caption = 'Two-sided to Two-sided pages'
         Checked = True
         Font.Color = clWindowText
@@ -2181,7 +2189,7 @@ object WizardBuildDuplex: TWizardBuildDuplex
         }
       end
       object Image5: TImage
-        Left = 10
+        Left = 26
         Height = 82
         Top = 210
         Width = 181
@@ -4453,14 +4461,14 @@ object WizardBuildDuplex: TWizardBuildDuplex
     end
     object TabSheet2: TTabSheet
       Caption = 'TabSheet2'
-      ClientHeight = 328
-      ClientWidth = 517
+      ClientHeight = 412
+      ClientWidth = 688
       ImageIndex = 1
       object Label1: TLabel
         Left = 10
-        Height = 19
+        Height = 24
         Top = 140
-        Width = 178
+        Width = 222
         Caption = 'Insert Front Side Pages'
         Font.Color = clWindowText
         Font.Height = -20
@@ -5109,9 +5117,9 @@ object WizardBuildDuplex: TWizardBuildDuplex
       end
       object Label2: TLabel
         Left = 10
-        Height = 19
+        Height = 24
         Top = 380
-        Width = 170
+        Width = 210
         Caption = 'Click Next when ready'
         Font.Color = clWindowText
         Font.Height = -20
@@ -5122,13 +5130,13 @@ object WizardBuildDuplex: TWizardBuildDuplex
     end
     object TabSheet3: TTabSheet
       Caption = 'TabSheet3'
-      ClientHeight = 328
-      ClientWidth = 517
+      ClientHeight = 412
+      ClientWidth = 688
       object lbBackSide: TLabel
         Left = 10
-        Height = 19
+        Height = 24
         Top = 10
-        Width = 376
+        Width = 472
         Caption = 'Turn all the Pages over so the Back Side is visible'
         Font.Color = clWindowText
         Font.Height = -20
@@ -8574,9 +8582,9 @@ object WizardBuildDuplex: TWizardBuildDuplex
       end
       object Label4: TLabel
         Left = 10
-        Height = 19
+        Height = 24
         Top = 380
-        Width = 170
+        Width = 210
         Caption = 'Click Next when ready'
         Font.Color = clWindowText
         Font.Height = -20
@@ -8586,9 +8594,9 @@ object WizardBuildDuplex: TWizardBuildDuplex
       end
       object lbBackSide1: TLabel
         Left = 10
-        Height = 19
+        Height = 24
         Top = 140
-        Width = 176
+        Width = 218
         Caption = 'Insert Back Side Pages'
         Font.Color = clWindowText
         Font.Height = -20
@@ -8599,13 +8607,13 @@ object WizardBuildDuplex: TWizardBuildDuplex
     end
     object TabSheet4: TTabSheet
       Caption = 'TabSheet4'
-      ClientHeight = 328
-      ClientWidth = 517
+      ClientHeight = 412
+      ClientWidth = 688
       object Label5: TLabel
         Left = 20
-        Height = 19
+        Height = 24
         Top = 180
-        Width = 358
+        Width = 446
         Caption = 'Finished... Click End to Build Front/Back Pages'
         Font.Color = clWindowText
         Font.Height = -20

@@ -1,6 +1,10 @@
 Bugs:
   Area Intera
       cambio Valore uno in meno non sostituisce le icone su Captured
+
+  Esporta PDF con File non A4 (es. Carte d'identità) le misure sono errate
+    Acrobat le stampa stretchandole in A4
+    Anche in un A4 le misure sono errate (non viene messo il dpi nel pdf? [120dpi di default?])
   
 Main:
   riprendi sessione : barra di captured alla fine
@@ -8,8 +12,25 @@ Main:
   Take/Preview con Countdown
   Take automatico, Giorni della Settimana con Checkbox e Orari (eventuali notifiche via email,etc)
 
-  ???
-  Tasto per creare una cartella numerata
+Idee Notturne:
+  Tasto in Crop Area che apre un Menù con dei Profili di Taglio
+    alcuni Memorizzati nella Cartella Programmi, altri dell'Utente; XML come Profiles
+      <Tagli in Program>
+      ---
+      <Tagli User>
+      ---
+      Edit
+      Add Current Crop Areas
+
+  in Captured Files
+     Aumentare la dimensione dei Tasti+Caption Sotto
+     Tasti Combina Orizzontale/Verticale/Griglia (attivare Selezione Multipla?)
+     Tasto Stampa
+
+  Wizard per Carte d'Identità simile all'altro, in ultima Pagina Combina Orizzontale/Verticale.
+
+
+  ???Tasto per creare una cartella numerata
   -> incrementa il foldercounter
       -> crea una cartella con il nome (CartellaSalvataggio)\foldercounter 
       -> azzera i contatori 

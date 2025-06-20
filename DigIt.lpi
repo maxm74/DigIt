@@ -223,7 +223,7 @@
       <Unit19>
         <Filename Value="DigIt_Form_Profiles.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="DigIt_Profiles"/>
+        <ComponentName Value="DigIt_Profiles_Form"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit19>

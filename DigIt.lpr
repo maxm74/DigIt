@@ -8,8 +8,10 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   LCLVersion, DefaultTranslator, LCLTranslator, Forms, lazcontrols,
-  DigIt_Types, DigIt_Utils, DigIt_Bridge_Intf, DigIt_Settings, DigIt_Bridge_Impl,
-  DigIt_Sources, Digit_Source_Folder,
+  DigIt_Types, DigIt_Bridge_Intf, DigIt_Bridge_Impl,
+  DigIt_Settings, DigIt_Sources, DigIt_Utils,
+  Digit_Source_WIA, Digit_Source_Twain,
+  Digit_Source_Folder,
   DigIt_Destinations,
   DigIt_Form_Main, DigIt_Form_Progress;
 

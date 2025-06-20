@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/19 Moved ConfirmSaveOnClose test to right place;
+2025/06/20 Fixed Build Duplex Wizard does not works;
+           Moved TDigIt_Sources to DigIt_Sources Unit;
+           Created Settings and Sources main Vars;
+           Deleted Bridge SettingsImpl and SourcesImpl properties;
+
+        19 Moved ConfirmSaveOnClose test to right place;
            Added Settings.Session write access to solve incorrect XML Save Object (see merge req to lazarus 494);
            Completed and tested under Linux GetUserName;
            Use GetUserName in PDF Export;

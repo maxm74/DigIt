@@ -1,7 +1,7 @@
 (*******************************************************************************
 **                                  DigIt                                     **
 **                                                                            **
-**          (s) 2023 Massimo Magnano                                          **
+**          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
 **   Utils Functions                                                          **
@@ -16,7 +16,7 @@ interface
 uses
   Classes, SysUtils, ComCtrls, DOM, XMLConf, Laz2_DOM, Laz_XMLStreaming, Laz2_XMLCfg,
   FPImage, Menus, BGRAPapers,
-  DigIt_types, Digit_Bridge_Intf, Digit_Bridge_Impl;
+  DigIt_Types, Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources;
 
 resourcestring
   rsDestination_Default = 'Save as Files';
@@ -197,9 +197,9 @@ var
 begin
   menuSources.Items.Clear;
 
-  for i:=0 to theBridge.SourcesImpl.Count-1 do
+  for i:=0 to Sources.Count-1 do
   begin
-    curSource:= theBridge.SourcesImpl.Data[i];
+    curSource:= Sources.Data[i];
     if (curSource<>nil) then
     begin
       curTitle:= '';
@@ -211,7 +211,7 @@ begin
              newItem.Caption:= curTitle;
              StrDispose(curTitle);
            end
-      else newItem.Caption:= theBridge.SourcesImpl.Key[i];
+      else newItem.Caption:= Sources.Key[i];
 
       newItem.ImageIndex:= curSource^.Inst.UI_ImageIndex;
       newItem.Tag:= SourcesMenuTag_encode(i, -1);

@@ -4,7 +4,7 @@
 **          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Progress Form                                                            **
+**   Progress Form ( Implementation of IDigIt_Progress )                      **
 *******************************************************************************)
 
 unit DigIt_Form_Progress;

@@ -7,6 +7,7 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -129,14 +130,14 @@ object DigIt_Main: TDigIt_Main
       end
       object tbCaptSep1: TToolButton
         Left = 53
-        Height = 26
+        Height = 8
         Top = 2
         Caption = 'tbCaptSep1'
         Style = tbsSeparator
       end
       object tbCaptSep2: TToolButton
         Left = 113
-        Height = 26
+        Height = 8
         Top = 2
         Caption = 'tbCaptSep2'
         Style = tbsSeparator
@@ -924,7 +925,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepMenu: TToolButton
         Left = 76
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepMenu'
         Style = tbsSeparator
@@ -952,7 +953,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepTake: TToolButton
         Left = 347
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
@@ -1013,7 +1014,7 @@ object DigIt_Main: TDigIt_Main
       Wrapable = False
       object tbSepCrop: TToolButton
         Left = 1
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepCrop'
         Style = tbsSeparator
@@ -1044,7 +1045,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepClear: TToolButton
         Left = 348
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator

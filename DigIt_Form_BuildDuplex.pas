@@ -1,7 +1,7 @@
 (*******************************************************************************
 **                                  DigIt                                     **
 **                                                                            **
-**          (s) 2024 Massimo Magnano                                          **
+**          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
 **   Wizard to Build Front/Back Pages from a Front Only Source                **
@@ -61,6 +61,7 @@ type
     TabSheet3: TTabSheet;
     TabSheet4: TTabSheet;
     tbDestination: TToolButton;
+    tbProfiles: TToolButton;
     tbSource: TToolButton;
     tbWizard: TToolBar;
 
@@ -102,13 +103,11 @@ type
     //IDigIt_ProgressCallback
     procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
 
-    function Execute(out aDataType: TDigItDataType; out aData: Pointer): TModalResult;
+    class function Execute(out aDataType: TDigItDataType; out aData: Pointer): Integer;
   end;
 
 var
   WizardBuildDuplex: TWizardBuildDuplex = nil;
-
-function WizardBuildDuplexExecute(out aDataType: TDigItDataType; out aData: Pointer): Integer;
 
 implementation
 
@@ -184,7 +183,6 @@ begin
 
   Result :=True;
   try
-     (* Put YOUR Code Here : index is the Page about to be Showed, return False to block *)
      Case index of
      1:try
        except
@@ -195,14 +193,21 @@ begin
           on E:Exception do raise Exception.Create('Error on Step:'+#13#10+'['+E.Message+']');
        end;
 
-     3:try //Before EndStep if index=(MaxPageIndex+1)
+     3:try //Front
        res:= DigIt_Main.Source^.Inst.Take(takeActTake, curDataType, curData);
        Result:= (res > 0) and (curData <> nil);
        if Result then
        begin
-         if (curDataType = diDataType_FileName) then
+         if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
          begin
-           if (res = 1)
+           if (curDataType = diDataType_FileName)
+           then begin
+                  res:= Files_Add(FrontFiles, PChar(curData));
+                  StrDispose(PChar(curData));
+                end
+           else res:= Files_Add(FrontFiles, IDigIt_ArrayR_PChars(curData));
+
+          (* if (res = 1)
            then begin
                   curImageFile:= PChar(curData);
                   Files_Add(FrontFiles, curImageFile);
@@ -213,7 +218,7 @@ begin
            then begin
                   curArray:= IDigIt_ArrayR_PChars(curData);
                   Files_Add(FrontFiles, curArray);
-                end;
+                end;*)
          end;
         end;
         except
@@ -226,9 +231,16 @@ begin
         Result:= (res > 0) and (curData <> nil);
         if Result then
         begin
-          if (curDataType = diDataType_FileName) then
+          if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
           begin
-            if (res = 1)
+            if (curDataType = diDataType_FileName)
+            then begin
+                   res:= Files_Add(BackFiles, PChar(curData));
+                   StrDispose(PChar(curData));
+                 end
+            else res:= Files_Add(BackFiles, IDigIt_ArrayR_PChars(curData));
+
+           (* if (res = 1)
             then begin
                    curImageFile:= PChar(curData);
                    Files_Add(BackFiles, curImageFile);
@@ -240,6 +252,7 @@ begin
                    curArray:= IDigIt_ArrayR_PChars(curData);
                    Files_Add(BackFiles, curArray);
                  end;
+                 *)
           end;
          end;
        except
@@ -619,30 +632,38 @@ begin
   CancelledOp:= True;
 end;
 
-function TWizardBuildDuplex.Execute(out aDataType: TDigItDataType; out aData: Pointer): TModalResult;
-begin
-    StartPageIndex :=1;
-
-    {$ifdef Test} EndStep; {$endif}
-
-    if (DigIt_Main.Source <> nil) and (DigIt_Main.Source^.Inst <> nil)
-    then Result:= Self.ShowModal
-    else Result:= mrCancel;
-end;
-
-function WizardBuildDuplexExecute(out aDataType: TDigItDataType; out aData: Pointer): Integer;
+class function TWizardBuildDuplex.Execute(out aDataType: TDigItDataType; out aData: Pointer): Integer;
 begin
   Result:= 0;
   aDataType:= diDataType_FileName;
 
-  if (WizardBuildDuplex = nil)
-  then WizardBuildDuplex :=TWizardBuildDuplex.Create(Application);
-
-  if (WizardBuildDuplex <> nil) and
-     (WizardBuildDuplex.Execute(aDataType, aData) = mrOk) then
+  if (DigIt_Main.Source <> nil) and (DigIt_Main.Source^.Inst <> nil) then
   begin
-    Result:= Length(WizardBuildDuplex.AllFiles);
-    aData:= WizardBuildDuplex as IDigIt_ArrayR_PChars;
+    if (WizardBuildDuplex = nil)
+    then WizardBuildDuplex :=TWizardBuildDuplex.Create(Application);
+
+    if (WizardBuildDuplex <> nil) then
+    with WizardBuildDuplex do
+    begin
+      StartPageIndex :=1;
+
+      {$ifdef Test} EndStep; {$endif}
+
+      if (ShowModal = mrOk) then
+      begin
+        Result:= Length(AllFiles);
+
+        if (Result = 1 )
+        then begin
+               aData:= StrNew(PChar(AllFiles[0]));
+               aDataType:= diDataType_FileName;
+             end
+        else begin
+               aData:= WizardBuildDuplex as IDigIt_ArrayR_PChars;
+               aDataType:= diDataType_FileNameArray;
+             end;
+      end;
+    end;
   end;
 end;
 

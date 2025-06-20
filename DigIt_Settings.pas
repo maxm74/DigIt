@@ -1,3 +1,12 @@
+(*******************************************************************************
+**                                  DigIt                                     **
+**                                                                            **
+**          (s) 2025 Massimo Magnano                                          **
+**                                                                            **
+********************************************************************************
+**   Settings  ( Implementation of IDigIt_Settings )                          **
+*******************************************************************************)
+
 unit DigIt_Settings;
 
 {$mode ObjFPC}{$H+}
@@ -51,6 +60,10 @@ type
   published
     property Session: TSessionSettings read rSession write rSession;
   end;
+
+var
+   Settings: TDigIt_Settings = nil;
+   //The Bridge Implementation Create It, there is no point in relying on the initialization/finalization mechanism
 
 implementation
 

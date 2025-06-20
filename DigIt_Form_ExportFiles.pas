@@ -4,7 +4,7 @@
 **          (s) 2025 Massimo Magnano                                          **
 **                                                                            **
 ********************************************************************************
-**   Export Files Settings Form                                               **
+**   Export as Files or PDF Form                                              **
 *******************************************************************************)
 
 unit DigIt_Form_ExportFiles;
@@ -402,6 +402,8 @@ var
 begin
   Result:= False;
   pdfFileName:= '';
+
+  SavePDF.FileName:= edTitle.Text;
 
   if SavePDF.Execute then
   try

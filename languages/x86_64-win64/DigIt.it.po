@@ -938,6 +938,7 @@ msgid "Menù"
 msgstr ""
 
 #: tdigit_main.tbprofiles.caption
+msgctxt "tdigit_main.tbprofiles.caption"
 msgid "Profiles..."
 msgstr "Profili..."
 
@@ -962,54 +963,69 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
-#: tdigit_profiles.btaddfiles1.caption
+#: tdigit_profiles_form.btaddfiles1.caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.btaddfiles1.caption"
 msgid "Add ..."
 msgstr "Aggiungi ..."
 
-#: tdigit_profiles.btdel.caption
-msgctxt "tdigit_profiles.btdel.caption"
+#: tdigit_profiles_form.btdel.caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.btdel.caption"
 msgid "Delete"
 msgstr "Elimina"
 
-#: tdigit_profiles.btdelall.caption
-msgctxt "tdigit_profiles.btdelall.caption"
+#: tdigit_profiles_form.btdelall.caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.btdelall.caption"
 msgid "Delete All"
 msgstr "Elimina Tutto"
 
-#: tdigit_profiles.btdown.hint
-msgctxt "tdigit_profiles.btdown.hint"
+#: tdigit_profiles_form.btdown.hint
+#, fuzzy
+msgctxt "tdigit_profiles_form.btdown.hint"
 msgid "Down"
 msgstr "Giù"
 
-#: tdigit_profiles.bteditprofile.caption
+#: tdigit_profiles_form.bteditprofile.caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.bteditprofile.caption"
 msgid "Edit ..."
 msgstr "Modifica ..."
 
-#: tdigit_profiles.btfirst.hint
-msgctxt "tdigit_profiles.btfirst.hint"
+#: tdigit_profiles_form.btfirst.hint
+#, fuzzy
+msgctxt "tdigit_profiles_form.btfirst.hint"
 msgid "To First"
 msgstr "All'Inizio"
 
-#: tdigit_profiles.btlast.hint
-msgctxt "tdigit_profiles.btlast.hint"
+#: tdigit_profiles_form.btlast.hint
+#, fuzzy
+msgctxt "tdigit_profiles_form.btlast.hint"
 msgid "To Last"
 msgstr "Alla Fine"
 
-#: tdigit_profiles.btup.hint
-msgctxt "tdigit_profiles.btup.hint"
+#: tdigit_profiles_form.btup.hint
+#, fuzzy
+msgctxt "tdigit_profiles_form.btup.hint"
 msgid "Up"
 msgstr "Su"
 
-#: tdigit_profiles.caption
-msgctxt "tdigit_profiles.caption"
+#: tdigit_profiles_form.caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.caption"
 msgid "Profiles"
 msgstr "Profili"
 
-#: tdigit_profiles.lvprofiles.columns[0].caption
+#: tdigit_profiles_form.lvprofiles.columns[0].caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.lvprofiles.columns[0].caption"
 msgid "Title"
 msgstr "Titolo"
 
-#: tdigit_profiles.lvprofiles.columns[1].caption
+#: tdigit_profiles_form.lvprofiles.columns[1].caption
+#, fuzzy
+msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
 msgstr "Sorgente"
 
@@ -1116,6 +1132,12 @@ msgctxt "twizardbuildduplex.tbdestination.caption"
 msgid "Destination..."
 msgstr "Destinazione..."
 
+#: twizardbuildduplex.tbprofiles.caption
+#, fuzzy
+msgctxt "twizardbuildduplex.tbprofiles.caption"
+msgid "Profiles..."
+msgstr "Profili..."
+
 #: twizardbuildduplex.tbsource.caption
 msgctxt "twizardbuildduplex.tbsource.caption"
 msgid "Source..."
@@ -1124,3 +1146,4 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
+

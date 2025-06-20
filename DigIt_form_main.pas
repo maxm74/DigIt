@@ -21,7 +21,7 @@ uses
   BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList,
   BCExpandPanels,BGRAFlashProgressBar,
   DigIt_Types, DigIt_Utils, Digit_Bridge_Intf, Digit_Bridge_Impl,
-  DigIt_Counter, DigIt_Settings;
+  DigIt_Settings, DigIt_Sources, DigIt_Counter;
 
 resourcestring
   rsNewWork = 'Start a New Work Session?';
@@ -365,8 +365,6 @@ type
 
     Profiles: TStringArray;
 
-    Settings: TDigIt_Settings; //An Alias of theBridge.SettingsImpl
-
     function GetCurrentCropArea: TCropArea;
 
     procedure Counter_Dec(AValue: Integer);
@@ -577,7 +575,6 @@ begin
   rDestinationName:= '';
   //  rDestinationParams:= nil;
 
-  Settings:= theBridge.SettingsImpl;
   Settings.Load(nil);
 
   SetSaveWriter(ifJpeg);
@@ -586,7 +583,7 @@ begin
 
   SetDefaultStartupValues;
 
-  TDigIt_Profiles.LoadFromXML(Path_Config+File_Profiles, Profiles);
+  TDigIt_Profiles_Form.LoadFromXML(Path_Config+File_Profiles, Profiles);
   BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
@@ -818,7 +815,7 @@ begin
       then res:= rSource^.Inst.Take(takeActTake, curDataType, curData)
       else
       if (Sender = actTakeBuildDuplex)
-      then res:= WizardBuildDuplexExecute(curDataType, curData);
+      then res:= TWizardBuildDuplex.Execute(curDataType, curData);
 
       if (res > 0) and (curData <> nil) then
       begin
@@ -1467,7 +1464,7 @@ end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
 begin
-  if TDigIt_Profiles.Add(Path_Config+File_Profiles, Profiles, Source, SourceParams, SourceName) then
+  if TDigIt_Profiles_Form.Add(Path_Config+File_Profiles, Profiles, Source, SourceParams, SourceName) then
   try
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
      menuProfiles.Items[Length(Profiles)-1].Default:= True;
@@ -1478,12 +1475,12 @@ end;
 
 procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);
 begin
-  if TDigIt_Profiles.Execute(Path_Config+File_Profiles, Profiles) then
+  if TDigIt_Profiles_Form.Execute(Path_Config+File_Profiles, Profiles) then
   try
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
 
   finally
-    DigIt_Profiles.Free; DigIt_Profiles:= nil;
+    DigIt_Profiles_Form.Free; DigIt_Profiles_Form:= nil;
   end;
 end;
 
@@ -2349,22 +2346,22 @@ begin
 
      Result:= -1;
 
-     if theBridge.SourcesImpl.Select(aXML, XMLRoot_Path, newSourceName)
+     if Sources.Select(aXML, XMLRoot_Path, newSourceName)
      then begin
             if (rSourceName <> newSourceName) then
             begin
               { #note -oMaxM : rSource Switched...Do something? }
             end;
 
-            rSource:= theBridge.SourcesImpl.Selected;
-            rSourceName:= theBridge.SourcesImpl.SelectedName;
-            rSourceParams:= theBridge.SourcesImpl.SelectedParams;
-            Result:= theBridge.SourcesImpl.SelectedIndex;
+            rSource:= Sources.Selected;
+            rSourceName:= Sources.SelectedName;
+            rSourceParams:= Sources.SelectedParams;
+            Result:= Sources.SelectedIndex;
           end
      else if (newSourceName <> '') then
           begin
             MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
-            Result:= theBridge.SourcesImpl.SelectedIndex;
+            Result:= Sources.SelectedIndex;
           end;
 
   finally
@@ -2393,13 +2390,13 @@ begin
      end
      else XML_File:= aXML.Filename;
 
-     if theBridge.SourcesImpl.Save(aXML, XMLRoot_Path, False) then
+     if Sources.Save(aXML, XMLRoot_Path, False) then
      begin
        if aFree then
        begin
          aXML.Free; aXML:= nil;
 
-         //Cannot use SaveParams=True in theBridge.SourcesImpl.Save
+         //Cannot use SaveParams=True in Sources.Save
          //FPC Bug?
          //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
          //So we do it after destroying XML.
@@ -2973,16 +2970,16 @@ function TDigIt_Main.Source_Select(newSourceIndex, newSourceSubIndex: Integer): 
 begin
   Result:= False;
   try
-     if theBridge.SourcesImpl.Select(newSourceIndex, newSourceSubIndex, True) then
+     if Sources.Select(newSourceIndex, newSourceSubIndex, True) then
      begin
-       if (theBridge.SourcesImpl.Selected <> rSource) then
+       if (Sources.Selected <> rSource) then
        begin
          { #note -oMaxM : rSource Switched...Do something? }
        end;
 
-       rSource:= theBridge.SourcesImpl.Selected;
-       rSourceName:= theBridge.SourcesImpl.SelectedName;
-       rSourceParams:= theBridge.SourcesImpl.SelectedParams;
+       rSource:= Sources.Selected;
+       rSourceName:= Sources.SelectedName;
+       rSourceParams:= Sources.SelectedParams;
 
        //Save Used Source in AutoSave
        SES_SaveSource(nil, True);

@@ -918,6 +918,7 @@ msgid "Menù"
 msgstr ""
 
 #: tdigit_main.tbprofiles.caption
+msgctxt "tdigit_main.tbprofiles.caption"
 msgid "Profiles..."
 msgstr ""
 
@@ -942,54 +943,58 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr ""
 
-#: tdigit_profiles.btaddfiles1.caption
+#: tdigit_profiles_form.btaddfiles1.caption
+msgctxt "tdigit_profiles_form.btaddfiles1.caption"
 msgid "Add ..."
 msgstr ""
 
-#: tdigit_profiles.btdel.caption
-msgctxt "tdigit_profiles.btdel.caption"
+#: tdigit_profiles_form.btdel.caption
+msgctxt "tdigit_profiles_form.btdel.caption"
 msgid "Delete"
 msgstr ""
 
-#: tdigit_profiles.btdelall.caption
-msgctxt "tdigit_profiles.btdelall.caption"
+#: tdigit_profiles_form.btdelall.caption
+msgctxt "tdigit_profiles_form.btdelall.caption"
 msgid "Delete All"
 msgstr ""
 
-#: tdigit_profiles.btdown.hint
-msgctxt "tdigit_profiles.btdown.hint"
+#: tdigit_profiles_form.btdown.hint
+msgctxt "tdigit_profiles_form.btdown.hint"
 msgid "Down"
 msgstr ""
 
-#: tdigit_profiles.bteditprofile.caption
+#: tdigit_profiles_form.bteditprofile.caption
+msgctxt "tdigit_profiles_form.bteditprofile.caption"
 msgid "Edit ..."
 msgstr ""
 
-#: tdigit_profiles.btfirst.hint
-msgctxt "tdigit_profiles.btfirst.hint"
+#: tdigit_profiles_form.btfirst.hint
+msgctxt "tdigit_profiles_form.btfirst.hint"
 msgid "To First"
 msgstr ""
 
-#: tdigit_profiles.btlast.hint
-msgctxt "tdigit_profiles.btlast.hint"
+#: tdigit_profiles_form.btlast.hint
+msgctxt "tdigit_profiles_form.btlast.hint"
 msgid "To Last"
 msgstr ""
 
-#: tdigit_profiles.btup.hint
-msgctxt "tdigit_profiles.btup.hint"
+#: tdigit_profiles_form.btup.hint
+msgctxt "tdigit_profiles_form.btup.hint"
 msgid "Up"
 msgstr ""
 
-#: tdigit_profiles.caption
-msgctxt "tdigit_profiles.caption"
+#: tdigit_profiles_form.caption
+msgctxt "tdigit_profiles_form.caption"
 msgid "Profiles"
 msgstr ""
 
-#: tdigit_profiles.lvprofiles.columns[0].caption
+#: tdigit_profiles_form.lvprofiles.columns[0].caption
+msgctxt "tdigit_profiles_form.lvprofiles.columns[0].caption"
 msgid "Title"
 msgstr ""
 
-#: tdigit_profiles.lvprofiles.columns[1].caption
+#: tdigit_profiles_form.lvprofiles.columns[1].caption
+msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
 msgstr ""
 
@@ -1094,6 +1099,11 @@ msgstr ""
 #: twizardbuildduplex.tbdestination.caption
 msgctxt "twizardbuildduplex.tbdestination.caption"
 msgid "Destination..."
+msgstr ""
+
+#: twizardbuildduplex.tbprofiles.caption
+msgctxt "twizardbuildduplex.tbprofiles.caption"
+msgid "Profiles..."
 msgstr ""
 
 #: twizardbuildduplex.tbsource.caption

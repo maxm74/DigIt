@@ -113,7 +113,7 @@ implementation
 
 {$R *.lfm}
 
-uses DigIt_Form_Main;
+uses DigIt_Sources, DigIt_Form_Main;
 
 procedure TWizardBuildDuplex.GUI_Adjust;
 begin
@@ -194,7 +194,7 @@ begin
        end;
 
      3:try //Front
-       res:= DigIt_Main.Source^.Inst.Take(takeActTake, curDataType, curData);
+       res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData);
        Result:= (res > 0) and (curData <> nil);
        if Result then
        begin
@@ -227,7 +227,7 @@ begin
 
      4:try
         animTurn.Visible:= False;
-        res:= DigIt_Main.Source^.Inst.Take(takeActTake, curDataType, curData);
+        res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData);
         Result:= (res > 0) and (curData <> nil);
         if Result then
         begin
@@ -376,7 +376,7 @@ begin
                             mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
               mrYes: begin
                        FrontFiles:= nil;
-                       DigIt_Main.Source^.Inst.Clear;
+                       Sources.Selected^.Inst.Clear;
                      end;
               mrCancel: Result:= False;
             end;
@@ -389,7 +389,7 @@ begin
                            mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
              mrYes: begin
                       BackFiles:= nil;
-                      DigIt_Main.Source^.Inst.Clear;
+                      Sources.Selected^.Inst.Clear;
                     end;
              mrCancel: Result:= False;
            end;
@@ -637,7 +637,7 @@ begin
   Result:= 0;
   aDataType:= diDataType_FileName;
 
-  if (DigIt_Main.Source <> nil) and (DigIt_Main.Source^.Inst <> nil) then
+  if (Sources.Selected <> nil) and (Sources.Selected^.Inst <> nil) then
   begin
     if (WizardBuildDuplex = nil)
     then WizardBuildDuplex :=TWizardBuildDuplex.Create(Application);

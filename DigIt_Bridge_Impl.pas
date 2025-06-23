@@ -122,7 +122,7 @@ var
 
 implementation
 
-uses dynlibs, Masks, DigIt_Types, DigIt_Form_Progress;
+uses dynlibs, Masks, DigIt_Types, DigIt_Counter, DigIt_Form_Progress;
 
 { TDigIt_Plugins }
 
@@ -501,6 +501,7 @@ begin
   inherited Create;
 
   rPlugins:= TDigIt_Plugins.Create;
+  DigIt_Counter.Counter:= TDigIt_Counter.Create('Counter0');
   DigIt_Settings.Settings:= TDigIt_Settings.Create;
   DigIt_Sources.Sources:= TDigIt_Sources.Create;
   //rDestinations:= TDigIt_Destinations.Create;

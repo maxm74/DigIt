@@ -330,7 +330,6 @@ type
     inFillPagesUI,
     imgListThumb_Changed,
     rSessionModified: Boolean;
-    Counter: TDigIt_Counter;
 
     CropMode: TDigItCropMode;
 
@@ -338,10 +337,6 @@ type
     PageResize: TDigItFilter_Resize;
     PageRotate: TDigItFilter_Rotate;
     PageFlip: TDigItFilter_Flip;
-
-    rSource: PSourceInfo;
-    rSourceParams: IDigIt_Params;
-    rSourceName: String;
 
     { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
     (*    rDestination: PDestinationInfo;
@@ -456,10 +451,6 @@ type
     procedure ItemSizesClick(Sender: TObject);
     procedure PageSizesClick(Sender: TObject);
 
-    property Source: PSourceInfo read rSource;
-    property SourceName: String read rSourceName;
-    property SourceParams: IDigIt_Params read rSourceParams;
-
     (*
     property Destination: PDestinationInfo read rDestination;
     property DestinationParams: IDigIt_Params read rDestinationParams;
@@ -554,8 +545,6 @@ end;
 
 procedure TDigIt_Main.FormCreate(Sender: TObject);
 begin
-  Counter:= TDigIt_Counter.Create('Counter0');
-
   Closing :=False;
   SES_Loading:= False;
   changingAspect :=False;
@@ -566,10 +555,6 @@ begin
 
   lastNewBoxNum :=0;
   TStringList(cbCropList.Items).OwnsObjects:=False;
-
-  rSource:= nil;
-  rSourceName:= '';;
-  rSourceParams:= nil;
 
   //  rDestination:= nil;
   rDestinationName:= '';
@@ -712,7 +697,7 @@ var
 begin
   try
       curData:= nil;
-      res:= rSource^.Inst.Take(takeActPreview, curDataType, curData);
+      res:= Sources.Selected^.Inst.Take(takeActPreview, curDataType, curData);
       if (res > 0) and (curData <> nil) then
       begin
         if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
@@ -812,7 +797,7 @@ begin
       end;
 
       if (Sender = actTake) or (Sender = actTakeRe)
-      then res:= rSource^.Inst.Take(takeActTake, curDataType, curData)
+      then res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData)
       else
       if (Sender = actTakeBuildDuplex)
       then res:= TWizardBuildDuplex.Execute(curDataType, curData);
@@ -837,7 +822,7 @@ begin
 
               lastLenTaked:= res;
               SourceFiles:= nil; iSourceFiles:= -1;
-              rSource^.Inst.Clear;
+              Sources.Selected^.Inst.Clear;
             end;
             diCropCustom: begin
               if (Sender = actTakeRe)
@@ -1020,7 +1005,7 @@ var
        then begin
               iSourceFiles:= -1;
               SourceFiles:= nil;
-              rSource^.Inst.Clear;
+              Sources.Selected^.Inst.Clear;
             end;
      end;
    end;
@@ -1464,7 +1449,7 @@ end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
 begin
-  if TDigIt_Profiles_Form.Add(Path_Config+File_Profiles, Profiles, Source, SourceParams, SourceName) then
+  if TDigIt_Profiles_Form.Add(Path_Config+File_Profiles, Profiles, Sources.Selected, Sources.SelectedParams, Sources.SelectedName) then
   try
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
      menuProfiles.Items[Length(Profiles)-1].Default:= True;
@@ -2265,9 +2250,9 @@ begin
      //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
      //So we do it after destroying XML.
 
-     if (rSource <> nil) and
-        (rSource^.Inst <> Nil)
-     then rSource^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
+     if (Sources.Selected <> nil) and
+        (Sources.Selected^.Inst <> Nil)
+     then Sources.Selected^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
 
 //     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Destination/Params');
 
@@ -2326,6 +2311,7 @@ function TDigIt_Main.SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
                                     XMLRoot_Path: String; XML_File: String): Integer;
 var
    aFree: Boolean;
+   oldSourceName,
    newSourceName: String;
 
 begin
@@ -2346,16 +2332,14 @@ begin
 
      Result:= -1;
 
+     oldSourceName:= Sources.SelectedName;
      if Sources.Select(aXML, XMLRoot_Path, newSourceName)
      then begin
-            if (rSourceName <> newSourceName) then
+            if (oldSourceName <> newSourceName) then
             begin
               { #note -oMaxM : rSource Switched...Do something? }
             end;
 
-            rSource:= Sources.Selected;
-            rSourceName:= Sources.SelectedName;
-            rSourceParams:= Sources.SelectedParams;
             Result:= Sources.SelectedIndex;
           end
      else if (newSourceName <> '') then
@@ -2401,9 +2385,9 @@ begin
          //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
          //So we do it after destroying XML.
 
-         if (rSource <> nil) and
-            (rSource^.Inst <> nil)
-         then rSource^.Inst.Params.Save(PChar(XML_File), PChar(XMLRoot_Path+'Source/Params'));
+         if (Sources.Selected <> nil) and
+            (Sources.Selected^.Inst <> nil)
+         then Sources.Selected^.Inst.Params.Save(PChar(XML_File), PChar(XMLRoot_Path+'Source/Params'));
        end;
 
        if IsAutoSave then SessionModified:= True;
@@ -2967,19 +2951,19 @@ begin
 end;
 
 function TDigIt_Main.Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
+var
+   curSource: PSourceInfo;
+
 begin
   Result:= False;
   try
+     curSource:= Sources.Selected;
      if Sources.Select(newSourceIndex, newSourceSubIndex, True) then
      begin
-       if (Sources.Selected <> rSource) then
+       if (Sources.Selected <> curSource) then
        begin
          { #note -oMaxM : rSource Switched...Do something? }
        end;
-
-       rSource:= Sources.Selected;
-       rSourceName:= Sources.SelectedName;
-       rSourceParams:= Sources.SelectedParams;
 
        //Save Used Source in AutoSave
        SES_SaveSource(nil, True);
@@ -3279,7 +3263,7 @@ end;
 
 procedure TDigIt_Main.MenuSourcePopup(Sender: TObject);
 begin
-  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, Source);
+  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, Sources.Selected);
 end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
@@ -3399,7 +3383,7 @@ begin
   lastCropped:= -1;
   lastLenTaked:= 0;
   SourceFiles:= nil;
-  if ClearSourceInst and (rSource <> nil) then rSource^.Inst.Clear;
+  if ClearSourceInst and (Sources.Selected <> nil) then Sources.Selected^.Inst.Clear;
 end;
 
 function TDigIt_Main.CropFile_Full(AFileName: String; isReTake: Boolean): Boolean;
@@ -3850,7 +3834,7 @@ var
    remSources: Integer;
 
 begin
-  bCommonCond:= (rSource<>nil) and (rSource^.Inst <> nil);
+  bCommonCond:= (Sources.Selected<>nil) and (Sources.Selected^.Inst <> nil);
   actPreview.Enabled:= bCommonCond;
   itemProfiles_AddCurrent.Enabled:= bCommonCond;
 

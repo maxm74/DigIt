@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/20 Fixed Build Duplex Wizard does not works;
+2025/06/23 Moved Counter var from Form to Unit;
+           Removed rSourceXXX vars from Form and use Sources property;
+           First write of DigIt_Session (does not compile)
+
+        20 Fixed Build Duplex Wizard does not works;
            Moved TDigIt_Sources to DigIt_Sources Unit;
            Created Settings and Sources main Vars;
            Deleted Bridge SettingsImpl and SourcesImpl properties;

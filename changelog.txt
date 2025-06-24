@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/23 Moved Counter var from Form to Unit;
+2025/06/24 Moved Take logic from Main Form to TDigIt_Sources class;
+           Added Take methods to TDigIt_Sources;
+           Changed Execute of BuildDuplex Wizard (same params of TDigIt_Sources.Take);
+
+        23 Moved Counter var from Form to Unit;
            Removed rSourceXXX vars from Form and use Sources property;
            First write of DigIt_Session (does not compile)
 

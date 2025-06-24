@@ -17,7 +17,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Dialogs, ComCtrls, ExtCtrls, Buttons, StdCtrls,
-  Digit_Bridge_Intf, Digit_Bridge_Impl, BGRAAnimatedGif;
+  BGRAAnimatedGif,
+  DigIt_Types, Digit_Bridge_Intf, Digit_Bridge_Impl;
 
 resourcestring
      CAPTION_PREV ='&Back';
@@ -35,7 +36,7 @@ type
   { TWizardBuildDuplex }
   Exception_CancelledOp = class (Exception);
 
-  TWizardBuildDuplex = class(TForm, IDigIt_ArrayR_PChars, IDigIt_ProgressCallback)
+  TWizardBuildDuplex = class(TForm, (* oldcode IDigIt_ArrayR_PChars,*) IDigIt_ProgressCallback)
     Image1: TImage;
     Image2: TImage;
     animTurn: TImage;
@@ -80,8 +81,9 @@ type
 
     FrontFiles,
     BackFiles,
-    AllFiles: TStringArray;
+    AllFiles: TSourceFileArray;
     OneSided: Boolean;
+    curtakeAction: DigIt_Source_TakeAction;
 
     procedure GUI_Adjust;
     procedure InternalNext;
@@ -92,18 +94,19 @@ type
     function CancelStep: Boolean;
     function EndStep: Boolean;
 
-    function Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer; overload;
-    function Files_Add(var AFiles: TStringArray; AFileName: String): Integer; overload;
+//oldcode    function Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer; overload;
+//oldcode    function Files_Add(var AFiles: TStringArray; AFileName: String): Integer; overload;
 
   public
-    //IDigIt_ArrayR_PChars
+ (* oldcode  //IDigIt_ArrayR_PChars
     function GetCount: DWord; stdcall;
     function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
-
+*)
     //IDigIt_ProgressCallback
     procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
 
-    class function Execute(out aDataType: TDigItDataType; out aData: Pointer): Integer;
+    class function Execute(takeAction: DigIt_Source_TakeAction;
+                           var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
   end;
 
 var
@@ -113,7 +116,7 @@ implementation
 
 {$R *.lfm}
 
-uses DigIt_Sources, DigIt_Form_Main;
+uses DigIt_Sources;
 
 procedure TWizardBuildDuplex.GUI_Adjust;
 begin
@@ -194,6 +197,7 @@ begin
        end;
 
      3:try //Front
+        (* oldcode
        res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData);
        Result:= (res > 0) and (curData <> nil);
        if Result then
@@ -206,27 +210,18 @@ begin
                   StrDispose(PChar(curData));
                 end
            else res:= Files_Add(FrontFiles, IDigIt_ArrayR_PChars(curData));
-
-          (* if (res = 1)
-           then begin
-                  curImageFile:= PChar(curData);
-                  Files_Add(FrontFiles, curImageFile);
-                  StrDispose(curImageFile);
-                end
-           else
-           if (res > 1)
-           then begin
-                  curArray:= IDigIt_ArrayR_PChars(curData);
-                  Files_Add(FrontFiles, curArray);
-                end;*)
          end;
-        end;
+       end;
+         *)
+         res:= Sources.Take(curtakeAction, FrontFiles, 0);
+         Result:= (res > 0) and (FrontFiles <> nil);
         except
           on E:Exception do raise Exception.Create('Error on Step:'+#13#10+'['+E.Message+']');
        end;
 
      4:try
         animTurn.Visible:= False;
+        (* oldcode
         res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData);
         Result:= (res > 0) and (curData <> nil);
         if Result then
@@ -239,22 +234,11 @@ begin
                    StrDispose(PChar(curData));
                  end
             else res:= Files_Add(BackFiles, IDigIt_ArrayR_PChars(curData));
-
-           (* if (res = 1)
-            then begin
-                   curImageFile:= PChar(curData);
-                   Files_Add(BackFiles, curImageFile);
-                   StrDispose(curImageFile);
-                 end
-            else
-            if (res > 1)
-            then begin
-                   curArray:= IDigIt_ArrayR_PChars(curData);
-                   Files_Add(BackFiles, curArray);
-                 end;
-                 *)
           end;
-         end;
+        end;
+          *)
+          res:= Sources.Take(curtakeAction, BackFiles, 0);
+          Result:= (res > 0) and (BackFiles <> nil);
        except
           on E:Exception do raise Exception.Create('Error on Step:'+#13#10+'['+E.Message+']');
        end;
@@ -508,6 +492,7 @@ begin
   end;
 end;
 
+(* oldcode
 function TWizardBuildDuplex.Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer;
 var
    oldLength, i: Integer;
@@ -550,15 +535,16 @@ begin
     Result:= 1;
   end;
 end;
+*)
 
 procedure TWizardBuildDuplex.FormCreate(Sender: TObject);
 begin
-     StartPageIndex :=1;
-     InStepCode :=False;
-     CancelledOp :=False;
-     FrontFiles:= nil;
-     BackFiles:= nil;
-     AllFiles:= nil;
+  StartPageIndex :=1;
+  InStepCode :=False;
+  CancelledOp :=False;
+  FrontFiles:= nil;
+  BackFiles:= nil;
+  AllFiles:= nil;
 end;
 
 procedure TWizardBuildDuplex.FormDestroy(Sender: TObject);
@@ -608,6 +594,7 @@ begin
             end;
 end;
 
+(*
 function TWizardBuildDuplex.GetCount: DWord; stdcall;
 begin
   Result:= Length(AllFiles);
@@ -626,33 +613,38 @@ begin
      Result:= False;
   end;
 end;
+*)
 
 procedure TWizardBuildDuplex.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
 begin
   CancelledOp:= True;
 end;
 
-class function TWizardBuildDuplex.Execute(out aDataType: TDigItDataType; out aData: Pointer): Integer;
+class function TWizardBuildDuplex.Execute(takeAction: DigIt_Source_TakeAction;
+                                          var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
 begin
   Result:= 0;
-  aDataType:= diDataType_FileName;
+
+// oldcode aDataType:= diDataType_FileName;
 
   if (Sources.Selected <> nil) and (Sources.Selected^.Inst <> nil) then
-  begin
+  try
     if (WizardBuildDuplex = nil)
     then WizardBuildDuplex :=TWizardBuildDuplex.Create(Application);
 
     if (WizardBuildDuplex <> nil) then
     with WizardBuildDuplex do
     begin
-      StartPageIndex :=1;
+      StartPageIndex:= 1;
+      curTakeAction:= takeAction;
 
       {$ifdef Test} EndStep; {$endif}
 
       if (ShowModal = mrOk) then
       begin
-        Result:= Length(AllFiles);
-
+        AFiles:= AllFiles;
+        Result:= Length(AFiles);
+        (* oldcode
         if (Result = 1 )
         then begin
                aData:= StrNew(PChar(AllFiles[0]));
@@ -662,8 +654,12 @@ begin
                aData:= WizardBuildDuplex as IDigIt_ArrayR_PChars;
                aDataType:= diDataType_FileNameArray;
              end;
+        *)
       end;
     end;
+
+  finally
+    WizardBuildDuplex.Free; WizardBuildDuplex:= nil;
   end;
 end;
 

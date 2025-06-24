@@ -433,11 +433,11 @@ type
 
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
-    function SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer; overload;
-    function SourceFiles_Add(AFileName: String; AStartIndex: Integer): Integer; overload;
+//oldcode    function SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer; overload;
+//oldcode    function SourceFiles_Add(AFileName: String; AStartIndex: Integer): Integer; overload;
     procedure SourceFiles_Clear(ClearSourceInst: Boolean);
 
-    function CropFile_Full(AFileName: String; isReTake: Boolean): Boolean; overload;
+//oldcode    function CropFile_Full(AFileName: String; isReTake: Boolean): Boolean; overload;
     procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean); overload;
 
     procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
@@ -689,13 +689,16 @@ end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
 var
-  curData: Pointer;
-  curDataType: TDigItDataType;
+//oldcode   curData: Pointer;
+//oldcode   curDataType: TDigItDataType;
   res: Integer;
-  curImageFile: PChar;
+  curImageFile: String; //oldcode PChar;
 
 begin
   try
+     if Sources.Take(takeActPreview, curImageFile)
+     then LoadImage(curImageFile, True)
+     (* oldcode
       curData:= nil;
       res:= Sources.Selected^.Inst.Take(takeActPreview, curDataType, curData);
       if (res > 0) and (curData <> nil) then
@@ -714,6 +717,7 @@ begin
           end;
         end;
       end
+      *)
       else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
@@ -796,6 +800,52 @@ begin
         end;
       end;
 
+      if (Sender = actTakeRe)
+      then StartIndex:= oldLength-lastLenTaked
+      else StartIndex:= oldLength;
+
+      if (Sender = actTake) or (Sender = actTakeRe)
+      then res:= Sources.Take(takeActTake, SourceFiles, StartIndex)
+      else
+      if (Sender = actTakeBuildDuplex)
+      then res:= TWizardBuildDuplex.Execute(takeActTake, SourceFiles, StartIndex);
+
+      if (res > 0) then
+      begin
+        Case CropMode of
+          diCropFull: begin
+            DigIt_Progress.ProgressShow(rsProcessingImages, 1, res);
+
+            CropFile_Full(0, (Sender = actTakeRe));
+
+            lastLenTaked:= res;
+            SourceFiles:= nil; iSourceFiles:= -1;
+            Sources.Selected^.Inst.Clear;
+          end;
+          diCropCustom: begin
+            if (Sender = actTakeRe)
+            then begin
+                   if (iSourceFiles > Length(SourceFiles))
+                   then iSourceFiles:= Length(SourceFiles); //Repos iSourceFiles if outside
+                 end
+            else begin
+                   //The queue was empty, Start from the first file
+                   if (oldLength = 0) and (Length(SourceFiles) > 0) then
+                   begin
+                     iSourceFiles:= 0;
+                     LoadImage(SourceFiles[0].fName, False);
+
+                     //Crop the First File directly
+                     actCropNextExecute(nil);
+                   end;
+                 end;
+
+            lastLenTaked:= res;
+          end;
+        end;
+      end
+
+      (* oldcode
       if (Sender = actTake) or (Sender = actTakeRe)
       then res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData)
       else
@@ -859,6 +909,7 @@ begin
           end;
         end;
       end
+      *)
       else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
@@ -871,7 +922,7 @@ begin
     end;
 
     DigIt_Progress.Hide;
-    WizardBuildDuplex.Free; WizardBuildDuplex:= nil;
+    //oldcode WizardBuildDuplex.Free; WizardBuildDuplex:= nil;
   end;
 end;
 
@@ -3326,6 +3377,7 @@ begin
 end;
 *)
 
+(* oldcode
 function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer;
 var
    oldLength, i: Integer;
@@ -3376,6 +3428,7 @@ begin
     Result:= 1;
   end;
 end;
+*)
 
 procedure TDigIt_Main.SourceFiles_Clear(ClearSourceInst: Boolean);
 begin
@@ -3386,17 +3439,18 @@ begin
   if ClearSourceInst and (Sources.Selected <> nil) then Sources.Selected^.Inst.Clear;
 end;
 
+(* oldcode
 function TDigIt_Main.CropFile_Full(AFileName: String; isReTake: Boolean): Boolean;
 begin
   Result:= (AFileName <> '') and LoadImage(AFileName, False);
   if Result then SaveCallBack(imgManipulation.Bitmap, nil, Integer(isReTake));
 end;
+*)
 
 procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
 var
    i,
    c,
-//   old_lastCropped,
    old_CounterValue,
    old_iCapturedFiles: Integer;
    cStr: String;
@@ -3409,7 +3463,6 @@ begin
      //Store old Values so if user Cancel Operation we can rollback
      old_iCapturedFiles:= iCapturedFiles;
      old_CounterValue:= Counter.Value;
-     //old_lastCropped:= lastCropped;
 
      c:= Length(SourceFiles);
      cStr:= IntToStr(c);
@@ -3423,13 +3476,20 @@ begin
 
        Application.ProcessMessages;
 
-       UserCancel:= DigIt_Progress.Cancelled or
+       UserCancel:= DigIt_Progress.Cancelled;
+                   (*oldcode or
                     not(CropFile_Full(SourceFiles[i].fName, isReTake and (i < lastLenTaked)));
-       if UserCancel then break;
+                    *)
 
-       //SourceFiles[i].fCrop:= True;
-       //if (i > lastCropped) then lastCropped:= i;
-       //iSourceFiles:= i;
+       UserCancel:= not(LoadImage(SourceFiles[i].fName, False));
+
+       try
+          SaveCallBack(imgManipulation.Bitmap, nil, Integer( (isReTake and (i < lastLenTaked)) ));
+       except
+         UserCancel:= True;
+       end;
+
+       if UserCancel then break;
 
        DigIt_Progress.progressTotal.Position:= i+1;
        DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);

@@ -46,9 +46,13 @@ msgstr "Annullo l'acquisizione del Lato Posteriore appena effettuata?"
 msgid "Do I cancel the Front Side acquisition I just made?"
 msgstr "Annullo l'acquisizione del Lato Frontale appena effettuata?"
 
-#: digit_form_buildduplex.rsnopages
-msgid "No Pages in Front or Back Side"
-msgstr "Nessuna Pagina sul lato Frontale o Posteriore"
+#: digit_form_buildduplex.rsnopagesback
+msgid "No Pages in Back Side"
+msgstr "Nessuna Pagina nel Lato Posteriore"
+
+#: digit_form_buildduplex.rsnopagesfront
+msgid "No Pages in Front Side"
+msgstr "Nessuna Pagina nel Lato Frontale"
 
 #: digit_form_exportfiles.rsconvertimg
 msgid "Converting Images to Images..."
@@ -86,16 +90,20 @@ msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_form_main.rscontinueautowork
 #, object-pascal-format
-msgid "Continue from Auto Saved Work Session?\n"
+msgid ""
+"Continue from Auto Saved Work Session?\n"
 "%s"
-msgstr "Continuo dalla Sessione Lavoro Salvata in Automatico?\n"
+msgstr ""
+"Continuo dalla Sessione Lavoro Salvata in Automatico?\n"
 "%s"
 
 #: digit_form_main.rscontinuework
 #, object-pascal-format
-msgid "Continue from last Work Session?\n"
+msgid ""
+"Continue from last Work Session?\n"
 "%s"
-msgstr "Continuo dall'ultima Sessione Lavoro?\n"
+msgstr ""
+"Continuo dall'ultima Sessione Lavoro?\n"
 "%s"
 
 #: digit_form_main.rscounterprev
@@ -145,17 +153,21 @@ msgstr "Operazione non completata, conservo i file elaborati?"
 
 #: digit_form_main.rserrloadwork
 #, object-pascal-format
-msgid "Cannot Load Work Session\n"
+msgid ""
+"Cannot Load Work Session\n"
 "%s"
-msgstr "Impossibile Caricare la Sessione Lavoro\n"
+msgstr ""
+"Impossibile Caricare la Sessione Lavoro\n"
 "%s"
 
 #: digit_form_main.rserrsavework
 #, object-pascal-format
-msgid "Cannot Save Work Session\n"
+msgid ""
+"Cannot Save Work Session\n"
 "%s\n"
 "%s"
-msgstr "Impossibile Salvare la Sessione Lavoro\n"
+msgstr ""
+"Impossibile Salvare la Sessione Lavoro\n"
 "%s\n"
 "%s"
 
@@ -164,9 +176,11 @@ msgid "Failed to Create the Counter"
 msgstr "Impossibile Creare il Contatore"
 
 #: digit_form_main.rsmiddlepage
-msgid "The page is within the already processed range\n"
+msgid ""
+"The page is within the already processed range\n"
 "Should I put it in the middle?"
-msgstr "La pagina rientra nell'intervallo già elaborato\n"
+msgstr ""
+"La pagina rientra nell'intervallo già elaborato\n"
 "Dovrei metterla al centro?"
 
 #: digit_form_main.rsnewwork
@@ -251,9 +265,11 @@ msgstr "Cartella di Immagini"
 
 #: digit_source_folder.rsfoldnotfound
 #, object-pascal-format
-msgid "Folder not found...\n"
+msgid ""
+"Folder not found...\n"
 "%s"
-msgstr "Cartella non trovata...\n"
+msgstr ""
+"Cartella non trovata...\n"
 "%s"
 
 #: digit_source_folder.rsfoldselect
@@ -296,11 +312,13 @@ msgstr "Annullando l'acquisizione"
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
-msgid "Device found \n"
+msgid ""
+"Device found \n"
 "%s %s\n"
 "but Item %s not...\n"
 "Select the First Item %s ?"
-msgstr "Dispositivo trovato\n"
+msgstr ""
+"Dispositivo trovato\n"
 "\"%s %s\n"
 "ma l'Elemento %s no...\n"
 "Selezionare il primo Elemento %s?"
@@ -924,6 +942,7 @@ msgid "Menù"
 msgstr ""
 
 #: tdigit_main.tbprofiles.caption
+msgctxt "tdigit_main.tbprofiles.caption"
 msgid "Profiles..."
 msgstr "Profili..."
 
@@ -948,54 +967,58 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
-#: tdigit_profiles.btaddfiles1.caption
+#: tdigit_profiles_form.btaddfiles1.caption
+msgctxt "tdigit_profiles_form.btaddfiles1.caption"
 msgid "Add ..."
 msgstr "Aggiungi ..."
 
-#: tdigit_profiles.btdel.caption
-msgctxt "tdigit_profiles.btdel.caption"
+#: tdigit_profiles_form.btdel.caption
+msgctxt "tdigit_profiles_form.btdel.caption"
 msgid "Delete"
 msgstr "Elimina"
 
-#: tdigit_profiles.btdelall.caption
-msgctxt "tdigit_profiles.btdelall.caption"
+#: tdigit_profiles_form.btdelall.caption
+msgctxt "tdigit_profiles_form.btdelall.caption"
 msgid "Delete All"
 msgstr "Elimina Tutto"
 
-#: tdigit_profiles.btdown.hint
-msgctxt "tdigit_profiles.btdown.hint"
+#: tdigit_profiles_form.btdown.hint
+msgctxt "tdigit_profiles_form.btdown.hint"
 msgid "Down"
 msgstr "Giù"
 
-#: tdigit_profiles.bteditprofile.caption
+#: tdigit_profiles_form.bteditprofile.caption
+msgctxt "tdigit_profiles_form.bteditprofile.caption"
 msgid "Edit ..."
 msgstr "Modifica ..."
 
-#: tdigit_profiles.btfirst.hint
-msgctxt "tdigit_profiles.btfirst.hint"
+#: tdigit_profiles_form.btfirst.hint
+msgctxt "tdigit_profiles_form.btfirst.hint"
 msgid "To First"
 msgstr "All'Inizio"
 
-#: tdigit_profiles.btlast.hint
-msgctxt "tdigit_profiles.btlast.hint"
+#: tdigit_profiles_form.btlast.hint
+msgctxt "tdigit_profiles_form.btlast.hint"
 msgid "To Last"
 msgstr "Alla Fine"
 
-#: tdigit_profiles.btup.hint
-msgctxt "tdigit_profiles.btup.hint"
+#: tdigit_profiles_form.btup.hint
+msgctxt "tdigit_profiles_form.btup.hint"
 msgid "Up"
 msgstr "Su"
 
-#: tdigit_profiles.caption
-msgctxt "tdigit_profiles.caption"
+#: tdigit_profiles_form.caption
+msgctxt "tdigit_profiles_form.caption"
 msgid "Profiles"
 msgstr "Profili"
 
-#: tdigit_profiles.lvprofiles.columns[0].caption
+#: tdigit_profiles_form.lvprofiles.columns[0].caption
+msgctxt "tdigit_profiles_form.lvprofiles.columns[0].caption"
 msgid "Title"
 msgstr "Titolo"
 
-#: tdigit_profiles.lvprofiles.columns[1].caption
+#: tdigit_profiles_form.lvprofiles.columns[1].caption
+msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
 msgstr "Sorgente"
 
@@ -1042,6 +1065,14 @@ msgstr "&Indietro"
 #: twizardbuildduplex.caption
 msgid "Build Front/Back..."
 msgstr "Costruisci Fronte/Retro..."
+
+#: twizardbuildduplex.cbfirstpageblank.caption
+msgid "First Page is Blank"
+msgstr "La Prima Pagina è Vuota"
+
+#: twizardbuildduplex.cblastpageblank.caption
+msgid "Last Page is Blank"
+msgstr "L' Ultima Pagina è Vuota"
 
 #: twizardbuildduplex.label1.caption
 msgid "Insert Front Side Pages"
@@ -1101,6 +1132,11 @@ msgstr ""
 msgctxt "twizardbuildduplex.tbdestination.caption"
 msgid "Destination..."
 msgstr "Destinazione..."
+
+#: twizardbuildduplex.tbprofiles.caption
+msgctxt "twizardbuildduplex.tbprofiles.caption"
+msgid "Profiles..."
+msgstr "Profili..."
 
 #: twizardbuildduplex.tbsource.caption
 msgctxt "twizardbuildduplex.tbsource.caption"
@@ -1382,17 +1418,21 @@ msgstr "Dimensione Personalizzata"
 
 #: wia_settingsform.rserrorselecting
 #, object-pascal-format
-msgid "Error Selecting Item %s of %s\n"
+msgid ""
+"Error Selecting Item %s of %s\n"
 "Try to Select another Source Item"
-msgstr "Errore Selezionando l'Elemento %s di %s\n"
+msgstr ""
+"Errore Selezionando l'Elemento %s di %s\n"
 "Prova a Selezionare un altro Elemento della Sorgente"
 
 #: wia_settingsform.rserrorselectingint
 #, object-pascal-format
-msgid "Error Selecting Item [%d] of %s\n"
+msgid ""
+"Error Selecting Item [%d] of %s\n"
 "%s\n"
 "Try to Select another Source Item"
-msgstr "Errore Selezionando l'Elemento [%d] di %s\n"
+msgstr ""
+"Errore Selezionando l'Elemento [%d] di %s\n"
 "%s\n"
 "Prova a Selezionare un altro Elemento della Sorgente"
 
@@ -1420,4 +1460,3 @@ msgstr "Orizzontale"
 msgctxt "wia_settingsform.rsportrait"
 msgid "Portrait"
 msgstr "Verticale"
-

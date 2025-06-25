@@ -14,7 +14,6 @@ object WizardBuildDuplex: TWizardBuildDuplex
   Font.Height = -16
   Font.Name = 'Sans'
   Position = poScreenCenter
-  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -899,10 +898,10 @@ object WizardBuildDuplex: TWizardBuildDuplex
     Height = 420
     Top = 0
     Width = 696
-    ActivePage = TabSheet2
+    ActivePage = TabSheet3
     Align = alClient
     ShowTabs = False
-    TabIndex = 1
+    TabIndex = 2
     TabOrder = 1
     object TabSheet1: TTabSheet
       Caption = 'TabSheet1'
@@ -5127,6 +5126,21 @@ object WizardBuildDuplex: TWizardBuildDuplex
         Font.Style = [fsBold]
         ParentFont = False
       end
+      object cbLastPageBlank: TCheckBox
+        AnchorSideLeft.Control = Image1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideBottom.Control = Image1
+        AnchorSideBottom.Side = asrBottom
+        Left = 330
+        Height = 22
+        Top = 301
+        Width = 152
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Left = 16
+        Caption = 'Last Page is Blank'
+        TabOrder = 0
+        Visible = False
+      end
     end
     object TabSheet3: TTabSheet
       Caption = 'TabSheet3'
@@ -8603,6 +8617,19 @@ object WizardBuildDuplex: TWizardBuildDuplex
         Font.Name = 'Sans'
         Font.Style = [fsBold]
         ParentFont = False
+      end
+      object cbFirstPageBlank: TCheckBox
+        AnchorSideLeft.Control = Image2
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideBottom.Side = asrBottom
+        Left = 330
+        Height = 22
+        Top = 301
+        Width = 153
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Left = 16
+        Caption = 'First Page is Blank'
+        TabOrder = 0
       end
     end
     object TabSheet4: TTabSheet

@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/24 Moved Take logic from Main Form to TDigIt_Sources class;
+2025/06/25 Added Blank Pages handle in WizardBuildDuplex;
+           Updated Languages;
+           Some UI adjustments to accommodate the Italian language;
+           Old Code Cleanup;
+
+        24 Moved Take logic from Main Form to TDigIt_Sources class;
            Added Take methods to TDigIt_Sources;
            Changed Execute of BuildDuplex Wizard (same params of TDigIt_Sources.Take);
 

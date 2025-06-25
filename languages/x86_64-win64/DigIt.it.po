@@ -46,9 +46,13 @@ msgstr "Annullo l'acquisizione del Lato Posteriore appena effettuata?"
 msgid "Do I cancel the Front Side acquisition I just made?"
 msgstr "Annullo l'acquisizione del Lato Frontale appena effettuata?"
 
-#: digit_form_buildduplex.rsnopages
-msgid "No Pages in Front or Back Side"
-msgstr "Nessuna Pagina sul lato Frontale o Posteriore"
+#: digit_form_buildduplex.rsnopagesback
+msgid "No Pages in Back Side"
+msgstr "Nessuna Pagina nel Lato Posteriore"
+
+#: digit_form_buildduplex.rsnopagesfront
+msgid "No Pages in Front Side"
+msgstr "Nessuna Pagina nel Lato Frontale"
 
 #: digit_form_exportfiles.rsconvertimg
 msgid "Converting Images to Images..."
@@ -964,67 +968,56 @@ msgid "Source..."
 msgstr "Sorgente..."
 
 #: tdigit_profiles_form.btaddfiles1.caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.btaddfiles1.caption"
 msgid "Add ..."
 msgstr "Aggiungi ..."
 
 #: tdigit_profiles_form.btdel.caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.btdel.caption"
 msgid "Delete"
 msgstr "Elimina"
 
 #: tdigit_profiles_form.btdelall.caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.btdelall.caption"
 msgid "Delete All"
 msgstr "Elimina Tutto"
 
 #: tdigit_profiles_form.btdown.hint
-#, fuzzy
 msgctxt "tdigit_profiles_form.btdown.hint"
 msgid "Down"
 msgstr "Giù"
 
 #: tdigit_profiles_form.bteditprofile.caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.bteditprofile.caption"
 msgid "Edit ..."
 msgstr "Modifica ..."
 
 #: tdigit_profiles_form.btfirst.hint
-#, fuzzy
 msgctxt "tdigit_profiles_form.btfirst.hint"
 msgid "To First"
 msgstr "All'Inizio"
 
 #: tdigit_profiles_form.btlast.hint
-#, fuzzy
 msgctxt "tdigit_profiles_form.btlast.hint"
 msgid "To Last"
 msgstr "Alla Fine"
 
 #: tdigit_profiles_form.btup.hint
-#, fuzzy
 msgctxt "tdigit_profiles_form.btup.hint"
 msgid "Up"
 msgstr "Su"
 
 #: tdigit_profiles_form.caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.caption"
 msgid "Profiles"
 msgstr "Profili"
 
 #: tdigit_profiles_form.lvprofiles.columns[0].caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.lvprofiles.columns[0].caption"
 msgid "Title"
 msgstr "Titolo"
 
 #: tdigit_profiles_form.lvprofiles.columns[1].caption
-#, fuzzy
 msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
 msgstr "Sorgente"
@@ -1072,6 +1065,14 @@ msgstr "&Indietro"
 #: twizardbuildduplex.caption
 msgid "Build Front/Back..."
 msgstr "Costruisci Fronte/Retro..."
+
+#: twizardbuildduplex.cbfirstpageblank.caption
+msgid "First Page is Blank"
+msgstr "La Prima Pagina è Vuota"
+
+#: twizardbuildduplex.cblastpageblank.caption
+msgid "Last Page is Blank"
+msgstr "L' Ultima Pagina è Vuota"
 
 #: twizardbuildduplex.label1.caption
 msgid "Insert Front Side Pages"
@@ -1133,7 +1134,6 @@ msgid "Destination..."
 msgstr "Destinazione..."
 
 #: twizardbuildduplex.tbprofiles.caption
-#, fuzzy
 msgctxt "twizardbuildduplex.tbprofiles.caption"
 msgid "Profiles..."
 msgstr "Profili..."
@@ -1146,4 +1146,3 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
-

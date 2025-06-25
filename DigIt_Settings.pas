@@ -50,7 +50,7 @@ type
     function Save(aXML: TRttiXMLConfig): Boolean;
 
     //Useful to avoid having to read/write everything
-    //procedure Load_StartupSession(aXML: TRttiXMLConfig; var APath, AFile: String);
+    procedure Load_StartupSession(aXML: TRttiXMLConfig; var APath, AFile: String);
     procedure Save_StartupSession(aXML: TRttiXMLConfig; const APath, AFile: String);
 
     //IDigIt_Settings implementation
@@ -130,7 +130,6 @@ begin
   end;
 end;
 
-(* oldcode
 procedure TDigIt_Settings.Load_StartupSession(aXML: TRttiXMLConfig; var APath, AFile: String);
 var
    aFree: Boolean;
@@ -143,14 +142,13 @@ begin
      APath:= SetDirSeparators(aXML.GetValue(SET_Path+'StartupSession_Path', ''));
      AFile:= SetDirSeparators(aXML.GetValue(SET_Path+'StartupSession_File', ''));
 
-     rStartupSession_Path:= APath;
-     rStartupSession_File:= AFile;
+     rSession.Startup_Path:= APath;
+     rSession.Startup_File:= AFile;
 
   finally
      if aFree then aXML.Free;
   end;
 end;
-*)
 
 procedure TDigIt_Settings.Save_StartupSession(aXML: TRttiXMLConfig; const APath, AFile: String);
 var

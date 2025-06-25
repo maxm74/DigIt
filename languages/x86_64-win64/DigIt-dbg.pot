@@ -36,8 +36,12 @@ msgstr ""
 msgid "Do I cancel the Front Side acquisition I just made?"
 msgstr ""
 
-#: digit_form_buildduplex.rsnopages
-msgid "No Pages in Front or Back Side"
+#: digit_form_buildduplex.rsnopagesback
+msgid "No Pages in Back Side"
+msgstr ""
+
+#: digit_form_buildduplex.rsnopagesfront
+msgid "No Pages in Front Side"
 msgstr ""
 
 #: digit_form_exportfiles.rsconvertimg
@@ -1040,6 +1044,15 @@ msgstr ""
 
 #: twizardbuildduplex.caption
 msgid "Build Front/Back..."
+msgstr ""
+
+#: twizardbuildduplex.cbfirstpageblank.caption
+msgid "First Page is Blank"
+msgstr ""
+
+#: twizardbuildduplex.cblastpageblank.caption
+msgctxt "twizardbuildduplex.cblastpageblank.caption"
+msgid "Last Page is Blank"
 msgstr ""
 
 #: twizardbuildduplex.label1.caption

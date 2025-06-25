@@ -14,10 +14,12 @@
 {"hash":127854082,"name":"twizardbuildduplex.tabsheet2.caption","sourcebytes":[84,97,98,83,104,101,101,116,50],"value":"TabSheet2"},
 {"hash":185032899,"name":"twizardbuildduplex.label1.caption","sourcebytes":[73,110,115,101,114,116,32,70,114,111,110,116,32,83,105,100,101,32,80,97,103,101,115],"value":"Insert Front Side Pages"},
 {"hash":8550361,"name":"twizardbuildduplex.label2.caption","sourcebytes":[67,108,105,99,107,32,78,101,120,116,32,119,104,101,110,32,114,101,97,100,121],"value":"Click Next when ready"},
+{"hash":102692635,"name":"twizardbuildduplex.cblastpageblank.caption","sourcebytes":[76,97,115,116,32,80,97,103,101,32,105,115,32,66,108,97,110,107],"value":"Last Page is Blank"},
 {"hash":127854083,"name":"twizardbuildduplex.tabsheet3.caption","sourcebytes":[84,97,98,83,104,101,101,116,51],"value":"TabSheet3"},
 {"hash":83866645,"name":"twizardbuildduplex.lbbackside.caption","sourcebytes":[84,117,114,110,32,97,108,108,32,116,104,101,32,80,97,103,101,115,32,111,118,101,114,32,115,111,32,116,104,101,32,66,97,99,107,32,83,105,100,101,32,105,115,32,118,105,115,105,98,108,101],"value":"Turn all the Pages over so the Back Side is visible"},
 {"hash":8550361,"name":"twizardbuildduplex.label4.caption","sourcebytes":[67,108,105,99,107,32,78,101,120,116,32,119,104,101,110,32,114,101,97,100,121],"value":"Click Next when ready"},
 {"hash":34647939,"name":"twizardbuildduplex.lbbackside1.caption","sourcebytes":[73,110,115,101,114,116,32,66,97,99,107,32,83,105,100,101,32,80,97,103,101,115],"value":"Insert Back Side Pages"},
+{"hash":238942043,"name":"twizardbuildduplex.cbfirstpageblank.caption","sourcebytes":[70,105,114,115,116,32,80,97,103,101,32,105,115,32,66,108,97,110,107],"value":"First Page is Blank"},
 {"hash":127854084,"name":"twizardbuildduplex.tabsheet4.caption","sourcebytes":[84,97,98,83,104,101,101,116,52],"value":"TabSheet4"},
 {"hash":99198723,"name":"twizardbuildduplex.label5.caption","sourcebytes":[70,105,110,105,115,104,101,100,46,46,46,32,67,108,105,99,107,32,69,110,100,32,116,111,32,66,117,105,108,100,32,70,114,111,110,116,47,66,97,99,107,32,80,97,103,101,115],"value":"Finished... Click End to Build Front/Back Pages"}
 ]}

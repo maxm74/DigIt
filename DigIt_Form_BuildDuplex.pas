@@ -30,13 +30,16 @@ resourcestring
 
      rsCancelFront = 'Do I cancel the Front Side acquisition I just made?';
      rsCancelBack = 'Do I cancel the Back Side acquisition I just made?';
-     rsNoPages = 'No Pages in Front or Back Side';
+     rsNoPagesFront = 'No Pages in Front Side';
+     rsNoPagesBack = 'No Pages in Back Side';
 
 type
   { TWizardBuildDuplex }
   Exception_CancelledOp = class (Exception);
 
-  TWizardBuildDuplex = class(TForm, (* oldcode IDigIt_ArrayR_PChars,*) IDigIt_ProgressCallback)
+  TWizardBuildDuplex = class(TForm)
+    cbFirstPageBlank: TCheckBox;
+    cbLastPageBlank: TCheckBox;
     Image1: TImage;
     Image2: TImage;
     animTurn: TImage;
@@ -94,17 +97,7 @@ type
     function CancelStep: Boolean;
     function EndStep: Boolean;
 
-//oldcode    function Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer; overload;
-//oldcode    function Files_Add(var AFiles: TStringArray; AFileName: String): Integer; overload;
-
   public
- (* oldcode  //IDigIt_ArrayR_PChars
-    function GetCount: DWord; stdcall;
-    function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
-*)
-    //IDigIt_ProgressCallback
-    procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
-
     class function Execute(takeAction: DigIt_Source_TakeAction;
                            var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
   end;
@@ -162,13 +155,7 @@ function TWizardBuildDuplex.BeforeNextStep(index: Integer): Boolean;
 var
    btNext_Enabled,
    btPrev_Enabled :Boolean;
-
-   curData: Pointer;
-   curDataType: TDigItDataType;
-   res, i,
-   oldLength: Integer;
-   curImageFile: PChar;
-   curArray: IDigIt_ArrayR_PChars;
+   res: Integer;
 
    procedure CheckCancelledOp;
    begin
@@ -197,48 +184,18 @@ begin
        end;
 
      3:try //Front
-        (* oldcode
-       res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData);
-       Result:= (res > 0) and (curData <> nil);
-       if Result then
-       begin
-         if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
-         begin
-           if (curDataType = diDataType_FileName)
-           then begin
-                  res:= Files_Add(FrontFiles, PChar(curData));
-                  StrDispose(PChar(curData));
-                end
-           else res:= Files_Add(FrontFiles, IDigIt_ArrayR_PChars(curData));
-         end;
-       end;
-         *)
-         res:= Sources.Take(curtakeAction, FrontFiles, 0);
-         Result:= (res > 0) and (FrontFiles <> nil);
+          res:= Sources.Take(curtakeAction, FrontFiles, 0);
+          Result:= (res > 0) and (FrontFiles <> nil);
         except
           on E:Exception do raise Exception.Create('Error on Step:'+#13#10+'['+E.Message+']');
        end;
 
-     4:try
-        animTurn.Visible:= False;
-        (* oldcode
-        res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData);
-        Result:= (res > 0) and (curData <> nil);
-        if Result then
-        begin
-          if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
-          begin
-            if (curDataType = diDataType_FileName)
-            then begin
-                   res:= Files_Add(BackFiles, PChar(curData));
-                   StrDispose(PChar(curData));
-                 end
-            else res:= Files_Add(BackFiles, IDigIt_ArrayR_PChars(curData));
-          end;
-        end;
-          *)
+     4:try //Back
+          animTurn.Visible:= False;
+
           res:= Sources.Take(curtakeAction, BackFiles, 0);
           Result:= (res > 0) and (BackFiles <> nil);
+          if not(Result) then animTurn.Visible:= not(OneSided);
        except
           on E:Exception do raise Exception.Create('Error on Step:'+#13#10+'['+E.Message+']');
        end;
@@ -295,7 +252,6 @@ begin
   btPrev.Enabled := False;
 
   try
-     (* Put YOUR Code Here : index is the Page Showed *)
      Case index of
      1:try
        except
@@ -303,6 +259,7 @@ begin
        end;
      2:try
           OneSided:= rbOneSided.Checked;
+          cbLastPageBlank.Visible:= OneSided;
        except
           on E:Exception do raise Exception.Create('Error on Step:'+#13#10+'['+E.Message+']');
        end;
@@ -398,8 +355,6 @@ end;
 function TWizardBuildDuplex.CancelStep: Boolean;
 begin
   try
-     (* Put YOUR Code Here : User Click the Cancel Button, return False to block *)
-
      Result :=True;
   except
      on E:Exception do begin
@@ -432,7 +387,19 @@ begin
      AllFiles:= nil;
      lenFront:= Length(FrontFiles);
      lenBack:= Length(BackFiles);
-     if (lenFront=0) or (lenBack=0) then raise Exception.Create(rsNoPages);
+
+     //Delete the Last Page from FrontFiles, no need to physically delete it we always use lenFront not Length(FrontFiles)
+     if OneSided and cbLastPageBlank.Checked then dec(lenFront);
+
+     //Delete the First Page from BackFiles moving elements back by 1
+     if cbFirstPageBlank.Checked then
+     begin
+       for i:=1 to lenBack-1 do BackFiles[i-1]:= BackFiles[i];
+       dec(lenBack);
+     end;
+
+     if (lenFront <= 0) then raise Exception.Create(rsNoPagesFront);
+     if (lenBack <= 0) then raise Exception.Create(rsNoPagesBack);
 
      //Take the smallest length in len and the difference with the largest in lenOver
      if (lenFront <= lenBack)
@@ -492,51 +459,6 @@ begin
   end;
 end;
 
-(* oldcode
-function TWizardBuildDuplex.Files_Add(var AFiles: TStringArray; AArray: IDigIt_ArrayR_PChars): Integer;
-var
-   oldLength, i: Integer;
-   curImageFile: PChar;
-
-begin
-  Result:= 0;
-  if (AArray <> nil) then
-  begin
-    //Add files to end of Array AFiles
-    oldLength:= Length(AFiles);
-    Result:= AArray.GetCount;
-    if (Result > 0) then
-    begin
-      SetLength(AFiles, oldLength+Result);
-      for i:=0 to Result-1 do
-      begin
-        if AArray.Get(i, curImageFile) then
-        begin
-          AFiles[oldLength+i]:= curImageFile;
-          StrDispose(curImageFile);
-        end;
-      end;
-    end;
-  end;
-end;
-
-function TWizardBuildDuplex.Files_Add(var AFiles: TStringArray; AFileName: String): Integer;
-var
-   oldLength: Integer;
-
-begin
-  Result:= 0;
-  if (AFileName <> '') then
-  begin
-    //Add files to end of Array AFiles
-    oldLength:= Length(AFiles);
-    SetLength(AFiles, oldLength+1);
-    AFiles[oldLength]:= AFileName;
-    Result:= 1;
-  end;
-end;
-*)
-
 procedure TWizardBuildDuplex.FormCreate(Sender: TObject);
 begin
   StartPageIndex :=1;
@@ -594,38 +516,13 @@ begin
             end;
 end;
 
-(*
-function TWizardBuildDuplex.GetCount: DWord; stdcall;
-begin
-  Result:= Length(AllFiles);
-end;
-
-function TWizardBuildDuplex.Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
-begin
-  aData:= nil;
-  Result:= (aIndex < Length(AllFiles));
-
-  if Result then
-  try
-     aData:= StrNew(PChar(AllFiles[aIndex]));
-     Result:= True;
-  except
-     Result:= False;
-  end;
-end;
-*)
-
-procedure TWizardBuildDuplex.ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
-begin
-  CancelledOp:= True;
-end;
-
 class function TWizardBuildDuplex.Execute(takeAction: DigIt_Source_TakeAction;
                                           var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
+var
+   oldLength, i: Integer;
+
 begin
   Result:= 0;
-
-// oldcode aDataType:= diDataType_FileName;
 
   if (Sources.Selected <> nil) and (Sources.Selected^.Inst <> nil) then
   try
@@ -642,19 +539,22 @@ begin
 
       if (ShowModal = mrOk) then
       begin
-        AFiles:= AllFiles;
-        Result:= Length(AFiles);
-        (* oldcode
-        if (Result = 1 )
+        Result:= Length(AllFiles);
+
+        if (AFiles <> nil) and (AStartIndex >= 0)
         then begin
-               aData:= StrNew(PChar(AllFiles[0]));
-               aDataType:= diDataType_FileName;
+               oldLength:= Length(AFiles);
+               if (AStartIndex > oldLength) then AStartIndex:= oldLength;
+
+               //Add more space, if needed, to end of Array
+               if (AStartIndex+Result > oldLength) then SetLength(AFiles, AStartIndex+Result);
+
+               for i:=0 to Result-1 do
+               begin
+                 AFiles[AStartIndex+i].fName:= AllFiles[i].fName;
+               end;
              end
-        else begin
-               aData:= WizardBuildDuplex as IDigIt_ArrayR_PChars;
-               aDataType:= diDataType_FileNameArray;
-             end;
-        *)
+        else AFiles:= AllFiles;
       end;
     end;
 

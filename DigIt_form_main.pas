@@ -14,7 +14,7 @@ unit DigIt_Form_Main;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons, ExtDlgs,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   ExtCtrls, Menus, ComCtrls, ActnList, Spin, ShellCtrls, EditBtn, SpinEx,
   LCLVersion, LCLType, Laz2_XMLCfg, FPImage,
   BGRABitmap, BGRABitmapTypes, BGRAPapers,
@@ -350,7 +350,6 @@ type
     Session_File,
     LoadedFile: String;
 
-    testI,
     lastCropped,
     lastLenTaked,     //Used in Take Again
     iSourceFiles,
@@ -433,13 +432,9 @@ type
 
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
-//oldcode    function SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer; overload;
-//oldcode    function SourceFiles_Add(AFileName: String; AStartIndex: Integer): Integer; overload;
     procedure SourceFiles_Clear(ClearSourceInst: Boolean);
 
-//oldcode    function CropFile_Full(AFileName: String; isReTake: Boolean): Boolean; overload;
     procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean); overload;
-
     procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
 
     procedure SetSaveWriter(AFormat: TBGRAImageFormat);
@@ -472,7 +467,7 @@ uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
   BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
   MM_StrUtils,
-  DigIt_Destinations, DigIt_Destination_SaveFiles_SettingsForm,
+  DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
   DigIt_Form_ExportFiles,
   DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
@@ -689,36 +684,13 @@ end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
 var
-//oldcode   curData: Pointer;
-//oldcode   curDataType: TDigItDataType;
-  res: Integer;
-  curImageFile: String; //oldcode PChar;
+  curImageFile: String;
 
 begin
   try
      if Sources.Take(takeActPreview, curImageFile)
      then LoadImage(curImageFile, True)
-     (* oldcode
-      curData:= nil;
-      res:= Sources.Selected^.Inst.Take(takeActPreview, curDataType, curData);
-      if (res > 0) and (curData <> nil) then
-      begin
-        if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
-        begin
-          if (curDataType = diDataType_FileName)
-          then curImageFile:= PChar(curData)
-          else if not(IDigIt_ArrayR_PChars(curData).Get(0, curImageFile))
-               then curImageFile:= '';
-
-          if (curImageFile <> '') then
-          begin
-            LoadImage(curImageFile, True);
-            StrDispose(curImageFile);
-          end;
-        end;
-      end
-      *)
-      else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
+     else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
     UI_ToolBar;
@@ -776,15 +748,12 @@ end;
 
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
-   curData: Pointer;
-   curDataType: TDigItDataType;
    res,
    StartIndex,
    oldLength: Integer;
 
 begin
   try
-      curData:= nil;
       res:= 0;
       oldLength:= Length(SourceFiles);
 
@@ -844,72 +813,6 @@ begin
           end;
         end;
       end
-
-      (* oldcode
-      if (Sender = actTake) or (Sender = actTakeRe)
-      then res:= Sources.Selected^.Inst.Take(takeActTake, curDataType, curData)
-      else
-      if (Sender = actTakeBuildDuplex)
-      then res:= TWizardBuildDuplex.Execute(curDataType, curData);
-
-      if (res > 0) and (curData <> nil) then
-      begin
-        if (curDataType in [diDataType_FileName, diDataType_FileNameArray]) then
-        begin
-          Case CropMode of
-            diCropFull: begin
-              DigIt_Progress.ProgressShow(rsProcessingImages, 1, res);
-
-              if (curDataType = diDataType_FileName)
-              then begin
-                     CropFile_Full(PChar(curData), (Sender = actTakeRe));
-                     StrDispose(PChar(curData));
-                   end
-              else begin
-                     res:= SourceFiles_Add(IDigIt_ArrayR_PChars(curData), -1);
-                     CropFile_Full(0, (Sender = actTakeRe));
-                   end;
-
-              lastLenTaked:= res;
-              SourceFiles:= nil; iSourceFiles:= -1;
-              Sources.Selected^.Inst.Clear;
-            end;
-            diCropCustom: begin
-              if (Sender = actTakeRe)
-              then StartIndex:= oldLength-lastLenTaked
-              else StartIndex:= oldLength;
-
-              //Add files to the queue array
-              if (curDataType = diDataType_FileName)
-              then begin
-                     res:= SourceFiles_Add(PChar(curData), StartIndex);
-                     StrDispose(PChar(curData));
-                   end
-              else res:= SourceFiles_Add(IDigIt_ArrayR_PChars(curData), StartIndex);
-
-              if (Sender = actTakeRe)
-              then begin
-                     if (iSourceFiles > Length(SourceFiles))
-                     then iSourceFiles:= Length(SourceFiles); //Repos iSourceFiles if outside
-                   end
-              else begin
-                     //The queue was empty, Start from the first file
-                     if (oldLength = 0) and (Length(SourceFiles) > 0) then
-                     begin
-                       iSourceFiles:= 0;
-                       LoadImage(SourceFiles[0].fName, False);
-
-                       //Crop the First File directly
-                       actCropNextExecute(nil);
-                     end;
-                   end;
-
-              lastLenTaked:= res;
-            end;
-          end;
-        end;
-      end
-      *)
       else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
@@ -922,7 +825,6 @@ begin
     end;
 
     DigIt_Progress.Hide;
-    //oldcode WizardBuildDuplex.Free; WizardBuildDuplex:= nil;
   end;
 end;
 
@@ -1041,7 +943,6 @@ end;
 
 procedure TDigIt_Main.actCropAllExecute(Sender: TObject);
 var
-   i: Integer;
    c: Integer;
    cStr: String;
    Finished: Boolean;
@@ -1640,11 +1541,6 @@ end;
 procedure TDigIt_Main.actSessionNewExecute(Sender: TObject);
 begin
   try
-   (*  if TDigIt_Templates.Execute then
-     begin
-
-     end;
-     *)
     if (MessageDlg('DigIt', rsNewWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes) then
     begin
       SES_ClearAutoSave(False);
@@ -2314,10 +2210,6 @@ begin
 end;
 
 procedure TDigIt_Main.SES_ClearAutoSave(AFromStartup: Boolean);
-var
-   i: Integer;
-   nofileBMP: TBitmap;
-
 begin
   try
      DeleteFile(Path_DefSession+File_DefSession+Ext_AutoSess);
@@ -2602,7 +2494,6 @@ end;
 procedure TDigIt_Main.SES_LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    i,
-   imgCount,
    newCount,
    newSelected: Integer;
    curAge: Longint;
@@ -2895,7 +2786,6 @@ end;
 
 procedure TDigIt_Main.SES_LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
-   selButton: Integer;
    aFree: Boolean;
 
 begin
@@ -3377,59 +3267,6 @@ begin
 end;
 *)
 
-(* oldcode
-function TDigIt_Main.SourceFiles_Add(AArray: IDigIt_ArrayR_PChars; AStartIndex: Integer): Integer;
-var
-   oldLength, i: Integer;
-   curImageFile: PChar;
-
-begin
-  Result:= 0;
-  if (AArray <> nil) then
-  begin
-    oldLength:= Length(SourceFiles);
-    Result:= AArray.GetCount;
-    if (Result > 0) then
-    begin
-      if (AStartIndex < 0) or (AStartIndex > oldLength)
-      then AStartIndex:= oldLength;
-
-      //Add more space, if needed, to end of Array SourceFiles
-      if (AStartIndex+Result > oldLength) then SetLength(SourceFiles, AStartIndex+Result);
-
-      for i:=0 to Result-1 do
-        if AArray.Get(i, curImageFile) then
-        begin
-          SourceFiles[AStartIndex+i].fName:= curImageFile;
-          StrDispose(curImageFile);
-        end;
-    end;
-  end;
-end;
-
-function TDigIt_Main.SourceFiles_Add(AFileName: String; AStartIndex: Integer): Integer;
-var
-   oldLength: Integer;
-
-begin
-  Result:= 0;
-  if (AFileName <> '') then
-  begin
-    //Add files to end of Array SourceFiles
-    oldLength:= Length(SourceFiles);
-
-    if (AStartIndex < 0) or (AStartIndex > oldLength)
-    then AStartIndex:= oldLength;
-
-    //Add more space, if needed, to end of Array SourceFiles
-    if (AStartIndex+1 > oldLength) then SetLength(SourceFiles, AStartIndex+1);
-
-    SourceFiles[AStartIndex].fName:= AFileName;
-    Result:= 1;
-  end;
-end;
-*)
-
 procedure TDigIt_Main.SourceFiles_Clear(ClearSourceInst: Boolean);
 begin
   iSourceFiles:= -1;
@@ -3438,14 +3275,6 @@ begin
   SourceFiles:= nil;
   if ClearSourceInst and (Sources.Selected <> nil) then Sources.Selected^.Inst.Clear;
 end;
-
-(* oldcode
-function TDigIt_Main.CropFile_Full(AFileName: String; isReTake: Boolean): Boolean;
-begin
-  Result:= (AFileName <> '') and LoadImage(AFileName, False);
-  if Result then SaveCallBack(imgManipulation.Bitmap, nil, Integer(isReTake));
-end;
-*)
 
 procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
 var
@@ -3477,11 +3306,10 @@ begin
        Application.ProcessMessages;
 
        UserCancel:= DigIt_Progress.Cancelled;
-                   (*oldcode or
-                    not(CropFile_Full(SourceFiles[i].fName, isReTake and (i < lastLenTaked)));
-                    *)
+       if UserCancel then break;
 
        UserCancel:= not(LoadImage(SourceFiles[i].fName, False));
+       if UserCancel then break;
 
        try
           SaveCallBack(imgManipulation.Bitmap, nil, Integer( (isReTake and (i < lastLenTaked)) ));
@@ -3964,7 +3792,6 @@ var
    i: Integer;
    curBtn: TToolButton;
    curAct: TAction;
-   st:String;
 
 begin
   for i:=0 to ActionListMain.ActionCount-1 do

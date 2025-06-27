@@ -1,7 +1,9 @@
 DigIt CHANGE LOG
 ======================
 
-2025/06/25 Added Blank Pages handle in WizardBuildDuplex;
+2025/06/27 Release 0.3
+
+        25 Added Blank Pages handle in WizardBuildDuplex;
            Updated Languages;
            Some UI adjustments to accommodate the Italian language;
            Old Code Cleanup;

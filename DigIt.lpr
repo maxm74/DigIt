@@ -19,7 +19,6 @@ uses
 
 begin
   RequireDerivedFormResource := True;
-  Application.Title:='DigIt';
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TDigIt_Main, DigIt_Main);

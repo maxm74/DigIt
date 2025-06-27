@@ -28,9 +28,7 @@
     </i18n>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="2"/>
-      <RevisionNr Value="1"/>
-      <Attributes pvaPreRelease="True"/>
+      <MinorVersionNr Value="3"/>
       <StringTable CompanyName="MaxM" LegalCopyright="2025 Massimo Magnano" ProductName="DigIt"/>
     </VersionInfo>
     <BuildModes Count="2">

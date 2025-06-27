@@ -34,10 +34,19 @@ type
     lastCropped,
     lastLenTaked,     //Used in Take Again
     iSourceFiles,
-    iCapturedFiles: Integer;
+    iCapturedFiles,
+    sCapturedFiles: Integer;
     SourceFiles: TSourceFileArray;
 
     CapturedFiles: TCapturedFileArray;
+    CropMode: TDigItCropMode;
+
+//oldcode    PageResizeUnitType: Integer;
+    PageResize: TDigItFilter_Resize;
+    PageResizeInfo: TImageResolutionInfo;
+    PageRotate: TDigItFilter_Rotate;
+    PageFlip: TDigItFilter_Flip;
+
     { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
     (*    rDestination: PDestinationInfo;
     rDestinationParams: IDigIt_Params;
@@ -47,6 +56,20 @@ type
     SaveFormat: TBGRAImageFormat;
     SaveWriter: TFPCustomImageWriter;
     SaveExt: String;
+
+    rLoadedFile: String;
+
+    rBitmap: TBGRABitmap;
+
+    rCropAreas:;   //DONT USE BGRAImageManipulation The Goal is not to use Controls here
+
+    function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
+    procedure EmptyImage(saveToXML: Boolean);
+
+    function ResizeImage(ABitmap :TBGRABitmap;
+                         APageResize: TDigItFilter_Resize; APageResizeInfo: TImageResolutionInfo): TBGRABitmap;
+    function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
+    procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
 
     procedure SetSaveWriter(AFormat: TBGRAImageFormat);
 
@@ -85,7 +108,127 @@ implementation
 uses Graphics, FileUtil,
      MM_StrUtils,
      BGRAWriteJPeg,
-     DigIt_Sources, DigIt_Counter;
+     DigIt_Utils, DigIt_Sources, DigIt_Counter;
+
+function TDigIt_Session.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
+var
+   BitmapN,
+   BitmapR: TBGRABitmap;
+
+begin
+  Result:= False;
+
+  if (AImageFile<>'') and FileExists(AImageFile) then
+  try
+     BitmapR:= nil;
+     BitmapN:= TBGRABitmap.Create;
+     BitmapN.LoadFromFile(AImageFile);
+
+     //Pre processing Filters
+
+     { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
+
+     //Rotate
+     if (PageRotate <> rotNone) then
+     begin
+       BitmapR:= RotateImage(BitmapN, PageRotate);
+       if (BitmapR<>nil) then
+       begin
+         BitmapN.Free;
+         BitmapN:= BitmapR;
+         BitmapR:= nil;
+       end;
+     end;
+
+     //Flip
+     if (PageFlip <> flipNone) then FlipImage(BitmapN, PageFlip);
+
+     //Resize
+     if (PageResize <> resNone) then
+     begin
+       BitmapR:= ResizeImage(BitmapN, PageResize, PageResizeInfo);
+       if (BitmapR<>nil) then
+       begin
+         BitmapN.Free;
+         BitmapN:= BitmapR;
+         BitmapR:= nil;
+       end;
+     end;
+
+     rBitmap:= BitmapN;
+
+     rLoadedFile:= AImageFile;
+
+     if saveToXML then SaveLoadedImage(nil, True);
+
+     Result:= True;
+
+  finally
+     if (BitmapN <> Nil) then BitmapN.Free;
+  end;
+end;
+
+procedure TDigIt_Session.EmptyImage(saveToXML: Boolean);
+begin
+  rBitmap:= nil;
+  rLoadedFile:= '';
+  if saveToXML then SaveLoadedImage(nil, True);
+end;
+
+function TDigIt_Session.ResizeImage(ABitmap: TBGRABitmap;
+                                    APageResize: TDigItFilter_Resize; APageResizeInfo: TImageResolutionInfo): TBGRABitmap;
+var
+   newWidth, newHeight: Single;
+   pixelWidth, pixelHeight: Integer;
+
+begin
+  Result:= nil;
+
+  if (APageResize <> resNone) then
+  begin
+    if (APageResizeInfo.ResolutionUnit = ruNone)
+    then begin
+           pixelWidth:= Trunc(APageResizeInfo.ResolutionX);
+           pixelHeight:= Trunc(APageResizeInfo.ResolutionY);
+         end
+    else begin
+           newWidth:= PhysicalSizeConvert(APageResizeInfo.ResolutionUnit,
+                                          APageResizeInfo.ResolutionX,
+                                          ABitmap.ResolutionUnit);
+           newHeight:= PhysicalSizeConvert(APageResizeInfo.ResolutionUnit,
+                                           APageResizeInfo.ResolutionY,
+                                           ABitmap.ResolutionUnit);
+
+           pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
+           pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
+         end;
+
+    Case APageResize of
+    resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
+    resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
+    end;
+
+    Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
+  end;
+end;
+
+function TDigIt_Session.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
+begin
+  Case APageRotate of
+    rotNone: Result:= nil;
+    rotLeft90: Result:= ABitmap.RotateCCW(True);
+    rotRight90: Result:= ABitmap.RotateCW(True);
+    rot180: Result:= ABitmap.RotateUD(True);
+  end;
+end;
+
+procedure TDigIt_Session.FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
+begin
+  Case APageFlip of
+    flipHorizontal: ABitmap.HorizontalFlip;
+    flipVertical: ABitmap.VerticalFlip;
+  end;
+end;
 
 procedure TDigIt_Session.SetSaveWriter(AFormat: TBGRAImageFormat);
 begin
@@ -439,14 +582,11 @@ procedure TDigIt_Session.LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boo
 var
    i,
    imgCount,
-   newCount,
-   newSelected: Integer;
+   newCount: Integer;
    curAge: Longint;
    curExt,
    cuFileName,
    curItemPath: String;
-   curItem: TListItem;
-   imgListCountChanged: Boolean;
    aFree: Boolean;
 
 begin
@@ -463,8 +603,35 @@ begin
 
      newCount := aXML.GetValue(SES_CapturedFiles+'Count', 0);
      iCapturedFiles:= aXML.GetValue(SES_CapturedFiles+'iCapturedFiles', -1);
-     newSelected :=aXML.GetValue(SES_CapturedFiles+'Selected', -1);
+     sCapturedFiles :=aXML.GetValue(SES_CapturedFiles+'Selected', -1);
 
+     SetLength(CapturedFiles, newCount);
+     for i:=0 to newCount-1 do
+     begin
+         curItemPath :=SES_CapturedFiles+'Item' + IntToStr(i)+'/';
+         CapturedFiles[i].fAge:= aXML.GetValue(curItemPath+'fAge', 0);
+         CapturedFiles[i].fName:= RelativePathToFullPath(rPath, aXML.GetValue(curItemPath+'fName', ''));
+         CapturedFiles[i].iIndex:= aXML.GetValue(curItemPath+'iIndex', 0);
+
+         cuFileName:= CapturedFiles[i].fName;
+
+         //if FileExists leave it's Index else set to 0, -1 if exists but has a different Age
+         if FileExists(cuFileName)
+         then begin
+                curAge:= FileAge(cuFileName);
+
+                //File is Changed
+                if (CapturedFiles[i].fAge <> curAge) then
+                begin
+                  CapturedFiles[i].fAge:= curAge;
+                  CapturedFiles[i].iIndex:= -1;
+                end;
+              end
+        else CapturedFiles[i].iIndex :=0;
+     end;
+
+
+(* oldcode
      lvCaptured.BeginUpdate;
      lvCaptured.Clear;
 
@@ -508,7 +675,7 @@ begin
 
                 curItem.ImageIndex:= CapturedFiles[i].iIndex;
               end
-         else curItem.ImageIndex:= 0; //CapturedFiles[i].iIndex :=0;
+        else curItem.ImageIndex:= 0; //CapturedFiles[i].iIndex :=0;
      end;
 
      if (newSelected > -1) and (newSelected < newCount)
@@ -519,6 +686,7 @@ begin
      else if (lvCaptured.Items.Count > 0) then lvCaptured.Items[lvCaptured.Items.Count-1].MakeVisible(False);
 
      lvCaptured.EndUpdate;
+     *)
 
   finally
     if aFree then aXML.Free;
@@ -545,6 +713,7 @@ begin
      then curExt:= Ext_AutoThumb
      else curExt:= Ext_Thumb;
 
+(* oldcode
      if imgListThumb_Changed then
      try
        imgListThumb.SaveToFile(rPath+rFileName+curExt);
@@ -552,23 +721,25 @@ begin
 
      except
      end;
-
+*)
      //Save CapturedFiles array
-     aXML.DeletePath(CapturedFiles);
+     aXML.DeletePath(SES_CapturedFiles);
      lenCapturedFiles:= Length(CapturedFiles);
 
      if (lenCapturedFiles > 0) then
      begin
-       aXML.SetValue(CapturedFiles+'Count', Length(CapturedFiles));
-       aXML.SetValue(CapturedFiles+'iCapturedFiles', iCapturedFiles);
+       aXML.SetValue(SES_CapturedFiles+'Count', Length(CapturedFiles));
+       aXML.SetValue(SES_CapturedFiles+'iCapturedFiles', iCapturedFiles);
 
-       if lvCaptured.Selected=nil
+(* oldcode       if lvCaptured.Selected=nil
        then aXML.DeleteValue(CapturedFiles+'Selected')
-       else aXML.SetValue(CapturedFiles+'Selected', lvCaptured.Selected.Index);
+       else aXML.SetValue(SES_CapturedFiles+'Selected', lvCaptured.Selected.Index);
+*)
+       aXML.SetValue(SES_CapturedFiles+'Selected', sCapturedFiles);
 
        for i:=0 to Length(CapturedFiles)-1 do
        begin
-         curItemPath :=CapturedFiles+'Item' + IntToStr(i)+'/';
+         curItemPath :=SES_CapturedFiles+'Item' + IntToStr(i)+'/';
          aXML.SetValue(curItemPath+'fAge', CapturedFiles[i].fAge);
          aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(rPath, CapturedFiles[i].fName));
          aXML.SetValue(curItemPath+'iIndex', CapturedFiles[i].iIndex);
@@ -613,7 +784,7 @@ begin
           then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
 
-     aXML.SetValue('LoadedFile', FullPathToRelativePath(rPath, LoadedFile));
+     aXML.SetValue('LoadedFile', FullPathToRelativePath(rPath, rLoadedFile));
 
      if IsAutoSave then rSessionModified:= True;
 
@@ -659,16 +830,19 @@ begin
 
      if (Length(SourceFiles) > 0) then
      begin
-       aXML.SetValue(SourceFiles+'iSourceFiles', iSourceFiles);
-       aXML.SetValue(SourceFiles+'lastCropped', lastCropped);
-       aXML.SetValue(SourceFiles+'lastLenTaked', lastLenTaked);
+       aXML.SetValue(SES_SourceFiles+'iSourceFiles', iSourceFiles);
+       aXML.SetValue(SES_SourceFiles+'lastCropped', lastCropped);
+       aXML.SetValue(SES_SourceFiles+'lastLenTaked', lastLenTaked);
      end;
 
-     if (Length(CapturedFiles) > 0) then aXML.SetValue(CapturedFiles+'iCapturedFiles', iCapturedFiles);
+     if (Length(CapturedFiles) > 0) then aXML.SetValue(SES_SourceFiles+'iCapturedFiles', iCapturedFiles);
 
+(* oldcode
      if lvCaptured.Selected=nil
      then aXML.DeleteValue(CapturedFiles+'Selected')
      else aXML.SetValue(CapturedFiles+'Selected', lvCaptured.Selected.Index);
+*)
+     aXML.SetValue(SES_CapturedFiles+'Selected', sCapturedFiles);
 
      SaveLoadedImage(aXML, IsAutoSave);
 
@@ -693,12 +867,19 @@ begin
              else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
 
      newCropMode:= TDigItCropMode(aXML.GetValue('CropMode', 0));
+
+     if (newCropMode = diCropCustom)
+     then rCropAreas.Load(aXML, 'CropAreas')
+     else rCropAreas.Clear;
+
+(* oldcode
      setCropMode(newCropMode);
      if (newCropMode = diCropCustom) then
      begin
        UI_FillCounter;
        imgManipulation.CropAreas.Load(aXML, 'CropAreas');
      end;
+*)
 
   finally
     if aFree then aXML.Free;

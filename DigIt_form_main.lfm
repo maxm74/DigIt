@@ -27,6 +27,7 @@ object DigIt_Main: TDigIt_Main
     EmptyImage.ShowBorder = True
     NewCropAreaDefault.Icons = []
     NewCropAreaDefault.AspectRatio = '3:4'
+    Opacity = 64
     OnCropAreaAdded = AddedCrop
     OnCropAreaDeleted = DeletedCrop
     OnCropAreaChanged = ChangedCrop

@@ -1,6 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
+2025/07/01 Do not allow mode change by selecting an area; Changed Opacity to 64;
+
 2025/06/27 Release 0.3
 
         25 Added Blank Pages handle in WizardBuildDuplex;

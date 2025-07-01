@@ -61,7 +61,7 @@ type
 
     rBitmap: TBGRABitmap;
 
-    rCropAreas:;   //DONT USE BGRAImageManipulation The Goal is not to use Controls here
+    rCropAreas: integer;   //DONT USE BGRAImageManipulation The Goal is not to use Controls here
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);

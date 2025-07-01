@@ -3108,7 +3108,7 @@ var
 
 begin
   //If we are in FullArea Mode and user add an Area switch to Custom Mode
-  if (CropMode <> diCropCustom) then setCropMode(diCropCustom);
+  if (CropMode <> diCropCustom) (*and not(imgManipulation.Empty)*) then setCropMode(diCropCustom);
 
   curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
 
@@ -3223,6 +3223,7 @@ begin
         tbCrop.Visible:= False;
         imgManipulation.clearCropAreas;
         imgManipulation.Opacity:= 0;
+        imgManipulation.Enabled:= False;
         rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
         rollCounters.Collapsed:= True;
 
@@ -3230,7 +3231,8 @@ begin
       end;
       diCropCustom: begin
         tbCrop.Visible:= True;
-        imgManipulation.Opacity:= 128;
+        imgManipulation.Opacity:= 64; //128; {#to-do Add to Settings}
+        imgManipulation.Enabled:= True;
         rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
         rollCounters.Collapsed:= False;
         tbCropMode.Caption:= rsCropCust;

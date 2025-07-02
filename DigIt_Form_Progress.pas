@@ -15,7 +15,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Buttons,
-  Digit_Bridge_Intf, BGRAFlashProgressBar;
+  Digit_Bridge_Intf, Digit_Bridge_Impl,
+  BGRAFlashProgressBar;
 
 type
 
@@ -74,7 +75,7 @@ type
   end;
 
 var
-  DigIt_Progress: TDigIt_Progress;
+  DigIt_Progress: TDigIt_Progress=nil;
 
 implementation
 
@@ -172,6 +173,7 @@ end;
 
 function TDigIt_Progress.Cancelled: Boolean; stdcall;
 begin
+  Application.ProcessMessages;
   Result:= rCancelled;
 end;
 
@@ -277,6 +279,9 @@ begin
   Application.ProcessMessages;
   Result:= rCancelled;
 end;
+
+initialization
+  theBridge.SetProgressInterface(DigIt_Progress as IDigIt_Progress);
 
 end.
 

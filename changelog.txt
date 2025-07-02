@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/01 Do not allow mode change by selecting an area; Changed Opacity to 64;
+2025/07/02 Added Bridge_Impl SetProgressInterface to avoid Form Progress direct use;
+           Added Bridge_Impl ProgressShow useful methods;
+           Added TDigItResizeUnitType and TLoadSaveXMLMethod types;
+           Changed PageResizeUnitType var type to TDigItResizeUnitType;
+           Continued DigIt_Session implementation;
+
+        01 Do not allow mode change by selecting an area; Changed Opacity to 64;
 
 2025/06/27 Release 0.3
 

@@ -14,9 +14,8 @@ unit Digit_Bridge_Impl;
 interface
 
 uses
-  Classes, SysUtils, Laz2_XMLCfg,
-  MM_OpenArrayList,
-  Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings;
+  Classes, SysUtils,
+  DigIt_Types, Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings, DigIt_Counter;
 
 type
   TPluginInfo = record
@@ -103,6 +102,7 @@ type
   protected
     //rDestinations: TDigIt_Destinations;
     rPlugins: TDigIt_Plugins;
+    rProgress: IDigIt_Progress;
 
   public
     constructor Create;
@@ -113,7 +113,20 @@ type
     function Settings: IDigIt_Settings; stdcall;
     function Progress: IDigIt_Progress; stdcall;
 
-    //Internal Use only
+    //***************************  Internal Use only ***************************
+    procedure SetProgressInterface(const AProgressInterface: IDigIt_Progress);
+
+    //Useful functions
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False); overload;
+    procedure ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer); overload;
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer); overload;
+
+    function ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean; overload;
+    function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean; overload;
+
+    function ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean; overload;
+    function ProgressSetCurrent(CurrentCaption: String; CurrentMin, CurrentMax, CurrentVal: Integer): Boolean; overload;
+
     property Plugins: TDigIt_Plugins read rPlugins;
   end;
 
@@ -122,7 +135,7 @@ var
 
 implementation
 
-uses dynlibs, Masks, DigIt_Types, DigIt_Counter, DigIt_Form_Progress;
+uses dynlibs, Masks;
 
 { TDigIt_Plugins }
 
@@ -536,7 +549,100 @@ end;
 
 function TDigIt_Bridge.Progress: IDigIt_Progress; stdcall;
 begin
-  Result:= DigIt_Progress as IDigIt_Progress;
+  Result:= rProgress;
+end;
+
+procedure TDigIt_Bridge.SetProgressInterface(const AProgressInterface: IDigIt_Progress);
+begin
+  rProgress:= AProgressInterface;
+end;
+
+procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False);
+begin
+  if (rProgress <> nil) then
+  begin
+    rProgress.SetTotal(TotalMin, TotalMax, TotalMin, False);
+
+    if CurrentMarquee
+    then rProgress.SetCurrent(0, 100, 0, True)
+    else rProgress.SetCurrentVisible(False);
+
+    rProgress.Show(PChar(ACaption));
+  end;
+end;
+
+procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer);
+begin
+  if (rProgress <> nil) then
+  begin
+    if TotalMarquee
+    then rProgress.SetTotal(0, 100, 0, True)
+    else rProgress.SetTotalVisible(False);
+
+    rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentMin, False);
+
+    rProgress.Show(PChar(ACaption));
+  end;
+end;
+
+procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer);
+begin
+  if (rProgress <> nil) then
+  begin
+    rProgress.SetTotal(TotalMin, TotalMax, TotalMin, False);
+    rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentMin, False);
+    rProgress.SetTotalVisible(True);
+    rProgress.SetCurrentVisible(True);
+    rProgress.Show(PChar(ACaption));
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetTotal(TotalMin, TotalMax, TotalVal, False);
+    rProgress.SetTotalCaption(PChar(TotalCaption));
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetTotalValue(TotalVal);
+    rProgress.SetTotalCaption(PChar(TotalCaption));
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetCurrentValue(CurrentVal);
+    rProgress.SetCurrentCaption(PChar(CurrentCaption));
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetCurrent(CurrentCaption: String; CurrentMin, CurrentMax, CurrentVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentVal, False);
+    rProgress.SetCurrentCaption(PChar(CurrentCaption));
+  end;
 end;
 
 initialization

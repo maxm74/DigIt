@@ -13,7 +13,7 @@ unit DigIt_Types;
 
 interface
 
-uses SysUtils;
+uses SysUtils, Laz2_XMLCfg, FPImage;
 
 resourcestring
   rsProcessingImages = 'Processing Images';
@@ -71,6 +71,13 @@ type
     resNone
   );
 
+  TDigItResizeUnitType = (
+    ruFullsize = -1,
+    ruPixels = Integer(FPImage.ruNone),
+    ruInch = Integer(FPImage.ruPixelsPerInch),
+    ruCentimeter = Integer(FPImage.ruPixelsPerCentimeter)
+  );
+
   TSourceFile = packed record
     cCount,
     cStart: DWord;
@@ -84,6 +91,8 @@ type
     iIndex: Integer;
   end;
   TCapturedFileArray = array of TCapturedFile;
+
+  TLoadSaveXMLMethod = procedure (aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
 
 var
    Path_Application,

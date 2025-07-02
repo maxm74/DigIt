@@ -190,26 +190,32 @@ msgid "Create a Copy of the Work Session or Move it?"
 msgstr ""
 
 #: digit_form_main.rssavingcaptured
+msgctxt "digit_form_main.rssavingcaptured"
 msgid "Saving Captured Files"
 msgstr ""
 
 #: digit_form_main.rssavingdone
+msgctxt "digit_form_main.rssavingdone"
 msgid "Saved Done"
 msgstr ""
 
 #: digit_form_main.rssavingsessionfiles
+msgctxt "digit_form_main.rssavingsessionfiles"
 msgid "Saving Session Files"
 msgstr ""
 
 #: digit_form_main.rssavingsources
+msgctxt "digit_form_main.rssavingsources"
 msgid "Saving Sources Files"
 msgstr ""
 
 #: digit_form_main.rssavingswitch
+msgctxt "digit_form_main.rssavingswitch"
 msgid "Switching to New Work Session"
 msgstr ""
 
 #: digit_form_main.rssavingwork
+msgctxt "digit_form_main.rssavingwork"
 msgid "Saving the Work Session"
 msgstr ""
 
@@ -239,6 +245,36 @@ msgstr ""
 
 #: digit_form_profiles.rsprofiles_title
 msgid "Profile Title :"
+msgstr ""
+
+#: digit_session.rssavingcaptured
+msgctxt "digit_session.rssavingcaptured"
+msgid "Saving Captured Files"
+msgstr ""
+
+#: digit_session.rssavingdone
+msgctxt "digit_session.rssavingdone"
+msgid "Saved Done"
+msgstr ""
+
+#: digit_session.rssavingsessionfiles
+msgctxt "digit_session.rssavingsessionfiles"
+msgid "Saving Session Files"
+msgstr ""
+
+#: digit_session.rssavingsources
+msgctxt "digit_session.rssavingsources"
+msgid "Saving Sources Files"
+msgstr ""
+
+#: digit_session.rssavingswitch
+msgctxt "digit_session.rssavingswitch"
+msgid "Switching to New Work Session"
+msgstr ""
+
+#: digit_session.rssavingwork
+msgctxt "digit_session.rssavingwork"
+msgid "Saving the Work Session"
 msgstr ""
 
 #: digit_source_folder.digit_source_folder_namel

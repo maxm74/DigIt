@@ -613,7 +613,8 @@ msgid "Height :"
 msgstr ""
 
 #: tdigit_main.bclabel12.caption
-msgid "Fixed side:"
+msgctxt "tdigit_main.bclabel12.caption"
+msgid "Unit :"
 msgstr ""
 
 #: tdigit_main.bclabel13.caption
@@ -643,6 +644,7 @@ msgid "Height :"
 msgstr ""
 
 #: tdigit_main.bclabel5.caption
+msgctxt "tdigit_main.bclabel5.caption"
 msgid "Unit :"
 msgstr ""
 
@@ -775,12 +777,12 @@ msgstr ""
 msgid "pixels"
 msgstr ""
 
-#: tdigit_main.edpage_fix.text
-msgid "Width"
+#: tdigit_main.edpageresizetype.text
+msgid "Full Size"
 msgstr ""
 
-#: tdigit_main.edpage_unittype.text
-msgid "full size"
+#: tdigit_main.edpageunit.text
+msgid "cm"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption

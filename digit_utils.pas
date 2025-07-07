@@ -49,11 +49,6 @@ procedure GetProportionalSize(Width, Height, imgWidth, imgHeight: Integer;
                               var newWidth, newHeight: Integer);
 function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
 
-{** Convert PhysicalSize to/from Cm/Inch}
-function PhysicalSizeConvert(ASourceUnit: TResolutionUnit; ASourceSize: Single;
-                             ATargetUnit: TResolutionUnit=ruPixelsPerInch;
-                             AResolution: Single = 96): Single;
-
 function GetUserName: String;
 
 implementation
@@ -400,24 +395,6 @@ begin
   else r:= imgSide/ASide;
 
   Result:= Round(imgOtherSide/r);
-end;
-
-function PhysicalSizeConvert(ASourceUnit: TResolutionUnit; ASourceSize: Single;
-                             ATargetUnit: TResolutionUnit; AResolution: Single): Single;
-begin
-  Result:= ASourceSize;
-  // already in expected unit
-  if ASourceUnit = ATargetUnit then exit;
-
-  // checks if resolution is ill-defined
-  if (ATargetUnit = ruNone) and (AResolution < 2) then AResolution:= 96; // assume legacy 96 DPI
-
-  case ASourceUnit of
-    ruPixelsPerCentimeter: Result:= ASourceSize/2.54; // from Cm to Inch
-    ruPixelsPerInch: Result:= ASourceSize*2.54;       // from Inch to Cm
-   else {ruNone}
-    Result:= ASourceSize / AResolution                // from Pixels
-  end;
 end;
 
 function GetUserName: String;

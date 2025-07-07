@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/02 Added Bridge_Impl SetProgressInterface to avoid Form Progress direct use;
+2025/07/07 Moved PhysicalSizeConvert in DigIt_Types;
+           Changed use of TResolutionUnit to TPhysicalUnit in TDigItPhysicalSize;
+           Use of TDigItPhysicalSize in Page Resize;
+           function to Convert to/from  Physical/Resolution Unit (maybe deleted in future);
+
+DigIt_Session don't use ImageManipulation Crop Areas but TPhysicalRectArray;
+        02 Added Bridge_Impl SetProgressInterface to avoid Form Progress direct use;
            Added Bridge_Impl ProgressShow useful methods;
            Added TDigItResizeUnitType and TLoadSaveXMLMethod types;
            Changed PageResizeUnitType var type to TDigItResizeUnitType;

@@ -7,6 +7,7 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -130,14 +131,14 @@ object DigIt_Main: TDigIt_Main
       end
       object tbCaptSep1: TToolButton
         Left = 53
-        Height = 26
+        Height = 8
         Top = 2
         Caption = 'tbCaptSep1'
         Style = tbsSeparator
       end
       object tbCaptSep2: TToolButton
         Left = 113
-        Height = 26
+        Height = 8
         Top = 2
         Caption = 'tbCaptSep2'
         Style = tbsSeparator
@@ -627,7 +628,7 @@ object DigIt_Main: TDigIt_Main
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object edPage_UnitType: TComboBox
+    object edPageResizeType: TComboBox
       Left = 108
       Height = 28
       Top = 336
@@ -636,15 +637,15 @@ object DigIt_Main: TDigIt_Main
       ItemHeight = 20
       ItemIndex = 0
       Items.Strings = (
-        'full size'
-        'pixels'
-        'inchs'
-        'cm'
+        'Full Size'
+        'Width'
+        'Height'
+        'Both'
       )
       Style = csDropDownList
       TabOrder = 2
-      Text = 'full size'
-      OnChange = edPage_UnitTypeChange
+      Text = 'Full Size'
+      OnChange = edPageResizeTypeChange
     end
     object btPageSizesToCrops: TSpeedButton
       Left = 239
@@ -787,28 +788,28 @@ object DigIt_Main: TDigIt_Main
         Rounding.RoundX = 1
         Rounding.RoundY = 1
       end
-      object edPage_Fix: TComboBox
+      object edPageUnit: TComboBox
         Left = 81
         Height = 28
         Top = 79
         Width = 129
         AutoSize = False
         ItemHeight = 20
-        ItemIndex = 0
+        ItemIndex = 2
         Items.Strings = (
-          'Width'
-          'Height'
-          'Both'
+          'pixels'
+          'inchs'
+          'cm'
         )
         Style = csDropDownList
         TabOrder = 2
-        Text = 'Width'
+        Text = 'cm'
       end
       object BCLabel12: TBCLabel
-        Left = 8
+        Left = 43
         Height = 20
         Top = 84
-        Width = 69
+        Width = 34
         Anchors = [akTop, akRight]
         Background.Gradient1.StartColor = clWhite
         Background.Gradient1.EndColor = clBlack
@@ -827,7 +828,7 @@ object DigIt_Main: TDigIt_Main
         Background.Gradient1EndPercent = 35
         Background.Style = bbsClear
         Border.Style = bboNone
-        Caption = 'Fixed side:'
+        Caption = 'Unit :'
         FontEx.Color = clDefault
         FontEx.FontQuality = fqSystemClearType
         FontEx.Shadow = False
@@ -925,7 +926,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepMenu: TToolButton
         Left = 76
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepMenu'
         Style = tbsSeparator
@@ -953,7 +954,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepTake: TToolButton
         Left = 347
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepTake'
         Style = tbsSeparator
@@ -1014,7 +1015,7 @@ object DigIt_Main: TDigIt_Main
       Wrapable = False
       object tbSepCrop: TToolButton
         Left = 1
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepCrop'
         Style = tbsSeparator
@@ -1045,7 +1046,7 @@ object DigIt_Main: TDigIt_Main
       end
       object tbSepClear: TToolButton
         Left = 348
-        Height = 62
+        Height = 8
         Top = 0
         Caption = 'tbSepClear'
         Style = tbsSeparator

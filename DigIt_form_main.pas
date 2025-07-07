@@ -132,8 +132,8 @@ type
     edCropWidth: TFloatSpinEdit;
     edPageHeight: TFloatSpinEdit;
     edPageWidth: TFloatSpinEdit;
-    edPage_Fix: TComboBox;
-    edPage_UnitType: TComboBox;
+    edPageUnit: TComboBox;
+    edPageResizeType: TComboBox;
     imgListCaptured: TImageList;
     itemTake: TMenuItem;
     itemTakeAgain: TMenuItem;
@@ -272,7 +272,7 @@ type
     procedure btZUpClick(Sender: TObject);
     procedure edPageHeightChange(Sender: TObject);
     procedure edPageWidthChange(Sender: TObject);
-    procedure edPage_UnitTypeChange(Sender: TObject);
+    procedure edPageResizeTypeChange(Sender: TObject);
     procedure itemCropModeClick(Sender: TObject);
     procedure itemProfiles_AddCurrentClick(Sender: TObject);
     procedure itemProfiles_EditClick(Sender: TObject);
@@ -333,7 +333,7 @@ type
 
     CropMode: TDigItCropMode;
 
-    PageResizeUnitType: TDigItResizeUnitType;
+    PageSize: TDigItPhysicalSize;
     PageResize: TDigItFilter_Resize;
     PageRotate: TDigItFilter_Rotate;
     PageFlip: TDigItFilter_Flip;
@@ -392,7 +392,7 @@ type
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
 
-    procedure SetPageResizeUnitType(AValue: TDigItResizeUnitType; PredefValues: Boolean);
+    procedure SetPageResizeType(AValue: TDigItFilter_Resize; PredefValues: Boolean);
 
     function ResizeImage(ABitmap :TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
     function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
@@ -1145,9 +1145,9 @@ procedure TDigIt_Main.btPageSizesClick(Sender: TObject);
 begin
   menuPaperSizes.Items.Clear;
 
-  if (edPage_UnitType.ItemIndex = 0)
+  if (edPageResizeType.ItemIndex = 0)
   then BuildPaperSizesMenu(ruPixelsPerCentimeter, Self, menuPaperSizes, @PageSizesClick, 4, 5)
-  else BuildPaperSizesMenu(TResolutionUnit(edPage_UnitType.ItemIndex-1), Self, menuPaperSizes, @PageSizesClick, 4, 5);
+  else BuildPaperSizesMenu(TResolutionUnit(edPageResizeType.ItemIndex-1), Self, menuPaperSizes, @PageSizesClick, 4, 5);
 
   menuPaperSizes.PopUp;
 end;
@@ -1156,13 +1156,13 @@ procedure TDigIt_Main.btPageSizesToCropsClick(Sender: TObject);
 begin
   imgManipulation.SetEmptyImageSizeToCropAreas(True);
 
-  if edPage_UnitType.ItemIndex=0
+  if edPageResizeType.ItemIndex=0
   then begin
          //if page size is not defined set it to PixelsPerCentimeter (fucking inch)
          imgManipulation.EmptyImage.ResolutionUnit:=ruPixelsPerCentimeter;
-         edPage_UnitType.ItemIndex:=3;
+         edPageResizeType.ItemIndex:=3;
        end
-  else imgManipulation.EmptyImage.ResolutionUnit:=TResolutionUnit(edPage_UnitType.ItemIndex-1);
+  else imgManipulation.EmptyImage.ResolutionUnit:=TResolutionUnit(edPageResizeType.ItemIndex-1);
 
   UI_FillPageSizes;
 end;
@@ -1290,8 +1290,8 @@ begin
   try
     PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, ResUnit, Paper);
 
-    if (PageResizeUnitType = ruFullsize)
-    then SetPageResizeUnitType(TDigItResizeUnitType(ResUnit), False);
+    if (PageResize = resFullSize)
+    then SetPageResizeType(resFixedWidth, False);
 
     imgManipulation.SetEmptyImageSize(ResUnit, Paper.w, Paper.h);
 
@@ -1358,10 +1358,11 @@ end;
 
 procedure TDigIt_Main.edPageHeightChange(Sender: TObject);
 begin
-  if inFillPagesUI or (PageResizeUnitType = ruFullsize) then exit;
+  if inFillPagesUI or (PageResize = resFullsize) then exit;
 
-  imgManipulation.SetEmptyImageSize(TResolutionUnit(PageResizeUnitType),
-                                    edPageWidth.Value, edPageHeight.Value);
+  PageSize.Height:= edPageHeight.Value;
+
+  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
 
   if not(imgManipulation.Empty) and
      FileExists(LoadedFile)
@@ -1370,20 +1371,21 @@ end;
 
 procedure TDigIt_Main.edPageWidthChange(Sender: TObject);
 begin
-  if inFillPagesUI or (PageResizeUnitType = ruFullsize) then exit;
+  if inFillPagesUI or (PageResize = resFullsize) then exit;
 
-  imgManipulation.SetEmptyImageSize(TResolutionUnit(PageResizeUnitType),
-                                    edPageWidth.Value, edPageHeight.Value);
+  PageSize.Width:= edPageWidth.Value;
+
+  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
 
   if not(imgManipulation.Empty) and
      FileExists(LoadedFile)
   then LoadImage(LoadedFile, False);
 end;
 
-procedure TDigIt_Main.edPage_UnitTypeChange(Sender: TObject);
+procedure TDigIt_Main.edPageResizeTypeChange(Sender: TObject);
 begin
   try
-     SetPageResizeUnitType(TDigItResizeUnitType(edPage_UnitType.ItemIndex-1), True);
+     SetPageResizeType(TDigItFilter_Resize(edPageResizeType.ItemIndex), True);
 
      if not(imgManipulation.Empty) and
         FileExists(LoadedFile)
@@ -1790,7 +1792,7 @@ begin
      if (PageFlip <> flipNone) then FlipImage(Bitmap, PageFlip);
 
      //Resize
-     if (PageResize <> resNone) then
+     if (PageResize <> resFullSize) then
      begin
        BitmapR:= ResizeImage(Bitmap, PageResize);
        if (BitmapR<>nil) then
@@ -1821,31 +1823,30 @@ begin
   if saveToXML then SES_SaveLoadedImage(nil, True);
 end;
 
-procedure TDigIt_Main.SetPageResizeUnitType(AValue: TDigItResizeUnitType; PredefValues: Boolean);
+procedure TDigIt_Main.SetPageResizeType(AValue: TDigItFilter_Resize; PredefValues: Boolean);
 begin
-  PageResizeUnitType:= AValue;
-  edPage_UnitType.ItemIndex:= Integer(AValue)+1;
+  PageResize:= AValue;
+  edPageResizeType.ItemIndex:= Integer(AValue);
 
-  if (PageResizeUnitType = ruFullsize)
-  then begin
-         PageResize:= resNone;
-         imgManipulation.SetEmptyImageSizeToNull;
-       end
+  if (PageResize = resFullsize)
+  then imgManipulation.SetEmptyImageSizeToNull
   else begin
          //if there is a size defined, change only the resolution unit
-         if (panelPageSize.Enabled)
-         then imgManipulation.EmptyImage.ResolutionUnit:= TResolutionUnit(edPage_UnitType.ItemIndex-1)
-         else if PredefValues then
-              Case TResolutionUnit(AValue) of
-              ruNone: imgManipulation.SetEmptyImageSize(ruNone,
+         (*if (panelPageSize.Enabled)
+         then begin
+                imgManipulation.EmptyImage.ResolutionUnit:= TResolutionUnit(edPageUnit.ItemIndex);
+              end
+         else*) if PredefValues then
+              Case PageSize.PhysicalUnit of
+              puPixel: imgManipulation.SetEmptyImageSize(ruNone,
                                                         Paper_A_inch[4].w * 200, Paper_A_inch[4].h * 200);
-              ruPixelsPerCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
-                                                        Paper_A_cm[4].w, Paper_A_cm[4].h);
-              ruPixelsPerInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
+              puInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
                                                         Paper_A_inch[4].w, Paper_A_inch[4].h);
+              puCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
+                                                        Paper_A_cm[4].w, Paper_A_cm[4].h);
               end;
 
-         PageResize:= TDigItFilter_Resize(edPage_Fix.ItemIndex);
+         PageResize:= TDigItFilter_Resize(edPageResizeType.ItemIndex);
        end;
 end;
 
@@ -1857,32 +1858,29 @@ var
 begin
   Result:= nil;
 
-  if (APageResize <> resNone) then
-  begin
-    if (imgManipulation.EmptyImage.ResolutionUnit = ruNone)
-    then begin
-           pixelWidth:= imgManipulation.EmptyImage.Width;
-           pixelHeight:= imgManipulation.EmptyImage.Height;
-         end
-    else begin
-           newWidth:= PhysicalSizeConvert(imgManipulation.EmptyImage.ResolutionUnit,
-                                          imgManipulation.EmptyImage.ResolutionWidth,
-                                          ABitmap.ResolutionUnit);
-           newHeight:= PhysicalSizeConvert(imgManipulation.EmptyImage.ResolutionUnit,
-                                           imgManipulation.EmptyImage.ResolutionHeight,
-                                           ABitmap.ResolutionUnit);
+  if (PageSize.PhysicalUnit = puPixel)
+  then begin
+         pixelWidth:= Trunc(PageSize.Width);
+         pixelHeight:= Trunc(PageSize.Height);
+        end
+  else begin
+        newWidth:= PhysicalSizeConvert(PageSize.PhysicalUnit,
+                                       PageSize.Width,
+                                       ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionX);
+        newHeight:= PhysicalSizeConvert(PageSize.PhysicalUnit,
+                                        PageSize.Height,
+                                        ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionY);
 
-           pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
-           pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
-         end;
+        pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
+        pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
+      end;
 
-    Case APageResize of
-    resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
-    resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
-    end;
-
-    Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
+  Case APageResize of
+  resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
+  resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
   end;
+
+  Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
 end;
 
 function TDigIt_Main.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
@@ -2795,21 +2793,20 @@ begin
           then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
-     aXML.ReadObject(SES_PageSettings+'Page/', imgManipulation.EmptyImage);
+     PageResize:= resFullsize;
+     aXML.GetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
 
-     PageResizeUnitType:= ruFullsize;
-     aXML.GetValue(SES_PageSettings+'ResizeUnitType', PageResizeUnitType, TypeInfo(TDigItResizeUnitType));
-     if (imgManipulation.EmptyImage.Width = 0) or
-        (imgManipulation.EmptyImage.Height = 0) then PageResizeUnitType:= ruFullsize;
-
-     PageResize:= resFixedWidth;
-     aXML.GetValue(SES_PageSettings+'Resize', PageResize, TypeInfo(TDigItFilter_Resize));
+     aXML.ReadObject(SES_PageSettings+'PageSize', PageSize);
 
      PageRotate:= rotNone;
-     aXML.GetValue(SES_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
+     aXML.GetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
 
      PageFlip:= flipNone;
-     aXML.GetValue(SES_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFilter_Flip));
+     aXML.GetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
+
+     if (PageResize = resFullsize)
+     then imgManipulation.SetEmptyImageSizeToNull
+     else imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(PageSize.PhysicalUnit), PageSize.Width, PageSize.Height);
 
   finally
     UI_FillPageSizes;
@@ -2831,12 +2828,14 @@ begin
           then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
 
-     aXML.WriteObject(SES_PageSettings+'Page/', imgManipulation.EmptyImage);
+     if (PageSize.Width = 0) or
+        (PageSize.Height = 0) then PageResize:= resFullsize;
 
-     aXML.SetValue(SES_PageSettings+'ResizeUnitType', PageResizeUnitType, TypeInfo(TDigItResizeUnitType));
-     aXML.SetValue(SES_PageSettings+'Resize', PageResize, TypeInfo(TDigItFilter_Resize));
-     aXML.SetValue(SES_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
-     aXML.SetValue(SES_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFilter_Flip));
+     aXML.SetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
+     aXML.WriteObject(SES_PageSettings+'PageSize', PageSize);
+
+     aXML.SetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
+     aXML.SetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
 
      if IsAutoSave then SessionModified:= True;
 
@@ -3419,8 +3418,7 @@ begin
 
   LoadedFile:= '';
 
-  PageResizeUnitType:= ruFullsize;
-  PageResize:= resNone;
+  PageResize:= resFullsize;
   PageRotate:= rotNone;
   PageFlip:= flipNone;
 
@@ -3643,16 +3641,16 @@ procedure TDigIt_Main.UI_FillPageSizes;
 begin
   inFillPagesUI:= True;
 
-  panelPageSize.Enabled:= (PageResizeUnitType <> ruFullsize);
+  panelPageSize.Enabled:= (PageResize <> resFullsize);
 
   if panelPageSize.Enabled then
   begin
-    if (Integer(PageResizeUnitType) <> Integer(imgManipulation.EmptyImage.ResolutionUnit)) then
+    if (PageSize.PhysicalUnit <> ResolutionToPhysicalUnit(imgManipulation.EmptyImage.ResolutionUnit)) then
     begin
-      imgManipulation.EmptyImage.ResolutionUnit:= TResolutionUnit(PageResizeUnitType);
+      imgManipulation.EmptyImage.ResolutionUnit:= PhysicalToResolutionUnit(PageSize.PhysicalUnit);
     end;
 
-    if (imgManipulation.EmptyImage.ResolutionUnit=ruNone)
+    if (PageSize.PhysicalUnit = puPixel)
     then begin
            edPageWidth.DecimalPlaces:=0;
            edPageHeight.DecimalPlaces:=0;
@@ -3662,8 +3660,8 @@ begin
            edPageHeight.DecimalPlaces:=3;
          end;
 
-    edPageWidth.Value:= imgManipulation.EmptyImage.ResolutionWidth;
-    edPageHeight.Value:= imgManipulation.EmptyImage.ResolutionHeight;
+    edPageWidth.Value:= PageSize.Width;
+    edPageHeight.Value:= PageSize.Height;
   end;
 
   inFillPagesUI:= False;

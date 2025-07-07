@@ -13,7 +13,8 @@ unit DigIt_Types;
 
 interface
 
-uses SysUtils, Laz2_XMLCfg, FPImage;
+uses Classes, SysUtils, Laz2_XMLCfg, FPImage,
+     BGRABitmapTypes;
 
 resourcestring
   rsProcessingImages = 'Processing Images';
@@ -35,6 +36,7 @@ const
   SES_SourceFiles   = 'SourceFiles/';
   SES_CapturedFiles = 'CapturedFiles/';
   SES_PageSettings  = 'PageSettings/';
+  SES_CropAreas = 'CropAreas/';
 
 type
   TDigItCropMode = (
@@ -65,18 +67,33 @@ type
   );
 
   TDigItFilter_Resize = (
+    resFullSize,
     resFixedWidth,
     resFixedHeight,
-    resBoth,
-    resNone
+    resBoth
   );
 
-  TDigItResizeUnitType = (
-    ruFullsize = -1,
-    ruPixels = Integer(FPImage.ruNone),
-    ruInch = Integer(FPImage.ruPixelsPerInch),
-    ruCentimeter = Integer(FPImage.ruPixelsPerCentimeter)
-  );
+  { TDigItPhysicalSize }
+
+  TDigItPhysicalSize = class(TPersistent)
+    private
+      rPhysicalUnit: TPhysicalUnit;
+      rWidth,
+      rHeight: Single;
+
+      procedure SetPhysicalUnit(AValue: TPhysicalUnit);
+
+    public
+      PixelsPerInch: Integer; //Used only to convert to pixels
+
+      constructor Create(APixelsPerInch: Integer=96);
+      procedure SetValues(APhysicalUnit: TPhysicalUnit; AWidth, AHeight: Single);
+
+    published
+      property PhysicalUnit: TPhysicalUnit read rPhysicalUnit write SetPhysicalUnit;
+      property Width: Single read rWidth write rWidth;
+      property Height: Single read rHeight write rHeight;
+    end;
 
   TSourceFile = packed record
     cCount,
@@ -94,6 +111,14 @@ type
 
   TLoadSaveXMLMethod = procedure (aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
 
+
+{** Convert PhysicalSize to/from Cm/Inch}
+function PhysicalSizeConvert(ASourceUnit: TPhysicalUnit; ASourceSize: Single;
+                             ATargetUnit: TPhysicalUnit; AResolution: Single): Single;
+
+function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
+function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
+
 var
    Path_Application,
    Path_Config,
@@ -108,6 +133,75 @@ var
 implementation
 
 uses BGRAOpenRaster, BGRAPaintNet;
+
+function PhysicalSizeConvert(ASourceUnit: TPhysicalUnit; ASourceSize: Single;
+                             ATargetUnit: TPhysicalUnit; AResolution: Single): Single;
+begin
+  Result:= ASourceSize;
+  // already in expected unit
+  if ASourceUnit = ATargetUnit then exit;
+
+  // checks if resolution is ill-defined
+  if (ATargetUnit = puPixel) and (AResolution < 2) then AResolution:= 96; // assume legacy 96 DPI
+
+  case ASourceUnit of
+  puPixel: if (ATargetUnit = puInch)
+           then Result:= ASourceSize/AResolution                // from Pixel to Inch
+           else Result:= (ASourceSize/AResolution)*2.54;        // from Pixel to Cm
+  puInch: if (ATargetUnit = puCentimeter)
+          then Result:= ASourceSize*2.54                        // from Inch to Cm
+          else Result:= ASourceSize*AResolution;                // form Inch to Pixel
+  puCentimeter: if (ATargetUnit = puInch)
+                then Result:= ASourceSize/2.54                  // from Cm to Inch
+                else Result:= (ASourceSize/2.54)*AResolution;   // form Cm to Pixel
+  end;
+end;
+
+function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
+begin
+  case ASourceUnit of
+  puPixel: Result:= ruNone;
+  puInch: Result:= ruPixelsPerInch;
+  puCentimeter: Result:= ruPixelsPerCentimeter;
+  end;
+end;
+
+function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
+begin
+  case ASourceUnit of
+  ruNone: Result:= puPixel;
+  ruPixelsPerInch: Result:= puInch;
+  ruPixelsPerCentimeter: Result:= puCentimeter;
+  end;
+end;
+
+
+{ TDigItPhysicalSize }
+
+procedure TDigItPhysicalSize.SetPhysicalUnit(AValue: TPhysicalUnit);
+begin
+  if (AValue<>rPhysicalUnit) then
+  begin
+    rWidth:= PhysicalSizeConvert(rPhysicalUnit, rWidth, AValue, PixelsPerInch);
+    rHeight:= PhysicalSizeConvert(rPhysicalUnit, rHeight, AValue, PixelsPerInch);
+    rPhysicalUnit:= AValue;
+  end;
+end;
+
+constructor TDigItPhysicalSize.Create(APixelsPerInch: Integer);
+begin
+  inherited Create;
+
+  PixelsPerInch:= APixelsPerInch;
+end;
+
+procedure TDigItPhysicalSize.SetValues(APhysicalUnit: TPhysicalUnit; AWidth,
+  AHeight: Single);
+begin
+  rPhysicalUnit:= APhysicalUnit;
+  rWidth:= AWidth;
+  rHeight:= AHeight;
+end;
 
 initialization
    Path_Application:= ExtractFilePath(ParamStr(0));

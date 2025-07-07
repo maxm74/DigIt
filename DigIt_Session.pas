@@ -45,14 +45,15 @@ type
     iSourceFiles,
     iCapturedFiles,
     sCapturedFiles: Integer;
+
+  public
     SourceFiles: TSourceFileArray;
 
     CapturedFiles: TCapturedFileArray;
     CropMode: TDigItCropMode;
 
-    rPageResizeUnitType: TDigItResizeUnitType;
+    rPageSize: TDigItPhysicalSize;
     PageResize: TDigItFilter_Resize;
-    PageResizeInfo: TImageResolutionInfo;
     PageRotate: TDigItFilter_Rotate;
     PageFlip: TDigItFilter_Flip;
 
@@ -70,23 +71,18 @@ type
 
     rBitmap: TBGRABitmap;
 
-    {$ifdef BGRAControls}
-    rImageManipulation: TBGRAImageManipulation;
-    {$else}
-    {$endif}
+    CropAreas: TPhysicalRectArray;
 
-    rAdditionalLoad,
-    rAdditionalSave: TLoadSaveXMLMethod;
+    AdditionalLoad,
+    AdditionalSave: TLoadSaveXMLMethod;
 
-  public
     constructor Create;
     destructor Destroy; override;
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
 
-    function ResizeImage(ABitmap :TBGRABitmap;
-                         APageResize: TDigItFilter_Resize; APageResizeInfo: TImageResolutionInfo): TBGRABitmap;
+    function ResizeImage(ABitmap :TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
     function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
     procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
 
@@ -131,9 +127,6 @@ type
     procedure SetSaveWriter(AFormat: TBGRAImageFormat);
 
     property Loading: Boolean read rLoading;
-
-    property AdditionalLoad: TLoadSaveXMLMethod read rAdditionalLoad write rAdditionalLoad;
-    property AdditionalSave: TLoadSaveXMLMethod read rAdditionalSave write rAdditionalSave;
   end;
 
 implementation
@@ -157,8 +150,12 @@ begin
 
   rLoadedFile:= '';
 
-  rPageResizeUnitType:= ruFullsize;
-  PageResize:= resNone;
+  CropAreas:= nil;
+
+  rPageSize:= TDigItPhysicalSize.Create;
+  rPageSize.SetValues(puCentimeter, 21, 29.7);
+
+  PageResize:= resFullSize;
   PageRotate:= rotNone;
   PageFlip:= flipNone;
 
@@ -174,6 +171,10 @@ end;
 
 destructor TDigIt_Session.Destroy;
 begin
+  CropAreas:= nil;
+  SourceFiles:= nil;
+  CapturedFiles:= nil;
+
   inherited Destroy;
 end;
 
@@ -211,9 +212,9 @@ begin
      if (PageFlip <> flipNone) then FlipImage(BitmapN, PageFlip);
 
      //Resize
-     if (PageResize <> resNone) then
+     if (PageResize <> resFullSize) then
      begin
-       BitmapR:= ResizeImage(BitmapN, PageResize, PageResizeInfo);
+       BitmapR:= ResizeImage(BitmapN, PageResize);
        if (BitmapR<>nil) then
        begin
          BitmapN.Free;
@@ -242,8 +243,7 @@ begin
   if saveToXML then SaveLoadedImage(nil, True);
 end;
 
-function TDigIt_Session.ResizeImage(ABitmap: TBGRABitmap;
-                                    APageResize: TDigItFilter_Resize; APageResizeInfo: TImageResolutionInfo): TBGRABitmap;
+function TDigIt_Session.ResizeImage(ABitmap: TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
 var
    newWidth, newHeight: Single;
    pixelWidth, pixelHeight: Integer;
@@ -251,32 +251,29 @@ var
 begin
   Result:= nil;
 
-  if (APageResize <> resNone) then
-  begin
-    if (APageResizeInfo.ResolutionUnit = ruNone)
-    then begin
-           pixelWidth:= Trunc(APageResizeInfo.ResolutionX);
-           pixelHeight:= Trunc(APageResizeInfo.ResolutionY);
-         end
-    else begin
-           newWidth:= PhysicalSizeConvert(APageResizeInfo.ResolutionUnit,
-                                          APageResizeInfo.ResolutionX,
-                                          ABitmap.ResolutionUnit);
-           newHeight:= PhysicalSizeConvert(APageResizeInfo.ResolutionUnit,
-                                           APageResizeInfo.ResolutionY,
-                                           ABitmap.ResolutionUnit);
+  if (rPageSize.PhysicalUnit = puPixel)
+  then begin
+         pixelWidth:= Trunc(rPageSize.Width);
+         pixelHeight:= Trunc(rPageSize.Height);
+        end
+  else begin
+        newWidth:= PhysicalSizeConvert(rPageSize.PhysicalUnit,
+                                       rPageSize.Width,
+                                       ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionX);
+        newHeight:= PhysicalSizeConvert(rPageSize.PhysicalUnit,
+                                        rPageSize.Height,
+                                        ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionY);
 
-           pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
-           pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
-         end;
+        pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
+        pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
+      end;
 
-    Case APageResize of
-    resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
-    resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
-    end;
-
-    Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
+  Case APageResize of
+  resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
+  resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
   end;
+
+  Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
 end;
 
 function TDigIt_Session.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
@@ -533,7 +530,7 @@ begin
      Counter.Load(aXML, 'Counter', True);
      LoadCropAreas(aXML, IsAutoSave);
 
-     if Assigned(rAdditionalLoad) then rAdditionalLoad(aXML, IsAutoSave);
+     if Assigned(AdditionalLoad) then AdditionalLoad(aXML, IsAutoSave);
 
      rSessionModified:= IsAutoSave;
 
@@ -567,7 +564,7 @@ begin
 
      SaveCropAreas(aXML, IsAutoSave);
 
-     if Assigned(rAdditionalSave) then rAdditionalSave(aXML, IsAutoSave);
+     if Assigned(AdditionalSave) then AdditionalSave(aXML, IsAutoSave);
 
      aXML.Flush;
      aXML.Free;
@@ -1119,6 +1116,8 @@ procedure TDigIt_Session.LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean
 var
    aFree: Boolean;
    newCropMode: TDigItCropMode;
+   i, newCount, newSelected: integer;
+   curItemPath: String;
 
 begin
   try
@@ -1131,8 +1130,29 @@ begin
      newCropMode:= TDigItCropMode(aXML.GetValue('CropMode', 0));
 
      if (newCropMode = diCropCustom)
-     then rImageManipulation.CropAreas.Load(aXML, 'CropAreas')
-     else rImageManipulation.CropAreas.Clear;
+     then begin
+            newCount:= aXML.GetValue(SES_CropAreas+'Count', -1);
+            //newSelected:= aXML.GetValue(SES_CropAreas+'Selected', -1);  IN UI See TCropAreaList.Load
+
+            CropAreas:=nil;
+            SetLength(CropAreas, newCount);
+
+            for i:=0 to newCount-1 do
+            begin
+              curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
+
+              //Area Unit
+              CropAreas[i].PhysicalUnit:= puCentimeter;
+              aXML.GetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
+
+              //Area Coordinates
+              CropAreas[i].Left:= StrToFloat(aXML.GetValue(curItemPath+'Area/Left', '0'));
+              CropAreas[i].Top:= StrToFloat(aXML.GetValue(curItemPath+'Area/Top', '0'));
+              CropAreas[i].Width:= StrToFloat(aXML.GetValue(curItemPath+'Area/Width', '0'));
+              CropAreas[i].Height:= StrToFloat(aXML.GetValue(curItemPath+'Area/Height', '0'));
+            end;
+          end
+     else CropAreas:= nil;
 
 (* oldcode
      setCropMode(newCropMode);
@@ -1151,6 +1171,8 @@ end;
 procedure TDigIt_Session.SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
+   i: integer;
+   curItemPath: String;
 
 begin
   try
@@ -1161,8 +1183,28 @@ begin
           else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
 
      aXML.SetValue('CropMode', Integer(CropMode));
+
      if (CropMode = diCropCustom)
-     then rImageManipulation.CropAreas.Save(aXML, 'CropAreas')
+     then begin
+            aXML.DeletePath(SES_CropAreas);
+
+            aXML.SetValue(SES_CropAreas+'Count', Length(CropAreas));
+            //aXML.SetValue(SES_CropAreas+'Selected', fOwner.SelectedCropArea.Index); IN UI See TCropAreaList.Save
+
+            for i:=0 to Length(CropAreas)-1 do
+            begin
+              curItemPath:= SES_CropAreas+'Item' + IntToStr(i)+'/';
+
+              //Area Unit
+              aXML.SetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
+
+              //Area Coordinates
+              aXML.SetValue(curItemPath+'Area/Left', FloatToStr(CropAreas[i].Left));
+              aXML.SetValue(curItemPath+'Area/Top', FloatToStr(CropAreas[i].Top));
+              aXML.SetValue(curItemPath+'Area/Width', FloatToStr(CropAreas[i].Width));
+              aXML.SetValue(curItemPath+'Area/Height', FloatToStr(CropAreas[i].Height));
+            end;
+          end
      else aXML.DeletePath('CropAreas');
 
      if IsAutoSave then rSessionModified:= True;
@@ -1174,7 +1216,6 @@ end;
 
 procedure TDigIt_Session.LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
-   selButton: Integer;
    aFree: Boolean;
 
 begin
@@ -1185,21 +1226,16 @@ begin
           then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
 
-     aXML.ReadObject(SES_PageSettings+'Page/', rImageManipulation.EmptyImage);
+     PageResize:= resFullsize;
+     aXML.GetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
 
-     rPageResizeUnitType:= ruFullsize;
-     aXML.GetValue(SES_PageSettings+'ResizeUnitType', rPageResizeUnitType, TypeInfo(TDigItResizeUnitType));
-     if (rImageManipulation.EmptyImage.Width = 0) or
-        (rImageManipulation.EmptyImage.Height = 0) then rPageResizeUnitType:= ruFullsize;
-
-     PageResize:= resFixedWidth;
-     aXML.GetValue(SES_PageSettings+'Resize', PageResize, TypeInfo(TDigItFilter_Resize));
+     aXML.ReadObject(SES_PageSettings+'PageSize', rPageSize);
 
      PageRotate:= rotNone;
-     aXML.GetValue(SES_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
+     aXML.GetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
 
      PageFlip:= flipNone;
-     aXML.GetValue(SES_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFilter_Flip));
+     aXML.GetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
 
   finally
     if aFree then aXML.Free;
@@ -1218,12 +1254,14 @@ begin
           then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
 
-     aXML.WriteObject(SES_PageSettings+'Page/', rImageManipulation.EmptyImage);
+     if (rPageSize.Width = 0) or
+        (rPageSize.Height = 0) then PageResize:= resFullsize;
 
-     aXML.SetValue(SES_PageSettings+'ResizeUnitType', rPageResizeUnitType, TypeInfo(TDigItResizeUnitType));
-     aXML.SetValue(SES_PageSettings+'Resize', PageResize, TypeInfo(TDigItFilter_Resize));
-     aXML.SetValue(SES_PageSettings+'Rotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
-     aXML.SetValue(SES_PageSettings+'Flip', PageFlip, TypeInfo(TDigItFilter_Flip));
+     aXML.SetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
+     aXML.WriteObject(SES_PageSettings+'PageSize', rPageSize);
+
+     aXML.SetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
+     aXML.SetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
 
      if IsAutoSave then rSessionModified:= True;
 

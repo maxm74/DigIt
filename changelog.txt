@@ -1,7 +1,9 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/07 Moved PhysicalSizeConvert in DigIt_Types;
+2025/07/08 Switched MainForm to DigIt_Session Use (It must be thoroughly tested)
+
+        07 Moved PhysicalSizeConvert in DigIt_Types;
            Changed use of TResolutionUnit to TPhysicalUnit in TDigItPhysicalSize;
            Use of TDigItPhysicalSize in Page Resize;
            function to Convert to/from  Physical/Resolution Unit (maybe deleted in future);

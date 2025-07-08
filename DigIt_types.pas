@@ -14,7 +14,8 @@ unit DigIt_Types;
 interface
 
 uses Classes, SysUtils, Laz2_XMLCfg, FPImage,
-     BGRABitmapTypes;
+     BGRABitmapTypes,
+     Digit_Bridge_Intf;
 
 resourcestring
   rsProcessingImages = 'Processing Images';
@@ -109,7 +110,12 @@ type
   end;
   TCapturedFileArray = array of TCapturedFile;
 
-  TLoadSaveXMLMethod = procedure (aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
+  TLoadSaveXMLEvent = procedure (Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
+  TFileNameEvent = procedure (Sender: TObject; AFileName: String) of object;
+  TConfirmEvent = function (Sender: TObject): Boolean of object;
+
+  TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;
+                                var AFiles: TSourceFileArray; AStartIndex: Integer): DWord of object;
 
 
 {** Convert PhysicalSize to/from Cm/Inch}

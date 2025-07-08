@@ -21,7 +21,7 @@ uses
   BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList,
   BCExpandPanels,BGRAFlashProgressBar,
   DigIt_Types, DigIt_Utils, Digit_Bridge_Intf, Digit_Bridge_Impl,
-  DigIt_Settings, DigIt_Sources, DigIt_Counter;
+  DigIt_Settings, DigIt_Sources, DigIt_Session, DigIt_Counter;
 
 resourcestring
   rsNewWork = 'Start a New Work Session?';
@@ -324,48 +324,36 @@ type
     lastNewBoxNum: Word;
     changingAspect,
     Closing,
-    SES_Loading,
     inFillCounterUI,
     inFillBoxUI,
     inFillPagesUI,
-    imgListThumb_Changed,
-    rSessionModified: Boolean;
-
-    CropMode: TDigItCropMode;
-
-    PageSize: TDigItPhysicalSize;
-    PageResize: TDigItFilter_Resize;
-    PageRotate: TDigItFilter_Rotate;
-    PageFlip: TDigItFilter_Flip;
-
-    { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
-    (*    rDestination: PDestinationInfo;
-    rDestinationParams: IDigIt_Params;
-    *)
-    rDestinationName: String;
-
-    SaveFormat: TBGRAImageFormat;
-    SaveWriter: TFPCustomImageWriter;
-    SaveExt,
-    Session_File,
-    LoadedFile: String;
+    imgListThumb_Changed: Boolean;
 
     lastCropped,
     lastLenTaked,     //Used in Take Again
     iSourceFiles,
     iCapturedFiles: Integer;
-    SourceFiles: TSourceFileArray;
-    CapturedFiles: TCapturedFileArray;
 
+    Session: TDigIt_Session;
     Profiles: TStringArray;
 
     function GetCurrentCropArea: TCropArea;
 
-    procedure Counter_Dec(AValue: Integer);
-    procedure Counter_Inc(AValue: Integer);
-    procedure Counter_Assign(AValue: Integer);
-
+    function GetSessionModified: Boolean;
     procedure SetSessionModified(AValue: Boolean);
+
+    function LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean=False): Boolean; overload;
+    function LoadSessionFile(AFileName: String): Boolean; overload;
+    function SaveSessionFile(AFileName: String): Boolean;
+
+    //DELETE When Dialogs Interface is done
+    procedure SES_Load(IsAutoSave: Boolean);
+    procedure SES_Save(IsAutoSave: Boolean);
+    procedure SES_ClearAutoSave(AFromStartup: Boolean);
+
+    //Transform to TLoadSaveXMLEvent and pass to Session.OnLoad/Save
+    procedure SES_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure SES_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 
     procedure UI_DestinationMenuClick(Sender: TObject);
     procedure UI_SourceMenuClick(Sender: TObject);
@@ -385,75 +373,34 @@ type
     procedure UI_ThumbnailUpdate(AIndex: Integer; ABitmap: TBGRABitmap); overload;
     procedure UI_Caption;
 
-                                            //Only the File Part, Path and Ext are added automatically
-    function SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
-    procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
-
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
 
+    procedure SaveCallBack(Bitmap :TBGRABitmap; CropArea: TCropArea; AUserData:Integer);
+
     procedure SetPageResizeType(AValue: TDigItFilter_Resize; PredefValues: Boolean);
 
-    function ResizeImage(ABitmap :TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
-    function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
-    procedure FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
-
-    function LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean=False): Boolean; overload;
-    function LoadSessionFile(AFileName: String): Boolean; overload;
-    function SaveSessionFile(AFileName: String): Boolean;
-
-    procedure SES_Load(IsAutoSave: Boolean);
-    procedure SES_Save(IsAutoSave: Boolean);
-    procedure SES_ClearAutoSave(AFromStartup: Boolean);
-
-    function SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
-                            XMLRoot_Path: String=''; XML_File: String=''): Integer;
-    procedure SES_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
-                             XMLRoot_Path: String=''; XML_File: String='');
-    procedure SES_LoadSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_SaveSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    function SES_LoadDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
-    procedure SES_SaveDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+(*oldcode
     procedure SES_LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_SaveCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_LoadLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_SaveLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_SaveSource_CapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_SaveSource_CapturedIndexes(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SES_SavePageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-
+*)
     function Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
     function Destination_Select(newDestinationIndex: Integer): Boolean;
 
     procedure setCropMode(ANewCropMode: TDigItCropMode);
 
-    procedure SourceFiles_Clear(ClearSourceInst: Boolean);
-
-    procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean); overload;
+(*    procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean); overload;
     procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
+*)
+    procedure Clear_Captured;
 
-    procedure SetSaveWriter(AFormat: TBGRAImageFormat);
-    procedure SetDefaultStartupValues;
-    procedure SetDefaultSessionValues;
-    procedure ClearCaptured;
-
-  public
     procedure ItemSizesClick(Sender: TObject);
     procedure PageSizesClick(Sender: TObject);
 
-    (*
-    property Destination: PDestinationInfo read rDestination;
-    property DestinationParams: IDigIt_Params read rDestinationParams;
-    *)
-    property DestinationName: String read rDestinationName;
-
-    property SessionModified: Boolean read rSessionModified write SetSessionModified;
-
+  public
+    property SessionModified: Boolean read GetSessionModified write SetSessionModified;
   end;
 
 var
@@ -541,7 +488,6 @@ end;
 procedure TDigIt_Main.FormCreate(Sender: TObject);
 begin
   Closing :=False;
-  SES_Loading:= False;
   changingAspect :=False;
   inFillCounterUI :=False;
   inFillBoxUI :=False;
@@ -551,17 +497,9 @@ begin
   lastNewBoxNum :=0;
   TStringList(cbCropList.Items).OwnsObjects:=False;
 
-  //  rDestination:= nil;
-  rDestinationName:= '';
-  //  rDestinationParams:= nil;
+  Session:= TDigIt_Session.Create;
 
   Settings.Load(nil);
-
-  SetSaveWriter(ifJpeg);
-
-  Session_File:= File_DefSession;
-
-  SetDefaultStartupValues;
 
   TDigIt_Profiles_Form.LoadFromXML(Path_Config+File_Profiles, Profiles);
   BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
@@ -592,7 +530,7 @@ begin
      if FileExists(ParamStr(1)) and
         (MessageDlg('DigIt', Format(rsContinueWork, [ParamStr(1)]),
                     mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-     then sessLoaded:= LoadSessionFile(ParamStr(1));
+     then sessLoaded:= Session.LoadSessionFile(ParamStr(1));
 
      if not(sessLoaded) then
      begin
@@ -608,12 +546,12 @@ begin
             (FileAge(optPath_Session+optFile_Session+Ext_AutoSess) > FileAge(optPath_Session+optFile_Session+Ext_Sess)) and
             (MessageDlg('DigIt', Format(rsContinueAutoWork, [optPath_Session+optFile_Session]),
                         mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-         then sessLoaded:= LoadSessionFile(optPath_Session, optFile_Session, True);
+         then sessLoaded:= Session.LoadSessionFile(optPath_Session, optFile_Session, True);
 
          if not(sessLoaded) and
            (MessageDlg('DigIt', Format(rsContinueWork, [optPath_Session+optFile_Session]),
                        mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-         then sessLoaded:= LoadSessionFile(optPath_Session, optFile_Session);
+         then sessLoaded:= Session.LoadSessionFile(optPath_Session, optFile_Session);
        end;
      end;
 
@@ -624,11 +562,11 @@ begin
        begin
          if (MessageDlg('DigIt', Format(rsContinueAutoWork, ['<no name>']), mtConfirmation, [mbYes, mbNo], 0)=mrYes)
          then begin
-                SES_Load(True);
+                Session.Load(True);
                 sessLoaded:= True;
               end
          else begin
-                SES_ClearAutoSave(True);
+                Session.ClearAutoSave(True);
                 sessLoaded:= False;
               end;
        end;
@@ -637,7 +575,7 @@ begin
      if not(sessLoaded) then
      begin
        //4 Set Last Used Source with it's Params
-       SES_LoadSource(nil, False, '', Path_Config+File_Config);
+       Session.LoadSource(nil, False, '', Path_Config+File_Config);
        setCropMode(diCropFull);
      end;
 
@@ -648,7 +586,7 @@ begin
     Path_Session_Scan:= Path_DefSession_Scan;
     Path_Session_Pictures:= Path_DefSession_Pictures;
 
-    SetDefaultStartupValues;
+    Session.SetDefaultStartupValues;
 
     setCropMode(diCropFull);
     Settings.Save_StartupSession(nil, '', '');
@@ -664,7 +602,7 @@ begin
   //AutoSave
   if SessionModified then //FileExists(Path_Session+Session_File+Ext_AutoSess)
   begin
-    SES_Save(True);
+    Session.Save(True);
 
     //Save Current Session ?
     actSessionSaveExecute(nil);
@@ -677,9 +615,10 @@ end;
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
   theBridge.Free;
-  SourceFiles:= nil;
-  if (SaveWriter <> nil) then SaveWriter.Free;
+//oldcode  SourceFiles:= nil;
+//oldcode  if (SaveWriter <> nil) then SaveWriter.Free;
   Counter.Free;
+  Session.Free;
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
@@ -698,48 +637,15 @@ begin
 end;
 
 procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
-var
-   len, i,
-   numTaked: Integer;
-   hasCropped: Boolean;
-
 begin
-  if (CropMode = diCropFull) then UI_SelectCurrentCaptured(-lastLenTaked);
+  if (Session.CropMode = diCropFull) then UI_SelectCurrentCaptured(-lastLenTaked);
 
   if (MessageDlg('DigIt', Format(rsTakeAgain, [lastLenTaked]),
                  mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
-    Case CropMode of
-      diCropFull: begin
-        Counter_Dec(lastLenTaked);
-        actTakeExecute(actTakeRe);
-      end;
-      diCropCustom: begin
-        len:= Length(SourceFiles);
-        numTaked:= lastLenTaked;
-        hasCropped:= (len-numTaked <= lastCropped);
-
-        actTakeExecute(actTakeRe);
-
-        if hasCropped then
-        begin
-          iSourceFiles:= len-numTaked;
-          for i:=len-numTaked to len-1 do
-          begin
-            if (SourceFiles[i].cCount > 0) then
-            begin
-              iSourceFiles:= i;
-              LoadImage(SourceFiles[i].fName, False);
-              CropFiles(i, True);
-            end;
-          end;
-        end;
-      end;
-    end;
+     Session.actTake(True);
 
   finally
-    SES_SaveSource_CapturedFiles(nil, True);
-
     UI_SelectCurrentCaptured;
     UI_FillCounter;
     UI_ToolBar;
@@ -748,83 +654,27 @@ end;
 
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
-   res,
+   res: DWord;
    StartIndex,
    oldLength: Integer;
 
 begin
   try
-      res:= 0;
-      oldLength:= Length(SourceFiles);
+     if (Sender = actTake) or (Sender = actTakeRe)
+     then res:= Session.actTake(False)
+     else
+     if (Sender = actTakeBuildDuplex)
+     then res:= Session.actTake(False, @TWizardBuildDuplex.Execute);
 
-      if (CropMode = diCropCustom) then
-      begin
-        //If we have processed all queue files automatically clear it
-        if not(Sender = actTakeRe) and
-           (oldLength > 0) and
-           (iSourceFiles >= 0) and (iSourceFiles >= oldLength) then
-        begin
-          SourceFiles_Clear(False);
-          oldLength:= 0;
-        end;
-      end;
-
-      if (Sender = actTakeRe)
-      then StartIndex:= oldLength-lastLenTaked
-      else StartIndex:= oldLength;
-
-      if (Sender = actTake) or (Sender = actTakeRe)
-      then res:= Sources.Take(takeActTake, SourceFiles, StartIndex)
-      else
-      if (Sender = actTakeBuildDuplex)
-      then res:= TWizardBuildDuplex.Execute(takeActTake, SourceFiles, StartIndex);
-
-      if (res > 0) then
-      begin
-        Case CropMode of
-          diCropFull: begin
-            DigIt_Progress.ProgressShow(rsProcessingImages, 1, res);
-
-            CropFile_Full(0, (Sender = actTakeRe));
-
-            lastLenTaked:= res;
-            SourceFiles:= nil; iSourceFiles:= -1;
-            Sources.Selected^.Inst.Clear;
-          end;
-          diCropCustom: begin
-            if (Sender = actTakeRe)
-            then begin
-                   if (iSourceFiles > Length(SourceFiles))
-                   then iSourceFiles:= Length(SourceFiles); //Repos iSourceFiles if outside
-                 end
-            else begin
-                   //The queue was empty, Start from the first file
-                   if (oldLength = 0) and (Length(SourceFiles) > 0) then
-                   begin
-                     iSourceFiles:= 0;
-                     LoadImage(SourceFiles[0].fName, False);
-
-                     //Crop the First File directly
-                     actCropNextExecute(nil);
-                   end;
-                 end;
-
-            lastLenTaked:= res;
-          end;
-        end;
-      end
-      else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
+     if (res = 0)
+     then MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
-    SES_Save(True);
-
     if not(Sender = actTakeRe) then
     begin
       UI_ToolBar;
       UI_FillCounter;
     end;
-
-    DigIt_Progress.Hide;
   end;
 end;
 
@@ -837,6 +687,7 @@ procedure TDigIt_Main.actCropNextExecute(Sender: TObject);
 var
    lenSources: Integer;
 
+  (*
   function CheckEndOfFiles: Boolean;
   begin
     Result:= (iSourceFiles >= lenSources);
@@ -848,36 +699,16 @@ var
       then SourceFiles_Clear(True);
     end;
   end;
+  *)
 
 begin
   try
-    lenSources:= Length(SourceFiles);
-    if (iSourceFiles = -1) then iSourceFiles:= 0;
-
-    if (iSourceFiles = lenSources) or
-       (SourceFiles[iSourceFiles].cCount > 0)
-    then CropFiles(iSourceFiles, True) //Re Crop
-    else begin
-           CropFiles(iSourceFiles, False);
-
-           if (iSourceFiles > lastCropped) then lastCropped:= iSourceFiles;
-
-           inc(iSourceFiles);
-         end;
-
-    if not(CheckEndOfFiles)
-    then if (iSourceFiles > -1) and (iSourceFiles < Length(SourceFiles))
-         then if not(LoadImage(SourceFiles[iSourceFiles].fName, False))
-              then begin
-                     { #todo -oMaxM : do something if LoadImage Fails? }
-                   end;
+     Session.actCropNext(nil);  {#to-do 10: Make an Interface for User confirmations/Errors Dialogs}
 
   finally
-    SES_SaveSource_CapturedFiles(nil, True);
-
-    UI_SelectNextCaptured;
-    UI_FillCounter;
-    UI_ToolBar;
+     UI_SelectNextCaptured;
+     UI_FillCounter;
+     UI_ToolBar;
   end;
 end;
 
@@ -887,25 +718,12 @@ var
 
 begin
   try
-     new_iSourceFiles:= iSourceFiles;
-     if (new_iSourceFiles >= 0) and (new_iSourceFiles < Length(SourceFiles)-1) then
-     begin
-       inc(new_iSourceFiles);
-       if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
-       begin
-         if (SourceFiles[new_iSourceFiles].cCount > 0)
-         then Counter_Assign(SourceFiles[new_iSourceFiles].cStart);
-         iSourceFiles:= new_iSourceFiles;
-       end;
-     end;
+     Session.actGoNext;
 
   finally
-    //SES_Save([xmlSourceIndexes, xmlCapturedIndexes]);
-    SES_SaveSource_CapturedFiles(nil, True);
-
-    UI_SelectNextCaptured;
-    UI_FillCounter;
-    UI_ToolBar;
+     UI_SelectNextCaptured;
+     UI_FillCounter;
+     UI_ToolBar;
   end;
 end;
 
@@ -915,38 +733,17 @@ var
 
 begin
   try
-     new_iSourceFiles:= iSourceFiles;
-     if (new_iSourceFiles > 0) then
-     begin
-       //We've already cut the last one, start with the penultimate one
-       if (new_iSourceFiles >= Length(SourceFiles)) then new_iSourceFiles:= Length(SourceFiles)-1;
-
-       dec(new_iSourceFiles);
-
-       if LoadImage(SourceFiles[new_iSourceFiles].fName, False) then
-       begin
-         if (SourceFiles[new_iSourceFiles].cCount > 0)
-         then Counter_Assign(SourceFiles[new_iSourceFiles].cStart);
-         iSourceFiles:= new_iSourceFiles;
-       end;
-     end;
+     Session.actGoBack;
 
   finally
-    //SES_Save([xmlSourceIndexes, xmlCapturedIndexes]);
-    SES_SaveSource_CapturedFiles(nil, True);
-
-    UI_SelectNextCaptured;
-    UI_FillCounter;
-    UI_ToolBar;
+     UI_SelectNextCaptured;
+     UI_FillCounter;
+     UI_ToolBar;
   end;
 end;
 
 procedure TDigIt_Main.actCropAllExecute(Sender: TObject);
-var
-   c: Integer;
-   cStr: String;
-   Finished: Boolean;
-
+   (*
    function CheckEndOfFiles: Boolean;
    begin
      Result:= (iSourceFiles >= Length(SourceFiles));
@@ -961,55 +758,16 @@ var
             end;
      end;
    end;
+   *)
 
 begin
   try
-    Finished:= False;
-    c:= Length(SourceFiles);
-
-    if (lastCropped > -1) then
-    begin
-      iSourceFiles:= lastCropped+1;
-      LoadImage(SourceFiles[iSourceFiles].fName, False);
-      Counter_Assign(SourceFiles[lastCropped].cStart+SourceFiles[lastCropped].cCount);
-    end;
-
-    cStr:= IntToStr(c);
-    DigIt_Progress.ProgressShow(rsProcessingImages, iSourceFiles, c);
-
-    repeat
-      DigIt_Progress.progressTotal.Position:= iSourceFiles;
-      DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [iSourceFiles, cStr]);
-      Application.ProcessMessages;
-      if DigIt_Progress.Cancelled then break;
-
-      CropFiles(iSourceFiles, False);
-      inc(iSourceFiles);
-
-      Finished:= CheckEndOfFiles;
-      if not(Finished)
-      then if not(LoadImage(SourceFiles[iSourceFiles].fName, False))
-           then begin
-                  { #todo -oMaxM : do something if LoadImage Fails? }
-                  break;
-                end;
-
-      lvCaptured.Selected:= lvCaptured.Items[iCapturedFiles];
-
-      DigIt_Progress.progressTotal.Position:= iSourceFiles+1;
-      DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [iSourceFiles-1, cStr]);
-      Application.ProcessMessages;
-    Until Finished or DigIt_Progress.Cancelled;
+     Session.actCropAll(nil);
 
   finally
-    //SES_Save([xmlSourceIndexes, xmlSourceFiles, xmlCapturedIndexes, xmlCapturedFiles]);
-    SES_SaveSource_CapturedFiles(nil, True);
-
-    UI_SelectNextCaptured;
-    UI_FillCounter;
-    UI_ToolBar;
-
-    DigIt_Progress.Hide;
+     UI_SelectNextCaptured;
+     UI_FillCounter;
+     UI_ToolBar;
   end;
 end;
 
@@ -1017,11 +775,9 @@ procedure TDigIt_Main.actClearQueueExecute(Sender: TObject);
 begin
   if (MessageDlg('DigIt', rsClearQueue, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
-    SourceFiles_Clear(True);
+    Session.Clear_SourceFiles(True);
 
   finally
-    SES_SaveSource_CapturedFiles(nil, True);
-
     UI_ToolBar;
   end;
 end;
@@ -1186,25 +942,25 @@ var
    oldPageFlip: TDigItFilter_Flip;
 
 begin
-  oldPageFlip:= PageFlip;
+  oldPageFlip:= Session.PageFlip;
 
   if btPFlipV.Down
-  then PageFlip:= flipVertical
+  then Session.PageFlip:= flipVertical
   else
   if btPFlipH.Down
-  then PageFlip:= flipHorizontal
-  else PageFlip:= flipNone;
+  then Session.PageFlip:= flipHorizontal
+  else Session.PageFlip:= flipNone;
 
   if not(imgManipulation.Empty) then
   begin
-    if FileExists(LoadedFile)
-    then LoadImage(LoadedFile, False)
+    if FileExists(Session.LoadedFile)
+    then LoadImage(Session.LoadedFile, False)
     else begin
            //Flip Image to Initial Value
-           FlipImage(imgManipulation.Bitmap, oldPageFlip);
+           Session.FlipImage(imgManipulation.Bitmap, oldPageFlip);
 
            //Flip Image to New Value
-           FlipImage(imgManipulation.Bitmap, PageFlip);
+           Session.FlipImage(imgManipulation.Bitmap, Session.PageFlip);
 
            imgManipulation.RefreshBitmap;
          end;
@@ -1218,39 +974,39 @@ var
    BitmapNewR: TBGRABitmap;
 
 begin
-  oldPageRotate:= PageRotate;
+  oldPageRotate:= Session.PageRotate;
 
   if btPRotateLeft.Down
-  then PageRotate:= rotLeft90
+  then Session.PageRotate:= rotLeft90
   else
   if btPRotateRight.Down
-  then PageRotate:= rotRight90
+  then Session.PageRotate:= rotRight90
   else
   if btPRotate180.Down
-  then PageRotate:= rot180
-  else PageRotate:= rotNone;
+  then Session.PageRotate:= rot180
+  else Session.PageRotate:= rotNone;
 
   if not(imgManipulation.Empty) then
   try
     BitmapR:= nil;
     BitmapNewR:= nil;
 
-    if FileExists(LoadedFile)
-    then LoadImage(LoadedFile, False)
+    if FileExists(Session.LoadedFile)
+    then LoadImage(Session.LoadedFile, False)
     else begin
            //Retun Image to Initial Value
            Case oldPageRotate of
            rotNone: BitmapR:= imgManipulation.Bitmap;
-           rotLeft90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotRight90);
-           rotRight90: BitmapR:= RotateImage(imgManipulation.Bitmap, rotLeft90);
-           rot180: BitmapR:= RotateImage(imgManipulation.Bitmap, rot180);
+           rotLeft90: BitmapR:= Session.RotateImage(imgManipulation.Bitmap, rotRight90);
+           rotRight90: BitmapR:= Session.RotateImage(imgManipulation.Bitmap, rotLeft90);
+           rot180: BitmapR:= Session.RotateImage(imgManipulation.Bitmap, rot180);
            end;
 
            //Rotate Image to New Value
-           if (PageRotate = rotNone)
+           if (Session.PageRotate = rotNone)
            then imgManipulation.Bitmap:= BitmapR
            else begin
-                  BitmapNewR:= RotateImage(BitmapR, PageRotate);
+                  BitmapNewR:= Session.RotateImage(BitmapR, Session.PageRotate);
                   imgManipulation.Bitmap:= BitmapNewR;
                 end;
          end;
@@ -1290,14 +1046,14 @@ begin
   try
     PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, ResUnit, Paper);
 
-    if (PageResize = resFullSize)
+    if (Session.PageResize = resFullSize)
     then SetPageResizeType(resFixedWidth, False);
 
     imgManipulation.SetEmptyImageSize(ResUnit, Paper.w, Paper.h);
 
     if not(imgManipulation.Empty) and
-       FileExists(LoadedFile)
-    then LoadImage(LoadedFile, False);
+       FileExists(Session.LoadedFile)
+    then LoadImage(Session.LoadedFile, False);
 
   finally
     UI_FillPageSizes;
@@ -1358,28 +1114,28 @@ end;
 
 procedure TDigIt_Main.edPageHeightChange(Sender: TObject);
 begin
-  if inFillPagesUI or (PageResize = resFullsize) then exit;
+  if inFillPagesUI or (Session.PageResize = resFullsize) then exit;
 
-  PageSize.Height:= edPageHeight.Value;
+  Session.PageSize.Height:= edPageHeight.Value;
 
-  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
+  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
 
   if not(imgManipulation.Empty) and
-     FileExists(LoadedFile)
-  then LoadImage(LoadedFile, False);
+     FileExists(Session.LoadedFile)
+  then LoadImage(Session.LoadedFile, False);
 end;
 
 procedure TDigIt_Main.edPageWidthChange(Sender: TObject);
 begin
-  if inFillPagesUI or (PageResize = resFullsize) then exit;
+  if inFillPagesUI or (Session.PageResize = resFullsize) then exit;
 
-  PageSize.Width:= edPageWidth.Value;
+  Session.PageSize.Width:= edPageWidth.Value;
 
-  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
+  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
 
   if not(imgManipulation.Empty) and
-     FileExists(LoadedFile)
-  then LoadImage(LoadedFile, False);
+     FileExists(Session.LoadedFile)
+  then LoadImage(Session.LoadedFile, False);
 end;
 
 procedure TDigIt_Main.edPageResizeTypeChange(Sender: TObject);
@@ -1388,8 +1144,8 @@ begin
      SetPageResizeType(TDigItFilter_Resize(edPageResizeType.ItemIndex), True);
 
      if not(imgManipulation.Empty) and
-        FileExists(LoadedFile)
-     then LoadImage(LoadedFile, False);
+        FileExists(Session.LoadedFile)
+     then LoadImage(Session.LoadedFile, False);
 
   finally
     UI_FillPageSizes;
@@ -1429,7 +1185,7 @@ var
 
 begin
   captItem:= lvCaptured.Selected;
-  if (captItem <> nil) then OpenDocument(CapturedFiles[captItem.Index].fName);
+  if (captItem <> nil) then OpenDocument(Session.CapturedFiles[captItem.Index].fName);
 end;
 
 procedure TDigIt_Main.lvCapturedSelectItem(Sender: TObject; Item: TListItem;
@@ -1444,7 +1200,7 @@ var
 
 begin
   captItem:= lvCaptured.GetItemAt(HintInfo^.CursorPos.X, HintInfo^.CursorPos.Y);
-  if (captItem <> nil) then HintInfo^.HintStr:= CapturedFiles[captItem.Index].fName;
+  if (captItem <> nil) then HintInfo^.HintStr:= Session.CapturedFiles[captItem.Index].fName;
 end;
 
 procedure TDigIt_Main.actOptionsExecute(Sender: TObject);
@@ -1469,37 +1225,23 @@ begin
 
      iSelected:= captItem.Index;
 
-     //Delete File and Thumb
-     DeleteFile(CapturedFiles[iSelected].fName);
-     imgListThumb.Delete(CapturedFiles[iSelected].iIndex);
+     //Delete Thumb
+     imgListThumb.Delete(Session.CapturedFiles[iSelected].iIndex);
      imgListThumb_Changed:= True;
 
-     if (iSelected < Length(CapturedFiles)-1) then
-       for iCur:=iSelected+1 to Length(CapturedFiles)-1 do
-       begin
-         RenameFile(CapturedFiles[iCur].fName, CapturedFiles[iCur-1].fName);
-
-         CapturedFiles[iCur-1].fAge:= CapturedFiles[iCur].fAge;
-       end;
+     Session.actCapturedDelete(iSelected);
 
      //Delete Last Item
-     lvCaptured.Items.Delete(Length(CapturedFiles)-1);
-     SetLength(CapturedFiles, Length(CapturedFiles)-1);
-     iCapturedFiles:= Length(CapturedFiles)-1;
+     lvCaptured.Items.Delete(Length(Session.CapturedFiles));
 
      //Select Item
-     if (iSelected < Length(CapturedFiles)-1)
+     if (iSelected < Length(Session.CapturedFiles)-1)
      then lvCaptured.Selected:= lvCaptured.Items[iSelected]
-     else lvCaptured.Selected:= lvCaptured.Items[Length(CapturedFiles)-1];
-
-     if (Counter.Value = Length(CapturedFiles)) then
-     begin
-       Counter.Value:= Length(CapturedFiles)-1;
-       UI_FillCounter;
-     end;
+     else lvCaptured.Selected:= lvCaptured.Items[Length(Session.CapturedFiles)-1];
 
   finally
-    lvCaptured.EndUpdate;
+     lvCaptured.EndUpdate;
+     UI_FillCounter;
   end;
 end;
 
@@ -1514,29 +1256,14 @@ begin
 end;
 
 procedure TDigIt_Main.actCapturedDeleteAllExecute(Sender: TObject);
-var
-   i: Integer;
-
 begin
   if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-  begin
-     //Delete all File in FileSystem ?
-     if (MessageDlg('DigIt', rsDeleteAllFiles, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-     then for i:=0 to Length(CapturedFiles)-1 do
-            DeleteFile(CapturedFiles[i].fName);
+  try
+     Session.actCapturedDeleteAll;
 
-     //Clear Array and ListView
-     ClearCaptured;
-
-     //Reset Counter
-     Counter.Reset;
-
-     EmptyImage(False);
-
-     SES_Save(True);
-
-     UI_ToolBar;
-     UI_FillCounter;
+  finally
+    UI_ToolBar;
+    UI_FillCounter;
   end;
 end;
 
@@ -1545,8 +1272,8 @@ begin
   try
     if (MessageDlg('DigIt', rsNewWork, mtConfirmation, [mbYes, mbNo], 0)=mrYes) then
     begin
-      SES_ClearAutoSave(False);
-      Settings.Save_StartupSession(nil, Path_Session, Session_File);
+      Session.ClearAutoSave(False);
+      Settings.Save_StartupSession(nil, Path_Session, Session.FileName);
     end;
 
    finally
@@ -1564,8 +1291,8 @@ begin
 
      if OpenSessionDlg.Execute then
      begin
-       LoadSessionFile(OpenSessionDlg.FileName);
-       Settings.Save_StartupSession(nil, Path_Session, Session_File);
+       Session.LoadSessionFile(OpenSessionDlg.FileName);
+       Settings.Save_StartupSession(nil, Path_Session, Session.FileName);
      end;
 
   finally
@@ -1577,7 +1304,7 @@ begin
   if SaveSessionDlg.Execute then
   begin
     SaveSessionFile(SaveSessionDlg.FileName);
-    Settings.Save_StartupSession(nil, Path_Session, Session_File);
+    Settings.Save_StartupSession(nil, Path_Session, Session.FileName);
   end;
 end;
 
@@ -1605,13 +1332,13 @@ begin
      then begin
             if (Path_Session = Path_DefSession)
             then actSessionSaveAs.Execute
-            else SES_Save(False);
+            else Session.Save(False);
           end
      else begin
             //If we are really closing the Application then Clear AutoSave
             if (Sender = nil) and not(dlgRes = mrCancel) and
                (Path_Session = Path_DefSession)
-            then SES_ClearAutoSave(True);
+            then Session.ClearAutoSave(True);
           end;
 
   finally
@@ -1631,7 +1358,7 @@ begin
 
   if (captItem <> nil) then
   try
-     curFileName:= CapturedFiles[captItem.Index].fName;
+     curFileName:= Session.CapturedFiles[captItem.Index].fName;
      sourceBitmap:= TBGRABitmap.Create(curFileName);
      rotatedBitmap:= sourceBitmap.RotateCCW(True);
      rotatedBitmap.SaveToFile(curFileName);   {#todo 2 -oMaxM : Save with the same Format Options }
@@ -1662,7 +1389,7 @@ begin
 
   if (captItem <> nil) then
   try
-     curFileName:= CapturedFiles[captItem.Index].fName;
+     curFileName:= Session.CapturedFiles[captItem.Index].fName;
      sourceBitmap:= TBGRABitmap.Create(curFileName);
      rotatedBitmap:= sourceBitmap.RotateCW(True);
      rotatedBitmap.SaveToFile(curFileName);  {#todo 2 -oMaxM : Save with the same Format Options }
@@ -1680,24 +1407,13 @@ begin
   end;
 end;
 
-function TDigIt_Main.SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
-begin
-  Result:=Path_Session_Pictures+AFileName+ExtensionSeparator+SaveExt;
-
-  { #todo -oMaxM : In future Presaving filters as Interfaces Here }
-
-  //Adjust some Writers
-  if (SaveWriter is TBGRAWriterTiff) then TBGRAWriterTiff(SaveWriter).Clear;
-
-  Bitmap.SaveToFile(Result, SaveWriter);
-end;
-
 procedure TDigIt_Main.SaveCallBack(Bitmap: TBGRABitmap; CropArea: TCropArea; AUserData: Integer);
 var
   savedFile: String;
   captItem: TListItem;
 
 begin
+(*
   //Increment the Counter Value
   Counter.Value:= Counter.Value+1;
 
@@ -1744,91 +1460,35 @@ begin
   if (captItem <> nil) then captItem.MakeVisible(False);
 
 //  SES_SaveCapturedFiles(nil); { #note -oMaxM : Maybe done with an Index }
+*)
 end;
 
 function TDigIt_Main.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
-var
-   Bitmap,
-   BitmapR:TBGRABitmap;
-
 begin
-  Result:= False;
-
-  if (AImageFile<>'') and FileExists(AImageFile) then
   try
-     BitmapR:= nil;
-     Bitmap:= TBGRABitmap.Create;
-     Bitmap.LoadFromFile(AImageFile);
-
-     //Pre processing Filters
-
-     { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
-(*
-     //Resize
-     if (PageResize <> resNone) then
-     begin
-       BitmapR:= ResizeImage(Bitmap, PageResize);
-       if (BitmapR<>nil) then
-       begin
-         Bitmap.Free;
-         Bitmap:= BitmapR;
-         BitmapR:= nil;
-       end;
-     end;
-*)
-     //Rotate
-     if (PageRotate <> rotNone) then
-     begin
-       BitmapR:= RotateImage(Bitmap, PageRotate);
-       if (BitmapR<>nil) then
-       begin
-         Bitmap.Free;
-         Bitmap:= BitmapR;
-         BitmapR:= nil;
-       end;
-     end;
-
-     //Flip
-     if (PageFlip <> flipNone) then FlipImage(Bitmap, PageFlip);
-
-     //Resize
-     if (PageResize <> resFullSize) then
-     begin
-       BitmapR:= ResizeImage(Bitmap, PageResize);
-       if (BitmapR<>nil) then
-       begin
-         Bitmap.Free;
-         Bitmap:= BitmapR;
-         BitmapR:= nil;
-       end;
-     end;
-
-     imgManipulation.Bitmap:= Bitmap;
-
-     LoadedFile:= AImageFile;
-
-     if saveToXML then SES_SaveLoadedImage(nil, True);
-
-     Result:= True;
+     Result:= Session.LoadImage(AImageFile, saveToXML);
+     imgManipulation.Bitmap:= Session.Bitmap;
 
   finally
-     if (Bitmap <> Nil) then Bitmap.Free;
   end;
 end;
 
 procedure TDigIt_Main.EmptyImage(saveToXML: Boolean);
 begin
-  imgManipulation.Bitmap:= nil;
-  LoadedFile:= '';
-  if saveToXML then SES_SaveLoadedImage(nil, True);
+  try
+     Session.EmptyImage(saveToXML);
+     imgManipulation.Bitmap:= nil;
+
+  finally
+  end;
 end;
 
 procedure TDigIt_Main.SetPageResizeType(AValue: TDigItFilter_Resize; PredefValues: Boolean);
 begin
-  PageResize:= AValue;
+  Session.PageResize:= AValue;
   edPageResizeType.ItemIndex:= Integer(AValue);
 
-  if (PageResize = resFullsize)
+  if (Session.PageResize = resFullsize)
   then imgManipulation.SetEmptyImageSizeToNull
   else begin
          //if there is a size defined, change only the resolution unit
@@ -1837,7 +1497,7 @@ begin
                 imgManipulation.EmptyImage.ResolutionUnit:= TResolutionUnit(edPageUnit.ItemIndex);
               end
          else*) if PredefValues then
-              Case PageSize.PhysicalUnit of
+              Case Session.PageSize.PhysicalUnit of
               puPixel: imgManipulation.SetEmptyImageSize(ruNone,
                                                         Paper_A_inch[4].w * 200, Paper_A_inch[4].h * 200);
               puInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
@@ -1846,59 +1506,8 @@ begin
                                                         Paper_A_cm[4].w, Paper_A_cm[4].h);
               end;
 
-         PageResize:= TDigItFilter_Resize(edPageResizeType.ItemIndex);
+         Session.PageResize:= TDigItFilter_Resize(edPageResizeType.ItemIndex);
        end;
-end;
-
-function TDigIt_Main.ResizeImage(ABitmap: TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
-var
-   newWidth, newHeight: Single;
-   pixelWidth, pixelHeight: Integer;
-
-begin
-  Result:= nil;
-
-  if (PageSize.PhysicalUnit = puPixel)
-  then begin
-         pixelWidth:= Trunc(PageSize.Width);
-         pixelHeight:= Trunc(PageSize.Height);
-        end
-  else begin
-        newWidth:= PhysicalSizeConvert(PageSize.PhysicalUnit,
-                                       PageSize.Width,
-                                       ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionX);
-        newHeight:= PhysicalSizeConvert(PageSize.PhysicalUnit,
-                                        PageSize.Height,
-                                        ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionY);
-
-        pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
-        pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
-      end;
-
-  Case APageResize of
-  resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
-  resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
-  end;
-
-  Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
-end;
-
-function TDigIt_Main.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
-begin
-  Case APageRotate of
-    rotNone: Result:= nil;
-    rotLeft90: Result:= ABitmap.RotateCCW(True);
-    rotRight90: Result:= ABitmap.RotateCW(True);
-    rot180: Result:= ABitmap.RotateUD(True);
-  end;
-end;
-
-procedure TDigIt_Main.FlipImage(ABitmap :TBGRABitmap; APageFlip: TDigItFilter_Flip);
-begin
-  Case APageFlip of
-    flipHorizontal: ABitmap.HorizontalFlip;
-    flipVertical: ABitmap.VerticalFlip;
-  end;
 end;
 
 function TDigIt_Main.LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean): Boolean;
@@ -1910,34 +1519,12 @@ var
 
 begin
   try
-     Result:= False;
+     Result:= Session.LoadSessionFile(APath, AFile, IsAutoSave);
 
-     oldPath_Session:= Path_Session;
-     oldPath_Session_Scan:= Path_Session_Scan;
-     oldPath_Session_Pictures:= Path_Session_Pictures;
-     oldSession_File:= Session_File;
+     if not(Result)
+     then MessageDlg('DigIt', Format(rsErrLoadWork, [APath+AFile]), mtError, [mbOk], 0);
 
-     Path_Session:= APath;
-     Path_Session_Scan:= Path_Session+'Scan'+DirectorySeparator;
-     Path_Session_Pictures:= Path_Session+'Pictures'+DirectorySeparator;
-     Session_File:= AFile;
-
-     SES_Load(IsAutoSave);
-
-     Result:= True;
-
-  except
-     Result:= False;
-  end;
-
-  if not(Result) then
-  begin
-    MessageDlg('DigIt', Format(rsErrLoadWork, [APath+AFile]), mtError, [mbOk], 0);
-
-    Path_Session:= oldPath_Session;
-    Path_Session_Scan:= oldPath_Session_Scan;
-    Path_Session_Pictures:= oldPath_Session_Pictures;
-    {#note : it would be more complicated than that because we would have to reread everything from the auto save}
+  finally
   end;
 end;
 
@@ -1949,179 +1536,41 @@ end;
 
 function TDigIt_Main.SaveSessionFile(AFileName: String): Boolean;
 var
-   newPath_Session,
-   newSession_File,
-   curFileName,
-   curFileNameR: String;
-   fileSources,
-   fileCaptured: TStringArray;
-   isRelative,
    isMove: Boolean;
-   i,
-   lenSources,
-   lenCaptured: Integer;
 
 begin
-  Result:= False;
   try
-  if (AFileName <> '') then
-  try
-     //SES_Save(True);
+     Result:= False;
+     if (AFileName <> '') then
+     try
+        //if Path is Default then we are saving a new Session, we must move the Files
+        if (Path_Session = Path_DefSession)
+        then isMove:= True
+        else begin
+               //Copy or Move temp/thumb Files from Current Work Session to New Session
+               dlgRes:= QuestionDlg('DigIt', rsSaveWorkCopy, mtConfirmation,
+                                   [mrYes, 'Copy', 'IsDefault',
+                                   mrNo, 'Move',
+                                   mrCancel, 'IsCancel'], 0);
 
-     newPath_Session:= ExtractFilePath(AFileName);
-     newSession_File:= ExtractFileNameWithoutExt(ExtractFileName(AFileName));
-     ForceDirectories(newPath_Session);
+               Case dlgRes of
+               mrYes: isMove:= False;
+               mrNo: isMove:= True;
+               mrCancel: exit;
+               end;
+             end;
 
-     //if Path is Default then we are saving a new Session, we must move the Files
-     if (Path_Session = Path_DefSession)
-     then isMove:= True
-     else begin
-            //Copy or Move temp/thumb Files from Current Work Session to New Session
-            dlgRes:= QuestionDlg('DigIt', rsSaveWorkCopy, mtConfirmation,
-                                [mrYes, 'Copy', 'IsDefault',
-                                 mrNo, 'Move',
-                                 mrCancel, 'IsCancel'], 0);
+        Session.SaveSessionFile(isMove, AFileName);
+        imgListThumb_Changed:= True;
+        Result:= True;
 
-            Case dlgRes of
-            mrYes: isMove:= False;
-            mrNo: isMove:= True;
-            mrCancel: exit;
-            end;
-          end;
-
-     DigIt_Progress.ProgressShow(rsSavingWork, 0, 5);
-
-
-     lenSources:= Length(SourceFiles);
-     lenCaptured:= Length(CapturedFiles);
-
-     SetLength(fileSources, lenSources);
-     SetLength(fileCaptured, lenCaptured);
-
-     //Copy Files to new Session, if is Relative convert Names else leave as is
-     if DigIt_Progress.ProgressSetTotal(rsSavingSources, 1) then exit;
-     for i:=0 to lenSources-1 do
-     begin
-       curFileNameR:= FullPathToRelativePath(Path_Session, SourceFiles[i].fName, isRelative);
-
-       if isRelative
-       then begin
-              curFileName:= RelativePathToFullPath(newPath_Session, curFileNameR);
-              ForceDirectories(ExtractFilePath(curFileName));
-              CopyFile(SourceFiles[i].fName, curFileName, True, True);
-              if isMove then DeleteFile(SourceFiles[i].fName);
-
-              fileSources[i]:= curFileName;
-            end
-       else begin
-              {#todo -oMaxM : User may select if copy the file inside the Session Scan Folder Yes,No,YesAll,NoAll }
-              fileSources[i]:= SourceFiles[i].fName;
-            end;
-
-       Application.ProcessMessages; if DigIt_Progress.Cancelled then exit;
+     except
+       on E: Exception do MessageDlg('DigIt', Format(rsErrSaveWork, [AFileName, E.Message]), mtError, [mbOk], 0);
      end;
-
-     if DigIt_Progress.ProgressSetTotal(rsSavingCaptured, 2) then exit;
-     for i:=0 to lenCaptured-1 do
-     begin
-       curFileNameR:= FullPathToRelativePath(Path_Session, CapturedFiles[i].fName, isRelative);
-
-       if isRelative
-       then begin
-              curFileName:= RelativePathToFullPath(newPath_Session, curFileNameR);
-              ForceDirectories(ExtractFilePath(curFileName));
-              CopyFile(CapturedFiles[i].fName, curFileName, True, True);
-              if isMove then DeleteFile(CapturedFiles[i].fName);
-
-              fileCaptured[i]:= curFileName;
-            end
-       else begin
-              {#todo -oMaxM : User may select if copy the file inside the Session Pictures Folder Yes,No,YesAll,NoAll }
-              fileCaptured[i]:= CapturedFiles[i].fName;
-            end;
-
-       Application.ProcessMessages; if DigIt_Progress.Cancelled then exit;
-     end;
-
-     if DigIt_Progress.ProgressSetTotal(rsSavingSessionFiles, 3) then exit;
-
-     //Copy Loaded File
-     curFileNameR:= FullPathToRelativePath(Path_Session, LoadedFile, isRelative);
-     if isRelative then
-     begin
-       curFileName:= RelativePathToFullPath(newPath_Session, curFileNameR);
-       ForceDirectories(ExtractFilePath(curFileName));
-       CopyFile(LoadedFile, curFileName, True, False);
-       if isMove then DeleteFile(LoadedFile);
-
-       LoadedFile:= curFileName;
-     end;
-
-     Application.ProcessMessages; if DigIt_Progress.Cancelled then exit;
-
-     //Copy AutoSave Files
-     curFileName:=Path_Session+Session_File+Ext_AutoSess;
-     if FileExists(curFileName) then
-     begin
-       CopyFile(curFileName, newPath_Session+newSession_File+Ext_AutoSess, True, False);
-
-       //if Path is Default then we are saving a new Session, we must move the autoSave Files
-       if isMove then DeleteFile(curFileName);
-     end;
-     curFileName:=Path_Session+Session_File+Ext_AutoThumb;
-     if FileExists(curFileName) then
-     begin
-       CopyFile(curFileName, newPath_Session+newSession_File+Ext_AutoThumb, True, False);
-       if isMove then DeleteFile(curFileName);
-     end;
-
-     //if is Move then Delete old Session Files
-     if isMove then
-     begin
-       DeleteFile(Path_Session+Session_File+Ext_Thumb);
-       DeleteFile(Path_Session+Session_File+Ext_Sess);
-     end;
-
-     if DigIt_Progress.ProgressSetTotal(rsSavingSwitch, 4) then exit;
-
-     //Populate the Files Arrays with new Filenames
-     for i:=0 to lenSources-1 do
-       SourceFiles[i].fName:= fileSources[i];
-
-     for i:=0 to lenCaptured-1 do
-       CapturedFiles[i].fName:= fileCaptured[i];
-
-     //If is Relative convert Paths to new Session, else leave as is
-     curFileNameR:= FullPathToRelativePath(Path_Session, Path_Session_Pictures, isRelative);
-     if isRelative then Path_Session_Pictures:= RelativePathToFullPath(newPath_Session, curFileNameR);
-
-     curFileNameR:= FullPathToRelativePath(Path_Session, Path_Session_Scan, isRelative);
-     if isRelative then Path_Session_Scan:= RelativePathToFullPath(newPath_Session, curFileNameR);
-
-     //Switch to New Session
-     Path_Session:= newPath_Session;
-     Session_File:= ExtractFileNameWithoutExt(ExtractFileName(AFileName));
-     imgListThumb_Changed:= True;
-
-     SES_Save(False);
-
-     DigIt_Progress.ProgressSetTotal(rsSavingDone, 5);
-     Result:= True;
-
-  except
-    on E: Exception do
-      MessageDlg('DigIt', Format(rsErrSaveWork, [AFileName, E.Message]), mtError, [mbOk], 0);
-  end;
 
   finally
-    if DigIt_Progress.Cancelled then
-    begin
-      dlgRes:= mrCancel;
-    end;
-
-    fileSources:= nil;
-    fileCaptured:= nil;
-    DigIt_Progress.Hide;
+     if theBridge.Progress.Cancelled then dlgRes:= mrCancel;
+     theBridge.Progress.Hide;
   end;
 end;
 
@@ -2133,28 +1582,9 @@ var
 
 begin
   try
-     SES_Loading:= True;
-
-     if IsAutoSave
-     then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-     else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     newSourceI:= SES_LoadSource(aXML, IsAutoSave);
-     SES_LoadSourceFiles(aXML, IsAutoSave);
-     newDestinationI:= SES_LoadDestination(aXML, IsAutoSave);
-     SES_LoadCapturedFiles(aXML, IsAutoSave);
-     SES_LoadPageSettings(aXML, IsAutoSave);
-     SES_LoadLoadedImage(aXML, IsAutoSave);
-     Counter.Load(aXML, 'Counter', True);
-     SES_LoadCropAreas(aXML, IsAutoSave);
-     SES_LoadUserInterface(aXML, IsAutoSave);
-
-     SessionModified:= IsAutoSave;
+     Session.Load(IsAutoSave);
 
   finally
-     SES_Loading:= False;
-     aXML.Free;
-
      UI_MenuItemsChecks(newSourceI, newDestinationI);
      UI_FillCounter;
      UI_ToolBar;
@@ -2167,40 +1597,8 @@ var
    curExt: String;
 
 begin
-  //if (rSource <> Nil) and (rSource^.Inst <> Nil) then
   try
-     if IsAutoSave
-     then curExt:= Ext_AutoSess
-     else curExt:= Ext_Sess;
-
-     aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+curExt);
-
-     SES_SaveSource(aXML, IsAutoSave);
-     SES_SaveSourceFiles(aXML, IsAutoSave);
-     SES_SaveDestination(aXML, IsAutoSave);
-     SES_SaveCapturedFiles(aXML, IsAutoSave);
-     SES_SavePageSettings(aXML, IsAutoSave);
-     SES_SaveLoadedImage(aXML, IsAutoSave);
-
-     Counter.Save(aXML, 'Counter', True);
-
-     SES_SaveCropAreas(aXML, IsAutoSave);
-     SES_SaveUserInterface(aXML, IsAutoSave);
-
-     aXML.Flush;
-     aXML.Free;
-
-     //FPC Bug?
-     //If a key like "rSource/Params" is written to the same open file, even after a flush, it is ignored.
-     //So we do it after destroying XML.
-
-     if (Sources.Selected <> nil) and
-        (Sources.Selected^.Inst <> Nil)
-     then Sources.Selected^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Source/Params');
-
-//     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Session+Session_File+curExt), 'Destination/Params');
-
-     if not(IsAutoSave) then SessionModified:= False;
+     Session.Save(IsAutoSave);
 
   finally
   end;
@@ -2209,37 +1607,16 @@ end;
 procedure TDigIt_Main.SES_ClearAutoSave(AFromStartup: Boolean);
 begin
   try
-     DeleteFile(Path_DefSession+File_DefSession+Ext_AutoSess);
-     DeleteFile(Path_DefSession+File_DefSession+Ext_AutoThumb);
-     DeleteDirectory(Path_DefSession_Scan, True);
-     DeleteDirectory(Path_DefSession_Pictures, True);
+     Session.ClearAutoSave(AFromStartup);
 
-     if AFromStartup
-     then begin
-          end
-     else try
-             SetDefaultSessionValues;
-             SetDefaultStartupValues;
+     if not(AFromStartup) then
+     try
+        imgManipulation.Bitmap:= nil;
+        if (Session.CropMode = diCropCustom) then imgManipulation.clearCropAreas;
 
-             //Clear Source Queque
-             //rSource^.Inst.Clear;
-
-             //Clear Captured Array and ListView
-             ClearCaptured;
-
-             //This would be like a Full Area Template
-             imgManipulation.Bitmap:= nil;
-             if (CropMode = diCropCustom) then imgManipulation.clearCropAreas;
-
-             //Reset Counter
-             Counter.Reset;
-
-             setCropMode(diCropFull);
-
-       finally
-         UI_FillCounter;
-       end;
-
+     finally
+        UI_FillCounter;
+     end;
 
   finally
     UI_ToolBar;
@@ -2247,247 +1624,7 @@ begin
   end;
 end;
 
-function TDigIt_Main.SES_LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
-                                    XMLRoot_Path: String; XML_File: String): Integer;
-var
-   aFree: Boolean;
-   oldSourceName,
-   newSourceName: String;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree then
-     begin
-       if (XML_File = '') then //Use Session File
-       begin
-         if IsAutoSave
-         then XML_File:= Path_Session+Session_File+Ext_AutoSess
-         else XML_File:= Path_Session+Session_File+Ext_Sess;
-       end;
-
-       aXML:= TRttiXMLConfig.Create(XML_File);
-     end
-     else XML_File:= aXML.Filename;
-
-     Result:= -1;
-
-     oldSourceName:= Sources.SelectedName;
-     if Sources.Select(aXML, XMLRoot_Path, newSourceName)
-     then begin
-            if (oldSourceName <> newSourceName) then
-            begin
-              { #note -oMaxM : rSource Switched...Do something? }
-            end;
-
-            Result:= Sources.SelectedIndex;
-          end
-     else if (newSourceName <> '') then
-          begin
-            MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
-            Result:= Sources.SelectedIndex;
-          end;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
-                                     XMLRoot_Path: String; XML_File: String);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree then
-     begin
-       if (XML_File = '') then //Use Session File
-       begin
-         if IsAutoSave
-         then XML_File:= Path_Session+Session_File+Ext_AutoSess
-         else XML_File:= Path_Session+Session_File+Ext_Sess;
-       end;
-
-       aXML:= TRttiXMLConfig.Create(XML_File);
-     end
-     else XML_File:= aXML.Filename;
-
-     if Sources.Save(aXML, XMLRoot_Path, False) then
-     begin
-       if aFree then
-       begin
-         aXML.Free; aXML:= nil;
-
-         //Cannot use SaveParams=True in Sources.Save
-         //FPC Bug?
-         //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
-         //So we do it after destroying XML.
-
-         if (Sources.Selected <> nil) and
-            (Sources.Selected^.Inst <> nil)
-         then Sources.Selected^.Inst.Params.Save(PChar(XML_File), PChar(XMLRoot_Path+'Source/Params'));
-       end;
-
-       if IsAutoSave then SessionModified:= True;
-     end;
-
-  finally
-    if aFree and (aXML <> nil) then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_LoadSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-   curItemPath: String;
-   i, iCount: Integer;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     //Load SourceFiles
-     SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
-     iCount:= aXML.GetValue(SES_SourceFiles+'Count', 0);
-     iSourceFiles:= aXML.GetValue(SES_SourceFiles+'iSourceFiles', -1);
-     lastCropped:= aXML.GetValue(SES_SourceFiles+'lastCropped', -1);
-     lastLenTaked:= aXML.GetValue(SES_SourceFiles+'lastLenTaked', 0);
-     SetLength(SourceFiles, iCount);
-     for i:=0 to iCount-1 do
-     begin
-       curItemPath :=SES_SourceFiles+'Item' + IntToStr(i)+'/';
-       SourceFiles[i].cCount:= aXML.GetValue(curItemPath+'cCount', 0);
-       SourceFiles[i].cStart:= aXML.GetValue(curItemPath+'cStart', 0);
-       SourceFiles[i].fName:= RelativePathToFullPath(Path_Session, aXML.GetValue(curItemPath+'fName', ''));
-     end;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SaveSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-   i: Integer;
-   curItemPath: String;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     //Save SourceFiles array
-     aXML.DeletePath(SES_SourceFiles);
-     aXML.SetValue(SES_SourceFiles+'Count', Length(SourceFiles));
-     aXML.SetValue(SES_SourceFiles+'iSourceFiles', iSourceFiles);
-     aXML.SetValue(SES_SourceFiles+'lastCropped', lastCropped);
-     aXML.SetValue(SES_SourceFiles+'lastLenTaked', lastLenTaked);
-     for i:=0 to Length(SourceFiles)-1 do
-     begin
-       curItemPath :=SES_SourceFiles+'Item' + IntToStr(i)+'/';
-       aXML.SetValue(curItemPath+'cCount', SourceFiles[i].cCount);
-       aXML.SetValue(curItemPath+'cStart', SourceFiles[i].cStart);
-       aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(Path_Session, SourceFiles[i].fName));
-     end;
-
-     if IsAutoSave then SessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-function TDigIt_Main.SES_LoadDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean): Integer;
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     //Load Destination and its Params
-     { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
- (*
-     newDestinationName:= aXML.GetValue('Destination/Name', '');
-     if (newDestinationName = '')
-     then begin
-            rDestination:= nil;
-            rDestinationParams:= nil;
- *)
-            rDestinationName:= '';
-            Path_Session_Pictures:= RelativePathToFullPath(Path_Session, aXML.GetValue('Destination/Params/Path', ''));
-
-            //Load Format and Create Writer
-            SaveFormat:= ifJpeg;
-            aXML.GetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
-            SetSaveWriter(SaveFormat);
-            aXML.ReadObject('Destination/Params/Writer/', SaveWriter);
-            Result:= 0;
- (*
-          end
-     else begin
-            if theBridge.DestinationsImpl.Select(newDestinationName) then
-            begin
-              rDestination:= theBridge.DestinationsImpl.Selected;
-              rDestinationName:= theBridge.DestinationsImpl.SelectedName;
-              rDestinationParams:= theBridge.DestinationsImpl.SelectedParams;
-              Result:= theBridge.DestinationsImpl.SelectedIndex+1;
-              theBridge.DestinationsImpl.LoadSelectedParams(aXML.Filename, 'Destination/Params');
-            end;
-          end;
- *)
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SaveDestination(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     //Save rDestination and its Params
-(*     aXML.SetValue('Destination/Name', rDestinationName);
-     if (rDestination = nil) then
-     begin
-*)
-       aXML.DeletePath('Destination/Params/');
-       aXML.SetValue('Destination/Params/Path', FullPathToRelativePath(Path_Session, Path_Session_Pictures));
-
-       aXML.SetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
-       aXML.WriteObject('Destination/Params/Writer/', SaveWriter);
-
-//     end;
-
-    if IsAutoSave then SessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
+(*
 procedure TDigIt_Main.SES_LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    i,
@@ -2634,103 +1771,6 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.SES_LoadLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     LoadImage(RelativePathToFullPath(Path_Session, aXML.GetValue('LoadedFile', '')), False); //DON'T set to True, if you do not want infinite recursion
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SaveLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     aXML.SetValue('LoadedFile', FullPathToRelativePath(Path_Session, LoadedFile));
-
-     if IsAutoSave then SessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SaveSource_CapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     SES_SaveSourceFiles(aXML, IsAutoSave);
-     SES_SaveCapturedFiles(aXML, IsAutoSave);
-     SES_SaveLoadedImage(aXML, IsAutoSave);
-
-     if IsAutoSave then SessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SaveSource_CapturedIndexes(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     if (Length(SourceFiles) > 0) then
-     begin
-       aXML.SetValue(SES_SourceFiles+'iSourceFiles', iSourceFiles);
-       aXML.SetValue(SES_SourceFiles+'lastCropped', lastCropped);
-       aXML.SetValue(SES_SourceFiles+'lastLenTaked', lastLenTaked);
-     end;
-
-     if (Length(CapturedFiles) > 0) then aXML.SetValue(SES_CapturedFiles+'iCapturedFiles', iCapturedFiles);
-
-     if lvCaptured.Selected=nil
-     then aXML.DeleteValue(SES_CapturedFiles+'Selected')
-     else aXML.SetValue(SES_CapturedFiles+'Selected', lvCaptured.Selected.Index);
-
-     SES_SaveLoadedImage(aXML, IsAutoSave);
-
-     if IsAutoSave then SessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
 procedure TDigIt_Main.SES_LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
@@ -2780,115 +1820,31 @@ begin
     if aFree then aXML.Free;
   end;
 end;
-
-procedure TDigIt_Main.SES_LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     PageResize:= resFullsize;
-     aXML.GetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
-
-     aXML.ReadObject(SES_PageSettings+'PageSize', PageSize);
-
-     PageRotate:= rotNone;
-     aXML.GetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
-
-     PageFlip:= flipNone;
-     aXML.GetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
-
-     if (PageResize = resFullsize)
-     then imgManipulation.SetEmptyImageSizeToNull
-     else imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(PageSize.PhysicalUnit), PageSize.Width, PageSize.Height);
-
-  finally
-    UI_FillPageSizes;
-    UI_FillPageRotateFlip;
-
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Main.SES_SavePageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
-     if (PageSize.Width = 0) or
-        (PageSize.Height = 0) then PageResize:= resFullsize;
-
-     aXML.SetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
-     aXML.WriteObject(SES_PageSettings+'PageSize', PageSize);
-
-     aXML.SetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
-     aXML.SetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
-
-     if IsAutoSave then SessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
+*)
 procedure TDigIt_Main.SES_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
 begin
   try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
      //User Interface
      rollCrops.Collapsed:=aXML.GetValue('UI/rollCrops_Collapsed', False);
      rollPages.Collapsed:=aXML.GetValue('UI/rollPages_Collapsed', True);
      rollCounters.Collapsed:=aXML.GetValue('UI/rollCounters_Collapsed', True);
 
   finally
-    if aFree then aXML.Free;
   end;
 end;
 
 procedure TDigIt_Main.SES_SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
 begin
   try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(Path_Session+Session_File+Ext_Sess);
-
      //User Interface
      aXML.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
      aXML.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
      aXML.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
 
-     if IsAutoSave then SessionModified:= True;
-
   finally
-    if aFree then aXML.Free;
   end;
 end;
+
 
 function TDigIt_Main.Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
 var
@@ -2906,10 +1862,10 @@ begin
        end;
 
        //Save Used Source in AutoSave
-       SES_SaveSource(nil, True);
+       Session.SaveSource(nil, True);
 
        //Save Last Used Source in Settings
-       SES_SaveSource(nil, False, '', Path_Config+File_Config);
+       Session.SaveSource(nil, False, '', Path_Config+File_Config);
 
        Result:= True;
      end;
@@ -2927,16 +1883,16 @@ begin
      if (newDestinationIndex = 0)
      then begin
             { #note 10 -oMaxM : Use of this function should be removed when SaveFiles is implemented as a descendant of IDigIt_Destination }
-            if TDest_SaveFiles_Settings.Execute(SaveFormat, SaveWriter, Path_Session_Pictures) then
+            if TDest_SaveFiles_Settings.Execute(Session.SaveFormat, Session.SaveWriter, Path_Session_Pictures) then
             begin
-              SaveExt:= SuggestImageExtension(SaveFormat);
-              SES_SaveDestination(nil, True);
+              Session.SaveExt:= SuggestImageExtension(Session.SaveFormat);
+              Session.SaveDestination(nil, True);
             end;
 
             //this way we know it is SaveAs Destination
             //rDestination:= nil;
             //rDestinationParams:= nil;
-            rDestinationName:= '';
+            //rDestinationName:= '';
 
             Result:= True;
           end
@@ -3071,7 +2027,7 @@ end;
 
 procedure TDigIt_Main.menuImageFormatClick(Sender: TObject);
 begin
-  TBGRAFormatUIContainer.Execute(SaveFormat, SaveWriter);
+  TBGRAFormatUIContainer.Execute(Session.SaveFormat, Session.SaveWriter);
 end;
 
 procedure TDigIt_Main.rgCropAspectSelectionChanged(Sender: TObject);
@@ -3107,7 +2063,7 @@ var
 
 begin
   //If we are in FullArea Mode and user add an Area switch to Custom Mode
-  if (CropMode <> diCropCustom) (*and not(imgManipulation.Empty)*) then setCropMode(diCropCustom);
+  if (Session.CropMode <> diCropCustom) and not(imgManipulation.Empty) then setCropMode(diCropCustom);
 
   curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
 
@@ -3118,7 +2074,7 @@ begin
   cbCropList.AddItem(CropArea.Name, CropArea);
   cbCropList.ItemIndex:=cbCropList.Items.IndexOfObject(CropArea);
 
-  if not(SES_Loading) then
+  if not(Session.Loading) then
   begin
     UI_FillCropArea(CropArea);
     UI_ToolBar;
@@ -3141,7 +2097,7 @@ begin
          then setCropMode(diCropFull)
          else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
 
-         if not(SES_Loading) then UI_ToolBar;
+         if not(Session.Loading) then UI_ToolBar;
     end;
   except
   end;
@@ -3193,12 +2149,12 @@ end;
 
 procedure TDigIt_Main.tbCapturedPDFClick(Sender: TObject);
 begin
-  TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, True);
+  TDigIt_ExportFiles.Execute(Application.Title, Session.CapturedFiles, True);
 end;
 
 procedure TDigIt_Main.tbCapturedToImgClick(Sender: TObject);
 begin
-  TDigIt_ExportFiles.Execute(Application.Title, CapturedFiles, False);
+  TDigIt_ExportFiles.Execute(Application.Title, Session.CapturedFiles, False);
 end;
 
 procedure TDigIt_Main.MenuSourcePopup(Sender: TObject);
@@ -3208,13 +2164,13 @@ end;
 
 procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
 begin
-  if (ANewCropMode <> CropMode) then
+  if (ANewCropMode <> Session.CropMode) then
   begin
     Case ANewCropMode of
       diCropFull: begin
-        if (CropMode = diCropCustom) then
+        if (Session.CropMode = diCropCustom) then
         begin
-          if (imgManipulation.CropAreas.Count > 0)
+          if (Length(Session.CropAreas) > 0)
           then if (MessageDlg('DigIt', rsClearCrops, mtConfirmation, mbYesNo, 0) = mrNo)
                then exit;
         end;
@@ -3238,15 +2194,15 @@ begin
       end;
     end;
 
-    CropMode:= ANewCropMode;
+    Session.CropMode:= ANewCropMode;
 
-    if not(SES_Loading) then
+    if not(Session.Loading) then
     begin
       UI_FillCounter;
       UI_ToolBar;
     end;
    end;
-  tbCropMode.ImageIndex:= Integer(CropMode);
+  tbCropMode.ImageIndex:= Integer(Session.CropMode);
 end;
 
 (*
@@ -3268,15 +2224,7 @@ begin
 end;
 *)
 
-procedure TDigIt_Main.SourceFiles_Clear(ClearSourceInst: Boolean);
-begin
-  iSourceFiles:= -1;
-  lastCropped:= -1;
-  lastLenTaked:= 0;
-  SourceFiles:= nil;
-  if ClearSourceInst and (Sources.Selected <> nil) then Sources.Selected^.Inst.Clear;
-end;
-
+(*
 procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
 var
    i,
@@ -3387,44 +2335,6 @@ begin
   SourceFiles[iSourceFiles].cCount:= imgManipulation.CropAreas.Count;
 end;
 
-procedure TDigIt_Main.SetSaveWriter(AFormat: TBGRAImageFormat);
-begin
-  SaveFormat:= AFormat;
-  try
-     if (SaveWriter <> nil) then SaveWriter.Free;
-     SaveWriter:= CreateBGRAImageWriter(SaveFormat, True);
-     SaveExt:= SuggestImageExtension(SaveFormat);
-
-  except
-    SaveFormat:= ifJpeg;
-    SaveWriter:= nil;
-    SaveExt:= 'jpg';
-  end;
-
-  if (SaveWriter <> nil) then
-  begin
-    if (SaveWriter is TBGRAWriterJPEG) then TBGRAWriterJPEG(SaveWriter).CompressionQuality:= 100;
-  end;
-end;
-
-procedure TDigIt_Main.SetDefaultStartupValues;
-begin
-  SourceFiles:= nil;
-  iSourceFiles:= -1;
-  CapturedFiles:= nil;
-  iCapturedFiles:= -1;
-  lastCropped:= -1;
-  lastLenTaked:= 0;
-
-  LoadedFile:= '';
-
-  PageResize:= resFullsize;
-  PageRotate:= rotNone;
-  PageFlip:= flipNone;
-
-  CropMode:= diCropNull; //setCropMode works only if there are changes
-end;
-
 procedure TDigIt_Main.SetDefaultSessionValues;
 begin
   Path_Session:= Path_DefSession;
@@ -3433,18 +2343,19 @@ begin
   Session_File:= File_DefSession;
   rSessionModified:= False;
 end;
+*)
 
-procedure TDigIt_Main.ClearCaptured;
+procedure TDigIt_Main.Clear_Captured;
 var
    nofileBMP: TBitmap;
 
 begin
   try
-     nofileBMP:=TBitmap.Create;
+     //Clear Array
+     Session.Clear_Captured;
 
-     //Clear Array and ListView
-     iCapturedFiles:= -1;
-     CapturedFiles:= nil;
+     //Clear ListView
+     nofileBMP:=TBitmap.Create;
      lvCaptured.Clear;
 
      //Get the Fixed Thumbnail NoFile and re-add it at position 0
@@ -3465,40 +2376,19 @@ begin
   else Result :=TCropArea(cbCropList.Items.Objects[cbCropList.ItemIndex]);
 end;
 
-procedure TDigIt_Main.Counter_Dec(AValue: Integer);
+function TDigIt_Main.GetSessionModified: Boolean;
 begin
-  if (AValue > 0) then
-  begin
-    Counter.Value:= Counter.Value-AValue;
-    dec(iCapturedFiles, AValue);
-    if (iCapturedFiles < 0) then iCapturedFiles:= -1;
-  end;
-end;
-
-procedure TDigIt_Main.Counter_Inc(AValue: Integer);
-begin
-  if (AValue > 0) then
-  begin
-    Counter.Value:= Counter.Value+AValue;
-    inc(iCapturedFiles, AValue);
-    if (iCapturedFiles > Length(CapturedFiles)-1) then iCapturedFiles:= Length(CapturedFiles)-1;
-  end;
-end;
-
-procedure TDigIt_Main.Counter_Assign(AValue: Integer);
-begin
-  Counter.Value:= AValue;
-  iCapturedFiles:= AValue-1;
-  if (iCapturedFiles > Length(CapturedFiles)-1) then iCapturedFiles:= Length(CapturedFiles)-1;
+  Result:= Session.Modified;
 end;
 
 procedure TDigIt_Main.SetSessionModified(AValue: Boolean);
 begin
-  if (rSessionModified = AValue) then exit;
+  if (Session.Modified <> AValue) then
+  begin
+    Session.Modified:= AValue;
 
-  rSessionModified:= AValue;
-
-  UI_Caption;
+    UI_Caption;
+  end;
 end;
 
 procedure TDigIt_Main.UI_DestinationMenuClick(Sender: TObject);
@@ -3534,9 +2424,9 @@ procedure TDigIt_Main.UI_ProfileMenuClick(Sender: TObject);
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   try
-    if (SES_LoadSource(nil, False,
-                      PROF_Item+IntToStr(TMenuItem(Sender).Tag)+'/',
-                      Path_Config+File_Profiles) > -1) then
+    if (Session.LoadSource(nil, False,
+                           PROF_Item+IntToStr(TMenuItem(Sender).Tag)+'/',
+                           Path_Config+File_Profiles) > -1) then
     begin
       TMenuItem(Sender).Default:= True;
     end;
@@ -3641,16 +2531,16 @@ procedure TDigIt_Main.UI_FillPageSizes;
 begin
   inFillPagesUI:= True;
 
-  panelPageSize.Enabled:= (PageResize <> resFullsize);
+  panelPageSize.Enabled:= (Session.PageResize <> resFullsize);
 
   if panelPageSize.Enabled then
   begin
-    if (PageSize.PhysicalUnit <> ResolutionToPhysicalUnit(imgManipulation.EmptyImage.ResolutionUnit)) then
+    if (Session.PageSize.PhysicalUnit <> ResolutionToPhysicalUnit(imgManipulation.EmptyImage.ResolutionUnit)) then
     begin
-      imgManipulation.EmptyImage.ResolutionUnit:= PhysicalToResolutionUnit(PageSize.PhysicalUnit);
+      imgManipulation.EmptyImage.ResolutionUnit:= PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit);
     end;
 
-    if (PageSize.PhysicalUnit = puPixel)
+    if (Session.PageSize.PhysicalUnit = puPixel)
     then begin
            edPageWidth.DecimalPlaces:=0;
            edPageHeight.DecimalPlaces:=0;
@@ -3660,8 +2550,8 @@ begin
            edPageHeight.DecimalPlaces:=3;
          end;
 
-    edPageWidth.Value:= PageSize.Width;
-    edPageHeight.Value:= PageSize.Height;
+    edPageWidth.Value:= Session.PageSize.Width;
+    edPageHeight.Value:= Session.PageSize.Height;
   end;
 
   inFillPagesUI:= False;
@@ -3671,7 +2561,7 @@ procedure TDigIt_Main.UI_FillPageRotateFlip;
 begin
   inFillPagesUI:= True;
 
-  Case PageRotate of
+  Case Session.PageRotate of
     rotLeft90: btPRotateLeft.Down:= True;
     rotRight90: btPRotateRight.Down:= True;
     rot180: btPRotate180.Down:= True;
@@ -3682,7 +2572,7 @@ begin
     end;
   end;
 
-  Case PageFlip of
+  Case Session.PageFlip of
     flipVertical: btPFlipV.Down:= True;
     flipHorizontal: btPFlipH.Down:= True;
     else begin
@@ -3726,11 +2616,11 @@ begin
   actPreview.Enabled:= bCommonCond;
   itemProfiles_AddCurrent.Enabled:= bCommonCond;
 
-  lenCaptured:= Length(CapturedFiles);
+  lenCaptured:= Length(Session.CapturedFiles);
 
-  if (CropMode = diCropCustom)
+  if (Session.CropMode = diCropCustom)
   then begin
-         lenSources:= Length(SourceFiles);
+         lenSources:= Length(Session.SourceFiles);
          bCommonCond:= bCommonCond and
                        not(imgManipulation.Empty) and (imgManipulation.CropAreas.Count > 0) and
                        DirectoryExists(Path_Session_Pictures);
@@ -3833,18 +2723,18 @@ end;
 
 procedure TDigIt_Main.UI_ThumbnailUpdate(AIndex: Integer; AFileName: String);
 begin
-  if (CapturedFiles[AIndex].iIndex <= 0)
-  then CapturedFiles[AIndex].iIndex:= imgListThumb.AddProportionally(AFileName)
-  else imgListThumb.ReplaceProportionally(CapturedFiles[AIndex].iIndex, AFileName);
+  if (Session.CapturedFiles[AIndex].iIndex <= 0)
+  then Session.CapturedFiles[AIndex].iIndex:= imgListThumb.AddProportionally(AFileName)
+  else imgListThumb.ReplaceProportionally(Session.CapturedFiles[AIndex].iIndex, AFileName);
 
   imgListThumb_Changed:= True;
 end;
 
 procedure TDigIt_Main.UI_ThumbnailUpdate(AIndex: Integer; ABitmap: TBGRABitmap);
 begin
-  if (CapturedFiles[AIndex].iIndex <= 0)
-  then CapturedFiles[AIndex].iIndex:= imgListThumb.AddProportionally(ABitmap.Bitmap)
-  else imgListThumb.ReplaceProportionally(CapturedFiles[AIndex].iIndex, ABitmap.Bitmap);
+  if (Session.CapturedFiles[AIndex].iIndex <= 0)
+  then Session.CapturedFiles[AIndex].iIndex:= imgListThumb.AddProportionally(ABitmap.Bitmap)
+  else imgListThumb.ReplaceProportionally(Session.CapturedFiles[AIndex].iIndex, ABitmap.Bitmap);
 
   imgListThumb_Changed:= True;
 end;
@@ -3854,11 +2744,11 @@ var
    capStr: String;
 
 begin
-  if rSessionModified then capStr:= '* ' else  capStr:= '';
+  if Session.Modified then capStr:= '* ' else  capStr:= '';
 
   if (Path_Session = Path_DefSession)
   then capStr:= capStr+'DigIt'
-  else capStr:= capStr+'DigIt'+' - '+Session_File;
+  else capStr:= capStr+'DigIt'+' - '+Session.FileName;
 
   {#todo 2 -oMaxM : Really Use something like rSource^.Inst.UI_SourceTitle + (rSourceName) }
   //if (rSourceName <> '') then capStr:= capStr+'  ('+rSourceName+')';

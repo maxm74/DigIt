@@ -606,6 +606,7 @@ begin
 
     rProgress.SetTotal(TotalMin, TotalMax, TotalVal, False);
     rProgress.SetTotalCaption(PChar(TotalCaption));
+    Result:= rProgress.Cancelled;
   end;
 end;
 
@@ -618,6 +619,7 @@ begin
 
     rProgress.SetTotalValue(TotalVal);
     rProgress.SetTotalCaption(PChar(TotalCaption));
+    Result:= rProgress.Cancelled;
   end;
 end;
 
@@ -630,6 +632,7 @@ begin
 
     rProgress.SetCurrentValue(CurrentVal);
     rProgress.SetCurrentCaption(PChar(CurrentCaption));
+    Result:= rProgress.Cancelled;
   end;
 end;
 
@@ -642,6 +645,7 @@ begin
 
     rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentVal, False);
     rProgress.SetCurrentCaption(PChar(CurrentCaption));
+    Result:= rProgress.Cancelled;
   end;
 end;
 

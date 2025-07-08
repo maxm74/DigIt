@@ -5,10 +5,12 @@ Bugs:
   Esporta PDF con File non A4 (es. Carte d'identità) le misure sono errate
     Acrobat le stampa stretchandole in A4
     Anche in un A4 le misure sono errate (non viene messo il dpi nel pdf? [120dpi di default?])
-  
-Main:
-  Aggiungere checkbox "Ultima Pagina Bianca" in Wizard BuildDuplex
 
+Session:
+  IMPORTANTISSIMO
+  Fare una Interfaccia per User confirmations/Errors Dialogs; da usare ad es. in Crop_Next SourceLoad etc...
+
+Main:
   riprendi sessione : barra di captured alla fine
   
   Take/Preview con Countdown

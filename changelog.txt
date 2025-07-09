@@ -1,7 +1,15 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/08 Switched MainForm to DigIt_Session Use (It must be thoroughly tested)
+2025/07/09 Moved the Progress Form to MaxM_Forms;
+           Moved the Progress interface to MaxM_Commons;
+           Use of the IMM_Progress and IMM_MessageDlg interfaces from MaxM_Commons;
+           Added Msg: IMM_MessageDlg to Bridge;
+           Use of theBridge.MessageDlg in DigIt_Session;
+           Added MessageDlg methods to Bridge;
+           Added the Digit_Bridge_Impl_UI_Form unit to register interface implementations.
+
+08 Switched MainForm to DigIt_Session Use (It must be thoroughly tested)
 
         07 Moved PhysicalSizeConvert in DigIt_Types;
            Changed use of TResolutionUnit to TPhysicalUnit in TDigItPhysicalSize;

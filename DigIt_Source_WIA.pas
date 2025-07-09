@@ -15,7 +15,7 @@ interface
 
 uses 
   Windows, Classes, SysUtils,
-  MM_OpenArrayList,
+  MM_OpenArrayList, MM_Interface_Progress,
   WIA, WiaDef, WIA_LH, WIA_PaperSizes, WIA_SettingsForm,
   Digit_Bridge_Intf;
 
@@ -46,7 +46,7 @@ type
   TDigIt_Source_WIA = class(TNoRefCountObject,
                             IDigIt_Params,
                             IDigIt_Source, IDigIt_Source_Items,
-                            IDigIt_ProgressCallback)
+                            IMM_ProgressCallback)
   private
     rWIA: TWIAManager;
     rWIASource: TWIADevice;
@@ -64,7 +64,7 @@ type
     DownloadedFiles: TDigIt_Source_WIA_Files;
     rEnabled,
     UserCancel: Boolean;
-    Progress: IDigIt_Progress;
+    Progress: IMM_Progress;
 
     function getWIA: TWIAManager;
 
@@ -583,7 +583,7 @@ begin
               Progress.SetTotal(0, 100, 0, True);
               Progress.SetCurrentCaption(nil);
               Progress.SetCurrent(0, 100, 0, False);
-              Progress.SetEventCallBack(Self as IDigIt_ProgressCallback);
+              Progress.SetEventCallBack(Self as IMM_ProgressCallback);
               Progress.Show(PChar(Format(rsWIAAcquiringTitle, [DeviceName])));
             end;
 

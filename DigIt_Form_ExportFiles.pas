@@ -119,7 +119,8 @@ implementation
 uses LCLIntf, LazFileUtils, DigIt_Utils,
      MM_StrUtils, MM_FilesUtils,
      BGRAReadJpeg, BGRAWriteJpeg, BGRAWriteTiff, fpPDF, BGRAPdf,
-     BGRAFormatUI, DigIt_Form_Progress;
+     BGRAFormatUI,
+     Digit_Bridge_Impl;
 
 const
   IMG_FILE   = 2;
@@ -425,7 +426,7 @@ begin
 
      lenCaptured:= Length(CapturedFiles)-1;
      cStr:= IntToStr(lenCaptured+1);
-     DigIt_Progress.ProgressShow(rsConvertPDF, 0, lenCaptured);
+     theBridge.ProgressShow(rsConvertPDF, 0, lenCaptured);
 
      PDF.StartDocument;
      S := PDF.Sections.AddSection;
@@ -434,10 +435,7 @@ begin
 
      for i:=0 to lenCaptured do
      begin
-       DigIt_Progress.progressTotal.Position:= i;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
-       Application.ProcessMessages;
-       if DigIt_Progress.Cancelled then break;
+       if theBridge.ProgressSetTotal(Format(rsProcessing, [i, cStr]), i) then break;
 
        curFileName:= CapturedFiles[i].fName;
 
@@ -519,20 +517,17 @@ begin
          //Some Error Loading Ignore It
        end;
 
-       DigIt_Progress.progressTotal.Position:= i+1;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
-       Application.ProcessMessages;
-       if DigIt_Progress.Cancelled then break;
+       if theBridge.ProgressSetTotal(Format(rsProcessed, [i, cStr]), i+1) then break;
      end;
 
-     if not(DigIt_Progress.Cancelled) then
+     if not(theBridge.ProgressCancelled) then
      begin
        PDF.SaveToFile(pdfFileName);
        Result:= True;
      end;
 
   finally
-     DigIt_Progress.Hide;
+     theBridge.ProgressHide;
 
      srcBitmap.Free;
      MemStream.Free;
@@ -598,14 +593,13 @@ begin
             //Process Using the ListView Items
             lenItems:= lvFiles.Items.Count-1;
             cStrItems:= IntToStr(lenItems+1);
-            DigIt_Progress.ProgressShow(rsConvertIMG, 0, lenItems, 0, 100);
+            theBridge.ProgressShow(rsConvertIMG, 0, lenItems, 0, 100);
 
             for iItem:=0 to lvFiles.Items.Count-1 do
             begin
               curItem:= lvFiles.Items[iItem];
 
-              if DigIt_Progress.ProgressSetTotal(Format(rsProcessing, [iItem, cStrItems])+' '+curItem.Caption, iItem)
-              then break;
+              if theBridge.ProgressSetTotal(Format(rsProcessing, [iItem, cStrItems])+' '+curItem.Caption, iItem) then break;
 
               if (curItem.ImageIndex = IMG_FOLDER)
               then begin
@@ -619,14 +613,12 @@ begin
                      lenCaptured:= Length(CapturedFiles)-1;
                      cStr:= IntToStr(lenCaptured+1);
 
-                     if DigIt_Progress.ProgressSetCurrent(Format(rsProcessing, [0, cStr]), 0, lenCaptured, 0)
-                     then break;
+                     if theBridge.ProgressSetCurrent(Format(rsProcessing, [0, cStr]), 0, lenCaptured, 0) then break;
 
                      //Process current Folder
                      for i:=0 to lenCaptured do
                      begin
-                       if DigIt_Progress.ProgressSetCurrent(Format(rsProcessing, [i, cStr]), i)
-                       then break;
+                       if theBridge.ProgressSetCurrent(Format(rsProcessing, [i, cStr]), i) then break;
 
                        if isRecursive then
                        begin
@@ -635,46 +627,40 @@ begin
                        end;
                        ProcessFile(CapturedFiles[i].fName, dstPath);
 
-                       if DigIt_Progress.ProgressSetCurrent(Format(rsProcessed, [i, cStr]), i+1)
-                       then break;
+                       if theBridge.ProgressSetCurrent(Format(rsProcessed, [i, cStr]), i+1) then break;
                      end;
                   end
               else begin
-                     if DigIt_Progress.ProgressSetCurrent(Format(rsProcessing, [0, '1']), 0, 1, 0)
-                     then break;
+                     if theBridge.ProgressSetCurrent(Format(rsProcessing, [0, '1']), 0, 1, 0) then break;
 
                      ProcessFile(curItem.SubItems[0], destPath);
 
-                     if DigIt_Progress.ProgressSetCurrent(Format(rsProcessed, [1, '1']), 1)
-                     then break;
+                     if theBridge.ProgressSetCurrent(Format(rsProcessed, [1, '1']), 1) then break;
                    end;
 
-              if DigIt_Progress.ProgressSetTotal(Format(rsProcessed, [iItem, cStrItems]), iItem+1)
-              then break;
+              if theBridge.ProgressSetTotal(Format(rsProcessed, [iItem, cStrItems]), iItem+1) then break;
             end;
           end
      else begin
             //Process Using directly CapturedFiles
             lenCaptured:= Length(CapturedFiles)-1;
             cStr:= IntToStr(lenCaptured+1);
-            DigIt_Progress.ProgressShow(rsConvertIMG, 0, lenCaptured);
+            theBridge.ProgressShow(rsConvertIMG, 0, lenCaptured);
 
             for i:=0 to lenCaptured do
             begin
-              if DigIt_Progress.ProgressSetTotal(Format(rsProcessing, [i, cStr]), i)
-              then break;
+              if theBridge.ProgressSetTotal(Format(rsProcessing, [i, cStr]), i) then break;
 
               ProcessFile(CapturedFiles[i].fName, destPath);
 
-              if DigIt_Progress.ProgressSetTotal(Format(rsProcessed, [i, cStr]), i+1)
-              then break;
+              if theBridge.ProgressSetTotal(Format(rsProcessed, [i, cStr]), i+1) then break;
             end;
           end;
 
-     Result:= not(DigIt_Progress.Cancelled);
+     Result:= not(theBridge.ProgressCancelled);
 
   finally
-     DigIt_Progress.Hide;
+     theBridge.ProgressHide;
 
      CapturedFiles:= nil;
      srcBitmap.Free;

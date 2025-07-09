@@ -19,7 +19,7 @@ uses
   LCLVersion, LCLType, Laz2_XMLCfg, FPImage,
   BGRABitmap, BGRABitmapTypes, BGRAPapers,
   BGRAImageManipulation,  BGRASpeedButton, BCPanel, BCLabel, BCListBox, BGRAImageList,
-  BCExpandPanels,BGRAFlashProgressBar,
+  BCExpandPanels,
   DigIt_Types, DigIt_Utils, Digit_Bridge_Intf, Digit_Bridge_Impl,
   DigIt_Settings, DigIt_Sources, DigIt_Session, DigIt_Counter;
 
@@ -28,20 +28,8 @@ resourcestring
   rsContinueWork = 'Continue from last Work Session?'#13#10'%s';
   rsContinueAutoWork = 'Continue from Auto Saved Work Session?'#13#10'%s';
   rsSaveWork = 'Save the Work Session?';
-  rsSavingWork = 'Saving the Work Session';
-  rsSavingSources = 'Saving Sources Files';
-  rsSavingCaptured = 'Saving Captured Files';
-  rsSavingSessionFiles = 'Saving Session Files';
-  rsSavingSwitch = 'Switching to New Work Session';
-  rsSavingDone = 'Saved Done';
-  rsSaveWorkCopy = 'Create a Copy of the Work Session or Move it?';
-  rsNoFilesDownloaded = 'NO Files Downloaded ';
-  rsTakeAgain = 'Replace the last %d taked files with a new Take?';
-  rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
-  rsMiddlePage = 'The page is within the already processed range'#13#10'Should I put it in the middle?';
-  rsClearQueue = 'Clear the Work Queue?';
-  rsExcCreateCounter = 'Failed to Create the Counter';
-  rsNotImpl = 'Not yet implemented';
+  //rsMiddlePage = 'The page is within the already processed range'#13#10'Should I put it in the middle?';
+  //rsNotImpl = 'Not yet implemented';
   rsClearCrops = 'Clear Crop Areas ?';
   rsCrop = 'Crop (F5)';
   rsCropNext = 'Crop + Next (F5)';
@@ -49,9 +37,6 @@ resourcestring
   rsCropCust = 'Custom';
   rsCropToDo = '%d files to do';
   rsCounterPrev = 'Value Previous: %d';
-  rsDeleteCaptured = 'Delete Captured Page %s ?';
-  rsDeleteAll = 'Delete All Captured Pages?';
-  rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
   rsSourceNotFound = 'Source %s not Found, try Select another from Menù';
   rsSourceNotSelected = 'Cannot Select Source %d, try Select another from Menù';
@@ -416,8 +401,7 @@ uses
   MM_StrUtils,
   DigIt_Destination_SaveFiles_SettingsForm,
   //DigIt_Form_PDF,
-  DigIt_Form_ExportFiles,
-  DigIt_Form_Progress, DigIt_Form_Templates, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
+  DigIt_Form_ExportFiles, DigIt_Form_Templates, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
 
 
 { TDigIt_Main }
@@ -640,15 +624,13 @@ procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 begin
   if (Session.CropMode = diCropFull) then UI_SelectCurrentCaptured(-lastLenTaked);
 
-  if (MessageDlg('DigIt', Format(rsTakeAgain, [lastLenTaked]),
-                 mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
      Session.actTake(True);
 
   finally
-    UI_SelectCurrentCaptured;
-    UI_FillCounter;
-    UI_ToolBar;
+     UI_SelectCurrentCaptured;
+     UI_FillCounter;
+     UI_ToolBar;
   end;
 end;
 
@@ -660,21 +642,15 @@ var
 
 begin
   try
-     if (Sender = actTake) or (Sender = actTakeRe)
+     if (Sender = actTake)
      then res:= Session.actTake(False)
      else
      if (Sender = actTakeBuildDuplex)
      then res:= Session.actTake(False, @TWizardBuildDuplex.Execute);
 
-     if (res = 0)
-     then MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
-
   finally
-    if not(Sender = actTakeRe) then
-    begin
-      UI_ToolBar;
-      UI_FillCounter;
-    end;
+     UI_ToolBar;
+     UI_FillCounter;
   end;
 end;
 
@@ -684,26 +660,9 @@ begin
 end;
 
 procedure TDigIt_Main.actCropNextExecute(Sender: TObject);
-var
-   lenSources: Integer;
-
-  (*
-  function CheckEndOfFiles: Boolean;
-  begin
-    Result:= (iSourceFiles >= lenSources);
-
-    if Result and (lenSources > 1) then
-    begin
-      if (MessageDlg('DigIt', rsNoMoreFiles, mtConfirmation,
-                     [mbYes, mbNo], 0) = mrYes)
-      then SourceFiles_Clear(True);
-    end;
-  end;
-  *)
-
 begin
   try
-     Session.actCropNext(nil);  {#to-do 10: Make an Interface for User confirmations/Errors Dialogs}
+     Session.actCropNext;
 
   finally
      UI_SelectNextCaptured;
@@ -713,9 +672,6 @@ begin
 end;
 
 procedure TDigIt_Main.actGoNextExecute(Sender: TObject);
-var
-   new_iSourceFiles: Integer;
-
 begin
   try
      Session.actGoNext;
@@ -728,9 +684,6 @@ begin
 end;
 
 procedure TDigIt_Main.actGoBackExecute(Sender: TObject);
-var
-   new_iSourceFiles: Integer;
-
 begin
   try
      Session.actGoBack;
@@ -743,26 +696,9 @@ begin
 end;
 
 procedure TDigIt_Main.actCropAllExecute(Sender: TObject);
-   (*
-   function CheckEndOfFiles: Boolean;
-   begin
-     Result:= (iSourceFiles >= Length(SourceFiles));
-     if Result then
-     begin
-       //User Confirmation
-       if (MessageDlg('DigIt', rsNoMoreFiles, mtConfirmation, [mbYes, mbNo], 0) = mrYes)
-       then begin
-              iSourceFiles:= -1;
-              SourceFiles:= nil;
-              Sources.Selected^.Inst.Clear;
-            end;
-     end;
-   end;
-   *)
-
 begin
   try
-     Session.actCropAll(nil);
+     Session.actCropAll;
 
   finally
      UI_SelectNextCaptured;
@@ -773,9 +709,8 @@ end;
 
 procedure TDigIt_Main.actClearQueueExecute(Sender: TObject);
 begin
-  if (MessageDlg('DigIt', rsClearQueue, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
-    Session.Clear_SourceFiles(True);
+    Session.actClearQueue;
 
   finally
     UI_ToolBar;
@@ -1229,7 +1164,7 @@ begin
      imgListThumb.Delete(Session.CapturedFiles[iSelected].iIndex);
      imgListThumb_Changed:= True;
 
-     Session.actCapturedDelete(iSelected);
+     Session.actCapturedDelete(False, iSelected);
 
      //Delete Last Item
      lvCaptured.Items.Delete(Length(Session.CapturedFiles));
@@ -1259,7 +1194,7 @@ procedure TDigIt_Main.actCapturedDeleteAllExecute(Sender: TObject);
 begin
   if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   try
-     Session.actCapturedDeleteAll;
+     Session.actCapturedDeleteAll(False);
 
   finally
     UI_ToolBar;
@@ -1316,7 +1251,7 @@ begin
   try
      if (Sender = nil)
      then begin
-            if Settings.Session.ConfirmSaveOnClose and SessionModified
+            if Settings.Session.ConfirmSaveOnClose and Session.Modified
             then begin
                    dlgRes:= MessageDlg('DigIt', rsSaveWork, mtConfirmation, [mbYes, mbNo, mbCancel], 0);
                    canSave:= (dlgRes=mrYes);
@@ -1521,8 +1456,10 @@ begin
   try
      Result:= Session.LoadSessionFile(APath, AFile, IsAutoSave);
 
-     if not(Result)
-     then MessageDlg('DigIt', Format(rsErrLoadWork, [APath+AFile]), mtError, [mbOk], 0);
+     if not(Result) then
+     begin
+
+     end;
 
   finally
   end;
@@ -1569,8 +1506,8 @@ begin
      end;
 
   finally
-     if theBridge.Progress.Cancelled then dlgRes:= mrCancel;
-     theBridge.Progress.Hide;
+     if theBridge.ProgressCancelled then dlgRes:= mrCancel;
+     theBridge.ProgressHide;
   end;
 end;
 

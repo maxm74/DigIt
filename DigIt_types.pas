@@ -112,7 +112,6 @@ type
 
   TLoadSaveXMLEvent = procedure (Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
   TFileNameEvent = procedure (Sender: TObject; AFileName: String) of object;
-  TConfirmEvent = function (Sender: TObject): Boolean of object;
 
   TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;
                                 var AFiles: TSourceFileArray; AStartIndex: Integer): DWord of object;

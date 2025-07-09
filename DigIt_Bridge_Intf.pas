@@ -13,7 +13,7 @@ unit Digit_Bridge_Intf;
 
 interface
 
-uses MM_OpenArrayList;
+uses MM_OpenArrayList, MM_Interface_Progress, MM_Interface_MessageDlg;
 
 const
   DigIt_Source_Kind         = $0000000F;
@@ -94,15 +94,15 @@ type
 
   //ALWAYS Return a Copy (using StrNew, etc) of your internal String DigIt will free after using it
   IDigIt_ArrayR_PChars = interface(specialize IOpenArrayR<PChar>)
-  ['{D101CADE-C69C-4929-A8DF-1386A8BF4D21}']
+  ['{D101B01A-FAD0-C666-CADE-1386A8BF4D21}']
   end;
 
   IDigIt_ArrayW_PChars = Interface(specialize IOpenArrayW<PChar>)
-  ['{D101CADE-C69C-4929-A8DF-1386A8BF4D22}']
+  ['{D101B01A-FAD0-C666-CADE-1386A8BF4D22}']
   end;
 
   IDigIt_Params = Interface
-  ['{D101CADE-C69C-4929-A8DF-4E30A587BCB3}']
+  ['{D101B01A-FAD0-C666-CADE-4E30A587BCB3}']
     function GetFromUser: Boolean; stdcall;
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
@@ -130,7 +130,7 @@ type
   DigIt_Source_TakeAction = (takeActPreview, takeActTake);
 
   IDigIt_Source = Interface(IDigIt_Interface)
-  ['{D101CADE-C69C-4929-A8DF-699AC76DEE00}']
+  ['{D101B01A-FAD0-C666-CADE-699AC76DEE00}']
     //Take a Picture and returns it on aData according with aDataType
     // (if Result is > 1 then aData is a IDigIt_ROArray interface)
     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
@@ -141,7 +141,7 @@ type
 
   //Get Sub Items so the User can select directly the Device from Menù
   IDigIt_Source_Items = interface(specialize IOpenArrayR<PChar>)
-  ['{D101CADE-C69C-4929-A8DF-699AC76DEE01}']
+  ['{D101B01A-FAD0-C666-CADE-699AC76DEE01}']
 
     //Select Sub Item, if called with aIndex=-1 then Show User Dialog to Select it
     function Select(aIndex: Integer): Boolean; stdcall;
@@ -151,7 +151,7 @@ type
   end;
 
   IDigIt_Sources = Interface
-  ['{D101CADE-C69C-4929-A8DF-8344B540E20F}']
+  ['{D101B01A-FAD0-C666-CADE-8344B540E20F}']
     function Register(const aName: PChar; const aClass: IDigIt_Source) :Boolean; stdcall;
     //function UnRegister(const aClass : IDigIt_Source) :Boolean; stdcall; { #note 5 -oMaxM : Implementer unregist the Class}
   end;
@@ -168,7 +168,7 @@ type
   { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
   (*
   IDigIt_Destination = Interface(IDigIt_Interface)
-  ['{D101CADE-C69C-4929-A8DF-699AC76DEE10}']
+  ['{D101B01A-FAD0-C666-CADE--699AC76DEE10}']
     //Put cropped image (stored in the temporary file AFileName) and
     //return a preview File name in APreviewFileName (Result is the String size) ??
     { #todo 5 -oMaxM : should also return a value to refer to this cropped area in future operations such as rotate/etc  }
@@ -177,53 +177,28 @@ type
   end;
 
   IDigIt_Destinations = Interface
-  ['{D101CADE-C69C-4929-A8DF-8344B540E21F}']
+  ['{D101B01A-FAD0-C666-CADE--8344B540E21F}']
     function Register(const aName: PChar; const aClass: IDigIt_Destination) :Boolean; stdcall;
     //function UnRegister(const aClass : IDigIt_Destination) :Boolean; stdcall; { #note 5 -oMaxM : Implementer unregist the Class}
   end;
   *)
 
   IDigIt_Settings = Interface
-  ['{D101CADE-C69C-4929-A8DF-6B103B8BCBDF}']
+  ['{D101B01A-FAD0-C666-CADE-6B103B8BCBDF}']
     //Path Consts: High Byte = Category, Low Byte = Path
     function Path(const APathID: Word): PChar; stdcall;
   end;
 
-  IDigIt_ProgressCallback = Interface
-  ['{D101CADE-C69C-4929-A8DF-2344BF2350B0}']
-    procedure ProgressCancelClick(ATotalValue, ACurrentValue: Integer); stdcall;
-  end;
-
-  IDigIt_Progress = Interface
-  ['{D101CADE-C69C-4929-A8DF-2344BF2350B1}']
-    procedure SetTotalVisible(AVisible: Boolean); stdcall;
-    procedure SetTotalLabel(const ALabel: PChar); stdcall;
-    procedure SetTotal(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
-    procedure SetTotalCaption(const ACaption: PChar); stdcall;
-    procedure SetTotalValue(AValue: Integer); stdcall;
-
-    procedure SetCurrentVisible(AVisible: Boolean); stdcall;
-    procedure SetCurrent(AMin, AMax, AValue: Integer; isMarquee: Boolean); stdcall;
-    procedure SetCurrentCaption(const ACaption: PChar); stdcall;
-    procedure SetCurrentValue(AValue: Integer); stdcall;
-
-    function Cancelled: Boolean; stdcall;
-
-    procedure SetEventCallBack(const AEventCallBack: IDigIt_ProgressCallback); stdcall;
-
-    procedure Show(const ACaption: PChar); stdcall;
-    procedure Hide; stdcall;
-  end;
-
   IDigIt_Bridge = Interface
-  ['{D101CADE-C69C-4929-A8DF-C779BE1D5762}']
+  ['{D101B01A-FAD0-C666-CADE-C779BE1D5762}']
     function Sources: IDigIt_Sources; stdcall;
 
     { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
     //function Destinations: IDigIt_Destinations; stdcall;
 
     function Settings: IDigIt_Settings; stdcall;
-    function Progress: IDigIt_Progress; stdcall;
+    function Progress: IMM_Progress; stdcall;
+    function Msg: IMM_MessageDlg; stdcall;
 
     //ToolBar, Menù, Pre/PostProcessing Image, etc... { #todo -oMaxM : Maybe Tomorrow }
   end;

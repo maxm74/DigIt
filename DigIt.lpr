@@ -13,7 +13,7 @@ uses
   Digit_Source_WIA, Digit_Source_Twain,
   Digit_Source_Folder,
   DigIt_Destinations,
-  DigIt_Form_Main, DigIt_Form_Progress;
+  DigIt_Form_Main, Digit_Bridge_Impl_UI_Form;
 
 {$R *.res}
 
@@ -22,7 +22,6 @@ begin
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TDigIt_Main, DigIt_Main);
-  Application.CreateForm(TDigIt_Progress, DigIt_Progress);
   Application.Run;
 end.
 

@@ -25,6 +25,16 @@ resourcestring
   rsSavingSessionFiles = 'Saving Session Files';
   rsSavingSwitch = 'Switching to New Work Session';
   rsSavingDone = 'Saved Done';
+  rsSaveWorkCopy = 'Create a Copy of the Work Session or Move it?';
+  rsNoFilesDownloaded = 'NO Files Downloaded ';
+  rsTakeAgain = 'Replace the last %d taked files with a new Take?';
+  rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
+  rsClearQueue = 'Clear the Work Queue?';
+  rsDeleteCaptured = 'Delete Captured Page %s ?';
+  rsDeleteAll = 'Delete All Captured Pages?';
+  rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
+
+  rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
 
 type
 
@@ -137,12 +147,13 @@ type
     function actPreview: Boolean;
     function actTake(isReTake: Boolean; CustomTake: TCustomTakeMethod=nil): DWord;
     procedure actTimerTake;
-    procedure actCropNext(AEndOfFilesConfirmation: TConfirmEvent=nil);
+    procedure actCropNext;
     procedure actGoNext;
     procedure actGoBack;
-    procedure actCropAll(AEndOfFilesConfirmation: TConfirmEvent=nil);
-    procedure actCapturedDeleteAll;
-    procedure actCapturedDelete(AIndex: Integer);
+    procedure actCropAll;
+    procedure actClearQueue;
+    procedure actCapturedDeleteAll(UserConfirm: Boolean);
+    procedure actCapturedDelete(UserConfirm: Boolean; AIndex: Integer);
 
     property Loading: Boolean read rLoading;
     property Modified: Boolean read rModified write rModified;
@@ -156,7 +167,7 @@ type
 implementation
 
 uses Graphics, FileUtil, LazFileUtils,
-     MM_StrUtils,
+     MM_StrUtils, MM_Interface_MessageDlg,
      BGRAWriteJPeg, BGRAWriteTiff,
      Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Counter;
 
@@ -407,6 +418,8 @@ begin
 
   if not(Result) then
   begin
+    theBridge.MessageDlg('DigIt', Format(rsErrLoadWork, [APath+AFile]), mtError, [mbOk], 0);
+
     Path_Session:= oldPath_Session;
     Path_Session_Scan:= oldPath_Session_Scan;
     Path_Session_Pictures:= oldPath_Session_Pictures;
@@ -472,7 +485,7 @@ begin
               fileSources[i]:= SourceFiles[i].fName;
             end;
 
-       if theBridge.Progress.Cancelled then exit;
+       if theBridge.ProgressCancelled then exit;
      end;
 
      if theBridge.ProgressSetTotal(rsSavingCaptured, 2) then exit;
@@ -494,7 +507,7 @@ begin
               fileCaptured[i]:= CapturedFiles[i].fName;
             end;
 
-       if theBridge.Progress.Cancelled then exit;
+       if theBridge.ProgressCancelled then exit;
      end;
 
      if theBridge.ProgressSetTotal(rsSavingSessionFiles, 3) then exit;
@@ -511,7 +524,7 @@ begin
        rLoadedFile:= curFileName;
      end;
 
-     if theBridge.Progress.Cancelled then exit;
+     if theBridge.ProgressCancelled then exit;
 
      //Copy AutoSave Files
      curFileName:=Path_Session+rFileName+Ext_AutoSess;
@@ -567,7 +580,7 @@ begin
     fileSources:= nil;
     fileCaptured:= nil;
 
-    theBridge.Progress.Hide;
+    theBridge.ProgressHide;
   end;
 end;
 
@@ -1462,6 +1475,7 @@ begin
   try
      Result:= Sources.Take(takeActPreview, curImageFile);
      if Result then Result:= LoadImage(curImageFile, True);
+     if not(Result) then theBridge.MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
   end;
@@ -1475,9 +1489,11 @@ var
    hasCropped: Boolean;
 
 begin
-  try
-    Result:= 0;
+  Result:= 0;
 
+  if isReTake and (theBridge.MessageDlg('DigIt', Format(rsTakeAgain, [lastLenTaked]),
+                                        mtConfirmation, [mbYes, mbNo], 0) = mrNo) then exit;
+  try
     Case CropMode of
       diCropFull: if isReTake then Counter_Dec(lastLenTaked);
       diCropCustom: begin
@@ -1530,7 +1546,7 @@ begin
                    LoadImage(SourceFiles[0].fName, False);
 
                    //Crop the First File directly
-                   actCropNext(nil);
+                   actCropNext;
                  end;
                end;
 
@@ -1551,13 +1567,12 @@ begin
           end;
         end;
       end;
-
-   end;
-
+   end
+   else theBridge.MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
   finally
     Save(True);
-    theBridge.Progress.Hide;
+    theBridge.ProgressHide;
   end;
 end;
 
@@ -1566,7 +1581,7 @@ begin
   //
 end;
 
-procedure TDigIt_Session.actCropNext(AEndOfFilesConfirmation: TConfirmEvent);
+procedure TDigIt_Session.actCropNext;
 var
    lenSources: Integer;
 
@@ -1576,7 +1591,7 @@ var
 
     if Result and (lenSources > 1) then
     begin
-      if Assigned(AEndOfFilesConfirmation) and AEndOfFilesConfirmation(Self)
+      if not(theBridge.MessageDlg('DigIt', rsNoMoreFiles, mtConfirmation, [mbYes, mbNo], 0) = mrNo)
       then Clear_SourceFiles(True);
     end;
   end;
@@ -1659,7 +1674,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Session.actCropAll(AEndOfFilesConfirmation: TConfirmEvent);
+procedure TDigIt_Session.actCropAll;
 var
    c: Integer;
    cStr: String;
@@ -1671,7 +1686,7 @@ var
      if Result then
      begin
        //User Confirmation
-       if Assigned(AEndOfFilesConfirmation) and AEndOfFilesConfirmation(Self) then
+       if not(theBridge.MessageDlg('DigIt', rsNoMoreFiles, mtConfirmation, [mbYes, mbNo], 0) = mrNo) then
        begin
          iSourceFiles:= -1;
          SourceFiles:= nil;
@@ -1716,48 +1731,62 @@ begin
 
   finally
     SaveSource_CapturedFiles(nil, True);
-    theBridge.Progress.Hide;
+    theBridge.ProgressHide;
   end;
 end;
 
-procedure TDigIt_Session.actCapturedDeleteAll;
+procedure TDigIt_Session.actClearQueue;
+begin
+  if (theBridge.MessageDlg('DigIt', rsClearQueue, mtConfirmation, [mbYes, mbNo], 0) = mrNo) then exit;
+
+  try
+    Clear_SourceFiles(True);
+
+  finally
+    SaveSource_CapturedFiles(nil, True);
+  end;
+end;
+
+procedure TDigIt_Session.actCapturedDeleteAll(UserConfirm: Boolean);
 var
    i: Integer;
 
 begin
-//  if (MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-  begin
-     //Delete all File in FileSystem ?
-     (*if (MessageDlg('DigIt', rsDeleteAllFiles, mtConfirmation, [mbYes, mbNo], 0)=mrYes)
-     then*) for i:=0 to Length(CapturedFiles)-1 do
-            DeleteFile(CapturedFiles[i].fName);
+  if UserConfirm and
+     (theBridge.MessageDlg('DigIt', rsDeleteAll, mtConfirmation, [mbYes, mbNo], 0) = mrNo) then exit;
 
-     //Clear Array and ListView
-     Clear_Captured;
+  //Delete all File in FileSystem ?
+  if (theBridge.MessageDlg('DigIt', rsDeleteAllFiles, mtConfirmation, [mbYes, mbNo], 0) = mrYes)
+  then for i:=0 to Length(CapturedFiles)-1 do
+         DeleteFile(CapturedFiles[i].fName);
 
-     //Reset Counter
-     Counter.Reset;
+  //Clear Array and ListView
+  Clear_Captured;
 
-     EmptyImage(False);
+  //Reset Counter
+  Counter.Reset;
 
-     Save(True);
-  end;
+  EmptyImage(False);
+
+  Save(True);
 end;
 
-procedure TDigIt_Session.actCapturedDelete(AIndex: Integer);
+procedure TDigIt_Session.actCapturedDelete(UserConfirm: Boolean; AIndex: Integer
+  );
 var
    iCur, iSelected: Integer;
 
 begin
   { #todo -oMaxM : this works ONLY in FullArea Mode, in Custom? Delete only the Item?  }
-//  if (MessageDlg('DigIt', Format(rsDeleteCaptured, [captItem.Caption]),
-//                 mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+  if UserConfirm and
+     (theBridge.MessageDlg('DigIt', Format(rsDeleteCaptured, [ExtractFileName(CapturedFiles[AIndex].fName)]),
+                           mtConfirmation, [mbYes, mbNo], 0) = mrNo) then exit;
   try
      //Delete File and Thumb
      DeleteFile(CapturedFiles[AIndex].fName);
 
      if (AIndex < Length(CapturedFiles)-1) then
-       for iCur:=iSelected+1 to Length(CapturedFiles)-1 do
+       for iCur:=AIndex+1 to Length(CapturedFiles)-1 do
        begin
          RenameFile(CapturedFiles[iCur].fName, CapturedFiles[iCur-1].fName);
 

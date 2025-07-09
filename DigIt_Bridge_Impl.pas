@@ -15,6 +15,7 @@ interface
 
 uses
   Classes, SysUtils,
+  MM_Interface_Progress, MM_Interface_MessageDlg,
   DigIt_Types, Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings, DigIt_Counter;
 
 type
@@ -102,7 +103,8 @@ type
   protected
     //rDestinations: TDigIt_Destinations;
     rPlugins: TDigIt_Plugins;
-    rProgress: IDigIt_Progress;
+    rProgress: IMM_Progress;
+    rMsg: IMM_MessageDlg;
 
   public
     constructor Create;
@@ -111,21 +113,40 @@ type
     function Sources: IDigIt_Sources; stdcall;
     //function Destinations: IDigIt_Destinations; stdcall;
     function Settings: IDigIt_Settings; stdcall;
-    function Progress: IDigIt_Progress; stdcall;
+    function Progress: IMM_Progress; stdcall;
+    function Msg: IMM_MessageDlg; stdcall;
 
     //***************************  Internal Use only ***************************
-    procedure SetProgressInterface(const AProgressInterface: IDigIt_Progress);
+    procedure SetProgressInterface(const AProgressInterface: IMM_Progress);
+    procedure SetMsgInterface(const AMsgInterface: IMM_MessageDlg);
 
     //Useful functions
     procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False); overload;
     procedure ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer); overload;
     procedure ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer); overload;
+    procedure ProgressHide;
+    function ProgressCancelled: Boolean;
 
     function ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean; overload;
     function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean; overload;
 
     function ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean; overload;
     function ProgressSetCurrent(CurrentCaption: String; CurrentMin, CurrentMax, CurrentVal: Integer): Boolean; overload;
+
+    function MessageDlg(const aMsg: string; DlgType: TMsgDlgType;
+                        Buttons: TMsgDlgButtons; HelpCtx: Longint): TModalResult; overload;
+    function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                        Buttons: TMsgDlgButtons; HelpCtx: Longint): TModalResult; overload;
+    function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                        Buttons: TMsgDlgButtons; HelpCtx: Longint; DefaultButton: TMsgDlgBtn): TModalResult; overload;
+    function MessageDlg(const aMsg: string; DlgType: TMsgDlgType;
+                        Buttons: TMsgDlgButtons; HelpCtx: Longint; DefaultButton: TMsgDlgBtn): TModalResult; overload;
+    function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                        Buttons: TMsgDlgButtons; const HelpKeyword: string): TModalResult; overload;
+    function QuestionDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                         Buttons: array of const; HelpCtx: Longint): TModalResult; overload;
+    function QuestionDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                         Buttons: array of const; const HelpKeyword: string): TModalResult; overload;
 
     property Plugins: TDigIt_Plugins read rPlugins;
   end;
@@ -547,14 +568,25 @@ begin
   Result:= DigIt_Settings.Settings as IDigIt_Settings;
 end;
 
-function TDigIt_Bridge.Progress: IDigIt_Progress; stdcall;
+function TDigIt_Bridge.Progress: IMM_Progress; stdcall;
 begin
   Result:= rProgress;
 end;
 
-procedure TDigIt_Bridge.SetProgressInterface(const AProgressInterface: IDigIt_Progress);
+function TDigIt_Bridge.Msg: IMM_MessageDlg; stdcall;
+begin
+  Result:= rMsg;
+end;
+
+procedure TDigIt_Bridge.SetProgressInterface(
+  const AProgressInterface: IMM_Progress);
 begin
   rProgress:= AProgressInterface;
+end;
+
+procedure TDigIt_Bridge.SetMsgInterface(const AMsgInterface: IMM_MessageDlg);
+begin
+  rMsg:= AMsgInterface;
 end;
 
 procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False);
@@ -595,6 +627,17 @@ begin
     rProgress.SetCurrentVisible(True);
     rProgress.Show(PChar(ACaption));
   end;
+end;
+
+procedure TDigIt_Bridge.ProgressHide;
+begin
+  if (rProgress <> nil) then rProgress.Hide;
+end;
+
+function TDigIt_Bridge.ProgressCancelled: Boolean;
+begin
+  Result:= False;
+  if (rProgress <> nil) then Result:= rProgress.Cancelled;
 end;
 
 function TDigIt_Bridge.ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean;
@@ -647,6 +690,55 @@ begin
     rProgress.SetCurrentCaption(PChar(CurrentCaption));
     Result:= rProgress.Cancelled;
   end;
+end;
+
+function TDigIt_Bridge.MessageDlg(const aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: TMsgDlgButtons; HelpCtx: Longint): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.MessageDlg(PChar(aMsg), DlgType, Buttons, HelpCtx);
+end;
+
+function TDigIt_Bridge.MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: TMsgDlgButtons; HelpCtx: Longint): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.MessageDlg(PChar(aCaption), PChar(aMsg), DlgType, Buttons, HelpCtx);
+end;
+
+function TDigIt_Bridge.MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: TMsgDlgButtons; HelpCtx: Longint; DefaultButton: TMsgDlgBtn): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.MessageDlg(PChar(aCaption), PChar(aMsg), DlgType, Buttons, HelpCtx, DefaultButton);
+end;
+
+function TDigIt_Bridge.MessageDlg(const aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: TMsgDlgButtons; HelpCtx: Longint; DefaultButton: TMsgDlgBtn): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.MessageDlg(PChar(aMsg), DlgType, Buttons, HelpCtx, DefaultButton);
+end;
+
+function TDigIt_Bridge.MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: TMsgDlgButtons; const HelpKeyword: string): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.MessageDlg(PChar(aCaption), PChar(aMsg), DlgType, Buttons, PChar(HelpKeyword));
+end;
+
+function TDigIt_Bridge.QuestionDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: array of const; HelpCtx: Longint): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.QuestionDlg(PChar(aCaption), PChar(aMsg), DlgType, Buttons, HelpCtx);
+end;
+
+function TDigIt_Bridge.QuestionDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+                                  Buttons: array of const; const HelpKeyword: string): TModalResult;
+begin
+  Result:= mrNone;
+  if (rMsg <> nil) then Result:= rMsg.QuestionDlg(PChar(aCaption), PChar(aMsg), DlgType, Buttons, PChar(HelpKeyword));
 end;
 
 initialization

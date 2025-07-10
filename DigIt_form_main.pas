@@ -314,11 +314,6 @@ type
     inFillPagesUI,
     imgListThumb_Changed: Boolean;
 
-    lastCropped,
-    lastLenTaked,     //Used in Take Again
-    iSourceFiles,
-    iCapturedFiles: Integer;
-
     Session: TDigIt_Session;
     Profiles: TStringArray;
 
@@ -327,14 +322,13 @@ type
     function GetSessionModified: Boolean;
     procedure SetSessionModified(AValue: Boolean);
 
-    function LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean=False): Boolean; overload;
-    function LoadSessionFile(AFileName: String): Boolean; overload;
     function SaveSessionFile(AFileName: String): Boolean;
 
-    //DELETE When Dialogs Interface is done
+    (* oldcode
     procedure SES_Load(IsAutoSave: Boolean);
     procedure SES_Save(IsAutoSave: Boolean);
     procedure SES_ClearAutoSave(AFromStartup: Boolean);
+    *)
 
     //Transform to TLoadSaveXMLEvent and pass to Session.OnLoad/Save
     procedure SES_LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
@@ -357,6 +351,7 @@ type
     procedure UI_ThumbnailUpdate(AIndex: Integer; AFileName: String); overload;
     procedure UI_ThumbnailUpdate(AIndex: Integer; ABitmap: TBGRABitmap); overload;
     procedure UI_Caption;
+    procedure UI_ImageManipulation(Sender: TObject);
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
@@ -482,6 +477,8 @@ begin
   TStringList(cbCropList.Items).OwnsObjects:=False;
 
   Session:= TDigIt_Session.Create;
+  Session.OnLoadImage:= @UI_ImageManipulation;
+  Session.OnEmptyImage:= @UI_ImageManipulation;
 
   Settings.Load(nil);
 
@@ -509,6 +506,7 @@ begin
   UI_ToolBarMods;
 
   sessLoaded:= False;
+  try
   try
      //1) If Application is started with a Session File Param then Open It
      if FileExists(ParamStr(1)) and
@@ -566,17 +564,16 @@ begin
      if (Path_Session = Path_DefSession) then Settings.Save_StartupSession(nil, '', '');
 
   except
-    Path_Session:= Path_DefSession;
-    Path_Session_Scan:= Path_DefSession_Scan;
-    Path_Session_Pictures:= Path_DefSession_Pictures;
-
-    Session.SetDefaultStartupValues;
-
-    setCropMode(diCropFull);
-    Settings.Save_StartupSession(nil, '', '');
+     Session.SetDefaultStartupValues;
+     setCropMode(diCropFull);
+     Settings.Save_StartupSession(nil, '', '');
   end;
-
-  UI_Caption;
+  finally
+    UI_MenuItemsChecks(Sources.SelectedIndex, 0);
+    UI_FillCounter;
+    UI_ToolBar;
+    UI_Caption;
+  end;
 end;
 
 procedure TDigIt_Main.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -622,7 +619,7 @@ end;
 
 procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 begin
-  if (Session.CropMode = diCropFull) then UI_SelectCurrentCaptured(-lastLenTaked);
+  if (Session.CropMode = diCropFull) then UI_SelectCurrentCaptured(-Session.LastTakedLength);
 
   try
      Session.actTake(True);
@@ -888,8 +885,8 @@ begin
 
   if not(imgManipulation.Empty) then
   begin
-    if FileExists(Session.LoadedFile)
-    then LoadImage(Session.LoadedFile, False)
+    if FileExists(Session.LoadedImageFile)
+    then LoadImage(Session.LoadedImageFile, False)
     else begin
            //Flip Image to Initial Value
            Session.FlipImage(imgManipulation.Bitmap, oldPageFlip);
@@ -926,8 +923,8 @@ begin
     BitmapR:= nil;
     BitmapNewR:= nil;
 
-    if FileExists(Session.LoadedFile)
-    then LoadImage(Session.LoadedFile, False)
+    if FileExists(Session.LoadedImageFile)
+    then LoadImage(Session.LoadedImageFile, False)
     else begin
            //Retun Image to Initial Value
            Case oldPageRotate of
@@ -987,8 +984,8 @@ begin
     imgManipulation.SetEmptyImageSize(ResUnit, Paper.w, Paper.h);
 
     if not(imgManipulation.Empty) and
-       FileExists(Session.LoadedFile)
-    then LoadImage(Session.LoadedFile, False);
+       FileExists(Session.LoadedImageFile)
+    then LoadImage(Session.LoadedImageFile, False);
 
   finally
     UI_FillPageSizes;
@@ -1056,8 +1053,8 @@ begin
   imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
 
   if not(imgManipulation.Empty) and
-     FileExists(Session.LoadedFile)
-  then LoadImage(Session.LoadedFile, False);
+     FileExists(Session.LoadedImageFile)
+  then LoadImage(Session.LoadedImageFile, False);
 end;
 
 procedure TDigIt_Main.edPageWidthChange(Sender: TObject);
@@ -1069,8 +1066,8 @@ begin
   imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit), edPageWidth.Value, edPageHeight.Value);
 
   if not(imgManipulation.Empty) and
-     FileExists(Session.LoadedFile)
-  then LoadImage(Session.LoadedFile, False);
+     FileExists(Session.LoadedImageFile)
+  then LoadImage(Session.LoadedImageFile, False);
 end;
 
 procedure TDigIt_Main.edPageResizeTypeChange(Sender: TObject);
@@ -1079,8 +1076,8 @@ begin
      SetPageResizeType(TDigItFilter_Resize(edPageResizeType.ItemIndex), True);
 
      if not(imgManipulation.Empty) and
-        FileExists(Session.LoadedFile)
-     then LoadImage(Session.LoadedFile, False);
+        FileExists(Session.LoadedImageFile)
+     then LoadImage(Session.LoadedImageFile, False);
 
   finally
     UI_FillPageSizes;
@@ -1445,32 +1442,6 @@ begin
        end;
 end;
 
-function TDigIt_Main.LoadSessionFile(APath, AFile: String; IsAutoSave: Boolean): Boolean;
-var
-   oldPath_Session,
-   oldPath_Session_Scan,
-   oldPath_Session_Pictures,
-   oldSession_File: String;
-
-begin
-  try
-     Result:= Session.LoadSessionFile(APath, AFile, IsAutoSave);
-
-     if not(Result) then
-     begin
-
-     end;
-
-  finally
-  end;
-end;
-
-function TDigIt_Main.LoadSessionFile(AFileName: String): Boolean;
-begin
-  Result:= LoadSessionFile(ExtractFilePath(AFileName),
-                           ExtractFileNameWithoutExt(ExtractFileName(AFileName)));
-end;
-
 function TDigIt_Main.SaveSessionFile(AFileName: String): Boolean;
 var
    isMove: Boolean;
@@ -1511,28 +1482,20 @@ begin
   end;
 end;
 
+(* oldcode
 procedure TDigIt_Main.SES_Load(IsAutoSave: Boolean);
-var
-   newSourceI,
-   newDestinationI: Integer;
-   aXML: TRttiXMLConfig;
-
 begin
   try
      Session.Load(IsAutoSave);
 
   finally
-     UI_MenuItemsChecks(newSourceI, newDestinationI);
+     UI_MenuItemsChecks(Sources.SelectedIndex, 0);
      UI_FillCounter;
      UI_ToolBar;
   end;
 end;
 
 procedure TDigIt_Main.SES_Save(IsAutoSave: Boolean);
-var
-   aXML: TRttiXMLConfig;
-   curExt: String;
-
 begin
   try
      Session.Save(IsAutoSave);
@@ -1560,7 +1523,7 @@ begin
     UI_Caption;
   end;
 end;
-
+*)
 (*
 procedure TDigIt_Main.SES_LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
@@ -1949,9 +1912,9 @@ end;
 procedure TDigIt_Main.menuDebugClick(Sender: TObject);
 begin
   Case TMenuItem(Sender).Tag of
-    0: SES_Load(True);
-    1: SES_Save(True);
-    2: SES_ClearAutoSave(False);
+    0: Session.Load(True);
+    1: Session.Save(True);
+    2: Session.ClearAutoSave(False);
     3: begin
          Settings.Session.Startup_File:= 'testSess';
          Settings.Session.Startup_Path:= 'c:\tmp\testSess\';
@@ -2445,7 +2408,7 @@ var
    selI: Integer;
 
 begin
-   selI:= iCapturedFiles+AddValue;
+   selI:= Session.CapturedFilesIndex+AddValue;
 
    if (selI >= 0) and (selI < lvCaptured.Items.Count)
    then lvCaptured.Selected:= lvCaptured.Items[selI]
@@ -2457,7 +2420,7 @@ var
    selI: Integer;
 
 begin
-   selI:= iCapturedFiles+AddValue+1;
+   selI:= Session.CapturedFilesIndex+AddValue+1;
 
    if (selI >= 0) and (selI < lvCaptured.Items.Count)
    then lvCaptured.Selected:= lvCaptured.Items[selI]
@@ -2542,76 +2505,72 @@ end;
 
 procedure TDigIt_Main.UI_ToolBar;
 var
-   bCommonCond,
-   actCrop_Enabled: Boolean;
+   actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,
+   actCropNext_Enabled,
+   actGoNext_Enabled, actGoBack_Enabled,
+   actCropAll_Enabled, actClearQueue_Enabled,
+   actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean;
    lenSources,
-   lenCaptured,
    remSources: Integer;
 
 begin
-  bCommonCond:= (Sources.Selected<>nil) and (Sources.Selected^.Inst <> nil);
-  actPreview.Enabled:= bCommonCond;
-  itemProfiles_AddCurrent.Enabled:= bCommonCond;
+  Session.GetEnabledActions(actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,
+                            actCropNext_Enabled,
+                            actGoNext_Enabled, actGoBack_Enabled,
+                            actCropAll_Enabled, actClearQueue_Enabled,
+                            actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled);
 
-  lenCaptured:= Length(Session.CapturedFiles);
+  actPreview.Enabled:= actPreview_Enabled;
+  actTake.Enabled:= actTake_Enabled;
+  actTakeRe.Enabled:= actTakeRe_Enabled;
+  actCapturedDeleteAll.Enabled:= actCapturedDeleteAll_Enabled;
+  actCapturedDelete.Enabled:= actCapturedDelete_Enabled;
 
-  if (Session.CropMode = diCropCustom)
-  then begin
-         lenSources:= Length(Session.SourceFiles);
-         bCommonCond:= bCommonCond and
-                       not(imgManipulation.Empty) and (imgManipulation.CropAreas.Count > 0) and
-                       DirectoryExists(Path_Session_Pictures);
+  if (Session.CropMode = diCropCustom) then
+  begin
+    lenSources:= Length(Session.SourceFiles);
 
-         actTake.Enabled:= bCommonCond;
-         actTakeRe.Enabled:= bCommonCond and (lastLenTaked > 0);
-         actCrop_Enabled:= bCommonCond and
-                           ((lenSources = 1) or (iSourceFiles >= 0) and (iSourceFiles >= lenSources-1));
-         actCropNext.Enabled:= bCommonCond and (lenSources > 0);
-                               //bCommonCond and (lenSources > 1) and (iSourceFiles >= 0) and (iSourceFiles < lenSources-1);
-         actGoNext.Enabled:= actCropNext.Enabled and not(actCrop_Enabled);
-         actGoBack.Enabled:= bCommonCond and (lenSources > 1) and (iSourceFiles > 0) and (iSourceFiles <= lenSources);
-         actCropAll.Enabled:= actCropNext.Enabled and not(actCrop_Enabled);
+    actCropNext.Enabled:= actCropNext_Enabled;
+    actGoNext.Enabled:= actGoNext_Enabled;
+    actGoBack.Enabled:= actGoBack_Enabled;
+    actCropAll.Enabled:= actCropAll_Enabled;
+    actClearQueue.Enabled:= actClearQueue_Enabled;
 
-         actClearQueue.Enabled:= bCommonCond and (lenSources > 0);
-         if (lenSources > 0)
-         then tbClearQueue.Caption:= actClearQueue.Caption+' ('+IntToStr(lenSources)+')'
-         else tbClearQueue.Caption:= actClearQueue.Caption;
+    if (lenSources > 0)
+    then tbClearQueue.Caption:= actClearQueue.Caption+' ('+IntToStr(lenSources)+')'
+    else tbClearQueue.Caption:= actClearQueue.Caption;
 
-         if actCrop_Enabled
-         then begin
-                actCropNext.Caption:= rsCrop;
-                actCropNext.ImageIndex:= 11;
-              end
-         else begin
-                actCropNext.Caption:= rsCropNext;
-                actCropNext.ImageIndex:= 12;
-              end;
-
-         tbCropSummary.Visible:= bCommonCond and (lenSources > 0);
-         if tbCropSummary.Visible then
-         begin
-           remSources:= lenSources-iSourceFiles;
-           tbCropSummary.Caption:= Format(rsCropToDo, [remSources]);
+    if actCropNext_Enabled and not(actGoNext_Enabled)
+    then begin
+           actCropNext.Caption:= rsCrop;
+           actCropNext.ImageIndex:= 11;
+         end
+    else begin
+           actCropNext.Caption:= rsCropNext;
+           actCropNext.ImageIndex:= 12;
          end;
 
-         actCapturedDelete.Enabled:= False; { #todo 2 -oMaxM : evaluate the complexity in case of multiple crop areas}
-       end
-  else begin
-         actTake.Enabled:= bCommonCond and DirectoryExists(Path_Session_Pictures);
+    tbCropSummary.Visible:= actCropNext_Enabled;
+    if actCropNext_Enabled then
+    begin
+      remSources:= lenSources-Session.SourceFilesIndex;
+      tbCropSummary.Caption:= Format(rsCropToDo, [remSources]);
+    end;
 
-         actCapturedDelete.Enabled:= (lenCaptured > 0) and (lvCaptured.Selected <> nil);
-       end;
+    actCapturedDelete.Enabled:= False; { #todo 2 -oMaxM : evaluate the complexity in case of multiple crop areas}
+  end;
 
-  actTimerTake.Enabled:= actTake.Enabled;
-  actTakeBuildDuplex.Enabled:= actTake.Enabled;
-  actTakeRe.Enabled:= actTake.Enabled and (lastLenTaked > 0);
+  actTimerTake.Enabled:= actTake_Enabled;
+  actTakeBuildDuplex.Enabled:= actTake_Enabled;
+
+  //Menù Items
+  itemProfiles_AddCurrent.Enabled:= actPreview_Enabled;
 
   //Captured Toolbar
-  actCapturedDeleteAll.Enabled:= (lenCaptured > 0);
-  actCapturedRotateLeft.Enabled:= (lenCaptured > 0) and (lvCaptured.Selected <> nil);
+  actCapturedRotateLeft.Enabled:= actCapturedDeleteAll_Enabled and (lvCaptured.Selected <> nil);
   actCapturedRotateRight.Enabled:= actCapturedRotateLeft.Enabled;
-  tbCapturedPDF.Enabled:= (lenCaptured > 0);
-  tbCapturedToImg.Enabled:= (lenCaptured > 0);
+  tbCapturedPDF.Enabled:= actCapturedDeleteAll_Enabled; //pratically = (length CapturedFiles > 0)
+  tbCapturedToImg.Enabled:= actCapturedDeleteAll_Enabled;
 end;
 
 procedure TDigIt_Main.UI_ToolBarMods;
@@ -2691,6 +2650,11 @@ begin
   //if (rSourceName <> '') then capStr:= capStr+'  ('+rSourceName+')';
 
   Caption:= capStr;
+end;
+
+procedure TDigIt_Main.UI_ImageManipulation(Sender: TObject);
+begin
+  imgManipulation.Bitmap:= Session.Bitmap;
 end;
 
 end.

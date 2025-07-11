@@ -1,7 +1,11 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/10 Renamed the index/length vars to be more human-friendly, renamed LoadedFile to LoadedImageFile;
+2025/07/11 Added Session Load/Save XML Events;
+           Added SES_ Events methods in MainForm to Update UI (must be completed);
+           Added temporary PhysicalRectArrayToCropAreas method;
+
+        10 Renamed the index/length vars to be more human-friendly, renamed LoadedFile to LoadedImageFile;
            Added GetEnabledActions;
            Remove all SES_ functions and Index/Length variables already in Session from the Main Form;
 

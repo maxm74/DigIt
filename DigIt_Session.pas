@@ -49,6 +49,8 @@ type
     rLoadedImageFile,
     rFileName: String;
 
+    rPageSize: TDigItPhysicalSize;
+
     rBitmap: TBGRABitmap;
 
     rLastCroppedIndex,
@@ -71,7 +73,6 @@ type
     SourceFiles: TSourceFileArray;
     CapturedFiles: TCapturedFileArray;
 
-    rPageSize: TDigItPhysicalSize;
     PageResize: TDigItFilter_Resize;
     PageRotate: TDigItFilter_Rotate;
     PageFlip: TDigItFilter_Flip;
@@ -82,8 +83,26 @@ type
 
     CropAreas: TPhysicalRectArray;
 
+    //Load Save from XML Events
+    OnLoadSource,
+    OnSaveSource: TLoadSaveSourceXMLEvent;
     OnLoadXML,
-    OnSaveXML: TLoadSaveXMLEvent;
+    OnSaveXML,
+    OnLoadSourceFiles,
+    OnSaveSourceFiles,
+    OnLoadDestination,
+    OnSaveDestination,
+    OnLoadCapturedFiles,
+    OnSaveCapturedFiles,
+    OnLoadLoadedImage,
+    OnSaveLoadedImage,
+    OnSaveSource_CapturedIndexes,
+    OnLoadCropAreas,
+    OnSaveCropAreas,
+    OnLoadPageSettings,
+    OnSavePageSettings: TLoadSaveXMLEvent;
+
+    //Image Events
     OnLoadImage,
     OnEmptyImage: TNotifyEvent;
 
@@ -157,12 +176,14 @@ type
                                 actCropAll_Enabled, actClearQueue_Enabled,
                                 actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean);
 
+    //property Path: String read rPath; It should be like this but the Bridge Setting reads it from Path_Session
+    property FileName: String read rFileName;
+
     property Loading: Boolean read rLoading;
     property Modified: Boolean read rModified write rModified;
     property CropMode: TDigItCropMode read rCropMode write SetCropMode;
     property LoadedImageFile: String read rLoadedImageFile;
     property PageSize: TDigItPhysicalSize read rPageSize;
-    property FileName: String read rFileName;
     property Bitmap: TBGRABitmap read rBitmap;
 
     property LastCroppedIndex: Integer read rLastCroppedIndex;
@@ -414,6 +435,7 @@ begin
      Path_Session:= APath;
      Path_Session_Scan:= Path_Session+'Scan'+DirectorySeparator;
      Path_Session_Pictures:= Path_Session+'Pictures'+DirectorySeparator;
+     rPath:= APath;
      rFileName:= AFile;
 
      Load(IsAutoSave);
@@ -764,13 +786,15 @@ begin
             Result:= Sources.SelectedIndex;
           end;
 
+     if Assigned(OnLoadSource) then OnLoadSource(Self, aXML, IsAutoSave, XMLRoot_Path);
+
   finally
     if aFree then aXML.Free;
   end;
 end;
 
 procedure TDigIt_Session.SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
-                                     XMLRoot_Path: String; XML_File: String);
+                                    XMLRoot_Path: String; XML_File: String);
 var
    aFree: Boolean;
 
@@ -792,19 +816,21 @@ begin
 
      if Sources.Save(aXML, XMLRoot_Path, False) then
      begin
+       if Assigned(OnSaveSource) then OnSaveSource(Self, aXML, IsAutoSave, XMLRoot_Path);
+
        if aFree then
        begin
          aXML.Free; aXML:= nil;
-
-         //Cannot use SaveParams=True in Sources.Save
-         //FPC Bug?
-         //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
-         //So we do it after destroying XML.
-
-         if (Sources.Selected <> nil) and
-            (Sources.Selected^.Inst <> nil)
-         then Sources.Selected^.Inst.Params.Save(PChar(XML_File), PChar(XMLRoot_Path+'Source/Params'));
        end;
+
+       //Cannot use SaveParams=True in Sources.Save
+       //FPC Bug?
+       //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
+       //So we do it after destroying XML.
+
+       if (Sources.Selected <> nil) and
+          (Sources.Selected^.Inst <> nil)
+       then Sources.Selected^.Inst.Params.Save(PChar(XML_File), PChar(XMLRoot_Path+'Source/Params'));
 
        if IsAutoSave then rModified:= True;
      end;
@@ -843,6 +869,8 @@ begin
        SourceFiles[i].fName:= RelativePathToFullPath(rPath, aXML.GetValue(curItemPath+'fName', ''));
      end;
 
+     if Assigned(OnLoadSourceFiles) then OnLoadSourceFiles(Self, aXML, IsAutoSave);
+
   finally
     if aFree then aXML.Free;
   end;
@@ -875,6 +903,8 @@ begin
        aXML.SetValue(curItemPath+'cStart', SourceFiles[i].cStart);
        aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(rPath, SourceFiles[i].fName));
      end;
+
+     if Assigned(OnSaveSourceFiles) then OnSaveSourceFiles(Self, aXML, IsAutoSave);
 
      if IsAutoSave then rModified:= True;
 
@@ -926,6 +956,7 @@ begin
             end;
           end;
  *)
+     if Assigned(OnLoadDestination) then OnLoadDestination(Self, aXML, IsAutoSave);
 
   finally
     if aFree then aXML.Free;
@@ -957,7 +988,9 @@ begin
 
 //     end;
 
-    if IsAutoSave then rModified:= True;
+     if Assigned(OnSaveDestination) then OnSaveDestination(Self, aXML, IsAutoSave);
+
+     if IsAutoSave then rModified:= True;
 
   finally
     if aFree then aXML.Free;
@@ -967,10 +1000,8 @@ end;
 procedure TDigIt_Session.LoadCapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    i,
-   imgCount,
    newCount: Integer;
    curAge: Longint;
-   curExt,
    cuFileName,
    curItemPath: String;
    aFree: Boolean;
@@ -982,10 +1013,6 @@ begin
      then if IsAutoSave
           then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
-
-     if IsAutoSave
-     then curExt:= Ext_AutoThumb
-     else curExt:= Ext_Thumb;
 
      newCount := aXML.GetValue(SES_CapturedFiles+'Count', 0);
      rCapturedFilesIndex:= aXML.GetValue(SES_CapturedFiles+'CapturedFilesIndex', -1);
@@ -1013,66 +1040,10 @@ begin
                   CapturedFiles[i].iIndex:= -1;
                 end;
               end
-        else CapturedFiles[i].iIndex :=0;
+        else CapturedFiles[i].iIndex:= 0;
      end;
 
-
-(* oldcode
-     lvCaptured.BeginUpdate;
-     lvCaptured.Clear;
-
-     if FileExists(rPath+rFileName+curExt)
-     then try
-             imgListThumb.Clear;
-             imgListThumb.LoadFromFile(rPath+rFileName+curExt);
-             imgListCountChanged:= ((imgListThumb.Count-1) <> newCount); //0 is reserved for No File
-
-          except
-            imgListCountChanged:= True;
-          end
-     else imgListCountChanged:= True;
-
-     SetLength(CapturedFiles, newCount);
-     for i:=0 to newCount-1 do
-     begin
-         curItemPath :=CapturedFiles+'Item' + IntToStr(i)+'/';
-         CapturedFiles[i].fAge:= aXML.GetValue(curItemPath+'fAge', 0);
-         CapturedFiles[i].fName:= RelativePathToFullPath(rPath, aXML.GetValue(curItemPath+'fName', ''));
-         CapturedFiles[i].iIndex:= aXML.GetValue(curItemPath+'iIndex', 0);
-
-         cuFileName:= CapturedFiles[i].fName;
-         curItem:= lvCaptured.Items.Add;
-         curItem.Caption:= ExtractFileName(cuFileName);
-
-         if FileExists(cuFileName)
-         then begin
-                curAge:= FileAge(cuFileName);
-
-                //Thumbs file don't exists we must add the image
-                if imgListCountChanged then CapturedFiles[i].iIndex:= -1;
-
-                //File is Changed, update the ImageList
-                if (CapturedFiles[i].iIndex <= 0) or (CapturedFiles[i].fAge <> curAge) then
-                begin
-                  CapturedFiles[i].fAge:= curAge;
-
-                  UI_ThumbnailUpdate(i, cuFileName);
-                end;
-
-                curItem.ImageIndex:= CapturedFiles[i].iIndex;
-              end
-        else curItem.ImageIndex:= 0; //CapturedFiles[i].iIndex :=0;
-     end;
-
-     if (newSelected > -1) and (newSelected < newCount)
-     then begin
-            lvCaptured.Selected:= lvCaptured.Items[newSelected];
-            lvCaptured.Selected.MakeVisible(False);
-          end
-     else if (lvCaptured.Items.Count > 0) then lvCaptured.Items[lvCaptured.Items.Count-1].MakeVisible(False);
-
-     lvCaptured.EndUpdate;
-     *)
+     if Assigned(OnLoadCapturedFiles) then OnLoadCapturedFiles(Self, aXML, IsAutoSave);
 
   finally
     if aFree then aXML.Free;
@@ -1132,6 +1103,8 @@ begin
        end;
      end;
 
+     if Assigned(OnSaveCapturedFiles) then OnSaveCapturedFiles(Self, aXML, IsAutoSave);
+
      if IsAutoSave then rModified:= True;
 
   finally
@@ -1153,6 +1126,8 @@ begin
 
      LoadImage(RelativePathToFullPath(rPath, aXML.GetValue('LoadedFile', '')), False); //DON'T set to True, if you do not want infinite recursion
 
+     if Assigned(OnLoadLoadedImage) then OnLoadLoadedImage(Self, aXML, IsAutoSave);
+
   finally
     if aFree then aXML.Free;
   end;
@@ -1171,6 +1146,8 @@ begin
           else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
 
      aXML.SetValue('LoadedFile', FullPathToRelativePath(rPath, rLoadedImageFile));
+
+     if Assigned(OnSaveLoadedImage) then OnSaveLoadedImage(Self, aXML, IsAutoSave);
 
      if IsAutoSave then rModified:= True;
 
@@ -1232,6 +1209,8 @@ begin
 
      SaveLoadedImage(aXML, IsAutoSave);
 
+     if Assigned(OnSaveSource_CapturedIndexes) then OnSaveSource_CapturedIndexes(Self, aXML, IsAutoSave);
+
      if IsAutoSave then rModified:= True;
 
   finally
@@ -1261,7 +1240,7 @@ begin
             newCount:= aXML.GetValue(SES_CropAreas+'Count', -1);
             //newSelected:= aXML.GetValue(SES_CropAreas+'Selected', -1);  IN UI See TCropAreaList.Load
 
-            CropAreas:=nil;
+            CropAreas:= nil;
             SetLength(CropAreas, newCount);
 
             for i:=0 to newCount-1 do
@@ -1289,6 +1268,7 @@ begin
        imgManipulation.CropAreas.Load(aXML, 'CropAreas');
      end;
 *)
+     if Assigned(OnLoadCropAreas) then OnLoadCropAreas(Self, aXML, IsAutoSave);
 
   finally
     if aFree then aXML.Free;
@@ -1334,6 +1314,8 @@ begin
           end
      else aXML.DeletePath('CropAreas');
 
+     if Assigned(OnSaveCropAreas) then OnSaveCropAreas(Self, aXML, IsAutoSave);
+
      if IsAutoSave then rModified:= True;
 
   finally
@@ -1364,6 +1346,8 @@ begin
      PageFlip:= flipNone;
      aXML.GetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
 
+     if Assigned(OnLoadPageSettings) then OnLoadPageSettings(Self, aXML, IsAutoSave);
+
   finally
     if aFree then aXML.Free;
   end;
@@ -1389,6 +1373,8 @@ begin
 
      aXML.SetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
      aXML.SetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
+
+     if Assigned(OnSavePageSettings) then OnSavePageSettings(Self, aXML, IsAutoSave);
 
      if IsAutoSave then rModified:= True;
 

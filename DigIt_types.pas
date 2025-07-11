@@ -110,7 +110,11 @@ type
   end;
   TCapturedFileArray = array of TCapturedFile;
 
+  //Events Types
+  TLoadSaveSourceXMLEvent = procedure (Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean;
+                                       XMLRoot_Path: String) of object;
   TLoadSaveXMLEvent = procedure (Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
+
   TFileNameEvent = procedure (Sender: TObject; AFileName: String) of object;
 
   TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;

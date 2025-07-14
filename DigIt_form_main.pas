@@ -40,7 +40,6 @@ resourcestring
 
   rsSourceNotFound = 'Source %s not Found, try Select another from Menù';
   rsSourceNotSelected = 'Cannot Select Source %d, try Select another from Menù';
-  rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
   rsErrSaveWork = 'Cannot Save Work Session'#13#10'%s'#13#10'%s';
 
@@ -334,6 +333,9 @@ type
     procedure SES_LoadPageSettings(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_Image(Sender: TObject);
 
+    procedure SES_CropImage(Sender: TObject; ABitmap: TBGRABitmap; iCapturedFiles: Integer; IsReCrop: Boolean);
+    procedure SES_CropFileFull(Sender: TObject; UserCancel, KeepFiles: Boolean; old_CounterValue, old_CapturedFilesIndex: Integer);
+
     procedure UI_DestinationMenuClick(Sender: TObject);
     procedure UI_SourceMenuClick(Sender: TObject);
     procedure UI_ProfileMenuClick(Sender: TObject);
@@ -386,6 +388,7 @@ implementation
 uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
   BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
+  MM_Interface_Progress, MM_Form_Progress,
   DigIt_Destination_SaveFiles_SettingsForm,
   DigIt_Form_ExportFiles, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
 
@@ -482,6 +485,8 @@ begin
 
     OnLoadImage:= @SES_Image;
     OnEmptyImage:= @SES_Image;
+    OnCropImage:= @SES_CropImage;
+    OnCropFile_Full:= @SES_CropFileFull;
   end;
 
   Settings.Load(nil);
@@ -498,6 +503,9 @@ begin
     lbPrevious.Visible:= True;
 //    MenuMain.OwnerDraw:= True;
   {$endif}
+
+  Application.CreateForm(TMMForm_Progress, MMForm_Progress);
+  theBridge.SetProgressInterface(MMForm_Progress as IMM_Progress);
 end;
 
 procedure TDigIt_Main.FormShow(Sender: TObject);
@@ -603,9 +611,10 @@ var
 
 begin
   try
-     if Sources.Take(takeActPreview, curImageFile)
+     Session.actPreview;
+     (*if Sources.Take(takeActPreview, curImageFile)
      then LoadImage(curImageFile, True)
-     else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
+     else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);*)
 
   finally
     UI_ToolBar;
@@ -1005,7 +1014,7 @@ begin
    for i:=0 to Length(Session.CropAreas)-1 do
    begin
      imgManipulation.addCropArea(RectF(Session.CropAreas[i].TopLeft, Session.CropAreas[i].BottomRight),
-                                 PhysicalToResolutionUnit(Session.CropAreas[i].PhysicalUnit)) ;
+                                 CSSToResolutionUnit(Session.CropAreas[i].PhysicalUnit)) ;
    end;
 (*
    with imgManipulation do
@@ -1613,6 +1622,69 @@ end;
 procedure TDigIt_Main.SES_Image(Sender: TObject);
 begin
   imgManipulation.Bitmap:= Session.Bitmap;
+end;
+
+procedure TDigIt_Main.SES_CropImage(Sender: TObject; ABitmap: TBGRABitmap; iCapturedFiles: Integer; IsReCrop: Boolean);
+var
+   captItem: TListItem;
+
+begin
+  captItem:= nil;
+
+  if IsReCrop
+  then begin
+         if (iCapturedFiles > -1) and (iCapturedFiles < Length(Session.CapturedFiles)) then
+         begin
+           //ReCrop, Update the image in Thumbnails
+           UI_ThumbnailUpdate(iCapturedFiles, ABitmap);
+
+           //Update Item in ListView
+           captItem:= lvCaptured.Items[iCapturedFiles];
+         end;
+       end
+  else begin
+         //Crop, add file to Thumbnails
+         UI_ThumbnailUpdate(iCapturedFiles, ABitmap);
+
+         //Add Item in ListView
+         captItem:= lvCaptured.Items.Add;
+       end;
+
+  if (captItem <> nil) then
+  begin
+    captItem.Caption:= ExtractFileName(Session.CapturedFiles[iCapturedFiles].fName);
+
+    //WorkAround to update immediately Image
+    captItem.ImageIndex:= -1;
+    captItem.ImageIndex:= Session.CapturedFiles[iCapturedFiles].iIndex;
+
+    //Go to Item in ListView
+    captItem.MakeVisible(False);
+  end;
+end;
+
+procedure TDigIt_Main.SES_CropFileFull(Sender: TObject; UserCancel, KeepFiles: Boolean;
+                                   old_CounterValue, old_CapturedFilesIndex: Integer);
+var
+   i: Integer;
+
+begin
+  try
+     if UserCancel and not(KeepFiles) then
+     begin
+       if (Length(Session.CapturedFiles) > old_CapturedFilesIndex+1) then
+         for i:=old_CapturedFilesIndex+1 to Session.CapturedFilesIndex do
+         begin
+           if (imgListThumb.Count > 1) then imgListThumb.Delete(imgListThumb.Count-1);
+           if (lvCaptured.Items.Count > 0) then lvCaptured.Items.Delete(lvCaptured.Items.Count-1);
+         end;
+       imgListThumb_Changed:= True;
+     end;
+
+  finally
+    UI_ToolBar;
+    UI_FillCounter;
+  end;
 end;
 
 function TDigIt_Main.Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;

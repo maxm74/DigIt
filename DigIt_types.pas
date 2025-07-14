@@ -14,7 +14,7 @@ unit DigIt_Types;
 interface
 
 uses Classes, SysUtils, Laz2_XMLCfg, FPImage,
-     BGRABitmapTypes,
+     BGRAUnits, BGRABitmapTypes, BGRABitmap,
      Digit_Bridge_Intf;
 
 resourcestring
@@ -76,6 +76,15 @@ type
 
   { TDigItPhysicalSize }
 
+  TPhysicalUnit = (
+    puPixel,
+    puCentimeter,
+    puMillimeter,
+    puInch,
+    puPercent
+  );
+
+
   TDigItPhysicalSize = class(TPersistent)
     private
       rPhysicalUnit: TPhysicalUnit;
@@ -117,6 +126,12 @@ type
 
   TFileNameEvent = procedure (Sender: TObject; AFileName: String) of object;
 
+  TCropFullEvent = procedure (Sender: TObject; UserCancel, KeepFiles: Boolean;
+                              old_CounterValue, old_CapturedFilesIndex: Integer) of object;
+
+  TCropImageEvent = procedure (Sender: TObject; ABitmap: TBGRABitmap;
+                               iCapturedFiles: Integer; IsReCrop: Boolean) of object;
+
   TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;
                                 var AFiles: TSourceFileArray; AStartIndex: Integer): DWord of object;
 
@@ -124,6 +139,11 @@ type
 {** Convert PhysicalSize to/from Cm/Inch}
 function PhysicalSizeConvert(ASourceUnit: TPhysicalUnit; ASourceSize: Single;
                              ATargetUnit: TPhysicalUnit; AResolution: Single): Single;
+
+function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
+function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
+
+function CSSToResolutionUnit(ASourceUnit: TCSSUnit): TResolutionUnit;
 
 function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
 function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
@@ -163,6 +183,37 @@ begin
   puCentimeter: if (ATargetUnit = puInch)
                 then Result:= ASourceSize/2.54                  // from Cm to Inch
                 else Result:= (ASourceSize/2.54)*AResolution;   // form Cm to Pixel
+  end;
+end;
+
+function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
+begin
+  case ASourceUnit of
+  puPixel: Result:= cuPixel;
+  puCentimeter: Result:= cuCentimeter;
+  puMillimeter: Result:= cuMillimeter;
+  puInch: Result:= cuInch;
+  puPercent: Result:= cuPercent;
+  end;
+end;
+
+function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
+begin
+  case ASourceUnit of
+  cuPixel: Result:= puPixel;
+  cuCentimeter: Result:= puCentimeter;
+  cuMillimeter: Result:= puMillimeter;
+  cuInch: Result:= puInch;
+  cuPercent: Result:= puPercent;
+  end;
+end;
+
+function CSSToResolutionUnit(ASourceUnit: TCSSUnit): TResolutionUnit;
+begin
+  case ASourceUnit of
+  cuPixel: Result:= ruNone;
+  cuCentimeter: Result:= ruPixelsPerCentimeter;
+  cuInch: Result:= ruPixelsPerInch;
   end;
 end;
 

@@ -33,6 +33,7 @@ resourcestring
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
+  rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
 
 type
@@ -68,6 +69,10 @@ type
     rDestinationName: String;
 
     procedure SetCropMode(AValue: TDigItCropMode);
+
+    procedure CropImage(ABitmap: TBGRABitmap; IsReCrop: Boolean);
+    procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
+    procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
 
   public
     SourceFiles: TSourceFileArray;
@@ -106,6 +111,10 @@ type
     OnLoadImage,
     OnEmptyImage: TNotifyEvent;
 
+    //Crop Events
+    OnCropImage: TCropImageEvent;
+    OnCropFile_Full: TCropFullEvent;
+
     constructor Create;
     procedure SetDefaultStartupValues;
     destructor Destroy; override;
@@ -117,7 +126,7 @@ type
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
                                             //Only the File Part, Path and Ext are added automatically
-    function SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
+    function SaveImage(ABitmap: TBGRABitmap; AFileName: String): String;
 
     function ResizeImage(ABitmap :TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
     function RotateImage(ABitmap :TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
@@ -152,9 +161,6 @@ type
 
     procedure Clear_SourceFiles(ClearSourceInst: Boolean);
     procedure Clear_Captured;
-
-    procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
-    procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
 
     procedure SetSaveWriter(AFormat: TBGRAImageFormat);
 
@@ -197,7 +203,7 @@ implementation
 
 uses Graphics, FileUtil, LazFileUtils,
      MM_StrUtils, MM_Interface_MessageDlg,
-     BGRAWriteJPeg, BGRAWriteTiff,
+     BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff,
      Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Counter;
 
 procedure TDigIt_Session.SetCropMode(AValue: TDigItCropMode);
@@ -211,6 +217,9 @@ end;
 constructor TDigIt_Session.Create;
 begin
   inherited Create;
+
+  // Create the Image Bitmap
+  rBitmap := TBGRABitmap.Create;
 
   SetDefaultStartupValues;
 end;
@@ -252,6 +261,7 @@ begin
   CropAreas:= nil;
   SourceFiles:= nil;
   CapturedFiles:= nil;
+  rBitmap.Free; rBitmap:= nil;
 
   inherited Destroy;
 end;
@@ -328,7 +338,7 @@ begin
        end;
      end;
 
-     rBitmap:= BitmapN;
+     rBitmap.Assign(BitmapN, True); // Associate the new bitmap
 
      rLoadedImageFile:= AImageFile;
 
@@ -337,7 +347,6 @@ begin
      if Assigned(OnLoadImage) then OnLoadImage(Self);
 
      Result:= True;
-
 
   finally
      if (BitmapN <> Nil) then BitmapN.Free;
@@ -353,7 +362,7 @@ begin
   if Assigned(OnLoadImage) then OnEmptyImage(Self);
 end;
 
-function TDigIt_Session.SaveImage(Bitmap: TBGRABitmap; AFileName: String): String;
+function TDigIt_Session.SaveImage(ABitmap: TBGRABitmap; AFileName: String): String;
 begin
   Result:=Path_Session_Pictures+AFileName+ExtensionSeparator+SaveExt;
 
@@ -362,7 +371,7 @@ begin
   //Adjust some Writers
   if (SaveWriter is TBGRAWriterTiff) then TBGRAWriterTiff(SaveWriter).Clear;
 
-  Bitmap.SaveToFile(Result, SaveWriter);
+  ABitmap.SaveToFile(Result, SaveWriter);
 end;
 
 function TDigIt_Session.ResizeImage(ABitmap: TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
@@ -379,6 +388,7 @@ begin
          pixelHeight:= Trunc(rPageSize.Height);
         end
   else begin
+    (*
         newWidth:= PhysicalSizeConvert(rPageSize.PhysicalUnit,
                                        rPageSize.Width,
                                        ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionX);
@@ -388,6 +398,10 @@ begin
 
         pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
         pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
+*)      pixelWidth:= HalfUp(PhysicalSizeToPixels(rPageSize.Width, ABitmap.ResolutionUnit, Abitmap.ResolutionX,
+                            PhysicalToCSSUnit(rPageSize.PhysicalUnit)));
+        pixelHeight:= HalfUp(PhysicalSizeToPixels(rPageSize.Height, ABitmap.ResolutionUnit, Abitmap.ResolutionY,
+                             PhysicalToCSSUnit(rPageSize.PhysicalUnit)));
       end;
 
   Case APageResize of
@@ -1248,7 +1262,7 @@ begin
               curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
 
               //Area Unit
-              CropAreas[i].PhysicalUnit:= puCentimeter;
+              CropAreas[i].PhysicalUnit:= cuCentimeter;
               aXML.GetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
 
               //Area Coordinates
@@ -1403,14 +1417,162 @@ begin
   CapturedFiles:= nil;
 end;
 
-procedure TDigIt_Session.CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
-begin
+procedure TDigIt_Session.CropImage(ABitmap: TBGRABitmap; IsReCrop: Boolean);
+var
+  savedFile: String;
 
+begin
+  //Increment the Counter Value
+  Counter.Value:= Counter.Value+1;
+
+  inc(rCapturedFilesIndex);
+
+  //Save File
+  savedFile:= SaveImage(ABitmap, Counter.GetValue);
+
+  if IsReCrop
+  then begin
+         if (rCapturedFilesIndex > -1) and (rCapturedFilesIndex < Length(CapturedFiles)) then
+         begin
+           //ReCrop, Update the image in Captured List
+           CapturedFiles[rCapturedFilesIndex].fName:= savedFile;
+           CapturedFiles[rCapturedFilesIndex].fAge:= FileAge(savedFile);
+         end;
+       end
+  else begin
+         //Crop, add file to Captured List
+         rCapturedFilesIndex:= Length(CapturedFiles);
+
+         SetLength(CapturedFiles, rCapturedFilesIndex+1);
+         CapturedFiles[rCapturedFilesIndex].fName:= savedFile;
+         CapturedFiles[rCapturedFilesIndex].fAge:= FileAge(savedFile);
+         CapturedFiles[rCapturedFilesIndex].iIndex:= 0;
+       end;
+
+   if Assigned(OnCropImage) then OnCropImage(Self, ABitmap, rCapturedFilesIndex, IsReCrop);
+end;
+
+procedure TDigIt_Session.CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
+var
+   i,
+   c,
+   old_CounterValue,
+   old_CapturedFilesIndex: Integer;
+   cStr: String;
+   UserCancel,
+   KeepFiles: Boolean;
+
+begin
+  try
+     UserCancel:= False;
+
+     //Store old Values so if user Cancel Operation we can rollback
+     old_CapturedFilesIndex:= rCapturedFilesIndex;
+     old_CounterValue:= Counter.Value;
+
+     c:= Length(SourceFiles);
+     cStr:= IntToStr(c);
+     theBridge.ProgressSetTotal(AStartIndex, c, AStartIndex);
+
+     for i:=AStartIndex to c-1 do
+     begin
+       UserCancel:= theBridge.ProgressSetTotal(Format(rsProcessing, [i, cStr]), i);
+       if UserCancel then break;
+
+       UserCancel:= not(LoadImage(SourceFiles[i].fName, False));
+       if UserCancel then break;
+
+       try
+          //SaveCallBack(imgManipulation.Bitmap, nil, Integer( (isReTake and (i < lastLenTaked)) ));
+          CropImage(rBitmap, isReTake and (i < rLastTakedLength));
+       except
+         UserCancel:= True;
+         break;
+       end;
+
+       UserCancel:= theBridge.ProgressSetTotal(Format(rsProcessed, [i, cStr]), i+1);
+       if UserCancel then break;
+     end;
+
+     if UserCancel
+     then KeepFiles:= not(theBridge.MessageDlg('DigIt', rsErrIncomplete, mtConfirmation, [mbYes, mbNo], 0) = mrNo)
+     else KeepFiles:= True;
+
+     if Assigned(OnCropFile_Full) then OnCropFile_Full(Self, UserCancel, KeepFiles, old_CounterValue, old_CapturedFilesIndex);
+
+     if UserCancel and not(KeepFiles) then
+     begin
+       if (Length(CapturedFiles) > old_CapturedFilesIndex+1) then
+         for i:=old_CapturedFilesIndex+1 to rCapturedFilesIndex do
+           DeleteFile(CapturedFiles[i].fName);
+
+       SetLength(CapturedFiles, old_CapturedFilesIndex+1);
+       rCapturedFilesIndex:= old_CapturedFilesIndex;
+       Counter.Value:= old_CounterValue;
+     end;
+
+  finally
+  end;
 end;
 
 procedure TDigIt_Session.CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
-begin
+var
+   oldCount: DWord;
+   i,
+   lenCropAreas: Integer;
+   curBitmap: TBGRABitmap;
+   curRect: TRect;
 
+begin
+  rSourceFilesIndex:= ASourceFileIndex;
+  lenCropAreas:= Length(CropAreas);
+
+  if isReTake
+  then begin
+         oldCount:= SourceFiles[rSourceFilesIndex].cCount;
+
+         if (oldCount <> lenCropAreas) then
+         begin
+           if (oldCount < lenCropAreas)
+           then begin
+                  { #todo 10 -oMaxM : Re index - add space for more files }
+                  theBridge.MessageDlg('DigIt', 'To-Do: add space for more files', mtInformation, [mbOk], 0);
+                end
+           else begin
+                  { #todo 10 -oMaxM : Re index - delete extra files }
+                  theBridge.MessageDlg('DigIt', 'To-Do: delete extra files', mtInformation, [mbOk], 0);
+                end;
+         end;
+
+         Counter_Assign(SourceFiles[rSourceFilesIndex].cStart);
+       end
+  else begin
+         if (rSourceFilesIndex < rLastCroppedIndex) then
+         begin
+           { #todo 10 -oMaxM : Re index - delete extra files }
+           theBridge.MessageDlg('DigIt', 'To-Do: insert files', mtInformation, [mbOk], 0);
+         end;
+
+         SourceFiles[rSourceFilesIndex].cStart:= Counter.Value;
+       end;
+
+  //imgManipulation.getAllBitmaps(@SaveCallBack, Integer(isReTake), True);
+  for i:=0 to lenCropAreas-1 do
+  try
+     //ONLY PIXELS Wait for BGRABitmap Pull Request
+    curRect.Top:= Trunc(CropAreas[i].Top);
+    curRect.Left:= Trunc(CropAreas[i].Left);
+    curRect.Bottom:= HalfUp(CropAreas[i].Bottom);
+    curRect.Right:= HalfUp(CropAreas[i].Right);
+
+    curBitmap:= rBitmap.GetPart(curRect, True, False);
+    CropImage(curBitmap, isReTake);
+
+  finally
+    if (curBitmap<>nil) then curBitmap.Free;
+  end;
+
+  SourceFiles[rSourceFilesIndex].cCount:= lenCropAreas;
 end;
 
 (* oldcode

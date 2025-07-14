@@ -1,7 +1,14 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/11 Added Session Load/Save XML Events;
+2025/07/14 Changed TDigItPhysicalSize Unit like BGRABitmap TCSSUnit (pending pull request);
+           Added Crop methods in Session;
+           Added others ProgressSet overloads to Bridge;
+           Moved CreateForm TMMForm_Progress to MainForm Create;
+           Added Crop Events in MainForm;
+           Solved Some Copy/Past Bugs (first Take Test with Session);
+
+        11 Added Session Load/Save XML Events;
            Added SES_ Events methods in MainForm to Update UI (must be completed);
            Added temporary PhysicalRectArrayToCropAreas method;
 

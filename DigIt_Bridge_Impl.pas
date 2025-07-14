@@ -129,9 +129,13 @@ type
 
     function ProgressSetTotal(TotalCaption: String; TotalMin, TotalMax, TotalVal: Integer): Boolean; overload;
     function ProgressSetTotal(TotalCaption: String; TotalVal: Integer): Boolean; overload;
+    function ProgressSetTotal(TotalMin, TotalMax, TotalVal: Integer): Boolean; overload;
+    function ProgressSetTotal(TotalVal: Integer): Boolean; overload;
 
-    function ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean; overload;
     function ProgressSetCurrent(CurrentCaption: String; CurrentMin, CurrentMax, CurrentVal: Integer): Boolean; overload;
+    function ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean; overload;
+    function ProgressSetCurrent(CurrentMin, CurrentMax, CurrentVal: Integer): Boolean; overload;
+    function ProgressSetCurrent(CurrentVal: Integer): Boolean; overload;
 
     function MessageDlg(const aMsg: string; DlgType: TMsgDlgType;
                         Buttons: TMsgDlgButtons; HelpCtx: Longint): TModalResult; overload;
@@ -666,15 +670,26 @@ begin
   end;
 end;
 
-function TDigIt_Bridge.ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean;
+function TDigIt_Bridge.ProgressSetTotal(TotalMin, TotalMax, TotalVal: Integer): Boolean;
 begin
   if (rProgress <> nil) then
   begin
     Result:= rProgress.Cancelled;
     if Result then exit;
 
-    rProgress.SetCurrentValue(CurrentVal);
-    rProgress.SetCurrentCaption(PChar(CurrentCaption));
+    rProgress.SetTotal(TotalMin, TotalMax, TotalVal, False);
+    Result:= rProgress.Cancelled;
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetTotal(TotalVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetTotalValue(TotalVal);
     Result:= rProgress.Cancelled;
   end;
 end;
@@ -688,6 +703,43 @@ begin
 
     rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentVal, False);
     rProgress.SetCurrentCaption(PChar(CurrentCaption));
+    Result:= rProgress.Cancelled;
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetCurrent(CurrentCaption: String; CurrentVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetCurrentValue(CurrentVal);
+    rProgress.SetCurrentCaption(PChar(CurrentCaption));
+    Result:= rProgress.Cancelled;
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetCurrent(CurrentMin, CurrentMax, CurrentVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentVal, False);
+    Result:= rProgress.Cancelled;
+  end;
+end;
+
+function TDigIt_Bridge.ProgressSetCurrent(CurrentVal: Integer): Boolean;
+begin
+  if (rProgress <> nil) then
+  begin
+    Result:= rProgress.Cancelled;
+    if Result then exit;
+
+    rProgress.SetCurrentValue(CurrentVal);
     Result:= rProgress.Cancelled;
   end;
 end;

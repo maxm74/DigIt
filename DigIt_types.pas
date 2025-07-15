@@ -38,10 +38,10 @@ const
   SES_CapturedFiles = 'CapturedFiles/';
   SES_PageSettings  = 'PageSettings/';
   SES_CropAreas = 'CropAreas/';
+  SES_Counter = 'Counter/';
 
 type
   TDigItCropMode = (
-    diCropNull = -1, //Used during the creation phase
     diCropFull,      //All captured pages are processed in bulk as they are
     diCropCustom     //All captured pages are processed with the cut chosen the first time in preview
   );
@@ -77,11 +77,11 @@ type
   { TDigItPhysicalSize }
 
   TPhysicalUnit = (
-    puPixel,
-    puCentimeter,
-    puMillimeter,
-    puInch,
-    puPercent
+    cuPixel,
+    cuCentimeter,
+    cuMillimeter,
+    cuInch,
+    cuPercent
   );
 
 
@@ -125,6 +125,8 @@ type
   TLoadSaveXMLEvent = procedure (Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean) of object;
 
   TFileNameEvent = procedure (Sender: TObject; AFileName: String) of object;
+
+  TCropModeEvent = procedure (Sender: TObject; old_Mode: TDigItCropMode) of object;
 
   TCropFullEvent = procedure (Sender: TObject; UserCancel, KeepFiles: Boolean;
                               old_CounterValue, old_CapturedFilesIndex: Integer) of object;
@@ -171,16 +173,16 @@ begin
   if ASourceUnit = ATargetUnit then exit;
 
   // checks if resolution is ill-defined
-  if (ATargetUnit = puPixel) and (AResolution < 2) then AResolution:= 96; // assume legacy 96 DPI
+  if (ATargetUnit = cuPixel) and (AResolution < 2) then AResolution:= 96; // assume legacy 96 DPI
 
   case ASourceUnit of
-  puPixel: if (ATargetUnit = puInch)
+  cuPixel: if (ATargetUnit = cuInch)
            then Result:= ASourceSize/AResolution                // from Pixel to Inch
            else Result:= (ASourceSize/AResolution)*2.54;        // from Pixel to Cm
-  puInch: if (ATargetUnit = puCentimeter)
+  cuInch: if (ATargetUnit = cuCentimeter)
           then Result:= ASourceSize*2.54                        // from Inch to Cm
           else Result:= ASourceSize*AResolution;                // form Inch to Pixel
-  puCentimeter: if (ATargetUnit = puInch)
+  cuCentimeter: if (ATargetUnit = cuInch)
                 then Result:= ASourceSize/2.54                  // from Cm to Inch
                 else Result:= (ASourceSize/2.54)*AResolution;   // form Cm to Pixel
   end;
@@ -189,49 +191,49 @@ end;
 function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
 begin
   case ASourceUnit of
-  puPixel: Result:= cuPixel;
-  puCentimeter: Result:= cuCentimeter;
-  puMillimeter: Result:= cuMillimeter;
-  puInch: Result:= cuInch;
-  puPercent: Result:= cuPercent;
+  cuPixel: Result:= TCSSUnit.cuPixel;
+  cuCentimeter: Result:= TCSSUnit.cuCentimeter;
+  cuMillimeter: Result:= TCSSUnit.cuMillimeter;
+  cuInch: Result:= TCSSUnit.cuInch;
+  cuPercent: Result:= TCSSUnit.cuPercent;
   end;
 end;
 
 function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
 begin
   case ASourceUnit of
-  cuPixel: Result:= puPixel;
-  cuCentimeter: Result:= puCentimeter;
-  cuMillimeter: Result:= puMillimeter;
-  cuInch: Result:= puInch;
-  cuPercent: Result:= puPercent;
+  TCSSUnit.cuPixel: Result:= cuPixel;
+  TCSSUnit.cuCentimeter: Result:= cuCentimeter;
+  TCSSUnit.cuMillimeter: Result:= cuMillimeter;
+  TCSSUnit.cuInch: Result:= cuInch;
+  TCSSUnit.cuPercent: Result:= cuPercent;
   end;
 end;
 
 function CSSToResolutionUnit(ASourceUnit: TCSSUnit): TResolutionUnit;
 begin
   case ASourceUnit of
-  cuPixel: Result:= ruNone;
-  cuCentimeter: Result:= ruPixelsPerCentimeter;
-  cuInch: Result:= ruPixelsPerInch;
+  TCSSUnit.cuPixel: Result:= ruNone;
+  TCSSUnit.cuCentimeter: Result:= ruPixelsPerCentimeter;
+  TCSSUnit.cuInch: Result:= ruPixelsPerInch;
   end;
 end;
 
 function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
 begin
   case ASourceUnit of
-  puPixel: Result:= ruNone;
-  puInch: Result:= ruPixelsPerInch;
-  puCentimeter: Result:= ruPixelsPerCentimeter;
+  cuPixel: Result:= ruNone;
+  cuInch: Result:= ruPixelsPerInch;
+  cuCentimeter: Result:= ruPixelsPerCentimeter;
   end;
 end;
 
 function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
 begin
   case ASourceUnit of
-  ruNone: Result:= puPixel;
-  ruPixelsPerInch: Result:= puInch;
-  ruPixelsPerCentimeter: Result:= puCentimeter;
+  ruNone: Result:= cuPixel;
+  ruPixelsPerInch: Result:= cuInch;
+  ruPixelsPerCentimeter: Result:= cuCentimeter;
   end;
 end;
 

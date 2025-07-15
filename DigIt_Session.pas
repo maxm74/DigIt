@@ -41,12 +41,13 @@ type
   { TDigIt_Session }
 
   TDigIt_Session = class
+  private
   protected
     rLoading,
     rModified: Boolean;
-    rPath,
+    (*rPath,
     rPath_Scan,
-    rPath_Pictures,
+    rPath_Pictures,*)
     rLoadedImageFile,
     rFileName: String;
 
@@ -69,6 +70,7 @@ type
     rDestinationName: String;
 
     procedure SetCropMode(AValue: TDigItCropMode);
+    procedure SetCapturedFilesSelected(AValue: Integer);
 
     procedure CropImage(ABitmap: TBGRABitmap; IsReCrop: Boolean);
     procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
@@ -112,6 +114,7 @@ type
     OnEmptyImage: TNotifyEvent;
 
     //Crop Events
+    OnCropModeChange: TCropModeEvent;
     OnCropImage: TCropImageEvent;
     OnCropFile_Full: TCropFullEvent;
 
@@ -179,8 +182,9 @@ type
     procedure GetEnabledActions(out actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,
                                 actCropNext_Enabled,
                                 actGoNext_Enabled, actGoBack_Enabled,
-                                actCropAll_Enabled, actClearQueue_Enabled,
-                                actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean);
+                                actCropAll_Enabled, actClearQueue_Enabled: Boolean);
+
+    procedure GetEnabledActions_Captured(out actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean);
 
     //property Path: String read rPath; It should be like this but the Bridge Setting reads it from Path_Session
     property FileName: String read rFileName;
@@ -196,7 +200,7 @@ type
     property LastTakedLength: Integer read rLastTakedLength;
     property SourceFilesIndex: Integer read rSourceFilesIndex;
     property CapturedFilesIndex: Integer read rCapturedFilesIndex;
-    property CapturedFilesSelected: Integer read rCapturedFilesSelected;
+    property CapturedFilesSelected: Integer read rCapturedFilesSelected write SetCapturedFilesSelected;
   end;
 
 implementation
@@ -206,11 +210,25 @@ uses Graphics, FileUtil, LazFileUtils,
      BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff,
      Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Counter;
 
+procedure TDigIt_Session.SetCapturedFilesSelected(AValue: Integer);
+begin
+  if (rCapturedFilesSelected <> AValue) then
+  begin
+    if (AValue >= Length(CapturedFiles)) then AValue:= Length(CapturedFiles)-1;
+    rCapturedFilesSelected:= AValue;
+  end;
+end;
+
 procedure TDigIt_Session.SetCropMode(AValue: TDigItCropMode);
+var
+   old_Mode: TDigItCropMode;
+
 begin
   if (rCropMode <> AValue) then
   begin
-    rCropMode:=AValue;
+    old_Mode:= rCropMode;
+    rCropMode:= AValue;
+    if Assigned(OnCropModeChange) then OnCropModeChange(Self, old_Mode);
   end;
 end;
 
@@ -239,13 +257,13 @@ begin
   CropAreas:= nil;
 
   rPageSize:= TDigItPhysicalSize.Create;
-  rPageSize.SetValues(puCentimeter, 21, 29.7);
+  rPageSize.SetValues(TPhysicalUnit.cuCentimeter, 21, 29.7);
 
   PageResize:= resFullSize;
   PageRotate:= rotNone;
   PageFlip:= flipNone;
 
-  CropMode:= diCropNull; //setCropMode works only if there are changes
+  rCropMode:= diCropFull;
 
   //Set Default Session Values
   Path_Session:= Path_DefSession;
@@ -382,7 +400,7 @@ var
 begin
   Result:= nil;
 
-  if (rPageSize.PhysicalUnit = puPixel)
+  if (rPageSize.PhysicalUnit = TPhysicalUnit.cuPixel)
   then begin
          pixelWidth:= Trunc(rPageSize.Width);
          pixelHeight:= Trunc(rPageSize.Height);
@@ -449,7 +467,7 @@ begin
      Path_Session:= APath;
      Path_Session_Scan:= Path_Session+'Scan'+DirectorySeparator;
      Path_Session_Pictures:= Path_Session+'Pictures'+DirectorySeparator;
-     rPath:= APath;
+     //rPath:= APath;
      rFileName:= AFile;
 
      Load(IsAutoSave);
@@ -659,8 +677,8 @@ begin
      rLoading:= True;
 
      if IsAutoSave
-     then aXML:= TRttiXMLConfig.Create(rPath+rFilename+Ext_AutoSess)
-     else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+     then aXML:= TRttiXMLConfig.Create(Path_Session+rFilename+Ext_AutoSess)
+     else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      newSourceI:= LoadSource(aXML, IsAutoSave);
      LoadSourceFiles(aXML, IsAutoSave);
@@ -668,8 +686,14 @@ begin
      LoadCapturedFiles(aXML, IsAutoSave);
      LoadPageSettings(aXML, IsAutoSave);
      LoadLoadedImage(aXML, IsAutoSave);
-     Counter.Load(aXML, 'Counter', True);
-     LoadCropAreas(aXML, IsAutoSave);
+     Counter.Load(aXML, SES_Counter, True);
+
+     rCropMode:= diCropFull;
+     aXML.GetValue('CropMode', rCropMode, TypeInfo(TDigItCropMode));
+
+     if (rCropMode = diCropCustom)
+     then LoadCropAreas(aXML, IsAutoSave)
+     else CropAreas:= nil;
 
      if Assigned(OnLoadXML) then OnLoadXML(Self, aXML, IsAutoSave);
 
@@ -692,7 +716,7 @@ begin
      then curExt:= Ext_AutoSess
      else curExt:= Ext_Sess;
 
-     aXML:= TRttiXMLConfig.Create(rPath+rFileName+curExt);
+     aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+curExt);
 
      SaveSource(aXML, IsAutoSave);
      SaveSourceFiles(aXML, IsAutoSave);
@@ -701,9 +725,13 @@ begin
      SavePageSettings(aXML, IsAutoSave);
      SaveLoadedImage(aXML, IsAutoSave);
 
-     Counter.Save(aXML, 'Counter', True);
+     Counter.Save(aXML, SES_Counter, True);
 
-     SaveCropAreas(aXML, IsAutoSave);
+     aXML.SetValue('CropMode', rCropMode, TypeInfo(TDigItCropMode));
+
+     if (rCropMode = diCropCustom)
+     then SaveCropAreas(aXML, IsAutoSave)
+     else aXML.DeletePath(SES_CropAreas);
 
      if Assigned(OnSaveXML) then OnSaveXML(Self, aXML, IsAutoSave);
 
@@ -716,9 +744,9 @@ begin
 
      if (Sources.Selected <> nil) and
         (Sources.Selected^.Inst <> Nil)
-     then Sources.Selected^.Inst.Params.Save(PChar(rPath+rFileName+curExt), 'Source/Params');
+     then Sources.Selected^.Inst.Params.Save(PChar(Path_Session+rFileName+curExt), 'Source/Params');
 
-//     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(rPath+rFileName+curExt), 'Destination/Params');
+//     if (rDestination <> nil) then rDestination^.Inst.Params.Save(PChar(Path_Session+rFileName+curExt), 'Destination/Params');
 
      if not(IsAutoSave) then rModified:= False;
 
@@ -774,8 +802,8 @@ begin
        if (XML_File = '') then //Use Session File
        begin
          if IsAutoSave
-         then XML_File:= rPath+rFileName+Ext_AutoSess
-         else XML_File:= rPath+rFileName+Ext_Sess;
+         then XML_File:= Path_Session+rFileName+Ext_AutoSess
+         else XML_File:= Path_Session+rFileName+Ext_Sess;
        end;
 
        aXML:= TRttiXMLConfig.Create(XML_File);
@@ -820,8 +848,8 @@ begin
        if (XML_File = '') then //Use Session File
        begin
          if IsAutoSave
-         then XML_File:= rPath+rFileName+Ext_AutoSess
-         else XML_File:= rPath+rFileName+Ext_Sess;
+         then XML_File:= Path_Session+rFileName+Ext_AutoSess
+         else XML_File:= Path_Session+rFileName+Ext_Sess;
        end;
 
        aXML:= TRttiXMLConfig.Create(XML_File);
@@ -865,8 +893,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      //Load SourceFiles
      SourceFiles:= nil; //Avoid possible data overlaps by eliminating any existing array
@@ -880,7 +908,7 @@ begin
        curItemPath:= SES_SourceFiles+'Item' + IntToStr(i)+'/';
        SourceFiles[i].cCount:= aXML.GetValue(curItemPath+'cCount', 0);
        SourceFiles[i].cStart:= aXML.GetValue(curItemPath+'cStart', 0);
-       SourceFiles[i].fName:= RelativePathToFullPath(rPath, aXML.GetValue(curItemPath+'fName', ''));
+       SourceFiles[i].fName:= RelativePathToFullPath(Path_Session, aXML.GetValue(curItemPath+'fName', ''));
      end;
 
      if Assigned(OnLoadSourceFiles) then OnLoadSourceFiles(Self, aXML, IsAutoSave);
@@ -901,8 +929,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      //Save SourceFiles array
      aXML.DeletePath(SES_SourceFiles);
@@ -915,7 +943,7 @@ begin
        curItemPath:= SES_SourceFiles+'Item' + IntToStr(i)+'/';
        aXML.SetValue(curItemPath+'cCount', SourceFiles[i].cCount);
        aXML.SetValue(curItemPath+'cStart', SourceFiles[i].cStart);
-       aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(rPath, SourceFiles[i].fName));
+       aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(Path_Session, SourceFiles[i].fName));
      end;
 
      if Assigned(OnSaveSourceFiles) then OnSaveSourceFiles(Self, aXML, IsAutoSave);
@@ -936,8 +964,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      //Load Destination and its Params
      { #note -oMaxM : Not enabled for now until I figure out how to pass the image data and make the thumbnails }
@@ -949,7 +977,7 @@ begin
             rDestinationParams:= nil;
  *)
             rDestinationName:= '';
-            rPath_Pictures:= RelativePathToFullPath(rPath, aXML.GetValue('Destination/Params/Path', ''));
+            Path_Session_Pictures:= RelativePathToFullPath(Path_Session, aXML.GetValue('Destination/Params/Path', ''));
 
             //Load Format and Create Writer
             SaveFormat:= ifJpeg;
@@ -986,8 +1014,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      //Save rDestination and its Params
 (*     aXML.SetValue('Destination/Name', rDestinationName);
@@ -995,7 +1023,7 @@ begin
      begin
 *)
        aXML.DeletePath('Destination/Params/');
-       aXML.SetValue('Destination/Params/Path', FullPathToRelativePath(rPath, rPath_Pictures));
+       aXML.SetValue('Destination/Params/Path', FullPathToRelativePath(Path_Session, Path_Session_Pictures));
 
        aXML.SetValue('Destination/Params/Format', SaveFormat, TypeInfo(TBGRAImageFormat));
        aXML.WriteObject('Destination/Params/Writer/', SaveWriter);
@@ -1025,8 +1053,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      newCount := aXML.GetValue(SES_CapturedFiles+'Count', 0);
      rCapturedFilesIndex:= aXML.GetValue(SES_CapturedFiles+'CapturedFilesIndex', -1);
@@ -1037,7 +1065,7 @@ begin
      begin
          curItemPath :=SES_CapturedFiles+'Item' + IntToStr(i)+'/';
          CapturedFiles[i].fAge:= aXML.GetValue(curItemPath+'fAge', 0);
-         CapturedFiles[i].fName:= RelativePathToFullPath(rPath, aXML.GetValue(curItemPath+'fName', ''));
+         CapturedFiles[i].fName:= RelativePathToFullPath(Path_Session, aXML.GetValue(curItemPath+'fName', ''));
          CapturedFiles[i].iIndex:= aXML.GetValue(curItemPath+'iIndex', 0);
 
          cuFileName:= CapturedFiles[i].fName;
@@ -1077,22 +1105,13 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      if IsAutoSave
      then curExt:= Ext_AutoThumb
      else curExt:= Ext_Thumb;
 
-(* oldcode
-     if imgListThumb_Changed then
-     try
-       imgListThumb.SaveToFile(rPath+rFileName+curExt);
-       imgListThumb_Changed:= False;
-
-     except
-     end;
-*)
      //Save CapturedFiles array
      aXML.DeletePath(SES_CapturedFiles);
      lenCapturedFiles:= Length(CapturedFiles);
@@ -1102,17 +1121,13 @@ begin
        aXML.SetValue(SES_CapturedFiles+'Count', Length(CapturedFiles));
        aXML.SetValue(SES_CapturedFiles+'CapturedFilesIndex', rCapturedFilesIndex);
 
-(* oldcode       if lvCaptured.Selected=nil
-       then aXML.DeleteValue(CapturedFiles+'Selected')
-       else aXML.SetValue(SES_CapturedFiles+'Selected', lvCaptured.Selected.Index);
-*)
        aXML.SetValue(SES_CapturedFiles+'Selected', rCapturedFilesSelected);
 
        for i:=0 to Length(CapturedFiles)-1 do
        begin
          curItemPath :=SES_CapturedFiles+'Item' + IntToStr(i)+'/';
          aXML.SetValue(curItemPath+'fAge', CapturedFiles[i].fAge);
-         aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(rPath, CapturedFiles[i].fName));
+         aXML.SetValue(curItemPath+'fName', FullPathToRelativePath(Path_Session, CapturedFiles[i].fName));
          aXML.SetValue(curItemPath+'iIndex', CapturedFiles[i].iIndex);
        end;
      end;
@@ -1135,10 +1150,10 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
-     LoadImage(RelativePathToFullPath(rPath, aXML.GetValue('LoadedFile', '')), False); //DON'T set to True, if you do not want infinite recursion
+     LoadImage(RelativePathToFullPath(Path_Session, aXML.GetValue('LoadedFile', '')), False); //DON'T set to True, if you do not want infinite recursion
 
      if Assigned(OnLoadLoadedImage) then OnLoadLoadedImage(Self, aXML, IsAutoSave);
 
@@ -1156,10 +1171,10 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
-     aXML.SetValue('LoadedFile', FullPathToRelativePath(rPath, rLoadedImageFile));
+     aXML.SetValue('LoadedFile', FullPathToRelativePath(Path_Session, rLoadedImageFile));
 
      if Assigned(OnSaveLoadedImage) then OnSaveLoadedImage(Self, aXML, IsAutoSave);
 
@@ -1179,8 +1194,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      SaveSourceFiles(aXML, IsAutoSave);
      SaveCapturedFiles(aXML, IsAutoSave);
@@ -1202,8 +1217,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      if (Length(SourceFiles) > 0) then
      begin
@@ -1214,11 +1229,6 @@ begin
 
      if (Length(CapturedFiles) > 0) then aXML.SetValue(SES_SourceFiles+'CapturedFilesIndex', rCapturedFilesIndex);
 
-(* oldcode
-     if lvCaptured.Selected=nil
-     then aXML.DeleteValue(CapturedFiles+'Selected')
-     else aXML.SetValue(CapturedFiles+'Selected', lvCaptured.Selected.Index);
-*)
      aXML.SetValue(SES_CapturedFiles+'Selected', rCapturedFilesSelected);
 
      SaveLoadedImage(aXML, IsAutoSave);
@@ -1235,7 +1245,6 @@ end;
 procedure TDigIt_Session.LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 var
    aFree: Boolean;
-   newCropMode: TDigItCropMode;
    i, newCount, newSelected: integer;
    curItemPath: String;
 
@@ -1244,48 +1253,34 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-             then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-             else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+             then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+             else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
-     newCropMode:= TDigItCropMode(aXML.GetValue('CropMode', 0));
+     newCount:= aXML.GetValue(SES_CropAreas+'Count', -1);
+     //newSelected:= aXML.GetValue(SES_CropAreas+'Selected', -1);  IN UI See TCropAreaList.Load
 
-     if (newCropMode = diCropCustom)
-     then begin
-            newCount:= aXML.GetValue(SES_CropAreas+'Count', -1);
-            //newSelected:= aXML.GetValue(SES_CropAreas+'Selected', -1);  IN UI See TCropAreaList.Load
+     CropAreas:= nil;
+     SetLength(CropAreas, newCount);
 
-            CropAreas:= nil;
-            SetLength(CropAreas, newCount);
-
-            for i:=0 to newCount-1 do
-            begin
-              curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
-
-              //Area Unit
-              CropAreas[i].PhysicalUnit:= cuCentimeter;
-              aXML.GetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
-
-              //Area Coordinates
-              CropAreas[i].Left:= StrToFloat(aXML.GetValue(curItemPath+'Area/Left', '0'));
-              CropAreas[i].Top:= StrToFloat(aXML.GetValue(curItemPath+'Area/Top', '0'));
-              CropAreas[i].Width:= StrToFloat(aXML.GetValue(curItemPath+'Area/Width', '0'));
-              CropAreas[i].Height:= StrToFloat(aXML.GetValue(curItemPath+'Area/Height', '0'));
-            end;
-          end
-     else CropAreas:= nil;
-
-(* oldcode
-     setCropMode(newCropMode);
-     if (newCropMode = diCropCustom) then
+     for i:=0 to newCount-1 do
      begin
-       UI_FillCounter;
-       imgManipulation.CropAreas.Load(aXML, 'CropAreas');
+       curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
+
+       //Area Unit
+       CropAreas[i].PhysicalUnit:= cuCentimeter;
+       aXML.GetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
+
+       //Area Coordinates
+       CropAreas[i].Left:= StrToFloat(aXML.GetValue(curItemPath+'Area/Left', '0'));
+       CropAreas[i].Top:= StrToFloat(aXML.GetValue(curItemPath+'Area/Top', '0'));
+       CropAreas[i].Width:= StrToFloat(aXML.GetValue(curItemPath+'Area/Width', '0'));
+       CropAreas[i].Height:= StrToFloat(aXML.GetValue(curItemPath+'Area/Height', '0'));
      end;
-*)
+
      if Assigned(OnLoadCropAreas) then OnLoadCropAreas(Self, aXML, IsAutoSave);
 
   finally
-    if aFree then aXML.Free;
+     if aFree then aXML.Free;
   end;
 end;
 
@@ -1300,33 +1295,27 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
-     aXML.SetValue('CropMode', Integer(CropMode));
+     aXML.DeletePath(SES_CropAreas);
 
-     if (CropMode = diCropCustom)
-     then begin
-            aXML.DeletePath(SES_CropAreas);
+     aXML.SetValue(SES_CropAreas+'Count', Length(CropAreas));
+     //aXML.SetValue(SES_CropAreas+'Selected', fOwner.SelectedCropArea.Index); IN UI See TCropAreaList.Save
 
-            aXML.SetValue(SES_CropAreas+'Count', Length(CropAreas));
-            //aXML.SetValue(SES_CropAreas+'Selected', fOwner.SelectedCropArea.Index); IN UI See TCropAreaList.Save
+     for i:=0 to Length(CropAreas)-1 do
+     begin
+       curItemPath:= SES_CropAreas+'Item' + IntToStr(i)+'/';
 
-            for i:=0 to Length(CropAreas)-1 do
-            begin
-              curItemPath:= SES_CropAreas+'Item' + IntToStr(i)+'/';
+       //Area Unit
+       aXML.SetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
 
-              //Area Unit
-              aXML.SetValue(curItemPath+'AreaUnit', CropAreas[i].PhysicalUnit, TypeInfo(TPhysicalUnit));
-
-              //Area Coordinates
-              aXML.SetValue(curItemPath+'Area/Left', FloatToStr(CropAreas[i].Left));
-              aXML.SetValue(curItemPath+'Area/Top', FloatToStr(CropAreas[i].Top));
-              aXML.SetValue(curItemPath+'Area/Width', FloatToStr(CropAreas[i].Width));
-              aXML.SetValue(curItemPath+'Area/Height', FloatToStr(CropAreas[i].Height));
-            end;
-          end
-     else aXML.DeletePath('CropAreas');
+       //Area Coordinates
+       aXML.SetValue(curItemPath+'Area/Left', FloatToStr(CropAreas[i].Left));
+       aXML.SetValue(curItemPath+'Area/Top', FloatToStr(CropAreas[i].Top));
+       aXML.SetValue(curItemPath+'Area/Width', FloatToStr(CropAreas[i].Width));
+       aXML.SetValue(curItemPath+'Area/Height', FloatToStr(CropAreas[i].Height));
+     end;
 
      if Assigned(OnSaveCropAreas) then OnSaveCropAreas(Self, aXML, IsAutoSave);
 
@@ -1346,8 +1335,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      PageResize:= resFullsize;
      aXML.GetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
@@ -1376,8 +1365,8 @@ begin
      aFree:= (aXML = nil);
      if aFree
      then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
+          then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
+          else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      if (rPageSize.Width = 0) or
         (rPageSize.Height = 0) then PageResize:= resFullsize;
@@ -1574,54 +1563,6 @@ begin
 
   SourceFiles[rSourceFilesIndex].cCount:= lenCropAreas;
 end;
-
-(* oldcode
-procedure TDigIt_Session.LoadUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
-
-     //User Interface
-     rollCrops.Collapsed:=aXML.GetValue('UI/rollCrops_Collapsed', False);
-     rollPages.Collapsed:=aXML.GetValue('UI/rollPages_Collapsed', True);
-     rollCounters.Collapsed:=aXML.GetValue('UI/rollCounters_Collapsed', True);
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-
-procedure TDigIt_Session.SaveUserInterface(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-var
-   aFree: Boolean;
-
-begin
-  try
-     aFree:= (aXML = nil);
-     if aFree
-     then if IsAutoSave
-          then aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_AutoSess)
-          else aXML:= TRttiXMLConfig.Create(rPath+rFileName+Ext_Sess);
-
-     //User Interface
-     aXML.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
-     aXML.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
-     aXML.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
-
-     if IsAutoSave then rSessionModified:= True;
-
-  finally
-    if aFree then aXML.Free;
-  end;
-end;
-*)
 
 function TDigIt_Session.actPreview: Boolean;
 var
@@ -1927,8 +1868,7 @@ begin
   Save(True);
 end;
 
-procedure TDigIt_Session.actCapturedDelete(UserConfirm: Boolean; AIndex: Integer
-  );
+procedure TDigIt_Session.actCapturedDelete(UserConfirm: Boolean; AIndex: Integer);
 var
    iCur, iSelected: Integer;
 
@@ -1961,14 +1901,11 @@ end;
 procedure TDigIt_Session.GetEnabledActions(out actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,
                                            actCropNext_Enabled,
                                            actGoNext_Enabled, actGoBack_Enabled,
-                                           actCropAll_Enabled, actClearQueue_Enabled,
-                                           actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean);
+                                           actCropAll_Enabled, actClearQueue_Enabled: Boolean);
 var
    bCommonCond,
    bCropEnabled: Boolean;
-   lenSources,
-   lenCaptured,
-   remSources: Integer;
+   lenSources: Integer;
 
 begin
   bCommonCond:= (Sources.Selected<>nil) and (Sources.Selected^.Inst <> nil);
@@ -1976,11 +1913,6 @@ begin
   actPreview_Enabled:= bCommonCond;
   actTake_Enabled:= bCommonCond; // and DirectoryExists(Path_Session_Pictures)
   actTakeRe_Enabled:= bCommonCond and (rLastTakedLength > 0);
-
-  lenCaptured:= Length(CapturedFiles);
-
-  actCapturedDeleteAll_Enabled:= (lenCaptured > 0);
-  actCapturedDelete_Enabled:= (lenCaptured > 0) and (rCapturedFilesSelected > -1);
 
   if (rCropMode = diCropCustom) then
   begin
@@ -1999,8 +1931,20 @@ begin
     actCropAll_Enabled:= actCropNext_Enabled and not(bCropEnabled);
 
     actClearQueue_Enabled:= bCommonCond and (lenSources > 0);
-    actCapturedDelete_Enabled:= False; { #todo 2 -oMaxM : evaluate the complexity in case of multiple crop areas}
   end;
+end;
+
+procedure TDigIt_Session.GetEnabledActions_Captured(out actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean);
+var
+   lenCaptured: Integer;
+
+begin
+  lenCaptured:= Length(CapturedFiles);
+
+  actCapturedDeleteAll_Enabled:= (lenCaptured > 0);
+  actCapturedDelete_Enabled:= (lenCaptured > 0) and
+                              (rCropMode = diCropFull) and { #todo 2 -oMaxM : evaluate the complexity in case of multiple crop areas}
+                              (rCapturedFilesSelected in [0..lenCaptured-1]);
 end;
 
 

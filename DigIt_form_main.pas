@@ -333,6 +333,7 @@ type
     procedure SES_LoadPageSettings(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SES_Image(Sender: TObject);
 
+    procedure SES_CropMode(Sender: TObject; old_Mode: TDigItCropMode);
     procedure SES_CropImage(Sender: TObject; ABitmap: TBGRABitmap; iCapturedFiles: Integer; IsReCrop: Boolean);
     procedure SES_CropFileFull(Sender: TObject; UserCancel, KeepFiles: Boolean; old_CounterValue, old_CapturedFilesIndex: Integer);
 
@@ -348,10 +349,12 @@ type
     procedure UI_FillPageRotateFlip;
     procedure UI_UpdateCropAreaList;
     procedure UI_ToolBar;
+    procedure UI_ToolBar_Captured;
     procedure UI_ToolBarMods;
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure UI_ThumbnailUpdate(AIndex: Integer; AFileName: String); overload;
     procedure UI_ThumbnailUpdate(AIndex: Integer; ABitmap: TBGRABitmap); overload;
+    procedure UI_ClearCaptured;
     procedure UI_Caption;
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
@@ -364,9 +367,6 @@ type
     function Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
     function Destination_Select(newDestinationIndex: Integer): Boolean;
 
-    procedure setCropMode(ANewCropMode: TDigItCropMode);
-
-    procedure Clear_Captured;
 
     procedure ItemSizesClick(Sender: TObject);
     procedure PageSizesClick(Sender: TObject);
@@ -485,6 +485,7 @@ begin
 
     OnLoadImage:= @SES_Image;
     OnEmptyImage:= @SES_Image;
+    OnCropModeChange:= @SES_CropMode;
     OnCropImage:= @SES_CropImage;
     OnCropFile_Full:= @SES_CropFileFull;
   end;
@@ -518,6 +519,7 @@ begin
   UI_ToolBarMods;
 
   sessLoaded:= False;
+  try
   try
      //1) If Application is started with a Session File Param then Open It
      if FileExists(ParamStr(1)) and
@@ -569,15 +571,23 @@ begin
      begin
        //4 Set Last Used Source with it's Params
        Session.LoadSource(nil, False, '', Path_Config+File_Config);
-       setCropMode(diCropFull);
      end;
 
      if (Path_Session = Path_DefSession) then Settings.Save_StartupSession(nil, '', '');
 
   except
      Session.SetDefaultStartupValues;
-     setCropMode(diCropFull);
      Settings.Save_StartupSession(nil, '', '');
+  end;
+
+  finally
+    if not(sessLoaded) then
+    begin
+      UI_MenuItemsChecks(Sources.SelectedIndex, 0);
+      UI_FillCounter;
+      SES_CropMode(nil, diCropFull);
+      UI_ToolBar;
+    end;
   end;
 end;
 
@@ -632,6 +642,7 @@ begin
      UI_SelectCurrentCaptured;
      UI_FillCounter;
      UI_ToolBar;
+     UI_ToolBar_Captured;
   end;
 end;
 
@@ -651,6 +662,7 @@ begin
 
   finally
      UI_ToolBar;
+     UI_ToolBar_Captured;
      UI_FillCounter;
   end;
 end;
@@ -669,6 +681,7 @@ begin
      UI_SelectNextCaptured;
      UI_FillCounter;
      UI_ToolBar;
+     UI_ToolBar_Captured;
   end;
 end;
 
@@ -681,6 +694,7 @@ begin
      UI_SelectNextCaptured;
      UI_FillCounter;
      UI_ToolBar;
+     UI_ToolBar_Captured;
   end;
 end;
 
@@ -693,6 +707,7 @@ begin
      UI_SelectNextCaptured;
      UI_FillCounter;
      UI_ToolBar;
+     UI_ToolBar_Captured;
   end;
 end;
 
@@ -705,6 +720,7 @@ begin
      UI_SelectNextCaptured;
      UI_FillCounter;
      UI_ToolBar;
+     UI_ToolBar_Captured;
   end;
 end;
 
@@ -1122,8 +1138,25 @@ begin
 end;
 
 procedure TDigIt_Main.itemCropModeClick(Sender: TObject);
+var
+   ANewCropMode: TDigItCropMode;
+
 begin
-  setCropMode(TDigItCropMode(TMenuItem(Sender).Tag));
+  ANewCropMode:= TDigItCropMode(TMenuItem(Sender).Tag);
+
+  if (ANewCropMode <> Session.CropMode) then
+  try
+    if (ANewCropMode = diCropFull) and
+       (Length(Session.CropAreas) > 0)
+    then if (MessageDlg('DigIt', rsClearCrops, mtConfirmation, mbYesNo, 0) = mrNo)
+         then exit;
+
+    Session.CropMode:= ANewCropMode;
+
+  finally
+    UI_FillCounter;
+    UI_ToolBar;
+  end;
 end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
@@ -1157,10 +1190,13 @@ begin
   if (captItem <> nil) then OpenDocument(Session.CapturedFiles[captItem.Index].fName);
 end;
 
-procedure TDigIt_Main.lvCapturedSelectItem(Sender: TObject; Item: TListItem;
-  Selected: Boolean);
+procedure TDigIt_Main.lvCapturedSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
-  UI_ToolBar;
+  if Selected and (Item <> nil)
+  then Session.CapturedFilesSelected:= Item.Index
+  else Session.CapturedFilesSelected:= -1;
+
+  UI_ToolBar_Captured;
 end;
 
 procedure TDigIt_Main.lvCapturedShowHint(Sender: TObject; HintInfo: PHintInfo);
@@ -1195,8 +1231,11 @@ begin
      iSelected:= captItem.Index;
 
      //Delete Thumb
-     imgListThumb.Delete(Session.CapturedFiles[iSelected].iIndex);
-     imgListThumb_Changed:= True;
+     if (Session.CapturedFiles[iSelected].iIndex > 0) then
+     begin
+       imgListThumb.Delete(Session.CapturedFiles[iSelected].iIndex);
+       imgListThumb_Changed:= True;
+     end;
 
      Session.actCapturedDelete(False, iSelected);
 
@@ -1231,7 +1270,9 @@ begin
      Session.actCapturedDeleteAll(False);
 
   finally
+    UI_ClearCaptured;
     UI_ToolBar;
+    UI_ToolBar_Captured;
     UI_FillCounter;
   end;
 end;
@@ -1411,11 +1452,11 @@ begin
               end
          else*) if PredefValues then
               Case Session.PageSize.PhysicalUnit of
-              puPixel: imgManipulation.SetEmptyImageSize(ruNone,
+              TPhysicalUnit.cuPixel: imgManipulation.SetEmptyImageSize(ruNone,
                                                         Paper_A_inch[4].w * 200, Paper_A_inch[4].h * 200);
-              puInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
+              TPhysicalUnit.cuInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
                                                         Paper_A_inch[4].w, Paper_A_inch[4].h);
-              puCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
+              TPhysicalUnit.cuCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
                                                         Paper_A_cm[4].w, Paper_A_cm[4].h);
               end;
 
@@ -1477,7 +1518,9 @@ begin
 
   UI_MenuItemsChecks(Sources.SelectedIndex, 0);
   UI_FillCounter;
+  SES_CropMode(nil, diCropFull);
   UI_ToolBar;
+  UI_ToolBar_Captured;
 end;
 
 procedure TDigIt_Main.SES_Save(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
@@ -1624,6 +1667,38 @@ begin
   imgManipulation.Bitmap:= Session.Bitmap;
 end;
 
+procedure TDigIt_Main.SES_CropMode(Sender: TObject; old_Mode: TDigItCropMode);
+begin
+  Case Session.CropMode of
+    diCropFull: begin
+      tbCrop.Visible:= False;
+      imgManipulation.clearCropAreas;
+      imgManipulation.Opacity:= 0;
+      imgManipulation.Enabled:= False;
+      rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
+      rollCounters.Collapsed:= True;
+
+      tbCropMode.Caption:= rsCropFull;
+    end;
+    diCropCustom: begin
+      tbCrop.Visible:= True;
+      imgManipulation.Opacity:= 64; //128; {#to-do Add to Settings}
+      imgManipulation.Enabled:= True;
+      rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
+      rollCounters.Collapsed:= False;
+      tbCropMode.Caption:= rsCropCust;
+    end;
+  end;
+
+  (* oldcode if not(Session.Loading) then
+  begin
+    UI_FillCounter;
+    UI_ToolBar;
+  end;*)
+
+  tbCropMode.ImageIndex:= Integer(Session.CropMode);
+end;
+
 procedure TDigIt_Main.SES_CropImage(Sender: TObject; ABitmap: TBGRABitmap; iCapturedFiles: Integer; IsReCrop: Boolean);
 var
    captItem: TListItem;
@@ -1683,6 +1758,7 @@ begin
 
   finally
     UI_ToolBar;
+    UI_ToolBar_Captured;
     UI_FillCounter;
   end;
 end;
@@ -1904,7 +1980,8 @@ var
 
 begin
   //If we are in FullArea Mode and user add an Area switch to Custom Mode
-  if (Session.CropMode <> diCropCustom) and not(imgManipulation.Empty) then setCropMode(diCropCustom);
+  if (Session.CropMode <> diCropCustom) and not(imgManipulation.Empty)
+  then Session.CropMode:= diCropCustom;
 
   curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
 
@@ -1935,7 +2012,7 @@ begin
 
          //If there are no more Crops switch to FullArea Mode
          if (imgManipulation.CropAreas.Count = 0)
-         then setCropMode(diCropFull)
+         then Session.CropMode:= diCropFull
          else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
 
          if not(Session.Loading) then UI_ToolBar;
@@ -2003,49 +2080,6 @@ begin
   BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, Sources.Selected);
 end;
 
-procedure TDigIt_Main.setCropMode(ANewCropMode: TDigItCropMode);
-begin
-  if (ANewCropMode <> Session.CropMode) then
-  begin
-    Case ANewCropMode of
-      diCropFull: begin
-        if (Session.CropMode = diCropCustom) then
-        begin
-          if (Length(Session.CropAreas) > 0)
-          then if (MessageDlg('DigIt', rsClearCrops, mtConfirmation, mbYesNo, 0) = mrNo)
-               then exit;
-        end;
-
-        tbCrop.Visible:= False;
-        imgManipulation.clearCropAreas;
-        imgManipulation.Opacity:= 0;
-        imgManipulation.Enabled:= False;
-        rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
-        rollCounters.Collapsed:= True;
-
-        tbCropMode.Caption:= rsCropFull;
-      end;
-      diCropCustom: begin
-        tbCrop.Visible:= True;
-        imgManipulation.Opacity:= 64; //128; {#to-do Add to Settings}
-        imgManipulation.Enabled:= True;
-        rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
-        rollCounters.Collapsed:= False;
-        tbCropMode.Caption:= rsCropCust;
-      end;
-    end;
-
-    Session.CropMode:= ANewCropMode;
-
-    if not(Session.Loading) then
-    begin
-      UI_FillCounter;
-      UI_ToolBar;
-    end;
-   end;
-  tbCropMode.ImageIndex:= Integer(Session.CropMode);
-end;
-
 (*
 function TDigIt_Main.WaitForAFile(AFileName:String; ATimeOut: Integer): Boolean;
 var
@@ -2064,151 +2098,6 @@ begin
   end;
 end;
 *)
-
-(*
-procedure TDigIt_Main.CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
-var
-   i,
-   c,
-   old_CounterValue,
-   old_iCapturedFiles: Integer;
-   cStr: String;
-   UserCancel: Boolean;
-
-begin
-  try
-     UserCancel:= False;
-
-     //Store old Values so if user Cancel Operation we can rollback
-     old_iCapturedFiles:= iCapturedFiles;
-     old_CounterValue:= Counter.Value;
-
-     c:= Length(SourceFiles);
-     cStr:= IntToStr(c);
-     DigIt_Progress.progressTotal.Min:= AStartIndex;
-     DigIt_Progress.progressTotal.Max:= c;
-
-     for i:=AStartIndex to c-1 do
-     begin
-       DigIt_Progress.progressTotal.Position:= i;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessing, [i, cStr]);
-
-       Application.ProcessMessages;
-
-       UserCancel:= DigIt_Progress.Cancelled;
-       if UserCancel then break;
-
-       UserCancel:= not(LoadImage(SourceFiles[i].fName, False));
-       if UserCancel then break;
-
-       try
-          SaveCallBack(imgManipulation.Bitmap, nil, Integer( (isReTake and (i < lastLenTaked)) ));
-       except
-         UserCancel:= True;
-       end;
-
-       if UserCancel then break;
-
-       DigIt_Progress.progressTotal.Position:= i+1;
-       DigIt_Progress.capTotal.Caption:= Format(rsProcessed, [i, cStr]);
-
-       Application.ProcessMessages; if DigIt_Progress.Cancelled then break;
-     end;
-
-     if UserCancel and
-        (MessageDlg('DigIt', rsErrIncomplete, mtConfirmation, [mbYes, mbNo], 0)=mrNo) then
-     begin
-       for i:=old_iCapturedFiles+1 to iCapturedFiles do
-       begin
-         DeleteFile(CapturedFiles[i].fName);
-
-         if (imgListThumb.Count > 1) then imgListThumb.Delete(imgListThumb.Count-1);
-         if (lvCaptured.Items.Count > 0) then lvCaptured.Items.Delete(lvCaptured.Items.Count-1);
-       end;
-       imgListThumb_Changed:= True;
-       SetLength(CapturedFiles, old_iCapturedFiles+1);
-       iCapturedFiles:= old_iCapturedFiles;
-       Counter.Value:= old_CounterValue;
-     end;
-
-  finally
-    UI_ToolBar;
-    UI_FillCounter;
-  end;
-end;
-
-procedure TDigIt_Main.CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
-var
-   oldCount: DWord;
-
-begin
-  iSourceFiles:= ASourceFileIndex;
-
-  if isReTake
-  then begin
-         oldCount:= SourceFiles[iSourceFiles].cCount;
-         if (oldCount <> imgManipulation.CropAreas.Count) then
-         begin
-           if (oldCount < imgManipulation.CropAreas.Count)
-           then begin
-                  { #todo 10 -oMaxM : Re index - add space for more files }
-                  MessageDlg('DigIt', 'To-Do: add space for more files', mtInformation, [mbOk], 0);
-                end
-           else begin
-                  { #todo 10 -oMaxM : Re index - delete extra files }
-                  MessageDlg('DigIt', 'To-Do: delete extra files', mtInformation, [mbOk], 0);
-                end;
-         end;
-
-         Counter_Assign(SourceFiles[iSourceFiles].cStart);
-       end
-  else begin
-         if (iSourceFiles < lastCropped) then
-         begin
-           { #todo 10 -oMaxM : Re index - delete extra files }
-           MessageDlg('DigIt', 'To-Do: insert files', mtInformation, [mbOk], 0);
-         end;
-
-         SourceFiles[iSourceFiles].cStart:= Counter.Value;
-       end;
-
-  imgManipulation.getAllBitmaps(@SaveCallBack, Integer(isReTake), True);
-  SourceFiles[iSourceFiles].cCount:= imgManipulation.CropAreas.Count;
-end;
-
-procedure TDigIt_Main.SetDefaultSessionValues;
-begin
-  Path_Session:= Path_DefSession;
-  Path_Session_Scan:= Path_DefSession_Scan;
-  Path_Session_Pictures:= Path_DefSession_Pictures;
-  Session_File:= File_DefSession;
-  rSessionModified:= False;
-end;
-*)
-
-procedure TDigIt_Main.Clear_Captured;
-var
-   nofileBMP: TBitmap;
-
-begin
-  try
-     //Clear Array
-     Session.Clear_Captured;
-
-     //Clear ListView
-     nofileBMP:=TBitmap.Create;
-     lvCaptured.Clear;
-
-     //Get the Fixed Thumbnail NoFile and re-add it at position 0
-     imgListThumb.GetBitmap(0, nofileBMP);
-     imgListThumb.Clear;
-     imgListThumb.Add(noFileBMP, nil);
-     imgListThumb_Changed:= True;
-
-  finally
-    noFileBMP.Free;
-  end;
-end;
 
 function TDigIt_Main.GetCurrentCropArea: TCropArea;
 begin
@@ -2381,7 +2270,7 @@ begin
       imgManipulation.EmptyImage.ResolutionUnit:= PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit);
     end;
 
-    if (Session.PageSize.PhysicalUnit = puPixel)
+    if (Session.PageSize.PhysicalUnit = TPhysicalUnit.cuPixel)
     then begin
            edPageWidth.DecimalPlaces:=0;
            edPageHeight.DecimalPlaces:=0;
@@ -2449,8 +2338,7 @@ var
    actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,
    actCropNext_Enabled,
    actGoNext_Enabled, actGoBack_Enabled,
-   actCropAll_Enabled, actClearQueue_Enabled,
-   actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean;
+   actCropAll_Enabled, actClearQueue_Enabled: Boolean;
    lenSources,
    remSources: Integer;
 
@@ -2458,14 +2346,11 @@ begin
   Session.GetEnabledActions(actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,
                             actCropNext_Enabled,
                             actGoNext_Enabled, actGoBack_Enabled,
-                            actCropAll_Enabled, actClearQueue_Enabled,
-                            actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled);
+                            actCropAll_Enabled, actClearQueue_Enabled);
 
   actPreview.Enabled:= actPreview_Enabled;
   actTake.Enabled:= actTake_Enabled;
   actTakeRe.Enabled:= actTakeRe_Enabled;
-  actCapturedDeleteAll.Enabled:= actCapturedDeleteAll_Enabled;
-  actCapturedDelete.Enabled:= actCapturedDelete_Enabled;
 
   if (Session.CropMode = diCropCustom) then
   begin
@@ -2506,6 +2391,17 @@ begin
 
   //Menù Items
   itemProfiles_AddCurrent.Enabled:= actPreview_Enabled;
+end;
+
+procedure TDigIt_Main.UI_ToolBar_Captured;
+var
+   actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean;
+
+begin
+  Session.GetEnabledActions_Captured(actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled);
+
+  actCapturedDeleteAll.Enabled:= actCapturedDeleteAll_Enabled;
+  actCapturedDelete.Enabled:= actCapturedDelete_Enabled;
 
   //Captured Toolbar
   actCapturedRotateLeft.Enabled:= actCapturedDeleteAll_Enabled and (lvCaptured.Selected <> nil);
@@ -2574,6 +2470,27 @@ begin
   else imgListThumb.ReplaceProportionally(Session.CapturedFiles[AIndex].iIndex, ABitmap.Bitmap);
 
   imgListThumb_Changed:= True;
+end;
+
+procedure TDigIt_Main.UI_ClearCaptured;
+var
+   nofileBMP: TBitmap;
+
+begin
+  try
+     //Clear ListView
+     nofileBMP:=TBitmap.Create;
+     lvCaptured.Clear;
+
+     //Get the Fixed Thumbnail NoFile and re-add it at position 0
+     imgListThumb.GetBitmap(0, nofileBMP);
+     imgListThumb.Clear;
+     imgListThumb.Add(noFileBMP, nil);
+     imgListThumb_Changed:= True;
+
+  finally
+    noFileBMP.Free;
+  end;
 end;
 
 procedure TDigIt_Main.UI_Caption;

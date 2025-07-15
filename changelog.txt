@@ -1,7 +1,14 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/14 Changed TDigItPhysicalSize Unit like BGRABitmap TCSSUnit (pending pull request);
+2025/07/15 Added Session OnCropModeChange;
+           Use of Path_Session intestead of rPath in Session;
+           Separeted Load of CropMode from LoadCropAreas in Session;
+           Added GetEnabledActions_Captured in Session;
+           Changed Set of CropMode in MainForm;
+           Changed name of TPhysicalUnit const for compatibility with TCSSUnit;
+
+        14 Changed TDigItPhysicalSize Unit like BGRABitmap TCSSUnit (pending pull request);
            Added Crop methods in Session;
            Added others ProgressSet overloads to Bridge;
            Moved CreateForm TMMForm_Progress to MainForm Create;

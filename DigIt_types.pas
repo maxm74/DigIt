@@ -81,28 +81,30 @@ type
     cuCentimeter,
     cuMillimeter,
     cuInch,
+    cuPica,
+    cuPoint,
     cuPercent
   );
 
 
   TDigItPhysicalSize = class(TPersistent)
     private
-      rPhysicalUnit: TPhysicalUnit;
-      rWidth,
-      rHeight: Single;
+      rPhysicalRect: TPhysicalRect;
+      Bitmap: TBGRABitmap; //Used only to convert to pixels
 
+      function GetPhysicalUnit: TPhysicalUnit;
       procedure SetPhysicalUnit(AValue: TPhysicalUnit);
 
     public
-      PixelsPerInch: Integer; //Used only to convert to pixels
-
-      constructor Create(APixelsPerInch: Integer=96);
+      constructor Create(ABitmap: TBGRABitmap);
       procedure SetValues(APhysicalUnit: TPhysicalUnit; AWidth, AHeight: Single);
 
+      property PhysicalRect: TPhysicalRect read rPhysicalRect;
+
     published
-      property PhysicalUnit: TPhysicalUnit read rPhysicalUnit write SetPhysicalUnit;
-      property Width: Single read rWidth write rWidth;
-      property Height: Single read rHeight write rHeight;
+      property PhysicalUnit: TPhysicalUnit read GetPhysicalUnit write SetPhysicalUnit;
+      property Width: Single read rPhysicalRect.Right write rPhysicalRect.Right;
+      property Height: Single read rPhysicalRect.Bottom write rPhysicalRect.Bottom;
     end;
 
   TSourceFile = packed record
@@ -138,10 +140,6 @@ type
                                 var AFiles: TSourceFileArray; AStartIndex: Integer): DWord of object;
 
 
-{** Convert PhysicalSize to/from Cm/Inch}
-function PhysicalSizeConvert(ASourceUnit: TPhysicalUnit; ASourceSize: Single;
-                             ATargetUnit: TPhysicalUnit; AResolution: Single): Single;
-
 function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
 function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
 
@@ -165,29 +163,6 @@ implementation
 
 uses BGRAOpenRaster, BGRAPaintNet;
 
-function PhysicalSizeConvert(ASourceUnit: TPhysicalUnit; ASourceSize: Single;
-                             ATargetUnit: TPhysicalUnit; AResolution: Single): Single;
-begin
-  Result:= ASourceSize;
-  // already in expected unit
-  if ASourceUnit = ATargetUnit then exit;
-
-  // checks if resolution is ill-defined
-  if (ATargetUnit = cuPixel) and (AResolution < 2) then AResolution:= 96; // assume legacy 96 DPI
-
-  case ASourceUnit of
-  cuPixel: if (ATargetUnit = cuInch)
-           then Result:= ASourceSize/AResolution                // from Pixel to Inch
-           else Result:= (ASourceSize/AResolution)*2.54;        // from Pixel to Cm
-  cuInch: if (ATargetUnit = cuCentimeter)
-          then Result:= ASourceSize*2.54                        // from Inch to Cm
-          else Result:= ASourceSize*AResolution;                // form Inch to Pixel
-  cuCentimeter: if (ATargetUnit = cuInch)
-                then Result:= ASourceSize/2.54                  // from Cm to Inch
-                else Result:= (ASourceSize/2.54)*AResolution;   // form Cm to Pixel
-  end;
-end;
-
 function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
 begin
   case ASourceUnit of
@@ -195,6 +170,8 @@ begin
   cuCentimeter: Result:= TCSSUnit.cuCentimeter;
   cuMillimeter: Result:= TCSSUnit.cuMillimeter;
   cuInch: Result:= TCSSUnit.cuInch;
+  cuPica: Result:= TCSSUnit.cuPica;
+  cuPoint: Result:= TCSSUnit.cuPoint;
   cuPercent: Result:= TCSSUnit.cuPercent;
   end;
 end;
@@ -206,6 +183,8 @@ begin
   TCSSUnit.cuCentimeter: Result:= cuCentimeter;
   TCSSUnit.cuMillimeter: Result:= cuMillimeter;
   TCSSUnit.cuInch: Result:= cuInch;
+  TCSSUnit.cuPica: Result:= cuPica;
+  TCSSUnit.cuPoint: Result:= cuPoint;
   TCSSUnit.cuPercent: Result:= cuPercent;
   end;
 end;
@@ -242,27 +221,29 @@ end;
 
 procedure TDigItPhysicalSize.SetPhysicalUnit(AValue: TPhysicalUnit);
 begin
-  if (AValue<>rPhysicalUnit) then
+  if (AValue<>CSSToPhysicalUnit(rPhysicalRect.PhysicalUnit)) then
   begin
-    rWidth:= PhysicalSizeConvert(rPhysicalUnit, rWidth, AValue, PixelsPerInch);
-    rHeight:= PhysicalSizeConvert(rPhysicalUnit, rHeight, AValue, PixelsPerInch);
-    rPhysicalUnit:= AValue;
+    PhysicalSizeConvert(rPhysicalRect, PhysicalToCSSUnit(AValue), Bitmap);
   end;
 end;
 
-constructor TDigItPhysicalSize.Create(APixelsPerInch: Integer);
+function TDigItPhysicalSize.GetPhysicalUnit: TPhysicalUnit;
+begin
+  Result:= CSSToPhysicalUnit(rPhysicalRect.PhysicalUnit);
+end;
+
+constructor TDigItPhysicalSize.Create(ABitmap: TBGRABitmap);
 begin
   inherited Create;
 
-  PixelsPerInch:= APixelsPerInch;
+  Bitmap:= ABitmap;
 end;
 
-procedure TDigItPhysicalSize.SetValues(APhysicalUnit: TPhysicalUnit; AWidth,
-  AHeight: Single);
+procedure TDigItPhysicalSize.SetValues(APhysicalUnit: TPhysicalUnit; AWidth, AHeight: Single);
 begin
-  rPhysicalUnit:= APhysicalUnit;
-  rWidth:= AWidth;
-  rHeight:= AHeight;
+  rPhysicalRect.PhysicalUnit:= PhysicalToCSSUnit(APhysicalUnit);
+  rPhysicalRect.Right:= AWidth;
+  rPhysicalRect.Bottom:= AHeight;
 end;
 
 initialization

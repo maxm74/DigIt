@@ -255,6 +255,7 @@ type
     procedure btZFrontClick(Sender: TObject);
     procedure btZUpClick(Sender: TObject);
     procedure edPageHeightChange(Sender: TObject);
+    procedure edPageUnitChange(Sender: TObject);
     procedure edPageWidthChange(Sender: TObject);
     procedure edPageResizeTypeChange(Sender: TObject);
     procedure itemCropModeClick(Sender: TObject);
@@ -998,10 +999,11 @@ begin
   try
     PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, ResUnit, Paper);
 
+    Session.PageSize.SetValues(ResolutionToPhysicalUnit(ResUnit), Paper.w, Paper.h);
+    imgManipulation.SetEmptyImageSize(ResUnit, Paper.w, Paper.h);
+
     if (Session.PageResize = resFullSize)
     then SetPageResizeType(resFixedWidth, False);
-
-    imgManipulation.SetEmptyImageSize(ResUnit, Paper.w, Paper.h);
 
     if not(imgManipulation.Empty) and
        FileExists(Session.LoadedImageFile)
@@ -1107,6 +1109,12 @@ begin
   if not(imgManipulation.Empty) and
      FileExists(Session.LoadedImageFile)
   then LoadImage(Session.LoadedImageFile, False);
+end;
+
+procedure TDigIt_Main.edPageUnitChange(Sender: TObject);
+begin
+  Session.PageSize.PhysicalUnit:= TPhysicalUnit(TComboBox(Sender).ItemIndex);
+  UI_FillPageSizes;
 end;
 
 procedure TDigIt_Main.edPageWidthChange(Sender: TObject);

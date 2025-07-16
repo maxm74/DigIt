@@ -256,7 +256,7 @@ begin
 
   CropAreas:= nil;
 
-  rPageSize:= TDigItPhysicalSize.Create;
+  rPageSize:= TDigItPhysicalSize.Create(rBitmap);
   rPageSize.SetValues(TPhysicalUnit.cuCentimeter, 21, 29.7);
 
   PageResize:= resFullSize;
@@ -396,14 +396,17 @@ function TDigIt_Session.ResizeImage(ABitmap: TBGRABitmap; APageResize: TDigItFil
 var
    newWidth, newHeight: Single;
    pixelWidth, pixelHeight: Integer;
+   pixelRect: TRect;
 
 begin
   Result:= nil;
 
   if (rPageSize.PhysicalUnit = TPhysicalUnit.cuPixel)
   then begin
-         pixelWidth:= Trunc(rPageSize.Width);
+         (*pixelWidth:= Trunc(rPageSize.Width);
          pixelHeight:= Trunc(rPageSize.Height);
+         *)
+         pixelRect:= Rect(0,0,Trunc(rPageSize.Width), Trunc(rPageSize.Height));
         end
   else begin
     (*
@@ -416,18 +419,21 @@ begin
 
         pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
         pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
-*)      pixelWidth:= HalfUp(PhysicalSizeToPixels(rPageSize.Width, ABitmap.ResolutionUnit, Abitmap.ResolutionX,
+*)
+    (*pixelWidth:= HalfUp(PhysicalSizeToPixels(rPageSize.Width, ABitmap.ResolutionUnit, Abitmap.ResolutionX,
                             PhysicalToCSSUnit(rPageSize.PhysicalUnit)));
         pixelHeight:= HalfUp(PhysicalSizeToPixels(rPageSize.Height, ABitmap.ResolutionUnit, Abitmap.ResolutionY,
                              PhysicalToCSSUnit(rPageSize.PhysicalUnit)));
+    *)
+       pixelRect:= PhysicalSizeToPixels(ABitmap, rPageSize.PhysicalRect);
       end;
 
   Case APageResize of
-  resFixedWidth: pixelHeight:= GetProportionalSide(pixelWidth, ABitmap.Width, ABitmap.Height);
-  resFixedHeight: pixelWidth:= GetProportionalSide(pixelHeight, ABitmap.Height, ABitmap.Width);
+  resFixedWidth: pixelRect.Bottom:= GetProportionalSide(pixelRect.Right, ABitmap.Width, ABitmap.Height);
+  resFixedHeight: pixelRect.Right:= GetProportionalSide(pixelRect.Bottom, ABitmap.Height, ABitmap.Width);
   end;
 
-  Result:= ABitmap.Resample(pixelWidth, pixelHeight, rmFineResample, True);
+  Result:= ABitmap.Resample(pixelRect.Right, pixelRect.Bottom, rmFineResample, True);
 end;
 
 function TDigIt_Session.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;

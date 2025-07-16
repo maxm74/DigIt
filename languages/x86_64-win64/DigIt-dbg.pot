@@ -756,7 +756,7 @@ msgid "Full Size"
 msgstr ""
 
 #: tdigit_main.edpageunit.text
-msgid "cm"
+msgid "Centimeter"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption

@@ -794,15 +794,20 @@ object DigIt_Main: TDigIt_Main
         Width = 129
         AutoSize = False
         ItemHeight = 20
-        ItemIndex = 2
+        ItemIndex = 1
         Items.Strings = (
-          'pixels'
-          'inchs'
-          'cm'
+          'Pixel'
+          'Centimeter'
+          'Millimeter'
+          'Inch'
+          'Pica '
+          'Point'
+          'Percent'
         )
         Style = csDropDownList
         TabOrder = 2
-        Text = 'cm'
+        Text = 'Centimeter'
+        OnChange = edPageUnitChange
       end
       object BCLabel12: TBCLabel
         Left = 43

@@ -7,8 +7,9 @@ Bugs:
     Anche in un A4 le misure sono errate (non viene messo il dpi nel pdf? [120dpi di default?])
 
 Session:
-  IMPORTANTISSIMO
-  Fare una Interfaccia per User confirmations/Errors Dialogs; da usare ad es. in Crop_Next SourceLoad etc...
+   USARE DUE Bitmap,
+        Una NON PROCESSATA su cui basare il PageSize (es. %)
+        Una PROCESSATA (Rotate, Resize, etc) sui cui fare i Tagli
 
 Main:
   riprendi sessione : barra di captured alla fine

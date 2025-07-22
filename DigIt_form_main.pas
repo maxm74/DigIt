@@ -471,7 +471,7 @@ begin
   lastNewBoxNum :=0;
   TStringList(cbCropList.Items).OwnsObjects:=False;
 
-  Session:= TDigIt_Session.Create;
+  Session:= TDigIt_Session.Create(ruPixelsPerInch, ScreenInfo.PixelsPerInchX, ScreenInfo.PixelsPerInchY);
   with Session do
   begin
     OnLoadXML:= @SES_Load;

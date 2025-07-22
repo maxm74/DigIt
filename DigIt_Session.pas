@@ -54,6 +54,7 @@ type
     rPageSize: TDigItPhysicalSize;
 
     rBitmap: TBGRABitmap;
+    DefaultResInfo: TImageResolutionInfo;
 
     rLastCroppedIndex,
     rLastTakedLength,     //Used in Take Again
@@ -75,6 +76,8 @@ type
     procedure CropImage(ABitmap: TBGRABitmap; IsReCrop: Boolean);
     procedure CropFile_Full(AStartIndex: Integer; isReTake: Boolean);
     procedure CropFiles(ASourceFileIndex: Integer; isReTake: Boolean);
+
+    function GetImageResolutionInfo: TImageResolutionInfo;
 
   public
     SourceFiles: TSourceFileArray;
@@ -118,7 +121,8 @@ type
     OnCropImage: TCropImageEvent;
     OnCropFile_Full: TCropFullEvent;
 
-    constructor Create;
+    constructor Create(defaultResolutionUnit: TResolutionUnit=ruPixelsPerInch;
+                       defaultResolutionX: Single=96; defaultResolutionY: Single=96);
     procedure SetDefaultStartupValues;
     destructor Destroy; override;
 
@@ -232,12 +236,22 @@ begin
   end;
 end;
 
-constructor TDigIt_Session.Create;
+constructor TDigIt_Session.Create(defaultResolutionUnit: TResolutionUnit;
+                                  defaultResolutionX: Single; defaultResolutionY: Single);
 begin
   inherited Create;
 
   // Create the Image Bitmap
   rBitmap := TBGRABitmap.Create;
+
+  with DefaultResInfo do
+  begin
+    ResolutionUnit:= defaultResolutionUnit;
+    ResolutionX:= defaultResolutionX;
+    ResolutionY:= defaultResolutionY;
+  end;
+
+  rPageSize:= TDigItPhysicalSize.Create(DefaultResInfo, TPhysicalUnit.cuCentimeter, 21, 29.7);
 
   SetDefaultStartupValues;
 end;
@@ -256,7 +270,6 @@ begin
 
   CropAreas:= nil;
 
-  rPageSize:= TDigItPhysicalSize.Create(rBitmap);
   rPageSize.SetValues(TPhysicalUnit.cuCentimeter, 21, 29.7);
 
   PageResize:= resFullSize;
@@ -325,6 +338,10 @@ begin
      BitmapN:= TBGRABitmap.Create;
      BitmapN.LoadFromFile(AImageFile);
 
+     if BitmapN.Empty
+     then rPageSize.SetBitmapValues(DefaultResInfo, TPhysicalUnit.cuCentimeter, 21, 29.7)
+     else rPageSize.SetBitmapValues(BitmapN);
+
      //Pre processing Filters
 
      { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
@@ -377,7 +394,7 @@ begin
   rLoadedImageFile:= '';
   if saveToXML then SaveLoadedImage(nil, True);
 
-  if Assigned(OnLoadImage) then OnEmptyImage(Self);
+  if Assigned(OnEmptyImage) then OnEmptyImage(Self);
 end;
 
 function TDigIt_Session.SaveImage(ABitmap: TBGRABitmap; AFileName: String): String;
@@ -394,46 +411,20 @@ end;
 
 function TDigIt_Session.ResizeImage(ABitmap: TBGRABitmap; APageResize: TDigItFilter_Resize): TBGRABitmap;
 var
-   newWidth, newHeight: Single;
-   pixelWidth, pixelHeight: Integer;
-   pixelRect: TRect;
+   pWidth, pHeight: Integer;
 
 begin
   Result:= nil;
+  if (ABitmap = nil) or (ABitmap.Empty) then exit;
 
-  if (rPageSize.PhysicalUnit = TPhysicalUnit.cuPixel)
-  then begin
-         (*pixelWidth:= Trunc(rPageSize.Width);
-         pixelHeight:= Trunc(rPageSize.Height);
-         *)
-         pixelRect:= Rect(0,0,Trunc(rPageSize.Width), Trunc(rPageSize.Height));
-        end
-  else begin
-    (*
-        newWidth:= PhysicalSizeConvert(rPageSize.PhysicalUnit,
-                                       rPageSize.Width,
-                                       ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionX);
-        newHeight:= PhysicalSizeConvert(rPageSize.PhysicalUnit,
-                                        rPageSize.Height,
-                                        ResolutionToPhysicalUnit(ABitmap.ResolutionUnit), ABitmap.ResolutionY);
-
-        pixelWidth:= HalfUp(newWidth*ABitmap.ResolutionX);
-        pixelHeight:= HalfUp(newHeight*ABitmap.ResolutionY);
-*)
-    (*pixelWidth:= HalfUp(PhysicalSizeToPixels(rPageSize.Width, ABitmap.ResolutionUnit, Abitmap.ResolutionX,
-                            PhysicalToCSSUnit(rPageSize.PhysicalUnit)));
-        pixelHeight:= HalfUp(PhysicalSizeToPixels(rPageSize.Height, ABitmap.ResolutionUnit, Abitmap.ResolutionY,
-                             PhysicalToCSSUnit(rPageSize.PhysicalUnit)));
-    *)
-       pixelRect:= PhysicalSizeToPixels(ABitmap, rPageSize.PhysicalRect);
-      end;
+  rPageSize.GetPixelsSize(pWidth, pHeight);
 
   Case APageResize of
-  resFixedWidth: pixelRect.Bottom:= GetProportionalSide(pixelRect.Right, ABitmap.Width, ABitmap.Height);
-  resFixedHeight: pixelRect.Right:= GetProportionalSide(pixelRect.Bottom, ABitmap.Height, ABitmap.Width);
+  resFixedWidth: pHeight:= GetProportionalSide(pWidth, rPageSize.BitmapWidth, rPageSize.BitmapHeight);
+  resFixedHeight: pWidth:= GetProportionalSide(pHeight, rPageSize.BitmapHeight, rPageSize.BitmapWidth);
   end;
 
-  Result:= ABitmap.Resample(pixelRect.Right, pixelRect.Bottom, rmFineResample, True);
+  Result:= ABitmap.Resample(pWidth, pHeight, rmFineResample, True);
 end;
 
 function TDigIt_Session.RotateImage(ABitmap: TBGRABitmap; APageRotate: TDigItFilter_Rotate): TBGRABitmap;
@@ -1568,6 +1559,13 @@ begin
   end;
 
   SourceFiles[rSourceFilesIndex].cCount:= lenCropAreas;
+end;
+
+function TDigIt_Session.GetImageResolutionInfo: TImageResolutionInfo;
+begin
+    if (rBitmap = nil) or (rBitmap.Empty)
+    then Result:= DefaultResInfo
+    else Result:= rBitmap.ResolutionInfo;
 end;
 
 function TDigIt_Session.actPreview: Boolean;

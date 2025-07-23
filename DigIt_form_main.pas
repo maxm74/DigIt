@@ -854,9 +854,7 @@ procedure TDigIt_Main.btPageSizesClick(Sender: TObject);
 begin
   menuPaperSizes.Items.Clear;
 
-  if (edPageResizeType.ItemIndex = 0)
-  then BuildPaperSizesMenu(ruPixelsPerCentimeter, Self, menuPaperSizes, @PageSizesClick, 4, 5)
-  else BuildPaperSizesMenu(TResolutionUnit(edPageResizeType.ItemIndex-1), Self, menuPaperSizes, @PageSizesClick, 4, 5);
+  BuildPaperSizesMenu(TPhysicalUnit(edPageUnit.ItemIndex), Self, menuPaperSizes, @PageSizesClick, 4, 5);
 
   menuPaperSizes.PopUp;
 end;
@@ -885,50 +883,23 @@ begin
   if CropArea<>nil then
   begin
     menuPaperSizes.Items.Clear;
-    BuildPaperSizesMenu(CropArea.AreaUnit, Self, menuPaperSizes, @ItemSizesClick, 4, 5);
+    BuildPaperSizesMenu(ResolutionToPhysicalUnit(CropArea.AreaUnit), Self, menuPaperSizes, @ItemSizesClick, 4, 5);
     menuPaperSizes.PopUp;
   end;
 end;
 
 procedure TDigIt_Main.btPFlipClick(Sender: TObject);
-var
-   oldPageFlip: TDigItFilter_Flip;
-
 begin
-  oldPageFlip:= Session.PageFlip;
-
   if btPFlipV.Down
   then Session.PageFlip:= flipVertical
   else
   if btPFlipH.Down
   then Session.PageFlip:= flipHorizontal
   else Session.PageFlip:= flipNone;
-
-  if not(imgManipulation.Empty) then
-  begin
-    if FileExists(Session.LoadedImageFile)
-    then LoadImage(Session.LoadedImageFile, False)
-    else begin
-           //Flip Image to Initial Value
-           Session.FlipImage(imgManipulation.Bitmap, oldPageFlip);
-
-           //Flip Image to New Value
-           Session.FlipImage(imgManipulation.Bitmap, Session.PageFlip);
-
-           imgManipulation.RefreshBitmap;
-         end;
-  end;
 end;
 
 procedure TDigIt_Main.btPRotateClick(Sender: TObject);
-var
-   oldPageRotate: TDigItFilter_Rotate;
-   BitmapR,
-   BitmapNewR: TBGRABitmap;
-
 begin
-  oldPageRotate:= Session.PageRotate;
-
   if btPRotateLeft.Down
   then Session.PageRotate:= rotLeft90
   else
@@ -939,42 +910,15 @@ begin
   then Session.PageRotate:= rot180
   else Session.PageRotate:= rotNone;
 
-  if not(imgManipulation.Empty) then
-  try
-    BitmapR:= nil;
-    BitmapNewR:= nil;
-
-    if FileExists(Session.LoadedImageFile)
-    then LoadImage(Session.LoadedImageFile, False)
-    else begin
-           //Retun Image to Initial Value
-           Case oldPageRotate of
-           rotNone: BitmapR:= imgManipulation.Bitmap;
-           rotLeft90: BitmapR:= Session.RotateImage(imgManipulation.Bitmap, rotRight90);
-           rotRight90: BitmapR:= Session.RotateImage(imgManipulation.Bitmap, rotLeft90);
-           rot180: BitmapR:= Session.RotateImage(imgManipulation.Bitmap, rot180);
-           end;
-
-           //Rotate Image to New Value
-           if (Session.PageRotate = rotNone)
-           then imgManipulation.Bitmap:= BitmapR
-           else begin
-                  BitmapNewR:= Session.RotateImage(BitmapR, Session.PageRotate);
-                  imgManipulation.Bitmap:= BitmapNewR;
-                end;
-         end;
-
-  finally
-    if (BitmapR <> nil) then BitmapR.Free;
-    if (BitmapNewR <> nil) then BitmapNewR.Free;
-  end;
+  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit),
+                                    edPageWidth.Value, edPageHeight.Value);
 end;
 
 procedure TDigIt_Main.ItemSizesClick(Sender: TObject);
 var
-   ResUnit: TResolutionUnit;
-   Paper: BGRAPapers.TPaperSize;
-   CropArea :TCropArea;
+   PhysicalUnit: TPhysicalUnit;
+   Paper: TPaperSize;
+   CropArea: TCropArea;
 
 begin
   if (Sender<>nil) then
@@ -982,8 +926,8 @@ begin
     CropArea :=GetCurrentCropArea;
     if (CropArea<>nil) then
     begin
-      PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, ResUnit, Paper);
-      CropArea.AreaUnit:=ResUnit;
+      PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, PhysicalUnit, Paper);
+      CropArea.AreaUnit:= ConvertPaperToResolutionUnit(PhysicalUnit, Paper);
       CropArea.SetSize(Paper.w, Paper.h);
     end;
   end;
@@ -991,23 +935,20 @@ end;
 
 procedure TDigIt_Main.PageSizesClick(Sender: TObject);
 var
-   ResUnit: TResolutionUnit;
+   PhysicalUnit: TPhysicalUnit;
    Paper: BGRAPapers.TPaperSize;
 
 begin
   if (Sender<>nil) then
   try
-    PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, ResUnit, Paper);
+    PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, PhysicalUnit, Paper);
 
-    Session.PageSize.SetValues(ResolutionToPhysicalUnit(ResUnit), Paper.w, Paper.h);
-    imgManipulation.SetEmptyImageSize(ResUnit, Paper.w, Paper.h);
+    Session.PageSize.SetValues(PhysicalUnit, Paper.w, Paper.h);
+    imgManipulation.SetEmptyImageSize(ConvertPaperToResolutionUnit(PhysicalUnit, Paper), Paper.w, Paper.h);
 
     if (Session.PageResize = resFullSize)
-    then SetPageResizeType(resFixedWidth, False);
-
-    if not(imgManipulation.Empty) and
-       FileExists(Session.LoadedImageFile)
-    then LoadImage(Session.LoadedImageFile, False);
+    then SetPageResizeType(resFixedWidth, False)
+    else Session.LoadImage(Session.LoadedImageFile, False);
 
   finally
     UI_FillPageSizes;
@@ -1098,47 +1039,53 @@ begin
 end;
 
 procedure TDigIt_Main.edPageHeightChange(Sender: TObject);
+var
+   Paper: TPaperSize;
+
 begin
   if inFillPagesUI or (Session.PageResize = resFullsize) then exit;
 
   Session.PageSize.Height:= edPageHeight.Value;
+  Session.LoadImage(Session.LoadedImageFile, False);
 
-  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit),
-                                                             edPageWidth.Value, edPageHeight.Value);
-
-  if not(imgManipulation.Empty) and
-     FileExists(Session.LoadedImageFile)
-  then LoadImage(Session.LoadedImageFile, False);
+  Paper.w:= edPageWidth.Value;
+  Paper.h:= edPageHeight.Value;
+  imgManipulation.SetEmptyImageSize(ConvertPaperToResolutionUnit(Session.PageSize.PhysicalUnit, Paper), Paper.w, Paper.h);
 end;
 
 procedure TDigIt_Main.edPageUnitChange(Sender: TObject);
+var
+   Paper: TPaperSize;
+
 begin
-  Session.PageSize.PhysicalUnit:= TPhysicalUnit(TComboBox(Sender).ItemIndex);
-  UI_FillPageSizes;
+  try
+     Session.PageSize.PhysicalUnit:= TPhysicalUnit(TComboBox(Sender).ItemIndex);
+     //Session.LoadImage(Session.LoadedImageFile, False);
+
+  finally
+     UI_FillPageSizes;
+  end;
 end;
 
 procedure TDigIt_Main.edPageWidthChange(Sender: TObject);
+var
+   Paper: TPaperSize;
+
 begin
   if inFillPagesUI or (Session.PageResize = resFullsize) then exit;
 
   Session.PageSize.Width:= edPageWidth.Value;
+  Session.LoadImage(Session.LoadedImageFile, False);
 
-  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit),
-                                                             edPageWidth.Value, edPageHeight.Value);
-
-  if not(imgManipulation.Empty) and
-     FileExists(Session.LoadedImageFile)
-  then LoadImage(Session.LoadedImageFile, False);
+  Paper.w:= edPageWidth.Value;
+  Paper.h:= edPageHeight.Value;
+  imgManipulation.SetEmptyImageSize(ConvertPaperToResolutionUnit(Session.PageSize.PhysicalUnit, Paper), Paper.w, Paper.h);
 end;
 
 procedure TDigIt_Main.edPageResizeTypeChange(Sender: TObject);
 begin
   try
-     SetPageResizeType(TDigItFilter_Resize(edPageResizeType.ItemIndex), True);
-
-     if not(imgManipulation.Empty) and
-        FileExists(Session.LoadedImageFile)
-     then LoadImage(Session.LoadedImageFile, False);
+     SetPageResizeType(TDigItFilter_Resize(edPageResizeType.ItemIndex), not(panelPageSize.Enabled) );
 
   finally
     UI_FillPageSizes;

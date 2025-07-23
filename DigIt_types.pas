@@ -154,6 +154,10 @@ type
   TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;
                                 var AFiles: TSourceFileArray; AStartIndex: Integer): DWord of object;
 
+const
+  PhysicalUnitShortName: array[TPhysicalUnit] of string =
+        ('px','cm','mm','in','pc','pt','%');
+
 
 function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
 function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
@@ -249,6 +253,7 @@ begin
 
     if (rCSSUnit = TCSSUnit.cuPercent)
     then begin
+           //Convert % of Pixels to newUnit
            rHeight:= PixelsToPhysicalSize(rHeight * rBitmapHeight / 100,
                                           rResolution.ResolutionUnit, rResolution.ResolutionY, newUnit);
            rWidth:= PixelsToPhysicalSize(rWidth * rBitmapWidth / 100,
@@ -257,11 +262,16 @@ begin
     else begin
            if (newUnit = TCSSUnit.cuPercent)
            then begin
-                  rHeight:= rHeight * 100 / rBitmapHeight;
-                  rWidth:= rWidth * 100 / rBitmapWidth;
+                  //Convert Physical Size to Pixel and then Pixel to %
+                  rHeight:= PhysicalSizeToPixels(rHeight, rResolution.ResolutionUnit, rResolution.ResolutionY, rCSSUnit)
+                            * 100 / rBitmapHeight;
+                  rWidth:= PhysicalSizeToPixels(rWidth, rResolution.ResolutionUnit, rResolution.ResolutionX, rCSSUnit)
+                           * 100 / rBitmapWidth;
                 end
            else PhysicalSizeConvert(rCSSUnit, rWidth, rHeight, newUnit, rResolution);
          end;
+
+    rCSSUnit:= newUnit;
   end;
 end;
 
@@ -323,8 +333,8 @@ var
 begin
   if (rCSSUnit = TCSSUnit.cuPercent)
   then begin
-         pHeight:= HalfUp(rHeight * 100 / rBitmapHeight);
-         pWidth:= HalfUp(rWidth * 100 / rBitmapWidth);
+         pHeight:= HalfUp(rHeight * rBitmapHeight / 100);
+         pWidth:= HalfUp(rWidth * rBitmapWidth / 100 );
        end
   else begin
          pHeight:= HalfUp(PhysicalSizeToPixels(rHeight, rResolution.ResolutionUnit, rResolution.ResolutionY, rCSSUnit));

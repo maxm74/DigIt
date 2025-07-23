@@ -339,6 +339,10 @@ msgctxt "digit_types.rsprocessingimages"
 msgid "Processing Images"
 msgstr ""
 
+#: digit_utils.rsbusinesscard
+msgid "Business Card"
+msgstr ""
+
 #: digit_utils.rsdestination_default
 msgid "Save as Files"
 msgstr ""

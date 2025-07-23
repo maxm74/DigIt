@@ -1,7 +1,16 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/22 Added defaultResolution, BitmapWidth/Height to PhysicalSize;
+2025/07/23 fixed some incorrect calculations in Page percentages;
+           Changed BuildPaperSizesMenu to use TPhysicalUnit;
+           Use of PaperSizes global var in BuildPaperSizesMenu;
+           Added temp ConvertPaperToResolutionUnit function;
+           Added AddPapers to Add US and Business Cards Papers;
+           Deleted Flip/Rotate Image to Initial Value in MainForm;
+           Session LoadImage first Resize Image;
+           Added Page Resize/Flip/Rotate Properties in Session;
+
+        22 Added defaultResolution, BitmapWidth/Height to PhysicalSize;
            Added GetPixelsSize and SetBitmapValues to PhysicalSize
            Added defaultResolution to Session;
            Use of PageSize.SetBitmapValues on Session.LoadImage;

@@ -14,27 +14,28 @@ unit DigIt_Utils;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, DOM, XMLConf, Laz2_DOM, Laz_XMLStreaming, Laz2_XMLCfg,
-  FPImage, Menus, BGRAPapers,
+  Classes, SysUtils, ComCtrls, FPImage, Menus,
+  BGRAPapers,
   DigIt_Types, Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources;
 
 resourcestring
   rsDestination_Default = 'Save as Files';
   rsVertical = '   Vertical';
   rsHorizontal = '    Horizontal';
+  rsBusinessCard = 'Business Card';
 
-procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit;
+procedure BuildPaperSizesMenu(PhysicalUnit: TPhysicalUnit;
                               AOwner: TComponent; menuPaperSizes: TMenu; menuOnClick: TNotifyEvent;
                               VImageIndex, HImageIndex: Integer);
 
-procedure PaperSizesMenuTag_decode(ATag:Integer; var ResUnit: TResolutionUnit; var Paper: TPaperSize);
-function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
+procedure PaperSizesMenuTag_decode(ATag:Integer; out PhysicalUnit: TPhysicalUnit; out Paper: TPaperSize);
+function PaperSizesMenuTag_encode(PhysicalUnit: TPhysicalUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 
 procedure BuildSourcesMenu(AOwner: TComponent;
                            menuSources: TMenu; menuSourcesOnClick: TNotifyEvent;
                            ASelectedSource: PSourceInfo);
 
-procedure SourcesMenuTag_decode(ATag: Integer; var Index, SubIndex: Integer);
+procedure SourcesMenuTag_decode(ATag: Integer; out Index, SubIndex: Integer);
 function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
 
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
@@ -51,6 +52,11 @@ function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
 
 function GetUserName: String;
 
+//THIS FUNCTIONS ARE TEMPORARY
+//until pull request #297 in BGRABitmap is approved and subsequent work on ImageManipulation to change the unit of measurement
+function ConvertPaperToResolutionUnit(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize): TResolutionUnit;
+
+
 implementation
 
 {$ifdef Windows}
@@ -59,34 +65,128 @@ uses Windows;
 uses users, baseunix;
 {$endif}
 
-procedure BuildPaperSizesMenu(ResUnit: TResolutionUnit; AOwner: TComponent; menuPaperSizes: TMenu;
+type
+  TPaperSizesArray = array of TPaperSizes;
+
+var
+   PaperSizes: TPaperSizesArray=nil;
+
+procedure AddPapers(const NewPapersName: TStringArray; const NewPapers: TPaperSizesArray; var APaperArray: TPaperSizesArray);
+var
+   i,
+   oldLength,
+   oldLenPapersName,
+   lenNewPapers,
+   lenNewPapersName: Integer;
+
+begin
+  oldLength:= Length(APaperArray);
+  lenNewPapers:= Length(NewPapers);
+  oldLenPapersName:= Length(PaperSizes_Names);
+  lenNewPapersName:= Length(NewPapersName);
+
+  SetLength(APaperArray, oldLength+lenNewPapers);
+  SetLength(PaperSizes_Names, oldLenPapersName+lenNewPapersName);
+  for i:=0 to lenNewPapers-1 do
+  begin
+    APaperArray[oldLength+i]:= NewPapers[i];
+    if (i<lenNewPapersName) then PaperSizes_Names[oldLenPapersName+i]:= NewPapersName[i];
+  end;
+end;
+
+function GetPapers(var PhysicalUnit: TPhysicalUnit): TPaperSizesArray;
+var
+   p, i: Integer;
+
+begin
+  Case PhysicalUnit of
+    cuPixel,
+    cuPercent,
+    cuCentimeter: begin
+      Result:= PaperSizes_cm;
+      PhysicalUnit:= cuCentimeter;
+    end;
+    cuMillimeter: begin
+      Result:= PaperSizes_cm;
+      for p:=Low(Result) to High(Result) do
+      for i:=Low(Result[p]) to High(Result[p]) do
+      begin
+        Result[p][i].w:= Result[p][i].w * 10;
+        Result[p][i].h:= Result[p][i].h * 10;
+      end;
+    end;
+    cuInch: Result:= PaperSizes_inch;
+    cuPica: begin
+      Result:= PaperSizes_inch;
+      for p:=Low(Result) to High(Result) do
+      for i:=Low(Result[p]) to High(Result[p]) do
+      begin
+        Result[p][i].w:= Result[p][i].w * 6;
+        Result[p][i].h:= Result[p][i].h * 6;
+      end;
+    end;
+    cuPoint: begin
+      Result:= PaperSizes_inch;
+      for p:=Low(Result) to High(Result) do
+      for i:=Low(Result[p]) to High(Result[p]) do
+      begin
+        Result[p][i].w:= Result[p][i].w * 72;
+        Result[p][i].h:= Result[p][i].h * 72;
+      end;
+    end;
+  end;
+end;
+
+function ConvertPaperToResolutionUnit(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize): TResolutionUnit;
+begin
+  Case PhysicalUnit of
+    cuPixel,
+    cuPercent,
+    cuCentimeter: begin
+      Result:= ruPixelsPerCentimeter;
+    end;
+    cuMillimeter: begin
+      Paper.w:= Paper.w / 10;
+      Paper.h:= Paper.h / 10;
+
+      Result:= ruPixelsPerCentimeter;
+    end;
+    cuInch: Result:= ruPixelsPerInch;
+    cuPica: begin
+      Paper.w:= Paper.w / 6;
+      Paper.h:= Paper.h / 6;
+
+      Result:= ruPixelsPerInch;
+    end;
+    cuPoint: begin
+      Paper.w:= Paper.w / 72;
+      Paper.h:= Paper.h / 72;
+
+      Result:= ruPixelsPerInch;
+    end;
+  end;
+end;
+
+procedure BuildPaperSizesMenu(PhysicalUnit: TPhysicalUnit; AOwner: TComponent; menuPaperSizes: TMenu;
   menuOnClick: TNotifyEvent; VImageIndex, HImageIndex: Integer);
 var
    p,
    i :Integer;
    newItem, newItem2 :TMenuItem;
-   curPapers: array of TPaperSizes;
-   u: String[5];
+//   curPapers: array of TPaperSizes;
+   u,
    preCaption: String;
 
 begin
-  if ResUnit=ruPixelsPerInch
-  then begin
-         curPapers:=PaperSizes_inch;
-         u:=' in';
-       end
-  else begin
-         curPapers:=PaperSizes_cm;
-         u:=' cm';
-         ResUnit:=ruPixelsPerCentimeter;
-       end;
+  PaperSizes:= GetPapers(PhysicalUnit);
+  u:= ' '+PhysicalUnitShortName[PhysicalUnit];
 
   //Vertical
   newItem :=TMenuItem.Create(AOwner);
   newItem.Caption:= rsVertical;
   newItem.ImageIndex:=VImageIndex;
   menuPaperSizes.Items.Add(newItem);
-  for p:=Low(curPapers) to High(curPapers) do
+  for p:=Low(PaperSizes) to High(PaperSizes) do
   begin
     newItem :=TMenuItem.Create(AOwner);
     newItem.Caption:=PaperSizes_Names[p];
@@ -94,19 +194,19 @@ begin
     //newItem.ImageIndex:=VImageIndex;
     menuPaperSizes.Items.Add(newItem);
 
-    for i:=Low(curPapers[p]) to High(curPapers[p]) do
+    for i:=Low(PaperSizes[p]) to High(PaperSizes[p]) do
     begin
       newItem2 :=TMenuItem.Create(AOwner);
 
-      preCaption :=curPapers[p][i].name;
+      preCaption :=PaperSizes[p][i].name;
       if (preCaption<>'')
       then preCaption :=preCaption+' - ';
 
       newItem2.Caption:=preCaption+
-        FloatToStrF(curPapers[p][i].w, ffFixed, 15, 2)+' x '+
-        FloatToStrF(curPapers[p][i].h, ffFixed, 15, 2)+u;
+        FloatToStrF(PaperSizes[p][i].w, ffFixed, 15, 2)+' x '+
+        FloatToStrF(PaperSizes[p][i].h, ffFixed, 15, 2)+u;
       newItem2.OnClick:=menuOnClick;
-      newItem2.Tag:=PaperSizesMenuTag_encode(ResUnit, True, p, i);
+      newItem2.Tag:=PaperSizesMenuTag_encode(PhysicalUnit, True, p, i);
       newItem.Add(newItem2);
    end;
   end;
@@ -118,7 +218,7 @@ begin
   newItem.Caption:= rsHorizontal;
   newItem.ImageIndex:=HImageIndex;
   menuPaperSizes.Items.Add(newItem);
-  for p:=Low(curPapers) to High(curPapers) do
+  for p:=Low(PaperSizes) to High(PaperSizes) do
   begin
     newItem :=TMenuItem.Create(AOwner);
     newItem.Caption:=PaperSizes_Names[p];
@@ -126,40 +226,38 @@ begin
     //newItem.ImageIndex:=HImageIndex;
     menuPaperSizes.Items.Add(newItem);
 
-    for i:=Low(curPapers[p]) to High(curPapers[p]) do
+    for i:=Low(PaperSizes[p]) to High(PaperSizes[p]) do
     begin
       newItem2 :=TMenuItem.Create(AOwner);
 
-      preCaption :=curPapers[p][i].name;
+      preCaption :=PaperSizes[p][i].name;
       if (preCaption<>'')
       then preCaption :=preCaption+' - ';
 
       newItem2.Caption:=preCaption+
-        FloatToStrF(curPapers[p][i].h, ffFixed, 15, 2)+' x '+
-        FloatToStrF(curPapers[p][i].w, ffFixed, 15, 2)+u;
+        FloatToStrF(PaperSizes[p][i].h, ffFixed, 15, 2)+' x '+
+        FloatToStrF(PaperSizes[p][i].w, ffFixed, 15, 2)+u;
       newItem2.OnClick:=menuOnClick;
-      newItem2.Tag:=PaperSizesMenuTag_encode(ResUnit, False, p, i);
+      newItem2.Tag:=PaperSizesMenuTag_encode(PhysicalUnit, False, p, i);
       newItem.Add(newItem2);
     end;
   end;
 end;
 
-procedure PaperSizesMenuTag_decode(ATag: Integer; var ResUnit: TResolutionUnit; var Paper: TPaperSize);
+procedure PaperSizesMenuTag_decode(ATag: Integer; out PhysicalUnit: TPhysicalUnit; out Paper: TPaperSize);
 var
    p, i :Integer;
    vert :Boolean;
    t :Single;
 
 begin
-     // ResUnit - vert(1bit) - pIndex(8bit) - iIndex(8bit)
-  i :=(ATag and $00FF);
-  p :=(ATag and $FF00) shr 8;
-  vert :=Boolean((ATag and $10000) shr 16);
-  ResUnit :=TResolutionUnit((ATag and $E0000) shr 17);
+     // PhysicalUnit - vert(1bit) - pIndex(8bit) - iIndex(8bit)
+  i:= (ATag and $00FF);
+  p:= (ATag and $FF00) shr 8;
+  vert:= Boolean((ATag and $10000) shr 16);
+  PhysicalUnit:= TPhysicalUnit((ATag and $E0000) shr 17);
 
-  if (ResUnit=ruPixelsPerCentimeter)
-  then Paper :=PaperSizes_cm[p][i]
-  else Paper :=PaperSizes_inch[p][i];
+  if (PaperSizes <> nil) then Paper:= PaperSizes[p][i];
 
   if not(vert) then
   begin
@@ -170,10 +268,10 @@ begin
   end;
 end;
 
-function PaperSizesMenuTag_encode(ResUnit: TResolutionUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
+function PaperSizesMenuTag_encode(PhysicalUnit: TPhysicalUnit; vert: Boolean; pIndex, iIndex: Byte): Integer;
 begin
-         // ResUnit               -   vert(1bit)         -   pIndex(8bit)  -  iIndex(8bit)
-  Result :=(Byte(ResUnit) shl 17) or (Byte(vert) shl 16) or (pIndex shl 8) or iIndex;
+              // PhysicalUnit               -   vert(1bit)    -   pIndex(8bit)  -  iIndex(8bit)
+  Result:= (Byte(PhysicalUnit) shl 17) or (Byte(vert) shl 16) or (pIndex shl 8) or iIndex;
 end;
 
 procedure BuildSourcesMenu(AOwner: TComponent;
@@ -258,7 +356,7 @@ begin
   end;
 end;
 
-procedure SourcesMenuTag_decode(ATag: Integer; var Index, SubIndex: Integer);
+procedure SourcesMenuTag_decode(ATag: Integer; out Index, SubIndex: Integer);
 begin
   SubIndex:= (ATag and $FFFF);
   Index:= (ATag and $FFFF0000) shr 16;
@@ -416,5 +514,10 @@ begin
   Result:= users.GetUserName(fpgetuid);
   {$endif}
 end;
+
+initialization
+   AddPapers(['US', rsBusinessCard], [Paper_US_cm, Paper_BUSINESS_CARD_cm], PaperSizes_cm);
+   AddPapers(['US', rsBusinessCard], [Paper_US_inch, Paper_BUSINESS_CARD_inch], PaperSizes_inch);
+
 end.
 

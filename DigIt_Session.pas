@@ -41,7 +41,6 @@ type
   { TDigIt_Session }
 
   TDigIt_Session = class
-  private
   protected
     rLoading,
     rModified: Boolean;
@@ -52,6 +51,9 @@ type
     rFileName: String;
 
     rPageSize: TDigItPhysicalSize;
+    rPageResize: TDigItFilter_Resize;
+    rPageRotate: TDigItFilter_Rotate;
+    rPageFlip: TDigItFilter_Flip;
 
     rBitmap: TBGRABitmap;
     DefaultResInfo: TImageResolutionInfo;
@@ -70,6 +72,10 @@ type
     *)
     rDestinationName: String;
 
+    procedure SetPageFlip(AValue: TDigItFilter_Flip);
+    procedure SetPageResize(AValue: TDigItFilter_Resize);
+    procedure SetPageRotate(AValue: TDigItFilter_Rotate);
+
     procedure SetCropMode(AValue: TDigItCropMode);
     procedure SetCapturedFilesSelected(AValue: Integer);
 
@@ -83,9 +89,6 @@ type
     SourceFiles: TSourceFileArray;
     CapturedFiles: TCapturedFileArray;
 
-    PageResize: TDigItFilter_Resize;
-    PageRotate: TDigItFilter_Rotate;
-    PageFlip: TDigItFilter_Flip;
 
     SaveFormat: TBGRAImageFormat;
     SaveWriter: TFPCustomImageWriter;
@@ -197,7 +200,12 @@ type
     property Modified: Boolean read rModified write rModified;
     property CropMode: TDigItCropMode read rCropMode write SetCropMode;
     property LoadedImageFile: String read rLoadedImageFile;
+
     property PageSize: TDigItPhysicalSize read rPageSize;
+    property PageResize: TDigItFilter_Resize read rPageResize write SetPageResize;
+    property PageRotate: TDigItFilter_Rotate read rPageRotate write SetPageRotate;
+    property PageFlip: TDigItFilter_Flip read rPageFlip write SetPageFlip;
+
     property Bitmap: TBGRABitmap read rBitmap;
 
     property LastCroppedIndex: Integer read rLastCroppedIndex;
@@ -220,6 +228,33 @@ begin
   begin
     if (AValue >= Length(CapturedFiles)) then AValue:= Length(CapturedFiles)-1;
     rCapturedFilesSelected:= AValue;
+  end;
+end;
+
+procedure TDigIt_Session.SetPageFlip(AValue: TDigItFilter_Flip);
+begin
+  if (rPageFlip <> AValue) then
+  begin
+    rPageFlip:= AValue;
+    LoadImage(rLoadedImageFile, False);
+  end;
+end;
+
+procedure TDigIt_Session.SetPageResize(AValue: TDigItFilter_Resize);
+begin
+  if (rPageResize <> AValue) then
+  begin
+    rPageResize:=AValue;
+    LoadImage(rLoadedImageFile, False);
+  end;
+end;
+
+procedure TDigIt_Session.SetPageRotate(AValue: TDigItFilter_Rotate);
+begin
+  if (rPageRotate <> AValue) then
+  begin
+    rPageRotate:=AValue;
+    LoadImage(rLoadedImageFile, False);
   end;
 end;
 
@@ -272,9 +307,9 @@ begin
 
   rPageSize.SetValues(TPhysicalUnit.cuCentimeter, 21, 29.7);
 
-  PageResize:= resFullSize;
-  PageRotate:= rotNone;
-  PageFlip:= flipNone;
+  rPageResize:= resFullSize;
+  rPageRotate:= rotNone;
+  rPageFlip:= flipNone;
 
   rCropMode:= diCropFull;
 
@@ -342,14 +377,27 @@ begin
      then rPageSize.SetBitmapValues(DefaultResInfo, TPhysicalUnit.cuCentimeter, 21, 29.7)
      else rPageSize.SetBitmapValues(BitmapN);
 
+
      //Pre processing Filters
 
      { #todo -oMaxM : In future Preprocessing filters as Interfaces Here }
 
-     //Rotate
-     if (PageRotate <> rotNone) then
+     //Resize
+     if (rPageResize <> resFullSize) then
      begin
-       BitmapR:= RotateImage(BitmapN, PageRotate);
+       BitmapR:= ResizeImage(BitmapN, rPageResize);
+       if (BitmapR<>nil) then
+       begin
+         BitmapN.Free;
+         BitmapN:= BitmapR;
+         BitmapR:= nil;
+       end;
+     end;
+
+     //Rotate
+     if (rPageRotate <> rotNone) then
+     begin
+       BitmapR:= RotateImage(BitmapN, rPageRotate);
        if (BitmapR<>nil) then
        begin
          BitmapN.Free;
@@ -359,12 +407,12 @@ begin
      end;
 
      //Flip
-     if (PageFlip <> flipNone) then FlipImage(BitmapN, PageFlip);
+     if (rPageFlip <> flipNone) then FlipImage(BitmapN, rPageFlip);
 
-     //Resize
-     if (PageResize <> resFullSize) then
+(*     //Resize
+     if (rPageResize <> resFullSize) then
      begin
-       BitmapR:= ResizeImage(BitmapN, PageResize);
+       BitmapR:= ResizeImage(BitmapN, rPageResize);
        if (BitmapR<>nil) then
        begin
          BitmapN.Free;
@@ -372,7 +420,7 @@ begin
          BitmapR:= nil;
        end;
      end;
-
+*)
      rBitmap.Assign(BitmapN, True); // Associate the new bitmap
 
      rLoadedImageFile:= AImageFile;
@@ -1335,16 +1383,16 @@ begin
           then aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_AutoSess)
           else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
-     PageResize:= resFullsize;
-     aXML.GetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
+     rPageResize:= resFullsize;
+     aXML.GetValue(SES_PageSettings+'PageResize', rPageResize, TypeInfo(TDigItFilter_Resize));
 
      aXML.ReadObject(SES_PageSettings+'PageSize', rPageSize);
 
-     PageRotate:= rotNone;
-     aXML.GetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
+     rPageRotate:= rotNone;
+     aXML.GetValue(SES_PageSettings+'PageRotate', rPageRotate, TypeInfo(TDigItFilter_Rotate));
 
-     PageFlip:= flipNone;
-     aXML.GetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
+     rPageFlip:= flipNone;
+     aXML.GetValue(SES_PageSettings+'PageFlip', rPageFlip, TypeInfo(TDigItFilter_Flip));
 
      if Assigned(OnLoadPageSettings) then OnLoadPageSettings(Self, aXML, IsAutoSave);
 
@@ -1366,13 +1414,13 @@ begin
           else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      if (rPageSize.Width = 0) or
-        (rPageSize.Height = 0) then PageResize:= resFullsize;
+        (rPageSize.Height = 0) then rPageResize:= resFullsize;
 
-     aXML.SetValue(SES_PageSettings+'PageResize', PageResize, TypeInfo(TDigItFilter_Resize));
+     aXML.SetValue(SES_PageSettings+'PageResize', rPageResize, TypeInfo(TDigItFilter_Resize));
      aXML.WriteObject(SES_PageSettings+'PageSize', rPageSize);
 
-     aXML.SetValue(SES_PageSettings+'PageRotate', PageRotate, TypeInfo(TDigItFilter_Rotate));
-     aXML.SetValue(SES_PageSettings+'PageFlip', PageFlip, TypeInfo(TDigItFilter_Flip));
+     aXML.SetValue(SES_PageSettings+'PageRotate', rPageRotate, TypeInfo(TDigItFilter_Rotate));
+     aXML.SetValue(SES_PageSettings+'PageFlip', rPageFlip, TypeInfo(TDigItFilter_Flip));
 
      if Assigned(OnSavePageSettings) then OnSavePageSettings(Self, aXML, IsAutoSave);
 

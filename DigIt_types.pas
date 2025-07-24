@@ -166,6 +166,7 @@ function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
 //THIS FUNCTIONS ARE TEMPORARY
 //until pull request #297 in BGRABitmap is approved and subsequent work on ImageManipulation to change the unit of measurement
 function CSSToResolutionUnit(ASourceUnit: TCSSUnit): TResolutionUnit;
+function ResolutionToCSSUnit(ASourceUnit: TResolutionUnit): TCSSUnit;
 function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
 function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
 
@@ -216,6 +217,15 @@ begin
   TCSSUnit.cuPixel: Result:= ruNone;
   TCSSUnit.cuCentimeter: Result:= ruPixelsPerCentimeter;
   TCSSUnit.cuInch: Result:= ruPixelsPerInch;
+  end;
+end;
+
+function ResolutionToCSSUnit(ASourceUnit: TResolutionUnit): TCSSUnit;
+begin
+  case ASourceUnit of
+  ruNone: Result:= TCSSUnit.cuPixel;
+  ruPixelsPerInch: Result:= TCSSUnit.cuInch;
+  ruPixelsPerCentimeter: Result:= TCSSUnit.cuCentimeter;
   end;
 end;
 

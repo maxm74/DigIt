@@ -245,15 +245,15 @@ type
     procedure btCropDuplicateClick(Sender: TObject);
     procedure btCRotateLeftClick(Sender: TObject);
     procedure btCRotateRightClick(Sender: TObject);
-    procedure btPageSizesClick(Sender: TObject);
-    procedure btPageSizesToCropsClick(Sender: TObject);
     procedure btPaperSizesClick(Sender: TObject);
     procedure btPFlipClick(Sender: TObject);
     procedure btPRotateClick(Sender: TObject);
-    procedure btZBackClick(Sender: TObject);
-    procedure btZDownClick(Sender: TObject);
     procedure btZFrontClick(Sender: TObject);
+    procedure btZBackClick(Sender: TObject);
     procedure btZUpClick(Sender: TObject);
+    procedure btZDownClick(Sender: TObject);
+    procedure btPageSizesClick(Sender: TObject);
+    procedure btPageSizesToCropsClick(Sender: TObject);
     procedure edPageHeightChange(Sender: TObject);
     procedure edPageUnitChange(Sender: TObject);
     procedure edPageWidthChange(Sender: TObject);
@@ -312,6 +312,7 @@ type
     inFillCounterUI,
     inFillBoxUI,
     inFillPagesUI,
+    CropAreas_Changed,
     imgListThumb_Changed: Boolean;
 
     Session: TDigIt_Session;
@@ -372,8 +373,7 @@ type
     procedure ItemSizesClick(Sender: TObject);
     procedure PageSizesClick(Sender: TObject);
 
-    //DELETE THIS When ImageManipulation.CropAreas is converted to new unit of measure
-    procedure PhysicalRectArrayToCropAreas;
+    procedure CropAreasToPhysicalRectArray;
 
   public
     property SessionModified: Boolean read GetSessionModified write SetSessionModified;
@@ -617,15 +617,9 @@ begin
 end;
 
 procedure TDigIt_Main.actPreviewExecute(Sender: TObject);
-var
-  curImageFile: String;
-
 begin
   try
      Session.actPreview;
-     (*if Sources.Take(takeActPreview, curImageFile)
-     then LoadImage(curImageFile, True)
-     else MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);*)
 
   finally
     UI_ToolBar;
@@ -634,9 +628,11 @@ end;
 
 procedure TDigIt_Main.actTakeReExecute(Sender: TObject);
 begin
-  if (Session.CropMode = diCropFull) then UI_SelectCurrentCaptured(-Session.LastTakedLength);
-
   try
+     if (Session.CropMode = diCropFull) then UI_SelectCurrentCaptured(-Session.LastTakedLength);
+
+     if CropAreas_Changed then CropAreasToPhysicalRectArray;
+
      Session.actTake(True);
 
   finally
@@ -650,11 +646,11 @@ end;
 procedure TDigIt_Main.actTakeExecute(Sender: TObject);
 var
    res: DWord;
-   StartIndex,
-   oldLength: Integer;
 
 begin
   try
+     if CropAreas_Changed then CropAreasToPhysicalRectArray;
+
      if (Sender = actTake)
      then res:= Session.actTake(False)
      else
@@ -676,6 +672,8 @@ end;
 procedure TDigIt_Main.actCropNextExecute(Sender: TObject);
 begin
   try
+     if CropAreas_Changed then CropAreasToPhysicalRectArray;
+
      Session.actCropNext;
 
   finally
@@ -715,6 +713,8 @@ end;
 procedure TDigIt_Main.actCropAllExecute(Sender: TObject);
 begin
   try
+     if CropAreas_Changed then CropAreasToPhysicalRectArray;
+
      Session.actCropAll;
 
   finally
@@ -737,141 +737,132 @@ end;
 
 procedure TDigIt_Main.btCRotateLeftClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
-  CropArea :=GetCurrentCropArea;
-  if CropArea<>nil then
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
   begin
     if btCropDuplicateOp.Down then
     begin
-      CropArea :=TCropArea.Create(imgManipulation, CropArea, True);
-      imgManipulation.SelectedCropArea :=CropArea;
+      CropArea:= TCropArea.Create(imgManipulation, CropArea, True);
+      imgManipulation.SelectedCropArea:= CropArea;
     end;
+
     CropArea.RotateLeft;
+    CropAreas_Changed:= True;
   end;
 end;
 
 procedure TDigIt_Main.btCFlipVDownClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
-  CropArea :=GetCurrentCropArea;
-  if CropArea<>nil then
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
   begin
     if btCropDuplicateOp.Down then
     begin
-      CropArea :=TCropArea.Create(imgManipulation, CropArea, True);
-      imgManipulation.SelectedCropArea :=CropArea;
+      CropArea:= TCropArea.Create(imgManipulation, CropArea, True);
+      imgManipulation.SelectedCropArea:= CropArea;
     end;
+
     CropArea.FlipVDown;
+    CropAreas_Changed:= True;
   end;
 end;
 
 procedure TDigIt_Main.btCFlipHLeftClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
-  CropArea :=GetCurrentCropArea;
-  if CropArea<>nil then
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
   begin
     if btCropDuplicateOp.Down then
     begin
-      CropArea :=TCropArea.Create(imgManipulation, CropArea, True);
-      imgManipulation.SelectedCropArea :=CropArea;
+      CropArea:= TCropArea.Create(imgManipulation, CropArea, True);
+      imgManipulation.SelectedCropArea:= CropArea;
     end;
+
     CropArea.FlipHLeft;
+    CropAreas_Changed:= True;
   end;
 end;
 
 procedure TDigIt_Main.btCFlipHRightClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
-  CropArea :=GetCurrentCropArea;
-  if CropArea<>nil then
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
   begin
     if btCropDuplicateOp.Down then
     begin
-      CropArea :=TCropArea.Create(imgManipulation, CropArea, True);
-      imgManipulation.SelectedCropArea :=CropArea;
+      CropArea:= TCropArea.Create(imgManipulation, CropArea, True);
+      imgManipulation.SelectedCropArea:= CropArea;
     end;
+
     CropArea.FlipHRight;
+    CropAreas_Changed:= True;
   end;
 end;
 
 procedure TDigIt_Main.btCFlipVUpClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
-  CropArea :=GetCurrentCropArea;
-  if CropArea<>nil then
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
   begin
     if btCropDuplicateOp.Down then
     begin
-      CropArea :=TCropArea.Create(imgManipulation, CropArea, True);
-      imgManipulation.SelectedCropArea :=CropArea;
+      CropArea:= TCropArea.Create(imgManipulation, CropArea, True);
+      imgManipulation.SelectedCropArea:= CropArea;
     end;
+
     CropArea.FlipVUp;
+    CropAreas_Changed:= True;
   end;
 end;
 
 procedure TDigIt_Main.btCropDuplicateClick(Sender: TObject);
 var
-   newCropArea :TCropArea;
+   newCropArea: TCropArea;
 
 begin
-  if imgManipulation.SelectedCropArea<>nil then
+  if (imgManipulation.SelectedCropArea <> nil) then
   begin
-    newCropArea :=TCropArea.Create(imgManipulation, imgManipulation.SelectedCropArea, True);
-    imgManipulation.SelectedCropArea :=newCropArea;
-    newCropArea.BorderColor :=VGALime;
+    newCropArea:= TCropArea.Create(imgManipulation, imgManipulation.SelectedCropArea, True);
+
+    CropAreas_Changed:= True;
+
+    imgManipulation.SelectedCropArea:= newCropArea;
+    newCropArea.BorderColor:= VGALime;
   end;
 end;
 
 procedure TDigIt_Main.btCRotateRightClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
-  CropArea :=GetCurrentCropArea;
-  if CropArea<>nil then
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
   begin
     if btCropDuplicateOp.Down then
     begin
-      CropArea :=TCropArea.Create(imgManipulation, CropArea, True);
-      imgManipulation.SelectedCropArea :=CropArea;
+      CropArea:= TCropArea.Create(imgManipulation, CropArea, True);
+      imgManipulation.SelectedCropArea:= CropArea;
     end;
+
     CropArea.RotateRight;
+    CropAreas_Changed:= True;
   end;
-end;
-
-procedure TDigIt_Main.btPageSizesClick(Sender: TObject);
-begin
-  menuPaperSizes.Items.Clear;
-
-  BuildPaperSizesMenu(TPhysicalUnit(edPageUnit.ItemIndex), Self, menuPaperSizes, @PageSizesClick, 4, 5);
-
-  menuPaperSizes.PopUp;
-end;
-
-procedure TDigIt_Main.btPageSizesToCropsClick(Sender: TObject);
-begin
-  imgManipulation.SetEmptyImageSizeToCropAreas(True);
-
-  if edPageResizeType.ItemIndex=0
-  then begin
-         //if page size is not defined set it to PixelsPerCentimeter (fucking inch)
-         imgManipulation.EmptyImage.ResolutionUnit:=ruPixelsPerCentimeter;
-         edPageResizeType.ItemIndex:=3;
-       end
-  else imgManipulation.EmptyImage.ResolutionUnit:=TResolutionUnit(edPageResizeType.ItemIndex-1);
-
-  UI_FillPageSizes;
 end;
 
 procedure TDigIt_Main.btPaperSizesClick(Sender: TObject);
@@ -955,87 +946,112 @@ begin
   end;
 end;
 
-procedure TDigIt_Main.PhysicalRectArrayToCropAreas;
+procedure TDigIt_Main.CropAreasToPhysicalRectArray;
 var
-   i: Integer;
+   i, len: Integer;
+   curCropArea: TCropArea;
 
 begin
-(*   with imgManipulation do
-   begin
-     OnCropAreaAdded:= nil;
-     OnCropAreaDeleted:= nil;
-     OnCropAreaChanged:= nil;
-     OnSelectedCropAreaChanged:= nil;
-   end;
-*)
-   imgManipulation.clearCropAreas;
-
-   for i:=0 to Length(Session.CropAreas)-1 do
-   begin
-     imgManipulation.addCropArea(RectF(Session.CropAreas[i].TopLeft, Session.CropAreas[i].BottomRight),
-                                 CSSToResolutionUnit(Session.CropAreas[i].PhysicalUnit)) ;
-   end;
-(*
-   with imgManipulation do
-   begin
-     OnCropAreaAdded:= @AddedCrop;
-     OnCropAreaDeleted:= @DeletedCrop;
-     OnCropAreaChanged:= @ChangedCrop;
-     OnSelectedCropAreaChanged:= @SelectedChangedCrop;
-   end;
-   *)
-end;
-
-procedure TDigIt_Main.btZBackClick(Sender: TObject);
-var
-   CropArea :TCropArea;
-
-begin
-  CropArea :=GetCurrentCropArea;
-  if (CropArea<>nil) then
+  //Copy ImageManipulation Crop Areas to Session Crop Areas
+  len:= imgManipulation.CropAreas.Count;
+  SetLength(Session.CropAreas, len);
+  for i:=0 to len-1 do
   begin
-    CropArea.BringToBack;
-    UI_UpdateCropAreaList;
-  end;
-end;
+    curCropArea:= imgManipulation.CropAreas[i];
 
-procedure TDigIt_Main.btZDownClick(Sender: TObject);
-var
-   CropArea :TCropArea;
-
-begin
-  CropArea:= GetCurrentCropArea;
-  if (CropArea<>nil) then
-  begin
-    CropArea.BringBackward;
-    UI_UpdateCropAreaList;
+    with Session.CropAreas[i] do
+    begin
+      PhysicalUnit:= ResolutionToCSSUnit(curCropArea.AreaUnit);
+      TopLeft:= curCropArea.Area.TopLeft;
+      BottomRight:= curCropArea.Area.BottomRight;
+    end;
   end;
+
+  CropAreas_Changed:= False;
 end;
 
 procedure TDigIt_Main.btZFrontClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
   CropArea:= GetCurrentCropArea;
-  if (CropArea<>nil) then
+  if (CropArea <> nil) then
   begin
     CropArea.BringToFront;
+    CropAreas_Changed:= True;
+
+    UI_UpdateCropAreaList;
+  end;
+end;
+
+procedure TDigIt_Main.btZBackClick(Sender: TObject);
+var
+   CropArea: TCropArea;
+
+begin
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
+  begin
+    CropArea.BringToBack;
+    CropAreas_Changed:= True;
+
     UI_UpdateCropAreaList;
   end;
 end;
 
 procedure TDigIt_Main.btZUpClick(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
   CropArea:= GetCurrentCropArea;
-  if (CropArea<>nil) then
+  if (CropArea <> nil) then
   begin
     CropArea.BringForward;
+    CropAreas_Changed:= True;
+
     UI_UpdateCropAreaList;
   end;
+end;
+
+procedure TDigIt_Main.btZDownClick(Sender: TObject);
+var
+   CropArea: TCropArea;
+
+begin
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
+  begin
+    CropArea.BringBackward;
+    CropAreas_Changed:= True;
+
+    UI_UpdateCropAreaList;
+  end;
+end;
+
+procedure TDigIt_Main.btPageSizesClick(Sender: TObject);
+begin
+  menuPaperSizes.Items.Clear;
+
+  BuildPaperSizesMenu(TPhysicalUnit(edPageUnit.ItemIndex), Self, menuPaperSizes, @PageSizesClick, 4, 5);
+
+  menuPaperSizes.PopUp;
+end;
+
+procedure TDigIt_Main.btPageSizesToCropsClick(Sender: TObject);
+begin
+  imgManipulation.SetEmptyImageSizeToCropAreas(True);
+
+  if edPageResizeType.ItemIndex=0
+  then begin
+         //if page size is not defined set it to PixelsPerCentimeter (fucking inch)
+         imgManipulation.EmptyImage.ResolutionUnit:=ruPixelsPerCentimeter;
+         edPageResizeType.ItemIndex:=3;
+       end
+  else imgManipulation.EmptyImage.ResolutionUnit:=TResolutionUnit(edPageResizeType.ItemIndex-1);
+
+  UI_FillPageSizes;
 end;
 
 procedure TDigIt_Main.edPageHeightChange(Sender: TObject);
@@ -1579,13 +1595,33 @@ begin
 end;
 
 procedure TDigIt_Main.SES_LoadCropAreas(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+var
+   i: Integer;
+   newCropArea: TCropArea;
+   curItemPath: String;
+
 begin
   if (aXML <> nil) then
   try
      if (Session.CropMode = diCropCustom) then
      begin
+       //Add Crop Areas in ImageManipulation
+       imgManipulation.clearCropAreas;
+       for i:=0 to Length(Session.CropAreas)-1 do
+       begin
+         newCropArea:= imgManipulation.addCropArea(RectF(Session.CropAreas[i].TopLeft, Session.CropAreas[i].BottomRight),
+                                                   CSSToResolutionUnit(Session.CropAreas[i].PhysicalUnit));
+
+         //Load Additional Fields from XML
+         curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
+         newCropArea.Name:= aXML.GetValue(curItemPath+'Name', 'Name '+IntToStr(i));
+         newCropArea.KeepAspectRatio:= BoolParent(aXML.GetValue(curItemPath+'KeepAspectRatio', Integer(bParent)));
+         newCropArea.AspectRatio:= aXML.GetValue(curItemPath+'AspectRatio', '3:4');
+         newCropArea.Rotate:= StrToFloat(aXML.GetValue(curItemPath+'Rotate', '0'));
+         newCropArea.UserData:= aXML.GetValue(curItemPath+'UserData', -1);
+       end;
+
        UI_FillCounter;
-       PhysicalRectArrayToCropAreas;
      end;
 
   finally
@@ -1593,9 +1629,30 @@ begin
 end;
 
 procedure TDigIt_Main.SES_SaveCropAreas(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+var
+   i: Integer;
+   curCropArea: TCropArea;
+   curItemPath: String;
+
 begin
   if (aXML <> nil) then
   try
+     if (Session.CropMode = diCropCustom) then
+     begin
+       //Let's start from the assumption that the index of the two CropArea lists refer to the same area
+       for i:=0 to Length(Session.CropAreas)-1 do
+       begin
+         curCropArea:= imgManipulation.CropAreas[i];
+
+         //Save Additional Fields to XML
+         curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
+         aXML.SetValue(curItemPath+'Name', curCropArea.Name);
+         aXML.SetValue(curItemPath+'KeepAspectRatio', Integer(curCropArea.KeepAspectRatio));
+         aXML.SetValue(curItemPath+'AspectRatio', curCropArea.AspectRatio);
+         aXML.SetValue(curItemPath+'Rotate', FloatToStr(curCropArea.Rotate));
+         aXML.SetValue(curItemPath+'UserData', curCropArea.UserData);
+       end;
+     end;
 
   finally
   end;
@@ -1795,90 +1852,108 @@ var
    CropArea :TCropArea;
 
 begin
-  CropArea :=TCropArea(cbCropList.Items.Objects[cbCropList.ItemIndex]);
-  CropArea.Name :=edCropName.Text;
+  CropArea:= TCropArea(cbCropList.Items.Objects[cbCropList.ItemIndex]);
+  CropArea.Name:= edCropName.Text;
 end;
 
 procedure TDigIt_Main.btCrop_AddClick(Sender: TObject);
 var
-   newCropArea :TCropArea;
+   newCropArea: TCropArea;
 
 begin
-  if edCropUnit_Type.ItemIndex=0
-  then newCropArea :=imgManipulation.addCropArea(Rect(50, 50, 100, 100))
-  else newCropArea :=imgManipulation.addCropArea(Rect(1, 1, 2, 2), TResolutionUnit(edCropUnit_Type.ItemIndex));
+  if (edCropUnit_Type.ItemIndex = 0)
+  then newCropArea:= imgManipulation.addCropArea(Rect(50, 50, 100, 100))
+  else newCropArea:= imgManipulation.addCropArea(Rect(1, 1, 2, 2), TResolutionUnit(edCropUnit_Type.ItemIndex));
 
-  newCropArea.BorderColor :=VGALime;
+  CropAreas_Changed:= True;
+
+  newCropArea.BorderColor:= VGALime;
   edCropName.SetFocus;
 end;
 
 procedure TDigIt_Main.btCrop_DelClick(Sender: TObject);
 var
-   CropArea :TCropArea;
-   curIndex :Integer;
+   CropArea: TCropArea;
+   curIndex: Integer;
 
 begin
-  curIndex :=cbCropList.ItemIndex;
-  if (curIndex>-1) then
+  curIndex:= cbCropList.ItemIndex;
+  if (curIndex > -1) then
   begin
-    CropArea :=TCropArea(cbCropList.Items.Objects[curIndex]);
+    CropArea:= TCropArea(cbCropList.Items.Objects[curIndex]);
     imgManipulation.delCropArea(CropArea);
-    cbCropList.ItemIndex:=cbCropList.Items.IndexOfObject(imgManipulation.SelectedCropArea);
+
+    CropAreas_Changed:= True;
+
+    cbCropList.ItemIndex:= cbCropList.Items.IndexOfObject(imgManipulation.SelectedCropArea);
   end;
+
   UI_FillCropArea(imgManipulation.SelectedCropArea);
 end;
 
 procedure TDigIt_Main.cbCropListChange(Sender: TObject);
 begin
-   imgManipulation.SelectedCropArea :=TCropArea(cbCropList.Items.Objects[cbCropList.ItemIndex]);
+   imgManipulation.SelectedCropArea:= TCropArea(cbCropList.Items.Objects[cbCropList.ItemIndex]);
 end;
 
 procedure TDigIt_Main.edCropHeightChange(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
   if inFillBoxUI then exit;
 
-  CropArea :=GetCurrentCropArea;
-  if (CropArea<>nil)
-  then CropArea.Height:=edCropHeight.Value;
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
+  begin
+    CropArea.Height:= edCropHeight.Value;
+    CropAreas_Changed:= True;
+  end;
 end;
 
 procedure TDigIt_Main.edCropLeftChange(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
   if inFillBoxUI then exit;
 
-  CropArea :=GetCurrentCropArea;
-  if (CropArea<>nil)
-  then CropArea.Left :=edCropLeft.Value;
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
+  begin
+    CropArea.Left:= edCropLeft.Value;
+    CropAreas_Changed:= True;
+  end;
 end;
 
 procedure TDigIt_Main.edCropTopChange(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
   if inFillBoxUI then exit;
 
-  CropArea :=GetCurrentCropArea;
-  if (CropArea<>nil)
-  then CropArea.Top :=edCropTop.Value;
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
+  begin
+    CropArea.Top:= edCropTop.Value;
+    CropAreas_Changed:= True;
+  end;
 end;
 
 procedure TDigIt_Main.edCropWidthChange(Sender: TObject);
 var
-   CropArea :TCropArea;
+   CropArea: TCropArea;
 
 begin
   if inFillBoxUI then exit;
 
-  CropArea :=GetCurrentCropArea;
-  if (CropArea<>nil)
-  then CropArea.Width:=edCropWidth.Value;
+  CropArea:= GetCurrentCropArea;
+  if (CropArea <> nil) then
+  begin
+    CropArea.Width:= edCropWidth.Value;
+    CropAreas_Changed:= True;
+  end;
 end;
 
 procedure TDigIt_Main.menuDebugClick(Sender: TObject);
@@ -1907,26 +1982,30 @@ begin
   if changingAspect then Exit;
 
   Case rgCropAspect.ItemIndex of
-  0 : imgManipulation.SelectedCropArea.KeepAspectRatio:=bParent;
-  1 : imgManipulation.SelectedCropArea.KeepAspectRatio:=bFalse;
+  0 : imgManipulation.SelectedCropArea.KeepAspectRatio:= bParent;
+  1 : imgManipulation.SelectedCropArea.KeepAspectRatio:= bFalse;
   2 : begin
-           imgManipulation.SelectedCropArea.KeepAspectRatio:=bTrue;
-           imgManipulation.SelectedCropArea.AspectRatio:=edCropAspectPersonal.Text;
+           imgManipulation.SelectedCropArea.KeepAspectRatio:= bTrue;
+           imgManipulation.SelectedCropArea.AspectRatio:= edCropAspectPersonal.Text;
        end;
   end;
+
+  CropAreas_Changed:= True;
 end;
 
 procedure TDigIt_Main.btCropApplyAspectRatioClick(Sender: TObject);
 begin
-   if imgManipulation.SelectedCropArea.KeepAspectRatio=bTrue
-   then imgManipulation.SelectedCropArea.AspectRatio:=edCropAspectPersonal.Text
+   if (imgManipulation.SelectedCropArea.KeepAspectRatio = bTrue)
+   then imgManipulation.SelectedCropArea.AspectRatio:= edCropAspectPersonal.Text
    else begin
-             imgManipulation.SelectedCropArea.KeepAspectRatio:=bTrue;
-             imgManipulation.SelectedCropArea.AspectRatio:=edCropAspectPersonal.Text;
-             changingAspect :=True;
-             rgCropAspect.ItemIndex :=2;
-             changingAspect :=False;
+             imgManipulation.SelectedCropArea.KeepAspectRatio:= bTrue;
+             imgManipulation.SelectedCropArea.AspectRatio:= edCropAspectPersonal.Text;
+             changingAspect:= True;
+             rgCropAspect.ItemIndex:= 2;
+             changingAspect:= False;
         end;
+
+   CropAreas_Changed:= True;
 end;
 
 procedure TDigIt_Main.AddedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
@@ -1934,9 +2013,11 @@ var
   curIndex :Integer;
 
 begin
+  (*
   //If we are in FullArea Mode and user add an Area switch to Custom Mode
   if (Session.CropMode <> diCropCustom) and not(imgManipulation.Empty)
   then Session.CropMode:= diCropCustom;
+  *)
 
   curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
 
@@ -1946,6 +2027,8 @@ begin
 
   cbCropList.AddItem(CropArea.Name, CropArea);
   cbCropList.ItemIndex:=cbCropList.Items.IndexOfObject(CropArea);
+
+  CropAreas_Changed:= True;
 
   if not(Session.Loading) then
   begin
@@ -1957,27 +2040,34 @@ end;
 procedure TDigIt_Main.DeletedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
 var
    delIndex :Integer;
+
 begin
   try
     if not(Closing) then
     begin
-         delIndex :=cbCropList.Items.IndexOfObject(CropArea);
-         if (delIndex<>-1)
-         then cbCropList.Items.Delete(delIndex);
+      CropAreas_Changed:= True;
 
-         //If there are no more Crops switch to FullArea Mode
-         if (imgManipulation.CropAreas.Count = 0)
-         then Session.CropMode:= diCropFull
-         else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
+      delIndex :=cbCropList.Items.IndexOfObject(CropArea);
+      if (delIndex<>-1) then cbCropList.Items.Delete(delIndex);
 
-         if not(Session.Loading) then UI_ToolBar;
+      (*
+      //If there are no more Crops switch to FullArea Mode
+      if (imgManipulation.CropAreas.Count = 0)
+      then Session.CropMode:= diCropFull
+      else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
+      *)
+
+      if not(Session.Loading) then UI_ToolBar;
     end;
+
   except
   end;
 end;
 
 procedure TDigIt_Main.ChangedCrop(Sender: TBGRAImageManipulation; CropArea: TCropArea);
 begin
+  CropAreas_Changed:= True;
+
   if (cbCropList.ItemIndex > -1) and (cbCropList.Items.Objects[cbCropList.ItemIndex] = CropArea) then
   begin
     UI_FillCropArea(CropArea);
@@ -2224,6 +2314,8 @@ begin
     begin
       imgManipulation.EmptyImage.ResolutionUnit:= PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit);
     end;
+
+    edPageUnit.ItemIndex:= Integer(Session.PageSize.PhysicalUnit);
 
     if (Session.PageSize.PhysicalUnit = TPhysicalUnit.cuPixel)
     then begin

@@ -1517,7 +1517,6 @@ begin
        if UserCancel then break;
 
        try
-          //SaveCallBack(imgManipulation.Bitmap, nil, Integer( (isReTake and (i < lastLenTaked)) ));
           CropImage(rBitmap, isReTake and (i < rLastTakedLength));
        except
          UserCancel:= True;
@@ -1555,7 +1554,6 @@ var
    i,
    lenCropAreas: Integer;
    curBitmap: TBGRABitmap;
-   curRect: TRect;
 
 begin
   rSourceFilesIndex:= ASourceFileIndex;
@@ -1593,13 +1591,8 @@ begin
   //imgManipulation.getAllBitmaps(@SaveCallBack, Integer(isReTake), True);
   for i:=0 to lenCropAreas-1 do
   try
-     //ONLY PIXELS Wait for BGRABitmap Pull Request
-    curRect.Top:= Trunc(CropAreas[i].Top);
-    curRect.Left:= Trunc(CropAreas[i].Left);
-    curRect.Bottom:= HalfUp(CropAreas[i].Bottom);
-    curRect.Right:= HalfUp(CropAreas[i].Right);
+    curBitmap:= rBitmap.GetPart(PhysicalSizeToPixels(rBitmap, CropAreas[i]), True, False);
 
-    curBitmap:= rBitmap.GetPart(curRect, True, False);
     CropImage(curBitmap, isReTake);
 
   finally

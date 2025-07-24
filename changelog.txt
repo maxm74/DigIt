@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/23 fixed some incorrect calculations in Page percentages;
+2025/07/24 MainForm CropAreas are Copied From/To Session;
+           MainForm CropAreas Load/Save additional Fields in XML;
+           Session use of PhysicalSizeToPixels to Crop Areas;
+           Added ResolutionToCSSUnit (yet another temp function);
+
+        23 fixed some incorrect calculations in Page percentages;
            Changed BuildPaperSizesMenu to use TPhysicalUnit;
            Use of PaperSizes global var in BuildPaperSizesMenu;
            Added temp ConvertPaperToResolutionUnit function;

@@ -28,9 +28,7 @@
     </i18n>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="2"/>
-      <RevisionNr Value="1"/>
-      <Attributes pvaPreRelease="True"/>
+      <MinorVersionNr Value="3"/>
       <StringTable CompanyName="MaxM" LegalCopyright="2025 Massimo Magnano" ProductName="DigIt"/>
     </VersionInfo>
     <BuildModes Count="2">
@@ -43,7 +41,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../Packages/MaxM/Commons"/>
+            <OtherUnitFiles Value="../../Packages/DelphiTwain/units"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
           </SearchPaths>
           <BuildMacros>
@@ -77,6 +75,8 @@
               </Win32>
             </Options>
           </Linking>
+          <Other>
+          </Other>
         </CompilerOptions>
       </Item2>
     </BuildModes>
@@ -86,35 +86,50 @@
     <RunParams>
       <local>
         <CommandLineParams Value="--debug-log=digit.log"/>
+        <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="2">
-        <Mode0 Name="default"/>
+        <Mode0 Name="default">
+          <local>
+            <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode0>
         <Mode1 Name="Debug">
           <local>
             <CommandLineParams Value="--debug-log=digit.log"/>
+            <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
           </local>
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="5">
+    <RequiredPackages Count="8">
       <Item1>
-        <PackageName Value="MaxM_Commons"/>
+        <PackageName Value="MaxM_Forms"/>
       </Item1>
       <Item2>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="WIAPascal_pkg"/>
       </Item2>
       <Item3>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="DelphiTwain_pkg"/>
       </Item3>
       <Item4>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="MaxM_Commons"/>
       </Item4>
       <Item5>
-        <PackageName Value="LCL"/>
+        <PackageName Value="LazControls"/>
       </Item5>
+      <Item6>
+        <PackageName Value="BGRABitmapPack"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="bgracontrols"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="LCL"/>
+      </Item8>
     </RequiredPackages>
-    <Units Count="18">
+    <Units Count="21">
       <Unit0>
         <Filename Value="DigIt.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -172,41 +187,51 @@
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="DigIt_Form_Progress.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="DigIt_Progress"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit12>
-      <Unit13>
         <Filename Value="DigIt_Form_BuildDuplex.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="WizardBuildDuplex"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="Digit_Source_Folder.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="Digit_Source_Folder.pas"/>
+        <Filename Value="DigIt_Source_WIA.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
+        <Filename Value="Digit_Source_Twain.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit15>
+      <Unit16>
         <Filename Value="DigIt_Form_ExportFiles.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DigIt_ExportFiles"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="DigIt_Counter.pas"/>
-        <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
+        <Filename Value="DigIt_Counter.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit17>
+      <Unit18>
         <Filename Value="DigIt_Form_Profiles.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="DigIt_Profiles"/>
+        <ComponentName Value="DigIt_Profiles_Form"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit17>
+      </Unit18>
+      <Unit19>
+        <Filename Value="DigIt_Session.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="DigIt_Bridge_Impl_UI_Form.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge_Impl_UI_Form"/>
+      </Unit20>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -678,7 +678,7 @@ begin
 
       if (aIndex = -1)
       then begin
-             if (MessageDlg('DigIt Twain', rsTwainExcNotFound+#13#10+ProductName+#13#10+Manufacturer,
+             if (theBridge.MessageDlg('DigIt Twain', rsTwainExcNotFound+#13#10+ProductName+#13#10+Manufacturer,
                             mtError, [mbRetry, mbAbort], 0)=mrAbort)
              then break;
            end;

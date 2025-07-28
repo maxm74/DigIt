@@ -152,7 +152,7 @@ type
                                iCapturedFiles: Integer; IsReCrop: Boolean) of object;
 
   TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;
-                                var AFiles: TSourceFileArray; AStartIndex: Integer): DWord of object;
+                                var AFiles: TSourceFileArray; AStartIndex: Integer): DWord; // of object;
 
 const
   PhysicalUnitShortName: array[TPhysicalUnit] of string =

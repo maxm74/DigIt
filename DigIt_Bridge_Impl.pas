@@ -152,6 +152,8 @@ type
     function QuestionDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;
                          Buttons: array of const; const HelpKeyword: string): TModalResult; overload;
 
+    procedure Cursor(ACursor: TCursor);
+
     property Plugins: TDigIt_Plugins read rPlugins;
   end;
 
@@ -791,6 +793,11 @@ function TDigIt_Bridge.QuestionDlg(const aCaption, aMsg: string; DlgType: TMsgDl
 begin
   Result:= mrNone;
   if (rMsg <> nil) then Result:= rMsg.QuestionDlg(PChar(aCaption), PChar(aMsg), DlgType, Buttons, PChar(HelpKeyword));
+end;
+
+procedure TDigIt_Bridge.Cursor(ACursor: TCursor);
+begin
+  if (rMsg <> nil) then rMsg.Cursor(ACursor);
 end;
 
 initialization

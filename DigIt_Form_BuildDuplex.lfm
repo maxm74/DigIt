@@ -14,6 +14,7 @@ object WizardBuildDuplex: TWizardBuildDuplex
   Font.Height = -16
   Font.Name = 'Sans'
   Position = poScreenCenter
+  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

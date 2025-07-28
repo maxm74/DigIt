@@ -105,11 +105,20 @@ type
 var
   WizardBuildDuplex: TWizardBuildDuplex = nil;
 
+function WizardBuildDuplex_Execute(takeAction: DigIt_Source_TakeAction;
+                                   var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
+
 implementation
 
 {$R *.lfm}
 
 uses DigIt_Sources;
+
+function WizardBuildDuplex_Execute(takeAction: DigIt_Source_TakeAction;
+                                   var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
+begin
+  Result:= TWizardBuildDuplex.Execute(takeAction, AFiles, AStartIndex);
+end;
 
 procedure TWizardBuildDuplex.GUI_Adjust;
 begin

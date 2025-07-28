@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/24 MainForm CropAreas are Copied From/To Session;
+2025/07/28 Changed TCustomTakeMethod to a non object function;
+           Session LoadImage Free old Bitmap due an Assign mulfunction;
+           Use of theBridge.MessageDlg in Sources;
+           Added Cursor Method in Bridge Impl;
+
+        24 MainForm CropAreas are Copied From/To Session;
            MainForm CropAreas Load/Save additional Fields in XML;
            Session use of PhysicalSizeToPixels to Crop Areas;
            Added ResolutionToCSSUnit (yet another temp function);

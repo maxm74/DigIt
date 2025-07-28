@@ -286,7 +286,9 @@ begin
 
      if (DeviceID <> '') or ((DeviceManufacturer <> '') and (DeviceName <> '')) then
      repeat
+       {$ifopt D-}theBridge.Cursor(crHourGlass);{$endif}
        Application.ProcessMessages;
+
        rWia.RefreshDeviceList;
 
        //Try to Open searching by ID and ItemName
@@ -309,7 +311,7 @@ begin
                               aIndex:= -1;
                               curItem:= curSource.Items[0];
                               if (curItem <> nil) then
-                              Case MessageDlg('DigIt WIA',
+                              Case theBridge.MessageDlg('DigIt WIA',
                                               Format(rsWIADevItemSel, [DeviceName, DeviceManufacturer, DeviceItemName, curItem^.Name]),
                                               mtConfirmation, [mbYes, mbRetry, mbAbort], 0) of
                               mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
@@ -320,12 +322,12 @@ begin
                 else begin
                        //We have some Error connecting Device ask the user what to do
                        aIndex:= -1;
-                       if (MessageDlg('DigIt WIA', rsWIAExcConnect+#13#10+DeviceName+#13#10+DeviceManufacturer,
+                       if (theBridge.MessageDlg('DigIt WIA', rsWIAExcConnect+#13#10+DeviceName+#13#10+DeviceManufacturer,
                                       mtError, [mbRetry, mbAbort], 0)=mrAbort)
                        then break;
                      end;
               end
-              else if (MessageDlg('DigIt WIA', rsWIAExcNotFound+#13#10+DeviceName+#13#10+DeviceManufacturer,
+              else if (theBridge.MessageDlg('DigIt WIA', rsWIAExcNotFound+#13#10+DeviceName+#13#10+DeviceManufacturer,
                        mtError, [mbRetry, mbAbort], 0)=mrAbort)
                    then break;
             end
@@ -336,7 +338,7 @@ begin
                 //We have found the Device but not the Item, ask the user what to do
                 curItem:= curSource.Items[0];
                 if (curItem <> nil) then
-                Case MessageDlg('DigIt WIA',
+                Case theBridge.MessageDlg('DigIt WIA',
                                 Format(rsWIADevItemSel, [DeviceName, DeviceManufacturer, DeviceItemName, curItem^.Name]),
                                 mtConfirmation, [mbYes, mbRetry, mbAbort], 0) of
                 mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
@@ -345,6 +347,8 @@ begin
               end;
             end;
     until (aIndex > -1);
+
+    theBridge.Cursor(crDefault);
 
     if (aIndex = -1)
     then Result:= Select(-1) and GetFromUser //User has selected Abort, Get Another Device from List and it's Params

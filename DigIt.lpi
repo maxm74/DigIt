@@ -76,10 +76,6 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dBGRAControls"/>
-            <OtherDefines Count="1">
-              <Define0 Value="BGRAControls"/>
-            </OtherDefines>
           </Other>
         </CompilerOptions>
       </Item2>

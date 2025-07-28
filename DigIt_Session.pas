@@ -421,7 +421,8 @@ begin
        end;
      end;
 *)
-     rBitmap.Assign(BitmapN, True); // Associate the new bitmap
+     rBitmap.Free;
+     rBitmap:= BitmapN; //oldcode rBitmap.Assign(BitmapN, True); // Associate the new bitmap
 
      rLoadedImageFile:= AImageFile;
 
@@ -432,7 +433,7 @@ begin
      Result:= True;
 
   finally
-     if (BitmapN <> Nil) then BitmapN.Free;
+     //oldcode if (BitmapN <> Nil) then BitmapN.Free;
   end;
 end;
 

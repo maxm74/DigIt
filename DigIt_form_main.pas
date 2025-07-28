@@ -655,7 +655,7 @@ begin
      then res:= Session.actTake(False)
      else
      if (Sender = actTakeBuildDuplex)
-     then res:= Session.actTake(False, @TWizardBuildDuplex.Execute);
+     then res:= Session.actTake(False, @WizardBuildDuplex_Execute);
 
   finally
      UI_ToolBar;
@@ -1677,6 +1677,8 @@ end;
 procedure TDigIt_Main.SES_Image(Sender: TObject);
 begin
   imgManipulation.Bitmap:= Session.Bitmap;
+//imgManipulation.RefreshBitmap;
+//imgManipulation.Bitmap.InvalidateBitmap;
 end;
 
 procedure TDigIt_Main.SES_CropMode(Sender: TObject; old_Mode: TDigItCropMode);

@@ -43,7 +43,8 @@ type
   TDigIt_Session = class
   protected
     rLoading,
-    rModified: Boolean;
+    rModified,
+    UseExternalBitmap: Boolean;
     (*rPath,
     rPath_Scan,
     rPath_Pictures,*)
@@ -124,7 +125,8 @@ type
     OnCropImage: TCropImageEvent;
     OnCropFile_Full: TCropFullEvent;
 
-    constructor Create(defaultResolutionUnit: TResolutionUnit=ruPixelsPerInch;
+    constructor Create(ABitmap: TBGRABitmap=nil;
+                       defaultResolutionUnit: TResolutionUnit=ruPixelsPerInch;
                        defaultResolutionX: Single=96; defaultResolutionY: Single=96);
     procedure SetDefaultStartupValues;
     destructor Destroy; override;
@@ -271,13 +273,16 @@ begin
   end;
 end;
 
-constructor TDigIt_Session.Create(defaultResolutionUnit: TResolutionUnit;
+constructor TDigIt_Session.Create(ABitmap: TBGRABitmap;
+                                  defaultResolutionUnit: TResolutionUnit;
                                   defaultResolutionX: Single; defaultResolutionY: Single);
 begin
   inherited Create;
 
-  // Create the Image Bitmap
-  rBitmap := TBGRABitmap.Create;
+  UseExternalBitmap:= (ABitmap <> nil);
+  if UseExternalBitmap
+  then rBitmap:= ABitmap
+  else rBitmap:= TBGRABitmap.Create; // Create the Image Bitmap
 
   with DefaultResInfo do
   begin
@@ -327,7 +332,11 @@ begin
   CropAreas:= nil;
   SourceFiles:= nil;
   CapturedFiles:= nil;
-  rBitmap.Free; rBitmap:= nil;
+  if not(UseExternalBitmap) then
+  begin
+    rBitmap.Free;
+    rBitmap:= nil;
+  end;
 
   inherited Destroy;
 end;
@@ -421,8 +430,9 @@ begin
        end;
      end;
 *)
-     rBitmap.Free;
-     rBitmap:= BitmapN; //oldcode rBitmap.Assign(BitmapN, True); // Associate the new bitmap
+     //rBitmap.Free;
+     //rBitmap:= BitmapN;
+     rBitmap.Assign(BitmapN, True); // Associate the new bitmap
 
      rLoadedImageFile:= AImageFile;
 
@@ -439,7 +449,7 @@ end;
 
 procedure TDigIt_Session.EmptyImage(saveToXML: Boolean);
 begin
-  FreeAndNil(rBitmap);
+  //FreeAndNil(rBitmap);
   rLoadedImageFile:= '';
   if saveToXML then SaveLoadedImage(nil, True);
 

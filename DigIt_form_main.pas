@@ -471,7 +471,8 @@ begin
   lastNewBoxNum :=0;
   TStringList(cbCropList.Items).OwnsObjects:=False;
 
-  Session:= TDigIt_Session.Create(ruPixelsPerInch, ScreenInfo.PixelsPerInchX, ScreenInfo.PixelsPerInchY);
+  Session:= TDigIt_Session.Create(imgManipulation.Bitmap,
+                                  ruPixelsPerInch, ScreenInfo.PixelsPerInchX, ScreenInfo.PixelsPerInchY);
   with Session do
   begin
     OnLoadXML:= @SES_Load;
@@ -1677,8 +1678,6 @@ end;
 procedure TDigIt_Main.SES_Image(Sender: TObject);
 begin
   imgManipulation.Bitmap:= Session.Bitmap;
-//imgManipulation.RefreshBitmap;
-//imgManipulation.Bitmap.InvalidateBitmap;
 end;
 
 procedure TDigIt_Main.SES_CropMode(Sender: TObject; old_Mode: TDigItCropMode);

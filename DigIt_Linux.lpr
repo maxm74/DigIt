@@ -13,7 +13,7 @@ uses
   DigIt_Settings, DigIt_Sources, DigIt_Session, DigIt_Utils,
   Digit_Source_Folder,
   DigIt_Destinations,
-  DigIt_Form_Main, Digit_Bridge_Impl_UI_Form;
+  DigIt_Form_Main, DigIt_Bridge_Impl_UI_Form;
 
 procedure TranslateLCL;
 var

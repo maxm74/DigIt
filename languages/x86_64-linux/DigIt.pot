@@ -36,8 +36,12 @@ msgstr ""
 msgid "Do I cancel the Front Side acquisition I just made?"
 msgstr ""
 
-#: digit_form_buildduplex.rsnopages
-msgid "No Pages in Front or Back Side"
+#: digit_form_buildduplex.rsnopagesback
+msgid "No Pages in Back Side"
+msgstr ""
+
+#: digit_form_buildduplex.rsnopagesfront
+msgid "No Pages in Front Side"
 msgstr ""
 
 #: digit_form_exportfiles.rsconvertimg
@@ -66,10 +70,6 @@ msgstr ""
 
 #: digit_form_main.rsclearcrops
 msgid "Clear Crop Areas ?"
-msgstr ""
-
-#: digit_form_main.rsclearqueue
-msgid "Clear the Work Queue?"
 msgstr ""
 
 #: digit_form_main.rscontinueautowork
@@ -114,25 +114,9 @@ msgstr ""
 msgid "%d files to do"
 msgstr ""
 
-#: digit_form_main.rsdeleteall
-msgid "Delete All Captured Pages?"
-msgstr ""
-
-#: digit_form_main.rsdeleteallfiles
-msgid "Do I also Delete Files from the disk?"
-msgstr ""
-
-#: digit_form_main.rsdeletecaptured
-#, object-pascal-format
-msgid "Delete Captured Page %s ?"
-msgstr ""
-
-#: digit_form_main.rserrincomplete
-msgid "Operation not completed, do I keep the processed files?"
-msgstr ""
-
 #: digit_form_main.rserrloadwork
 #, object-pascal-format
+msgctxt "digit_form_main.rserrloadwork"
 msgid ""
 "Cannot Load Work Session\n"
 "%s"
@@ -146,62 +130,12 @@ msgid ""
 "%s"
 msgstr ""
 
-#: digit_form_main.rsexccreatecounter
-msgid "Failed to Create the Counter"
-msgstr ""
-
-#: digit_form_main.rsmiddlepage
-msgid ""
-"The page is within the already processed range\n"
-"Should I put it in the middle?"
-msgstr ""
-
 #: digit_form_main.rsnewwork
 msgid "Start a New Work Session?"
 msgstr ""
 
-#: digit_form_main.rsnofilesdownloaded
-msgid "NO Files Downloaded "
-msgstr ""
-
-#: digit_form_main.rsnomorefiles
-msgid "There are no more files to process, should I clear the Work Queue?"
-msgstr ""
-
-#: digit_form_main.rsnotimpl
-msgid "Not yet implemented"
-msgstr ""
-
 #: digit_form_main.rssavework
 msgid "Save the Work Session?"
-msgstr ""
-
-#: digit_form_main.rssaveworkcopy
-msgid "Create a Copy of the Work Session or Move it?"
-msgstr ""
-
-#: digit_form_main.rssavingcaptured
-msgid "Saving Captured Files"
-msgstr ""
-
-#: digit_form_main.rssavingdone
-msgid "Saved Done"
-msgstr ""
-
-#: digit_form_main.rssavingsessionfiles
-msgid "Saving Session Files"
-msgstr ""
-
-#: digit_form_main.rssavingsources
-msgid "Saving Sources Files"
-msgstr ""
-
-#: digit_form_main.rssavingswitch
-msgid "Switching to New Work Session"
-msgstr ""
-
-#: digit_form_main.rssavingwork
-msgid "Saving the Work Session"
 msgstr ""
 
 #: digit_form_main.rssourcenotfound
@@ -212,11 +146,6 @@ msgstr ""
 #: digit_form_main.rssourcenotselected
 #, object-pascal-format
 msgid "Cannot Select Source %d, try Select another from Menù"
-msgstr ""
-
-#: digit_form_main.rstakeagain
-#, object-pascal-format
-msgid "Replace the last %d taked files with a new Take?"
 msgstr ""
 
 #: digit_form_profiles.rsprofiles_addcurrent
@@ -230,6 +159,91 @@ msgstr ""
 
 #: digit_form_profiles.rsprofiles_title
 msgid "Profile Title :"
+msgstr ""
+
+#: digit_session.rsclearqueue
+msgctxt "digit_session.rsclearqueue"
+msgid "Clear the Work Queue?"
+msgstr ""
+
+#: digit_session.rsdeleteall
+msgctxt "digit_session.rsdeleteall"
+msgid "Delete All Captured Pages?"
+msgstr ""
+
+#: digit_session.rsdeleteallfiles
+msgctxt "digit_session.rsdeleteallfiles"
+msgid "Do I also Delete Files from the disk?"
+msgstr ""
+
+#: digit_session.rsdeletecaptured
+#, object-pascal-format
+msgctxt "digit_session.rsdeletecaptured"
+msgid "Delete Captured Page %s ?"
+msgstr ""
+
+#: digit_session.rserrincomplete
+msgctxt "digit_session.rserrincomplete"
+msgid "Operation not completed, do I keep the processed files?"
+msgstr ""
+
+#: digit_session.rserrloadwork
+#, object-pascal-format
+msgctxt "digit_session.rserrloadwork"
+msgid ""
+"Cannot Load Work Session\n"
+"%s"
+msgstr ""
+
+#: digit_session.rsnofilesdownloaded
+msgctxt "digit_session.rsnofilesdownloaded"
+msgid "NO Files Downloaded "
+msgstr ""
+
+#: digit_session.rsnomorefiles
+msgctxt "digit_session.rsnomorefiles"
+msgid "There are no more files to process, should I clear the Work Queue?"
+msgstr ""
+
+#: digit_session.rssaveworkcopy
+msgctxt "digit_session.rssaveworkcopy"
+msgid "Create a Copy of the Work Session or Move it?"
+msgstr ""
+
+#: digit_session.rssavingcaptured
+msgctxt "digit_session.rssavingcaptured"
+msgid "Saving Captured Files"
+msgstr ""
+
+#: digit_session.rssavingdone
+msgctxt "digit_session.rssavingdone"
+msgid "Saved Done"
+msgstr ""
+
+#: digit_session.rssavingsessionfiles
+msgctxt "digit_session.rssavingsessionfiles"
+msgid "Saving Session Files"
+msgstr ""
+
+#: digit_session.rssavingsources
+msgctxt "digit_session.rssavingsources"
+msgid "Saving Sources Files"
+msgstr ""
+
+#: digit_session.rssavingswitch
+msgctxt "digit_session.rssavingswitch"
+msgid "Switching to New Work Session"
+msgstr ""
+
+#: digit_session.rssavingwork
+msgctxt "digit_session.rssavingwork"
+msgid "Saving the Work Session"
+msgstr ""
+
+#: digit_session.rstakeagain
+#, object-pascal-format
+msgctxt "digit_session.rstakeagain"
+msgid "Replace the last %d taked files with a new Take?"
 msgstr ""
 
 #: digit_source_folder.digit_source_folder_namel
@@ -260,6 +274,10 @@ msgstr ""
 
 #: digit_types.rsprocessingimages
 msgid "Processing Images"
+msgstr ""
+
+#: digit_utils.rsbusinesscard
+msgid "Business Card"
 msgstr ""
 
 #: digit_utils.rsdestination_default
@@ -502,7 +520,8 @@ msgid "Height :"
 msgstr ""
 
 #: tdigit_main.bclabel12.caption
-msgid "Fixed side:"
+msgctxt "tdigit_main.bclabel12.caption"
+msgid "Unit :"
 msgstr ""
 
 #: tdigit_main.bclabel13.caption
@@ -532,6 +551,7 @@ msgid "Height :"
 msgstr ""
 
 #: tdigit_main.bclabel5.caption
+msgctxt "tdigit_main.bclabel5.caption"
 msgid "Unit :"
 msgstr ""
 
@@ -657,12 +677,12 @@ msgstr ""
 msgid "pixels"
 msgstr ""
 
-#: tdigit_main.edpage_fix.text
-msgid "Width"
+#: tdigit_main.edpageresizetype.text
+msgid "Full Size"
 msgstr ""
 
-#: tdigit_main.edpage_unittype.text
-msgid "full size"
+#: tdigit_main.edpageunit.text
+msgid "Centimeter"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption
@@ -838,6 +858,7 @@ msgid "Menù"
 msgstr ""
 
 #: tdigit_main.tbprofiles.caption
+msgctxt "tdigit_main.tbprofiles.caption"
 msgid "Profiles..."
 msgstr ""
 
@@ -862,71 +883,59 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr ""
 
-#: tdigit_profiles.btaddfiles1.caption
+#: tdigit_profiles_form.btaddfiles1.caption
+msgctxt "tdigit_profiles_form.btaddfiles1.caption"
 msgid "Add ..."
 msgstr ""
 
-#: tdigit_profiles.btdel.caption
-msgctxt "tdigit_profiles.btdel.caption"
+#: tdigit_profiles_form.btdel.caption
+msgctxt "tdigit_profiles_form.btdel.caption"
 msgid "Delete"
 msgstr ""
 
-#: tdigit_profiles.btdelall.caption
-msgctxt "tdigit_profiles.btdelall.caption"
+#: tdigit_profiles_form.btdelall.caption
+msgctxt "tdigit_profiles_form.btdelall.caption"
 msgid "Delete All"
 msgstr ""
 
-#: tdigit_profiles.btdown.hint
-msgctxt "tdigit_profiles.btdown.hint"
+#: tdigit_profiles_form.btdown.hint
+msgctxt "tdigit_profiles_form.btdown.hint"
 msgid "Down"
 msgstr ""
 
-#: tdigit_profiles.bteditprofile.caption
+#: tdigit_profiles_form.bteditprofile.caption
+msgctxt "tdigit_profiles_form.bteditprofile.caption"
 msgid "Edit ..."
 msgstr ""
 
-#: tdigit_profiles.btfirst.hint
-msgctxt "tdigit_profiles.btfirst.hint"
+#: tdigit_profiles_form.btfirst.hint
+msgctxt "tdigit_profiles_form.btfirst.hint"
 msgid "To First"
 msgstr ""
 
-#: tdigit_profiles.btlast.hint
-msgctxt "tdigit_profiles.btlast.hint"
+#: tdigit_profiles_form.btlast.hint
+msgctxt "tdigit_profiles_form.btlast.hint"
 msgid "To Last"
 msgstr ""
 
-#: tdigit_profiles.btup.hint
-msgctxt "tdigit_profiles.btup.hint"
+#: tdigit_profiles_form.btup.hint
+msgctxt "tdigit_profiles_form.btup.hint"
 msgid "Up"
 msgstr ""
 
-#: tdigit_profiles.caption
-msgctxt "tdigit_profiles.caption"
+#: tdigit_profiles_form.caption
+msgctxt "tdigit_profiles_form.caption"
 msgid "Profiles"
 msgstr ""
 
-#: tdigit_profiles.lvprofiles.columns[0].caption
+#: tdigit_profiles_form.lvprofiles.columns[0].caption
+msgctxt "tdigit_profiles_form.lvprofiles.columns[0].caption"
 msgid "Title"
 msgstr ""
 
-#: tdigit_profiles.lvprofiles.columns[1].caption
+#: tdigit_profiles_form.lvprofiles.columns[1].caption
+msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
-msgstr ""
-
-#: tdigit_progress.capcurrent.caption
-msgid "Current"
-msgstr ""
-
-#: tdigit_progress.caption
-msgid "DigIt_Progress"
-msgstr ""
-
-#: tdigit_progress.captotal.caption
-msgid "Total"
-msgstr ""
-
-#: tdigit_progress.labtotal.caption
-msgid "TotalL"
 msgstr ""
 
 #: tdigit_templates.bcpanel1.caption
@@ -954,6 +963,14 @@ msgstr ""
 
 #: twizardbuildduplex.caption
 msgid "Build Front/Back..."
+msgstr ""
+
+#: twizardbuildduplex.cbfirstpageblank.caption
+msgid "First Page is Blank"
+msgstr ""
+
+#: twizardbuildduplex.cblastpageblank.caption
+msgid "Last Page is Blank"
 msgstr ""
 
 #: twizardbuildduplex.label1.caption
@@ -1013,6 +1030,11 @@ msgstr ""
 #: twizardbuildduplex.tbdestination.caption
 msgctxt "twizardbuildduplex.tbdestination.caption"
 msgid "Destination..."
+msgstr ""
+
+#: twizardbuildduplex.tbprofiles.caption
+msgctxt "twizardbuildduplex.tbprofiles.caption"
+msgid "Profiles..."
 msgstr ""
 
 #: twizardbuildduplex.tbsource.caption

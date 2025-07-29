@@ -1,7 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/28 Changed TCustomTakeMethod to a non object function;
+2025/07/29 Added Session can use of External Bitmap (let's save memory);
+           Linux Capital Unit names fixes and Project Update;
+
+        28 Changed TCustomTakeMethod to a non object function;
            Session LoadImage Free old Bitmap due an Assign mulfunction;
            Use of theBridge.MessageDlg in Sources;
            Added Cursor Method in Bridge Impl;

@@ -747,7 +747,7 @@ msgid "DigIt"
 msgstr ""
 
 #: tdigit_main.edcropunit_type.text
-msgid "pixels"
+msgid "Pixel"
 msgstr ""
 
 #: tdigit_main.edpageresizetype.text

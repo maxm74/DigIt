@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/07/29 Added Session can use of External Bitmap (let's save memory);
+2025/07/30 Deleted use of TResolutionUnit in CropAreas (use my bgracontrols branch);
+           Changed ConvertPaperToResolutionUnit to ConvertCmPaperTo;
+           Deleted TEMPORARY Unit Convert Functions;
+           Changed MainForm edCropUnit_Type Items to Physical Units;
+           Re Added BGRAControls define;
+
+        29 Added Session can use of External Bitmap (let's save memory);
            Linux Capital Unit names fixes and Project Update;
 
         28 Changed TCustomTakeMethod to a non object function;

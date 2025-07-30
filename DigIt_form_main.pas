@@ -393,7 +393,6 @@ uses
   DigIt_Destination_SaveFiles_SettingsForm,
   DigIt_Form_ExportFiles, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
 
-
 { TDigIt_Main }
 
 procedure TDigIt_Main.edCounterValueChange(Sender: TObject);
@@ -454,7 +453,7 @@ begin
   CropArea :=GetCurrentCropArea;
   if CropArea<>nil then
   begin
-    CropArea.AreaUnit:=TResolutionUnit(edCropUnit_Type.ItemIndex);
+    CropArea.AreaUnit:= TPhysicalUnit(edCropUnit_Type.ItemIndex);
     UI_FillCropArea(CropArea);
   end;
 end;
@@ -500,7 +499,7 @@ begin
 
   {$ifopt D+}
     imgManipulation.Rulers_Show:= True;
-    imgManipulation.Rulers_Unit:= ruPixelsPerCentimeter;
+    imgManipulation.Rulers_Unit:= TPhysicalUnit.cuCentimeter;
 
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
@@ -875,7 +874,7 @@ begin
   if CropArea<>nil then
   begin
     menuPaperSizes.Items.Clear;
-    BuildPaperSizesMenu(ResolutionToPhysicalUnit(CropArea.AreaUnit), Self, menuPaperSizes, @ItemSizesClick, 4, 5);
+    BuildPaperSizesMenu(CropArea.AreaUnit, Self, menuPaperSizes, @ItemSizesClick, 4, 5);
     menuPaperSizes.PopUp;
   end;
 end;
@@ -902,7 +901,7 @@ begin
   then Session.PageRotate:= rot180
   else Session.PageRotate:= rotNone;
 
-  imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit),
+  imgManipulation.SetEmptyImageSize(Session.PageSize.PhysicalUnit,
                                     edPageWidth.Value, edPageHeight.Value);
 end;
 
@@ -919,7 +918,7 @@ begin
     if (CropArea<>nil) then
     begin
       PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, PhysicalUnit, Paper);
-      CropArea.AreaUnit:= ConvertPaperToResolutionUnit(PhysicalUnit, Paper);
+      CropArea.AreaUnit:= PhysicalUnit;
       CropArea.SetSize(Paper.w, Paper.h);
     end;
   end;
@@ -936,7 +935,7 @@ begin
     PaperSizesMenuTag_decode(TMenuItem(Sender).Tag, PhysicalUnit, Paper);
 
     Session.PageSize.SetValues(PhysicalUnit, Paper.w, Paper.h);
-    imgManipulation.SetEmptyImageSize(ConvertPaperToResolutionUnit(PhysicalUnit, Paper), Paper.w, Paper.h);
+    imgManipulation.SetEmptyImageSize(PhysicalUnit, Paper.w, Paper.h);
 
     if (Session.PageResize = resFullSize)
     then SetPageResizeType(resFixedWidth, False)
@@ -962,7 +961,7 @@ begin
 
     with Session.CropAreas[i] do
     begin
-      PhysicalUnit:= ResolutionToCSSUnit(curCropArea.AreaUnit);
+      PhysicalUnit:= PhysicalToCSSUnit(curCropArea.AreaUnit);
       TopLeft:= curCropArea.Area.TopLeft;
       BottomRight:= curCropArea.Area.BottomRight;
     end;
@@ -1047,10 +1046,10 @@ begin
   if edPageResizeType.ItemIndex=0
   then begin
          //if page size is not defined set it to PixelsPerCentimeter (fucking inch)
-         imgManipulation.EmptyImage.ResolutionUnit:=ruPixelsPerCentimeter;
-         edPageResizeType.ItemIndex:=3;
+         imgManipulation.EmptyImage.PhysicalUnit:= TPhysicalUnit.cuCentimeter;
+         edPageResizeType.ItemIndex:= 3;
        end
-  else imgManipulation.EmptyImage.ResolutionUnit:=TResolutionUnit(edPageResizeType.ItemIndex-1);
+  else imgManipulation.EmptyImage.PhysicalUnit:= TPhysicalUnit(edPageResizeType.ItemIndex-1);
 
   UI_FillPageSizes;
 end;
@@ -1067,7 +1066,7 @@ begin
 
   Paper.w:= edPageWidth.Value;
   Paper.h:= edPageHeight.Value;
-  imgManipulation.SetEmptyImageSize(ConvertPaperToResolutionUnit(Session.PageSize.PhysicalUnit, Paper), Paper.w, Paper.h);
+  imgManipulation.SetEmptyImageSize(Session.PageSize.PhysicalUnit, Paper.w, Paper.h);
 end;
 
 procedure TDigIt_Main.edPageUnitChange(Sender: TObject);
@@ -1077,7 +1076,6 @@ var
 begin
   try
      Session.PageSize.PhysicalUnit:= TPhysicalUnit(TComboBox(Sender).ItemIndex);
-     //Session.LoadImage(Session.LoadedImageFile, False);
 
   finally
      UI_FillPageSizes;
@@ -1096,7 +1094,7 @@ begin
 
   Paper.w:= edPageWidth.Value;
   Paper.h:= edPageHeight.Value;
-  imgManipulation.SetEmptyImageSize(ConvertPaperToResolutionUnit(Session.PageSize.PhysicalUnit, Paper), Paper.w, Paper.h);
+  imgManipulation.SetEmptyImageSize(Session.PageSize.PhysicalUnit, Paper.w, Paper.h);
 end;
 
 procedure TDigIt_Main.edPageResizeTypeChange(Sender: TObject);
@@ -1410,27 +1408,30 @@ begin
 end;
 
 procedure TDigIt_Main.SetPageResizeType(AValue: TDigItFilter_Resize; PredefValues: Boolean);
+var
+   aPaper: TPaperSize;
+
 begin
   Session.PageResize:= AValue;
   edPageResizeType.ItemIndex:= Integer(AValue);
 
   if (Session.PageResize = resFullsize)
   then imgManipulation.SetEmptyImageSizeToNull
-  else begin
-         //if there is a size defined, change only the resolution unit
-         (*if (panelPageSize.Enabled)
-         then begin
-                imgManipulation.EmptyImage.ResolutionUnit:= TResolutionUnit(edPageUnit.ItemIndex);
-              end
-         else*) if PredefValues then
-              Case Session.PageSize.PhysicalUnit of
-              TPhysicalUnit.cuPixel: imgManipulation.SetEmptyImageSize(ruNone,
+  else if PredefValues then
+       begin
+         aPaper:= Paper_A_cm[4];
+         ConvertCmPaperTo(Session.PageSize.PhysicalUnit, aPaper);
+         imgManipulation.SetEmptyImageSize(Session.PageSize.PhysicalUnit, aPaper.w, aPaper.h);
+         (*oldcode
+         Case Session.PageSize.PhysicalUnit of
+         TPhysicalUnit.cuPixel: imgManipulation.SetEmptyImageSize(TPhysicalUnit.cuPixel,
                                                         Paper_A_inch[4].w * 200, Paper_A_inch[4].h * 200);
-              TPhysicalUnit.cuInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
+         TPhysicalUnit.cuInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
                                                         Paper_A_inch[4].w, Paper_A_inch[4].h);
-              TPhysicalUnit.cuCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
+         TPhysicalUnit.cuCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
                                                         Paper_A_cm[4].w, Paper_A_cm[4].h);
-              end;
+         end;
+         *)
 
          Session.PageResize:= TDigItFilter_Resize(edPageResizeType.ItemIndex);
        end;
@@ -1611,7 +1612,7 @@ begin
        for i:=0 to Length(Session.CropAreas)-1 do
        begin
          newCropArea:= imgManipulation.addCropArea(RectF(Session.CropAreas[i].TopLeft, Session.CropAreas[i].BottomRight),
-                                                   CSSToResolutionUnit(Session.CropAreas[i].PhysicalUnit));
+                                                   CSSToPhysicalUnit(Session.CropAreas[i].PhysicalUnit));
 
          //Load Additional Fields from XML
          curItemPath:= SES_CropAreas+'Item'+IntToStr(i)+'/';
@@ -1665,8 +1666,7 @@ begin
   try
      if (Session.PageResize = resFullsize)
      then imgManipulation.SetEmptyImageSizeToNull
-     else imgManipulation.SetEmptyImageSize(PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit),
-                                                                     Session.PageSize.Width, Session.PageSize.Height);
+     else imgManipulation.SetEmptyImageSize(Session.PageSize.PhysicalUnit, Session.PageSize.Width, Session.PageSize.Height);
 
   finally
   end;
@@ -1864,7 +1864,7 @@ var
 begin
   if (edCropUnit_Type.ItemIndex = 0)
   then newCropArea:= imgManipulation.addCropArea(Rect(50, 50, 100, 100))
-  else newCropArea:= imgManipulation.addCropArea(Rect(1, 1, 2, 2), TResolutionUnit(edCropUnit_Type.ItemIndex));
+  else newCropArea:= imgManipulation.addCropArea(Rect(1, 1, 2, 2), TPhysicalUnit(edCropUnit_Type.ItemIndex));
 
   CropAreas_Changed:= True;
 
@@ -2222,7 +2222,7 @@ begin
            edCropName.Text :=ACropArea.Name;
            edCropUnit_Type.ItemIndex :=Integer(ACropArea.AreaUnit);
 
-           if (ACropArea.AreaUnit=ruNone)
+           if (ACropArea.AreaUnit = TPhysicalUnit.cuPixel)
            then begin
                   edCropLeft.DecimalPlaces:=0;
                   edCropTop.DecimalPlaces:=0;
@@ -2311,24 +2311,26 @@ begin
 
   if panelPageSize.Enabled then
   begin
-    if (Session.PageSize.PhysicalUnit <> ResolutionToPhysicalUnit(imgManipulation.EmptyImage.ResolutionUnit)) then
-    begin
-      imgManipulation.EmptyImage.ResolutionUnit:= PhysicalToResolutionUnit(Session.PageSize.PhysicalUnit);
-    end;
+    imgManipulation.EmptyImage.PhysicalUnit:= Session.PageSize.PhysicalUnit;
 
     edPageUnit.ItemIndex:= Integer(Session.PageSize.PhysicalUnit);
 
     if (Session.PageSize.PhysicalUnit = TPhysicalUnit.cuPixel)
     then begin
-           edPageWidth.DecimalPlaces:=0;
-           edPageHeight.DecimalPlaces:=0;
+           edPageWidth.DecimalPlaces:= 0;
+           edPageHeight.DecimalPlaces:= 0;
          end
     else begin
-           edPageWidth.DecimalPlaces:=3;
-           edPageHeight.DecimalPlaces:=3;
+           edPageWidth.DecimalPlaces:= 3;
+           edPageHeight.DecimalPlaces:= 3;
          end;
 
+    edPageWidth.Enabled:= Session.PageResize in [resFixedWidth, resBoth];
+    BCLabel10.Enabled:= edPageWidth.Enabled;
     edPageWidth.Value:= Session.PageSize.Width;
+
+    edPageHeight.Enabled:= Session.PageResize in [resFixedHeight, resBoth];
+    BCLabel11.Enabled:= edPageHeight.Enabled;
     edPageHeight.Value:= Session.PageSize.Height;
   end;
 

@@ -16,6 +16,9 @@ interface
 uses
   Classes, SysUtils, ComCtrls, FPImage, Menus,
   BGRAPapers,
+  {$ifdef BGRAControls}
+  BGRAImageManipulation,
+  {$endif}
   DigIt_Types, Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources;
 
 resourcestring
@@ -52,9 +55,7 @@ function GetProportionalSide(ASide, imgSide, imgOtherSide: Integer): Integer;
 
 function GetUserName: String;
 
-//THIS FUNCTIONS ARE TEMPORARY
-//until pull request #297 in BGRABitmap is approved and subsequent work on ImageManipulation to change the unit of measurement
-function ConvertPaperToResolutionUnit(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize): TResolutionUnit;
+procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 
 
 implementation
@@ -137,21 +138,24 @@ begin
   end;
 end;
 
-function ConvertPaperToResolutionUnit(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize): TResolutionUnit;
+procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 begin
-  Case PhysicalUnit of
+  Paper.w:= PhysicalSizeConvert(cuCentimeter, Paper.w, PhysicalUnit);
+  Paper.h:= PhysicalSizeConvert(cuCentimeter, Paper.h, PhysicalUnit);
+(*oldcode  Case PhysicalUnit of
     cuPixel,
     cuPercent,
     cuCentimeter: begin
       Result:= ruPixelsPerCentimeter;
     end;
-    cuMillimeter: begin
+  cuMillimeter: begin
       Paper.w:= Paper.w / 10;
       Paper.h:= Paper.h / 10;
-
-      Result:= ruPixelsPerCentimeter;
     end;
-    cuInch: Result:= ruPixelsPerInch;
+    cuInch: begin
+      Paper.w:= Paper.w / 2.54;
+      Paper.h:= Paper.h / 2.54;
+    end;
     cuPica: begin
       Paper.w:= Paper.w / 6;
       Paper.h:= Paper.h / 6;
@@ -165,6 +169,7 @@ begin
       Result:= ruPixelsPerInch;
     end;
   end;
+  *)
 end;
 
 procedure BuildPaperSizesMenu(PhysicalUnit: TPhysicalUnit; AOwner: TComponent; menuPaperSizes: TMenu;

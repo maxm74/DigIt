@@ -51,7 +51,7 @@
 {"hash":5988922,"name":"tdigit_main.bclabel2.caption","sourcebytes":[84,111,112,32,58],"value":"Top :"},
 {"hash":234596970,"name":"tdigit_main.bclabel3.caption","sourcebytes":[87,105,100,116,104,32,58],"value":"Width :"},
 {"hash":201192154,"name":"tdigit_main.bclabel4.caption","sourcebytes":[72,101,105,103,104,116,32,58],"value":"Height :"},
-{"hash":124841011,"name":"tdigit_main.edcropunit_type.text","sourcebytes":[112,105,120,101,108,115],"value":"pixels"},
+{"hash":5705404,"name":"tdigit_main.edcropunit_type.text","sourcebytes":[80,105,120,101,108],"value":"Pixel"},
 {"hash":96798266,"name":"tdigit_main.bclabel5.caption","sourcebytes":[85,110,105,116,32,58],"value":"Unit :"},
 {"hash":88618810,"name":"tdigit_main.bclabel6.caption","sourcebytes":[78,97,109,101,32,58],"value":"Name :"},
 {"hash":47374687,"name":"tdigit_main.rgcropaspect.caption","sourcebytes":[65,115,112,101,99,116,32,82,97,116,105,111],"value":"Aspect Ratio"},

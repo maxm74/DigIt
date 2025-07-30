@@ -15,6 +15,9 @@ interface
 
 uses Classes, SysUtils, Laz2_XMLCfg, FPImage,
      BGRAUnits, BGRABitmapTypes, BGRABitmap,
+     {$ifdef BGRAControls}
+     BGRAImageManipulation,
+     {$endif}
      Digit_Bridge_Intf;
 
 resourcestring
@@ -76,6 +79,9 @@ type
 
   { TDigItPhysicalSize }
 
+  {$ifdef BGRAControls}
+  TPhysicalUnit = BGRAImageManipulation.TPhysicalUnit;
+  {$else}
   TPhysicalUnit = (
     cuPixel,
     cuCentimeter,
@@ -85,7 +91,7 @@ type
     cuPoint,
     cuPercent
   );
-
+  {$endif}
 
   TDigItPhysicalSize = class(TPersistent)
     private
@@ -154,21 +160,14 @@ type
   TCustomTakeMethod = function (takeAction: DigIt_Source_TakeAction;
                                 var AFiles: TSourceFileArray; AStartIndex: Integer): DWord; // of object;
 
+
+{$ifndef BGRAControls}
 const
-  PhysicalUnitShortName: array[TPhysicalUnit] of string =
-        ('px','cm','mm','in','pc','pt','%');
+  PhysicalUnitShortName: array[TPhysicalUnit] of string = ('px','cm','mm','in','pc','pt','%');
 
-
-function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
-function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
-
-
-//THIS FUNCTIONS ARE TEMPORARY
-//until pull request #297 in BGRABitmap is approved and subsequent work on ImageManipulation to change the unit of measurement
-function CSSToResolutionUnit(ASourceUnit: TCSSUnit): TResolutionUnit;
-function ResolutionToCSSUnit(ASourceUnit: TResolutionUnit): TCSSUnit;
-function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
-function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
+  function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
+  function CSSToPhysicalUnit(ASourceUnit: TCSSUnit): TPhysicalUnit;
+{$endif}
 
 var
    Path_Application,
@@ -185,6 +184,7 @@ implementation
 
 uses BGRAOpenRaster, BGRAPaintNet;
 
+{$ifndef BGRAControls}
 function PhysicalToCSSUnit(ASourceUnit: TPhysicalUnit): TCSSUnit;
 begin
   case ASourceUnit of
@@ -210,43 +210,7 @@ begin
   TCSSUnit.cuPercent: Result:= cuPercent;
   end;
 end;
-
-function CSSToResolutionUnit(ASourceUnit: TCSSUnit): TResolutionUnit;
-begin
-  case ASourceUnit of
-  TCSSUnit.cuPixel: Result:= ruNone;
-  TCSSUnit.cuCentimeter: Result:= ruPixelsPerCentimeter;
-  TCSSUnit.cuInch: Result:= ruPixelsPerInch;
-  end;
-end;
-
-function ResolutionToCSSUnit(ASourceUnit: TResolutionUnit): TCSSUnit;
-begin
-  case ASourceUnit of
-  ruNone: Result:= TCSSUnit.cuPixel;
-  ruPixelsPerInch: Result:= TCSSUnit.cuInch;
-  ruPixelsPerCentimeter: Result:= TCSSUnit.cuCentimeter;
-  end;
-end;
-
-function PhysicalToResolutionUnit(ASourceUnit: TPhysicalUnit): TResolutionUnit;
-begin
-  case ASourceUnit of
-  cuPixel: Result:= ruNone;
-  cuInch: Result:= ruPixelsPerInch;
-  cuCentimeter: Result:= ruPixelsPerCentimeter;
-  end;
-end;
-
-function ResolutionToPhysicalUnit(ASourceUnit: TResolutionUnit): TPhysicalUnit;
-begin
-  case ASourceUnit of
-  ruNone: Result:= cuPixel;
-  ruPixelsPerInch: Result:= cuInch;
-  ruPixelsPerCentimeter: Result:= cuCentimeter;
-  end;
-end;
-
+{$endif}
 
 { TDigItPhysicalSize }
 

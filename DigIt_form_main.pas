@@ -498,8 +498,9 @@ begin
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
-    imgManipulation.Rulers_Show:= True;
-    imgManipulation.Rulers_Unit:= TPhysicalUnit.cuCentimeter;
+    imgManipulation.Rulers.PhysicalUnit:= TPhysicalUnit.cuCentimeter;
+    imgManipulation.Rulers.Sides:= [rsdTop, rsdLeft];
+    imgManipulation.Rulers.ShowPhysicalUnit:= True;
 
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
@@ -1863,8 +1864,8 @@ var
 
 begin
   if (edCropUnit_Type.ItemIndex = 0)
-  then newCropArea:= imgManipulation.addCropArea(Rect(50, 50, 100, 100))
-  else newCropArea:= imgManipulation.addCropArea(Rect(1, 1, 2, 2), TPhysicalUnit(edCropUnit_Type.ItemIndex));
+  then newCropArea:= imgManipulation.addCropArea(RectF(50, 50, 100, 100))
+  else newCropArea:= imgManipulation.addCropArea(RectF(1, 1, 2, 2), TPhysicalUnit(edCropUnit_Type.ItemIndex));
 
   CropAreas_Changed:= True;
 

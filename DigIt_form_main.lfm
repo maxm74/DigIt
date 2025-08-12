@@ -23,15 +23,15 @@ object DigIt_Main: TDigIt_Main
     KeepAspectRatio = False
     MinHeight = 0
     MinWidth = 0
-    EmptyImage.ResolutionUnit = ruPixelsPerInch
     EmptyImage.ShowBorder = True
     NewCropAreaDefault.Icons = []
     NewCropAreaDefault.AspectRatio = '3:4'
     Opacity = 64
+    Rulers.StopToImage = False
     OnCropAreaAdded = AddedCrop
     OnCropAreaDeleted = DeletedCrop
     OnCropAreaChanged = ChangedCrop
-    OnSelectedCropAreaChanged = SelectedChangedCrop
+    OnCropAreaSelectedChanged = SelectedChangedCrop
   end
   object rollPages: TBCExpandPanel
     Left = 0

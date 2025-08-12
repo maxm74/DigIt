@@ -60,11 +60,13 @@ procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 
 implementation
 
+uses
 {$ifdef Windows}
-uses Windows;
+ Windows,
 {$else}
-uses users, baseunix;
+ users, baseunix,
 {$endif}
+ BGRAUnits;
 
 type
   TPaperSizesArray = array of TPaperSizes;
@@ -101,13 +103,13 @@ var
 
 begin
   Case PhysicalUnit of
-    cuPixel,
-    cuPercent,
-    cuCentimeter: begin
+    TPhysicalUnit.cuPixel,
+    TPhysicalUnit.cuPercent,
+    TPhysicalUnit.cuCentimeter: begin
       Result:= PaperSizes_cm;
-      PhysicalUnit:= cuCentimeter;
+      PhysicalUnit:= TPhysicalUnit.cuCentimeter;
     end;
-    cuMillimeter: begin
+    TPhysicalUnit.cuMillimeter: begin
       Result:= PaperSizes_cm;
       for p:=Low(Result) to High(Result) do
       for i:=Low(Result[p]) to High(Result[p]) do
@@ -116,8 +118,8 @@ begin
         Result[p][i].h:= Result[p][i].h * 10;
       end;
     end;
-    cuInch: Result:= PaperSizes_inch;
-    cuPica: begin
+    TPhysicalUnit.cuInch: Result:= PaperSizes_inch;
+    TPhysicalUnit.cuPica: begin
       Result:= PaperSizes_inch;
       for p:=Low(Result) to High(Result) do
       for i:=Low(Result[p]) to High(Result[p]) do
@@ -126,7 +128,7 @@ begin
         Result[p][i].h:= Result[p][i].h * 6;
       end;
     end;
-    cuPoint: begin
+    TPhysicalUnit.cuPoint: begin
       Result:= PaperSizes_inch;
       for p:=Low(Result) to High(Result) do
       for i:=Low(Result[p]) to High(Result[p]) do
@@ -140,8 +142,8 @@ end;
 
 procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 begin
-  Paper.w:= PhysicalSizeConvert(cuCentimeter, Paper.w, PhysicalUnit);
-  Paper.h:= PhysicalSizeConvert(cuCentimeter, Paper.h, PhysicalUnit);
+  Paper.w:= PhysicalSizeConvert(cuCentimeter, Paper.w, PhysicalToCSSUnit(PhysicalUnit));
+  Paper.h:= PhysicalSizeConvert(cuCentimeter, Paper.h, PhysicalToCSSUnit(PhysicalUnit));
 (*oldcode  Case PhysicalUnit of
     cuPixel,
     cuPercent,

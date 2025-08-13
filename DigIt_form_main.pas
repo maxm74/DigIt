@@ -137,6 +137,14 @@ type
     MenuItem2: TMenuItem;
     itemProfiles_Edit: TMenuItem;
     itemProfiles_AddCurrent: TMenuItem;
+    itemRulerPixel: TMenuItem;
+    itemRulerCentimeter: TMenuItem;
+    itemRulerMillimeter: TMenuItem;
+    itemRulerInch: TMenuItem;
+    itemRulerPica: TMenuItem;
+    itemRulerPoint: TMenuItem;
+    itemRulerPercent: TMenuItem;
+    menuRulers: TPopupMenu;
     Separator4: TMenuItem;
     menuSaveProfiles: TMenuItem;
     menuSaveSettings: TMenuItem;
@@ -258,7 +266,10 @@ type
     procedure edPageUnitChange(Sender: TObject);
     procedure edPageWidthChange(Sender: TObject);
     procedure edPageResizeTypeChange(Sender: TObject);
+    procedure imgManipulationRulersPopup(Sender: TBGRAImageManipulation;
+      ARulers: TRulersSides; MousePos: TPoint; var Handled: Boolean);
     procedure itemCropModeClick(Sender: TObject);
+    procedure itemRulerClick(Sender: TObject);
     procedure itemProfiles_AddCurrentClick(Sender: TObject);
     procedure itemProfiles_EditClick(Sender: TObject);
     procedure lvCapturedDblClick(Sender: TObject);
@@ -1108,6 +1119,13 @@ begin
   end;
 end;
 
+procedure TDigIt_Main.imgManipulationRulersPopup(Sender: TBGRAImageManipulation; ARulers: TRulersSides; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  Handled:= True;
+  menuRulers.PopUp;
+end;
+
 procedure TDigIt_Main.itemCropModeClick(Sender: TObject);
 var
    ANewCropMode: TDigItCropMode;
@@ -1128,6 +1146,11 @@ begin
     UI_FillCounter;
     UI_ToolBar;
   end;
+end;
+
+procedure TDigIt_Main.itemRulerClick(Sender: TObject);
+begin
+  imgManipulation.Rulers.PhysicalUnit:= TPhysicalUnit(TMenuItem(Sender).Tag);
 end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);

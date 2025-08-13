@@ -108,5 +108,12 @@
 {"hash":48547185,"name":"tdigit_main.itemcropmodefull.caption","sourcebytes":[70,117,108,108,32,65,114,101,97],"value":"Full Area"},
 {"hash":78424925,"name":"tdigit_main.itemcropmodecustom.caption","sourcebytes":[67,117,115,116,111,109],"value":"Custom"},
 {"hash":43366734,"name":"tdigit_main.itemprofiles_addcurrent.caption","sourcebytes":[65,100,100,32,67,117,114,114,101,110,116,32,83,111,117,114,99,101,46,46,46],"value":"Add Current Source..."},
-{"hash":196112718,"name":"tdigit_main.itemprofiles_edit.caption","sourcebytes":[69,100,105,116,46,46,46],"value":"Edit..."}
+{"hash":196112718,"name":"tdigit_main.itemprofiles_edit.caption","sourcebytes":[69,100,105,116,46,46,46],"value":"Edit..."},
+{"hash":5705404,"name":"tdigit_main.itemrulerpixel.caption","sourcebytes":[80,105,120,101,108],"value":"Pixel"},
+{"hash":185030290,"name":"tdigit_main.itemrulercentimeter.caption","sourcebytes":[67,101,110,116,105,109,101,116,101,114],"value":"Centimeter"},
+{"hash":50760434,"name":"tdigit_main.itemrulermillimeter.caption","sourcebytes":[77,105,108,108,105,109,101,116,101,114],"value":"Millimeter"},
+{"hash":328856,"name":"tdigit_main.itemrulerinch.caption","sourcebytes":[73,110,99,104],"value":"Inch"},
+{"hash":356241,"name":"tdigit_main.itemrulerpica.caption","sourcebytes":[80,105,99,97],"value":"Pica"},
+{"hash":5726292,"name":"tdigit_main.itemrulerpoint.caption","sourcebytes":[80,111,105,110,116],"value":"Point"},
+{"hash":113810436,"name":"tdigit_main.itemrulerpercent.caption","sourcebytes":[80,101,114,99,101,110,116],"value":"Percent"}
 ]}

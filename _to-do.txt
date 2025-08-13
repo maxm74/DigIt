@@ -7,9 +7,6 @@ Bugs:
     Anche in un A4 le misure sono errate (non viene messo il dpi nel pdf? [120dpi di default?])
 
 Session:
-   USARE DUE Bitmap,
-        Una NON PROCESSATA su cui basare il PageSize (es. %)
-        Una PROCESSATA (Rotate, Resize, etc) sui cui fare i Tagli
 
 Main:
   riprendi sessione : barra di captured alla fine
@@ -17,7 +14,6 @@ Main:
   Take/Preview con Countdown
   Take automatico, Giorni della Settimana con Checkbox e Orari (eventuali notifiche via email,etc)
 
-Idee Notturne:
   Tasto in Crop Area che apre un Menù con dei Profili di Taglio
     alcuni Memorizzati nella Cartella Programmi, altri dell'Utente; XML come Profiles
       <Tagli in Program>
@@ -27,12 +23,16 @@ Idee Notturne:
       Edit
       Add Current Crop Areas
 
-  in Captured Files
+  Wizard per Carte d'Identità simile all'altro, in ultima Pagina Combina Orizzontale/Verticale.
+
+Export Wizard:
+  In Esporta come Files mettere CheckBox "Copy as is"
+
+In Captured Files:
+     Tasto Copia File
      Aumentare la dimensione dei Tasti+Caption Sotto
      Tasti Combina Orizzontale/Verticale/Griglia (attivare Selezione Multipla?)
      Tasto Stampa
-
-  Wizard per Carte d'Identità simile all'altro, in ultima Pagina Combina Orizzontale/Verticale.
 
 
   ???Tasto per creare una cartella numerata
@@ -48,8 +48,10 @@ Idee Notturne:
 	                      Foto-01.jpg , etc...
 
 Takers:
-WIA:
+  Classi Astratte comuni tra WIA-Twain-Sane-Etc...
 
-Twain:
+  WIA: NON Usare LCL (usato solo perchè ci sono le Form) - Separare in 2 pacchetti?
+
+  Twain: Riscrivere in Stile WIA
 
 

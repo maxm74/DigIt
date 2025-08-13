@@ -752,6 +752,7 @@ msgid "DigIt"
 msgstr ""
 
 #: tdigit_main.edcropunit_type.text
+msgctxt "tdigit_main.edcropunit_type.text"
 msgid "Pixel"
 msgstr ""
 
@@ -760,6 +761,7 @@ msgid "Full Size"
 msgstr ""
 
 #: tdigit_main.edpageunit.text
+msgctxt "tdigit_main.edpageunit.text"
 msgid "Centimeter"
 msgstr ""
 
@@ -781,6 +783,36 @@ msgstr ""
 #: tdigit_main.itemprofiles_edit.caption
 msgctxt "tdigit_main.itemprofiles_edit.caption"
 msgid "Edit..."
+msgstr ""
+
+#: tdigit_main.itemrulercentimeter.caption
+msgctxt "tdigit_main.itemrulercentimeter.caption"
+msgid "Centimeter"
+msgstr ""
+
+#: tdigit_main.itemrulerinch.caption
+msgid "Inch"
+msgstr ""
+
+#: tdigit_main.itemrulermillimeter.caption
+msgid "Millimeter"
+msgstr ""
+
+#: tdigit_main.itemrulerpercent.caption
+msgid "Percent"
+msgstr ""
+
+#: tdigit_main.itemrulerpica.caption
+msgid "Pica"
+msgstr ""
+
+#: tdigit_main.itemrulerpixel.caption
+msgctxt "tdigit_main.itemrulerpixel.caption"
+msgid "Pixel"
+msgstr ""
+
+#: tdigit_main.itemrulerpoint.caption
+msgid "Point"
 msgstr ""
 
 #: tdigit_main.label1.caption

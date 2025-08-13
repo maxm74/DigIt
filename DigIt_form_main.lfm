@@ -32,6 +32,7 @@ object DigIt_Main: TDigIt_Main
     OnCropAreaDeleted = DeletedCrop
     OnCropAreaChanged = ChangedCrop
     OnCropAreaSelectedChanged = SelectedChangedCrop
+    OnRulersPopup = imgManipulationRulersPopup
   end
   object rollPages: TBCExpandPanel
     Left = 0
@@ -4410,6 +4411,45 @@ object DigIt_Main: TDigIt_Main
       Enabled = False
       ImageIndex = 16
       OnClick = itemProfiles_EditClick
+    end
+  end
+  object menuRulers: TPopupMenu
+    Left = 432
+    Top = 416
+    object itemRulerPixel: TMenuItem
+      Caption = 'Pixel'
+      OnClick = itemRulerClick
+    end
+    object itemRulerCentimeter: TMenuItem
+      Tag = 1
+      Caption = 'Centimeter'
+      Default = True
+      OnClick = itemRulerClick
+    end
+    object itemRulerMillimeter: TMenuItem
+      Tag = 2
+      Caption = 'Millimeter'
+      OnClick = itemRulerClick
+    end
+    object itemRulerInch: TMenuItem
+      Tag = 3
+      Caption = 'Inch'
+      OnClick = itemRulerClick
+    end
+    object itemRulerPica: TMenuItem
+      Tag = 4
+      Caption = 'Pica'
+      OnClick = itemRulerClick
+    end
+    object itemRulerPoint: TMenuItem
+      Tag = 5
+      Caption = 'Point'
+      OnClick = itemRulerClick
+    end
+    object itemRulerPercent: TMenuItem
+      Tag = 6
+      Caption = 'Percent'
+      OnClick = itemRulerClick
     end
   end
 end

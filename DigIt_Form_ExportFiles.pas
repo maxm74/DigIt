@@ -38,6 +38,7 @@ type
     btUp: TSpeedButton;
     cbResursive: TCheckBox;
     cbSaveFormat: TComboBox;
+    cbCopyAsIs: TCheckBox;
     panelSaveFormat: TGroupBox;
     OpenDlg: TBGRAOpenPictureDialog;
     btPaperOrientation: TSpeedButton;
@@ -77,6 +78,7 @@ type
     procedure btDelClick(Sender: TObject);
     procedure btUpDownClick(Sender: TObject);
     procedure btPaperOrientationClick(Sender: TObject);
+    procedure cbCopyAsIsChange(Sender: TObject);
     procedure cbResursiveChange(Sender: TObject);
     procedure cbSaveFormatChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -116,7 +118,7 @@ implementation
 
 {$R *.lfm}
 
-uses LCLIntf, LazFileUtils, DigIt_Utils,
+uses LCLIntf, FileUtil, LazFileUtils, DigIt_Utils,
      MM_StrUtils, MM_FilesUtils,
      BGRAReadJpeg, BGRAWriteJpeg, BGRAWriteTiff, fpPDF, BGRAPdf,
      BGRAFormatUI,
@@ -133,6 +135,21 @@ begin
   if btPaperOrientation.Down
   then begin btPaperOrientation.ImageIndex:= 1; btPaperOrientation.Hint:= rsLandscape; end
   else begin btPaperOrientation.ImageIndex:= 0; btPaperOrientation.Hint:= rsPortrait; end;
+end;
+
+procedure TDigIt_ExportFiles.cbCopyAsIsChange(Sender: TObject);
+begin
+  if cbCopyAsIs.Checked
+  then begin
+         BCLabel9.Enabled:= False;
+         cbSaveFormat.Enabled:= False;
+         panelFormatUI.Enabled:= False;
+       end
+  else begin
+         BCLabel9.Enabled:= True;
+         cbSaveFormat.Enabled:= True;
+         panelFormatUI.Enabled:= True;
+       end;
 end;
 
 procedure TDigIt_ExportFiles.cbResursiveChange(Sender: TObject);
@@ -307,9 +324,9 @@ begin
            panelFormatUI.Parent:= panelJPeg;
          end
     else begin
-           pageOptions.Height:= 260;
+           pageOptions.Height:= 300;
            Height:= 550;
-           panelFormatUI.Top:= 40; panelFormatUI.Left:= 108;
+           panelFormatUI.Top:= 70; panelFormatUI.Left:= 108;
            panelFormatUI.Parent:= panelSaveFormat;
          end;
 
@@ -558,14 +575,23 @@ var
     Result:= False;
     if FileExists(curFileName) then
     try
-      srcBitmap.LoadFromFile(curFileName);
       ForceDirectory(curDestPath);
-      dstFilename:= GetFileFreeName(curDestPath, ExtractFileNameOnly(curFileName), dstExt, True, 3);
 
-      //Adjust some Writers
-      if (SaveWriter is TBGRAWriterTiff) then TBGRAWriterTiff(SaveWriter).Clear;
+      if cbCopyAsIs.Checked
+      then begin
+             dstFilename:= GetFileFreeName(curDestPath, ExtractFileNameOnly(curFileName), ExtractFileExt(curFileName), True, 3);
+             FileUtil.CopyFile(curFileName, curDestPath+dstFilename, [cffOverwriteFile]);
+           end
+      else begin
+             dstFilename:= GetFileFreeName(curDestPath, ExtractFileNameOnly(curFileName), dstExt, True, 3);
+             srcBitmap.LoadFromFile(curFileName);
 
-      srcBitmap.SaveToFile(curDestPath+dstFilename, SaveWriter);
+             //Adjust some Writers
+             if (SaveWriter is TBGRAWriterTiff) then TBGRAWriterTiff(SaveWriter).Clear;
+
+             srcBitmap.SaveToFile(curDestPath+dstFilename, SaveWriter);
+           end;
+
       Result:= True;
 
     except
@@ -584,9 +610,11 @@ begin
      if not(destPath[Length(destPath)] in AllowDirectorySeparators)
      then destPath:= destPath+DirectorySeparator;
 
-     dstExt:= ExtensionSeparator+SuggestImageExtension(SaveFormat);
-
-     srcBitmap:= TBGRABitmap.Create;
+     if not(cbCopyAsIs.Checked) then
+     begin
+       dstExt:= ExtensionSeparator+SuggestImageExtension(SaveFormat);
+       srcBitmap:= TBGRABitmap.Create;
+     end;
 
      if (CapturedFiles = nil)
      then begin
@@ -663,7 +691,7 @@ begin
      theBridge.ProgressHide;
 
      CapturedFiles:= nil;
-     srcBitmap.Free;
+     if not(cbCopyAsIs.Checked) then srcBitmap.Free;
   end;
 end;
 

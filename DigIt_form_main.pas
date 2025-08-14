@@ -118,6 +118,7 @@ type
     edPageWidth: TFloatSpinEdit;
     edPageUnit: TComboBox;
     edPageResizeType: TComboBox;
+    imgListChecks: TImageList;
     imgListCaptured: TImageList;
     itemTake: TMenuItem;
     itemTakeAgain: TMenuItem;
@@ -144,6 +145,13 @@ type
     itemRulerPica: TMenuItem;
     itemRulerPoint: TMenuItem;
     itemRulerPercent: TMenuItem;
+    menuRulerBottom: TMenuItem;
+    menuRulerRight: TMenuItem;
+    menuRulerTop: TMenuItem;
+    menuRulerLeft: TMenuItem;
+    menuViewRulers: TMenuItem;
+    menuView: TMenuItem;
+    menuSession: TMenuItem;
     menuRulers: TPopupMenu;
     Separator4: TMenuItem;
     menuSaveProfiles: TMenuItem;
@@ -297,6 +305,7 @@ type
     procedure edCropWidthChange(Sender: TObject);
     procedure menuDebugClick(Sender: TObject);
     procedure menuImageFormatClick(Sender: TObject);
+    procedure menuRulerViewClick(Sender: TObject);
     procedure rgCropAspectSelectionChanged(Sender: TObject);
     procedure btCropApplyAspectRatioClick(Sender: TObject);
 
@@ -365,6 +374,7 @@ type
     procedure UI_ToolBar_Captured;
     procedure UI_ToolBarMods;
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
+    procedure UI_MenuItemRulersChecks;
     procedure UI_ThumbnailUpdate(AIndex: Integer; AFileName: String); overload;
     procedure UI_ThumbnailUpdate(AIndex: Integer; ABitmap: TBGRABitmap); overload;
     procedure UI_ClearCaptured;
@@ -509,10 +519,10 @@ begin
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
-    imgManipulation.Rulers.PhysicalUnit:= TPhysicalUnit.cuCentimeter;
+    (*imgManipulation.Rulers.PhysicalUnit:= TPhysicalUnit.cuCentimeter;
     imgManipulation.Rulers.Sides:= [rsdTop, rsdLeft];
     imgManipulation.Rulers.ShowPhysicalUnit:= True;
-
+    *)
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
 //    MenuMain.OwnerDraw:= True;
@@ -600,6 +610,7 @@ begin
       UI_FillCounter;
       SES_CropMode(nil, diCropFull);
       UI_ToolBar;
+      UI_MenuItemRulersChecks;
     end;
   end;
 end;
@@ -1151,6 +1162,7 @@ end;
 procedure TDigIt_Main.itemRulerClick(Sender: TObject);
 begin
   imgManipulation.Rulers.PhysicalUnit:= TPhysicalUnit(TMenuItem(Sender).Tag);
+  TMenuItem(Sender).Default:= True;
 end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
@@ -1502,13 +1514,25 @@ begin
 end;
 
 procedure TDigIt_Main.SES_Load(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+var
+   newRuleSides: TRulersSides;
+   newRulersUnit: TPhysicalUnit;
+
 begin
   if (aXML <> nil) then
   try
-     //User Interface
-     rollCrops.Collapsed:=aXML.GetValue('UI/rollCrops_Collapsed', False);
-     rollPages.Collapsed:=aXML.GetValue('UI/rollPages_Collapsed', True);
-     rollCounters.Collapsed:=aXML.GetValue('UI/rollCounters_Collapsed', True);
+     //Rolls
+     rollCrops.Collapsed:= aXML.GetValue(SES_UI_Rolls+'Crops', False);
+     rollCounters.Collapsed:= aXML.GetValue(SES_UI_Rolls+'CounterPage', False);
+     rollPages.Collapsed:= aXML.GetValue(SES_UI_Rolls+'Pages', True);
+
+     //Rulers
+     newRuleSides:= [];
+     aXML.GetValue(SES_UI_Rulers+'Sides', newRuleSides, TypeInfo(TRulersSides));
+     imgManipulation.Rulers.Sides:= newRuleSides;
+     newRulersUnit:= TPhysicalUnit.cuCentimeter;
+     aXML.GetValue(SES_UI_Rulers+'PhysicalUnit', newRulersUnit, TypeInfo(TPhysicalUnit));
+     imgManipulation.Rulers.PhysicalUnit:= newRulersUnit;
 
   finally
   end;
@@ -1518,16 +1542,21 @@ begin
   SES_CropMode(nil, diCropFull);
   UI_ToolBar;
   UI_ToolBar_Captured;
+  UI_MenuItemRulersChecks;
 end;
 
 procedure TDigIt_Main.SES_Save(Sender: TObject; aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 begin
   if (aXML <> nil) then
   try
-     //User Interface
-     aXML.SetValue('UI/rollCrops_Collapsed', rollCrops.Collapsed);
-     aXML.SetValue('UI/rollPages_Collapsed', rollPages.Collapsed);
-     aXML.SetValue('UI/rollCounters_Collapsed', rollCounters.Collapsed);
+     //Rolls
+     aXML.SetValue(SES_UI_Rolls+'Crops', rollCrops.Collapsed);
+     aXML.SetValue(SES_UI_Rolls+'CounterPage', rollCounters.Collapsed);
+     aXML.SetValue(SES_UI_Rolls+'Pages', rollPages.Collapsed);
+
+     //Rulers
+     aXML.SetValue(SES_UI_Rulers+'Sides', imgManipulation.Rulers.Sides, TypeInfo(TRulersSides));
+     aXML.SetValue(SES_UI_Rulers+'PhysicalUnit', imgManipulation.Rulers.PhysicalUnit, TypeInfo(TPhysicalUnit));
 
   finally
   end;
@@ -1711,7 +1740,7 @@ begin
       tbCrop.Visible:= False;
       imgManipulation.clearCropAreas;
       imgManipulation.Opacity:= 0;
-      imgManipulation.Enabled:= False;
+      imgManipulation.EnabledWorkArea:= False;
       rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
       rollCounters.Collapsed:= True;
 
@@ -1720,7 +1749,7 @@ begin
     diCropCustom: begin
       tbCrop.Visible:= True;
       imgManipulation.Opacity:= 64; //128; {#to-do Add to Settings}
-      imgManipulation.Enabled:= True;
+      imgManipulation.EnabledWorkArea:= True;
       rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
       rollCounters.Collapsed:= False;
       tbCropMode.Caption:= rsCropCust;
@@ -2000,6 +2029,24 @@ end;
 procedure TDigIt_Main.menuImageFormatClick(Sender: TObject);
 begin
   TBGRAFormatUIContainer.Execute(Session.SaveFormat, Session.SaveWriter);
+end;
+
+procedure TDigIt_Main.menuRulerViewClick(Sender: TObject);
+var
+   curRuler: TRulersSide;
+
+begin
+  curRuler:= TRulersSide(TMenuItem(Sender).Tag);
+
+  if (curRuler in imgManipulation.Rulers.Sides)
+  then begin
+         imgManipulation.Rulers.Sides:= imgManipulation.Rulers.Sides-[curRuler];
+         TMenuItem(Sender).ImageIndex:= 0;
+       end
+  else begin
+         imgManipulation.Rulers.Sides:= imgManipulation.Rulers.Sides+[curRuler];
+         TMenuItem(Sender).ImageIndex:= 1;
+       end
 end;
 
 procedure TDigIt_Main.rgCropAspectSelectionChanged(Sender: TObject);
@@ -2526,6 +2573,14 @@ begin
 
   curItem:= FindMenuItemByTag(menuDestinations, newDestinationI);
   if (curItem <> Nil) then curItem.Default:= True;
+end;
+
+procedure TDigIt_Main.UI_MenuItemRulersChecks;
+begin
+  menuRulerLeft.ImageIndex:= Integer(rsdLeft in imgManipulation.Rulers.Sides);
+  menuRulerTop.ImageIndex:= Integer(rsdTop in imgManipulation.Rulers.Sides);
+  menuRulerRight.ImageIndex:= Integer(rsdRight in imgManipulation.Rulers.Sides);
+  menuRulerBottom.ImageIndex:= Integer(rsdBottom in imgManipulation.Rulers.Sides);
 end;
 
 procedure TDigIt_Main.UI_ThumbnailUpdate(AIndex: Integer; AFileName: String);

@@ -1,4 +1,7 @@
 Bugs:
+  Image Manipulation Empty Image parte sempre con 21x29.7cm, appena attivo un Righello si corregge
+     (probabile manca CreateEmptyImage in Loaded)
+
   Area Intera
       cambio Valore uno in meno non sostituisce le icone su Captured
 
@@ -26,7 +29,6 @@ Main:
   Wizard per Carte d'Identità simile all'altro, in ultima Pagina Combina Orizzontale/Verticale.
 
 Export Wizard:
-  In Esporta come Files mettere CheckBox "Copy as is"
 
 In Captured Files:
      Tasto Copia File

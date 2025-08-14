@@ -773,6 +773,7 @@ begin
      else curExt:= Ext_Sess;
 
      aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+curExt);
+     aXML.Clear;
 
      SaveSource(aXML, IsAutoSave);
      SaveSourceFiles(aXML, IsAutoSave);

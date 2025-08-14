@@ -42,6 +42,8 @@ const
   SES_PageSettings  = 'PageSettings/';
   SES_CropAreas = 'CropAreas/';
   SES_Counter = 'Counter/';
+  SES_UI_Rolls = 'UI/Rolls/';
+  SES_UI_Rulers = 'UI/Rulers/';
 
 type
   TDigItCropMode = (

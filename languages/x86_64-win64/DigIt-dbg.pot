@@ -405,6 +405,10 @@ msgstr ""
 msgid "Export Settings -"
 msgstr ""
 
+#: tdigit_exportfiles.cbcopyasis.caption
+msgid "Copy as is"
+msgstr ""
+
 #: tdigit_exportfiles.cbpapersize.text
 msgid "Same as the Image Size"
 msgstr ""
@@ -879,6 +883,38 @@ msgstr ""
 msgid "Load XML"
 msgstr ""
 
+#: tdigit_main.menuprojectnew.caption
+msgid "New ..."
+msgstr ""
+
+#: tdigit_main.menuprojectopen.caption
+msgid "Open ..."
+msgstr ""
+
+#: tdigit_main.menuprojectsave.caption
+msgid "Save"
+msgstr ""
+
+#: tdigit_main.menuprojectsaveas.caption
+msgid "Save as ..."
+msgstr ""
+
+#: tdigit_main.menurulerbottom.caption
+msgid "Bottom"
+msgstr ""
+
+#: tdigit_main.menurulerleft.caption
+msgid "Left"
+msgstr ""
+
+#: tdigit_main.menurulerright.caption
+msgid "Right"
+msgstr ""
+
+#: tdigit_main.menurulertop.caption
+msgid "Top"
+msgstr ""
+
 #: tdigit_main.menusaveprofiles.caption
 msgid "Save Profiles"
 msgstr ""
@@ -891,12 +927,24 @@ msgstr ""
 msgid "Save XML"
 msgstr ""
 
+#: tdigit_main.menusession.caption
+msgid "Work Session"
+msgstr ""
+
 #: tdigit_main.menutimertakeconfig.caption
 msgid "Config Timer"
 msgstr ""
 
 #: tdigit_main.menutimertakestop.caption
 msgid "Stop Timer"
+msgstr ""
+
+#: tdigit_main.menuview.caption
+msgid "View"
+msgstr ""
+
+#: tdigit_main.menuviewrulers.caption
+msgid "Rulers"
 msgstr ""
 
 #: tdigit_main.opensessiondlg.title

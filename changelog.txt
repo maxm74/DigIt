@@ -2,7 +2,13 @@ DigIt CHANGE LOG
 ======================
 
 
-2025/08/13 Added Rulers Change with PopupMenù;
+2025/08/14 Added Copy as is in ExportFiles as Images;
+           Added Rulers MenuItems;
+           Changed UI XML KeyNames and Added Rulers Load/Save;
+           Changed Enabled of ImageManipulation to EnabledWorkArea;
+           Added Clear of XML before Save Session;
+
+        13 Added Rulers Change with PopupMenù;
            Added Some To-Do;
 
 2025/07/30 Deleted use of TResolutionUnit in CropAreas (use my bgracontrols branch);

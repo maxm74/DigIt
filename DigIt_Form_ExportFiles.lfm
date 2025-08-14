@@ -11,7 +11,6 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
   ClientWidth = 520
   DesignTimePPI = 120
   Position = poScreenCenter
-  LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -75,13 +74,13 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             AutoSize = True
             Caption = 'File Name'
             MinWidth = 100
-            Width = 100
+            Width = 87
           end        
           item
             AutoSize = True
             Caption = 'Full Path'
             MinWidth = 100
-            Width = 100
+            Width = 76
           end>
         HideSelection = False
         IconOptions.Arrangement = iaLeft
@@ -510,17 +509,17 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
         ClientWidth = 508
         object panelSaveFormat: TGroupBox
           Left = 0
-          Height = 250
+          Height = 280
           Top = 0
           Width = 508
           Caption = ' Save Options '
-          ClientHeight = 225
+          ClientHeight = 255
           ClientWidth = 504
           TabOrder = 0
           object BCLabel9: TBCLabel
-            Left = 43
+            Left = 40
             Height = 20
-            Top = 4
+            Top = 36
             Width = 54
             Background.Gradient1.StartColor = clWhite
             Background.Gradient1.EndColor = clBlack
@@ -551,14 +550,23 @@ object DigIt_ExportFiles: TDigIt_ExportFiles
             Rounding.RoundY = 1
           end
           object cbSaveFormat: TComboBox
-            Left = 108
+            Left = 105
             Height = 28
-            Top = 0
+            Top = 32
             Width = 390
             ItemHeight = 20
             Style = csDropDownList
             TabOrder = 0
             OnChange = cbSaveFormatChange
+          end
+          object cbCopyAsIs: TCheckBox
+            Left = 40
+            Height = 24
+            Top = 0
+            Width = 87
+            Caption = 'Copy as is'
+            TabOrder = 1
+            OnChange = cbCopyAsIsChange
           end
         end
       end

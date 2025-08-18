@@ -4529,7 +4529,6 @@ object DigIt_Main: TDigIt_Main
     end
     object itemProfiles_Edit: TMenuItem
       Caption = 'Edit...'
-      Enabled = False
       ImageIndex = 16
       OnClick = itemProfiles_EditClick
     end

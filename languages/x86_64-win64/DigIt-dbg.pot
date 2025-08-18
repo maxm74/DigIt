@@ -1043,8 +1043,8 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr ""
 
-#: tdigit_profiles_form.btaddfiles1.caption
-msgctxt "tdigit_profiles_form.btaddfiles1.caption"
+#: tdigit_profiles_form.btaddprofile.caption
+msgctxt "tdigit_profiles_form.btaddprofile.caption"
 msgid "Add ..."
 msgstr ""
 

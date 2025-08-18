@@ -9,5 +9,5 @@
 {"hash":185936116,"name":"tdigit_profiles_form.btlast.hint","sourcebytes":[84,111,32,76,97,115,116],"value":"To Last"},
 {"hash":1472,"name":"tdigit_profiles_form.btup.hint","sourcebytes":[85,112],"value":"Up"},
 {"hash":308958,"name":"tdigit_profiles_form.btdown.hint","sourcebytes":[68,111,119,110],"value":"Down"},
-{"hash":128332110,"name":"tdigit_profiles_form.btaddfiles1.caption","sourcebytes":[65,100,100,32,46,46,46],"value":"Add ..."}
+{"hash":128332110,"name":"tdigit_profiles_form.btaddprofile.caption","sourcebytes":[65,100,100,32,46,46,46],"value":"Add ..."}
 ]}

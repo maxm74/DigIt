@@ -1167,7 +1167,7 @@ end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
 begin
-  if TDigIt_Profiles_Form.Add(Path_Config+File_Profiles, Profiles, Sources.Selected, Sources.SelectedParams, Sources.SelectedName) then
+  if TDigIt_Profiles_Form.AddCurrent(Path_Config+File_Profiles, Profiles) then
   try
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
      menuProfiles.Items[Length(Profiles)-1].Default:= True;
@@ -1178,7 +1178,7 @@ end;
 
 procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);
 begin
-  if TDigIt_Profiles_Form.Execute(Path_Config+File_Profiles, Profiles) then
+  if TDigIt_Profiles_Form.Execute(Session, Path_Config+File_Profiles, Profiles) then
   try
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
 

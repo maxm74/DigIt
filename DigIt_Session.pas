@@ -772,8 +772,7 @@ begin
      then curExt:= Ext_AutoSess
      else curExt:= Ext_Sess;
 
-     aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+curExt);
-     aXML.Clear;
+     aXML:= TRttiXMLConfig.CreateClean(Path_Session+rFileName+curExt);
 
      SaveSource(aXML, IsAutoSave);
      SaveSourceFiles(aXML, IsAutoSave);

@@ -2,7 +2,9 @@ DigIt CHANGE LOG
 ======================
 
 
-2025/08/14 Added Copy as is in ExportFiles as Images;
+2025/08/18 First write of Profiles Edit;
+
+        14 Added Copy as is in ExportFiles as Images;
            Added Rulers MenuItems;
            Changed UI XML KeyNames and Added Rulers Load/Save;
            Changed Enabled of ImageManipulation to EnabledWorkArea;

@@ -238,7 +238,7 @@ object DigIt_Profiles_Form: TDigIt_Profiles_Form
       ParentShowHint = False
       OnClick = btUpDownClick
     end
-    object btAddFiles1: TSpeedButton
+    object btAddProfile: TSpeedButton
       Left = 392
       Height = 28
       Top = 34
@@ -247,13 +247,14 @@ object DigIt_Profiles_Form: TDigIt_Profiles_Form
       Caption = 'Add ...'
       Images = imgList
       ImageIndex = 1
+      OnClick = btAddProfileClick
     end
   end
   object imgList: TImageList
     Height = 22
     Width = 22
     Left = 424
-    Top = 248
+    Top = 240
     Bitmap = {
       4C7A080000001600000016000000B01400000000000078DAED5A79588D6BFB7D
       76EDA62F4312D529C30995B963FCCCB34A14A1C93C44F5710C298A52341195E6
@@ -423,5 +424,10 @@ object DigIt_Profiles_Form: TDigIt_Profiles_Form
       396035CD015B690E984D73C0AA96CF014DE6967534B718B6DEDCF24FCE59FF4B
       F83F19F5031C
     }
+  end
+  object menuSources: TPopupMenu
+    Images = DigIt_Main.imgListMenu
+    Left = 424
+    Top = 304
   end
 end

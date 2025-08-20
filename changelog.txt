@@ -2,7 +2,14 @@ DigIt CHANGE LOG
 ======================
 
 
-2025/08/18 First write of Profiles Edit;
+2025/08/20 Added Init,Release methods and Renamed OnSet to OnSelected in IDigIt_Params;
+           Added Multiple Params Handle in IDigIt_Interface (Params_New, Params_Set);
+           Added Get methods in TDigIt_Sources to get Multiple Source;
+           Modified Select in TDigIt_Sources to call Get;
+           Added ASource param to TDigIt_Sources.Take;
+           Divided the management of Parameters into the various Sources;
+
+        18 First write of Profiles Edit;
 
         14 Added Copy as is in ExportFiles as Images;
            Added Rulers MenuItems;

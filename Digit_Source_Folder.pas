@@ -25,45 +25,55 @@ resourcestring
   rsFoldSelect = 'Select a Folder';
 
 type
+  { TDigIt_Source_Folder_Params }
+  TDigIt_Source_Folder_Params = class(TNoRefCountObject, IDigIt_Params)
+  protected
+    Folder: String;
+
+  public
+    function Init: Boolean; stdcall;
+    function Release: Boolean; stdcall;
+
+    function GetFromUser: Boolean; stdcall;
+    function Duplicate: IDigIt_Params; stdcall;
+    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+    function Summary(out ASummary: PChar): Integer; stdcall;
+
+    function OnSelected: Boolean; stdcall;
+  end;
+
   { TDigIt_Source_Folder }
-  TDigIt_Source_Folder = class(TNoRefCountObject, IDigIt_Params, IDigIt_ArrayR_PChars, IDigIt_Source)
+  TDigIt_Source_Folder = class(TNoRefCountObject, IDigIt_ArrayR_PChars, IDigIt_Source)
   protected
     xFiles: TStringList; //A Citation
-    Folder: String;
+    rParams: IDigIt_Params;
 
   public
     constructor Create;
     destructor Destroy; override;
 
-    //IDigIt_Interface
+    //IDigIt_Interface Implementation
     function Flags: TDigItInterfaceKind; stdcall;
     function Init: Boolean; stdcall;
     function Release: Boolean; stdcall;
     function Enabled: Boolean; stdcall;
     function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
-    //function RegisterName: PChar; stdcall;
     function Params: IDigIt_Params; stdcall;
+    function Params_New: IDigIt_Params; stdcall;
+    function Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
+
     function UI_Title(out AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
-
-    //IDigIt_Params
-    function GetFromUser: Boolean; stdcall;
-    function Duplicate: IDigIt_Params; stdcall;
-    function Load(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
-    function Save(const xml_File: PChar; const xml_RootPath: PChar):Boolean; stdcall;
-    function Summary(out ASummary: PChar): Integer; stdcall;
-
-    function OnSet: Boolean; stdcall;
 
     //IDigIt_ROArray
     function GetCount: DWord; stdcall;
     function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
 
     //IDigIt_Source
-    //Take a Picture and returns FileNames
+                                                       //Take a Picture and returns FileName/s
     function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
-
     procedure Clear; stdcall;
  end;
 
@@ -77,9 +87,20 @@ uses Digit_Bridge_Impl, BGRABitmapTypes,
 var
    Source_Folder : TDigIt_Source_Folder = nil;
 
-{ TDigIt_Source_Folder }
+{ TDigIt_Source_Folder_Params }
 
-function TDigIt_Source_Folder.GetFromUser: Boolean; stdcall;
+function TDigIt_Source_Folder_Params.Init: Boolean; stdcall;
+begin
+  Result:= True;
+end;
+
+function TDigIt_Source_Folder_Params.Release: Boolean; stdcall;
+begin
+  Result:= True;
+  Free;
+end;
+
+function TDigIt_Source_Folder_Params.GetFromUser: Boolean; stdcall;
 var
    openDialog: TSelectDirectoryDialog;
 
@@ -99,12 +120,12 @@ begin
   end;
 end;
 
-function TDigIt_Source_Folder.Duplicate: IDigIt_Params; stdcall;
+function TDigIt_Source_Folder_Params.Duplicate: IDigIt_Params; stdcall;
 begin
   Result:= nil;
 end;
 
-function TDigIt_Source_Folder.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+function TDigIt_Source_Folder_Params.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
 
@@ -122,7 +143,7 @@ begin
   end;
 end;
 
-function TDigIt_Source_Folder.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
+function TDigIt_Source_Folder_Params.Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
 var
    XMLWork: TXMLConfig;
 
@@ -141,13 +162,13 @@ begin
   end;
 end;
 
-function TDigIt_Source_Folder.Summary(out ASummary: PChar): Integer; stdcall;
+function TDigIt_Source_Folder_Params.Summary(out ASummary: PChar): Integer; stdcall;
 begin
   ASummary:= StrNew(PChar('Folder= '+Folder));
   Result:= Length(ASummary);
 end;
 
-function TDigIt_Source_Folder.OnSet: Boolean; stdcall;
+function TDigIt_Source_Folder_Params.OnSelected: Boolean; stdcall;
 begin
   repeat
     Result:= DirectoryExists(Folder);
@@ -160,6 +181,8 @@ begin
       end;
   until Result;
 end;
+
+{ TDigIt_Source_Folder }
 
 function TDigIt_Source_Folder.GetCount: DWord; stdcall;
 begin
@@ -186,6 +209,7 @@ begin
   inherited Create;
 
   xFiles:= nil;
+  rParams:= nil;
 end;
 
 destructor TDigIt_Source_Folder.Destroy;
@@ -193,6 +217,7 @@ begin
   inherited Destroy;
 
   if (xFiles <> nil) then xFiles.Free;
+  if (rParams <> nil) then rParams.Release;
 end;
 
 function TDigIt_Source_Folder.Flags: TDigItInterfaceKind; stdcall;
@@ -224,7 +249,19 @@ end;
 
 function TDigIt_Source_Folder.Params: IDigIt_Params; stdcall;
 begin
-  Result:= Self;
+  Result:= rParams;
+end;
+
+function TDigIt_Source_Folder.Params_New: IDigIt_Params; stdcall;
+begin
+  rParams:= TDigIt_Source_Folder_Params.Create;
+  Result:= rParams;
+end;
+
+function TDigIt_Source_Folder.Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
+begin
+  rParams:= AParams;
+  Result:= True;
 end;
 
 function TDigIt_Source_Folder.UI_Title(out AUI_Title: PChar): Integer; stdcall;
@@ -243,10 +280,11 @@ function TDigIt_Source_Folder.Take(takeAction: DigIt_Source_TakeAction; out aDat
 begin
   Result:= 0;
   aData:= nil;
+  if (rParams = nil) then exit;
 
   if (xFiles <> nil) then xFiles.Free;
 
-  xFiles:= GetFilesInDir(Folder, False,
+  xFiles:= GetFilesInDir((rParams as TDigIt_Source_Folder_Params).Folder, False,
                          faAnyFile, BGRARegisteredImageReaderExtension,
                          flsSortNatural, False, True);
 

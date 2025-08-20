@@ -15,7 +15,7 @@ interface
 uses
   Classes, SysUtils, Laz2_XMLCfg,
   MM_OpenArrayList,
-  DigIt_Types, Digit_Bridge_Intf;
+  DigIt_Types, DigIt_Bridge_Intf;
 
 type
   { TDigIt_Sources }
@@ -39,17 +39,24 @@ type
   public
     constructor Create;
 
+    function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
+                 SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
+    function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
+                 SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
+    function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String;
+                 aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean; overload;
+
     function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
     function Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; var newSourceName: String): Boolean; overload;
+    function Select(out ASourceName: String; aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean; overload;
 
     function Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
     function Save(aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
-    //function LoadSelectedParams(XMLFileName, XMLPath: String): Boolean;
 
-    function Take(takeAction: DigIt_Source_TakeAction;
-                  var AFiles: TSourceFileArray; AStartIndex: Integer): DWord; overload;
-    function Take(takeAction: DigIt_Source_TakeAction; var AFileName: String): Boolean; overload;
+    function Take(takeAction: DigIt_Source_TakeAction; var AFiles: TSourceFileArray; AStartIndex: Integer;
+                  ASource: PSourceInfo=nil): DWord; overload;
+    function Take(takeAction: DigIt_Source_TakeAction; var AFileName: String;
+                  ASource: PSourceInfo=nil): Boolean; overload;
 
     property Selected: PSourceInfo read rSelected;
     property SelectedIndex: Integer read rSelectedIndex;
@@ -87,14 +94,14 @@ begin
 
   rSelected:= nil;
   rSelectedName:= '';
-  rSelectedIndex:= -1;
+//oldcode  rSelectedIndex:= -1;
   rSelectedParams:= nil;
 end;
 
-function TDigIt_Sources.Select(SourceName: String; GetUserParams: Boolean): Boolean;
+function TDigIt_Sources.Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
+                            SourceName: String; GetUserParams: Boolean): Boolean;
 var
    newSourceI: Integer;
-   newSource: PSourceInfo =nil;
 
 begin
   Result:= False;
@@ -102,17 +109,18 @@ begin
   if (SourceName <> '') then
   try
      newSourceI:= FindByKey(SourceName);
-     if (newSourceI > -1) then Result:= Select(newSourceI, -1, GetUserParams);
+     if (newSourceI > -1) then Result:= Get(ASource, AParams, newSourceI, -1, GetUserParams);
 
   except
     Result:= False;
   end;
 end;
 
-function TDigIt_Sources.Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
+function TDigIt_Sources.Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
+                            SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
 var
-   newSource: PSourceInfo =nil;
-   curSourceItems: IDigIt_Source_Items;
+   newSource: PSourceInfo=nil;
+   newParams: IDigIt_Params=nil;
 
 begin
   Result:= False;
@@ -128,16 +136,26 @@ begin
          then Result:= (newSource^.Inst as IDigIt_Source_Items).Select(newSourceSubIndex)
          else Result:= True;
 
-         if Result then Result:= (newSource^.Inst.Params <> nil) and newSource^.Inst.Params.GetFromUser;
+         newParams:= newSource^.Inst.Params;
+         if (newParams = nil) then
+         begin
+           newParams:= newSource^.Inst.Params_New;
+           Result:= newSource^.Inst.Params_Set(newParams);
+           if not(Result) and (newParams <> nil) then
+           begin
+             newParams.Release;
+             newParams:= nil;
+           end;
+         end;
+
+         if (newParams <> nil) then Result:= newParams.GetFromUser;
        end
        else Result:= True;
 
        if Result then
        begin
-         rSelected:= newSource;
-         rSelectedParams :=newSource^.Inst.Params;
-         rSelectedName:= rList[SourceIndex].Key;
-         rSelectedIndex:= SourceIndex;
+         ASource:= newSource;
+         AParams:= newSource^.Inst.Params;
        end;
      end;
 
@@ -146,24 +164,42 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; var newSourceName: String): Boolean;
+function TDigIt_Sources.Get(var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String;
+                            aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean;
+var
+   newSource: PSourceInfo=nil;
+   newParams: IDigIt_Params=nil;
+
 begin
   Result:= False;
 
   if (aXML <> nil) then
   try
      //Load a New Source and its Params
-     newSourceName:= aXML.GetValue(XMLRoot_Path+'Source/Name', '');
+     ASourceName:= aXML.GetValue(XMLRoot_Path+'Source/Name', '');
 
-     if Select(newSourceName) then
+     Result:= Get(newSource, newParams, ASourceName);
+     if Result then
      begin
-        Result:= True;
-
-        if (rSelectedParams <> nil) then
+        if (newParams = nil) then
         begin
-          Result:= rSelectedParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-          if Result then Result:= rSelectedParams.OnSet;
+          newParams:= newSource^.Inst.Params_New;
+          Result:= newSource^.Inst.Params_Set(newParams);
+          if not(Result) and (newParams <> nil) then
+          begin
+            newParams.Release;
+            newParams:= nil;
+          end;
         end;
+
+        if (newParams <> nil) then
+        begin
+          Result:= newParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
+//oldcode          if Result then Result:= newParams.OnSelected;
+        end;
+
+        ASource:= newSource;
+        AParams:= newParams;
      end;
 
   except
@@ -171,9 +207,75 @@ begin
   end;
 end;
 
+function TDigIt_Sources.Select(SourceName: String; GetUserParams: Boolean): Boolean;
+var
+   newSource: PSourceInfo=nil;
+   newParams: IDigIt_Params=nil;
+
+begin
+  Result:= Get(newSource, newParams, SourceName, GetUserParams);
+
+  if Result then
+  begin
+    if (newParams <> nil) then Result:= newParams.OnSelected;
+    if Result then
+    begin
+      rSelected:= newSource;
+      rSelectedParams:= newParams;
+      rSelectedName:= SourceName;
+      rSelectedIndex:= FindByKey(rSelectedName);
+    end;
+  end;
+end;
+
+function TDigIt_Sources.Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
+var
+   newSource: PSourceInfo=nil;
+   newParams: IDigIt_Params=nil;
+
+begin
+  Result:= Get(newSource, newParams, SourceIndex, newSourceSubIndex, GetUserParams);
+
+  if Result then
+  begin
+    if (newParams <> nil) then Result:= newParams.OnSelected;
+    if Result then
+    begin
+      rSelected:= newSource;
+      rSelectedParams:= newParams;
+      rSelectedName:= rList[SourceIndex].Key;
+      rSelectedIndex:= SourceIndex;
+    end;
+  end;
+end;
+
+function TDigIt_Sources.Select(out ASourceName: String; aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean;
+var
+   newSource: PSourceInfo=nil;
+   newParams: IDigIt_Params=nil;
+   newSourceName: String;
+
+begin
+  Result:= Get(newSource, newParams, newSourceName, aXML, XMLRoot_Path);
+  ASourceName:= newSourceName;
+
+  if Result then
+  begin
+    if (newParams <> nil) then Result:= newParams.OnSelected;
+    if Result then
+    begin
+      rSelected:= newSource;
+      rSelectedParams:= newParams;
+      rSelectedName:= newSourceName;
+      rSelectedIndex:= FindByKey(rSelectedName);
+    end;
+  end;
+end;
+
 function TDigIt_Sources.Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean;
 var
    curSource: PSourceInfo =nil;
+   curParams: IDigIt_Params;
 
 begin
   Result:= False;
@@ -188,8 +290,11 @@ begin
        aXML.SetValue(XMLRoot_Path+'Source/Name', rList[SourceIndex].Key);
        aXML.DeletePath(XMLRoot_Path+'Source/Params/');
 
-       if SaveParams and (curSource^.Inst <> nil)
-       then curSource^.Inst.Params.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
+       if SaveParams and (curSource^.Inst <> nil) then
+       begin
+         curParams:= curSource^.Inst.Params;
+         if (curParams <> nil) then curParams.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
+       end;
 
        Result:= True;
      end;
@@ -210,8 +315,8 @@ begin
      aXML.DeletePath(XMLRoot_Path+'Source/Params/');
 
      if SaveParams and
-       (rSelected <> nil) and (rSelected^.Inst <> nil)
-     then rSelected^.Inst.Params.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
+       (rSelected <> nil) and (rSelectedParams <> nil)
+     then rSelectedParams.Save(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
 
      Result:= True;
 
@@ -220,8 +325,8 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Take(takeAction: DigIt_Source_TakeAction;
-                             var AFiles: TSourceFileArray; AStartIndex: Integer): DWord;
+function TDigIt_Sources.Take(takeAction: DigIt_Source_TakeAction; var AFiles: TSourceFileArray; AStartIndex: Integer;
+                             ASource: PSourceInfo=nil): DWord;
 var
    curData: Pointer;
    curDataType: TDigItDataType;
@@ -230,11 +335,13 @@ var
 
 begin
   Result:= 0;
-  if (rSelected <> nil) and (rSelected^.Inst <> nil) then
+  if (ASource = nil) then ASource:= rSelected;
+
+  if (ASource <> nil) and (ASource^.Inst <> nil) then
   begin
     curData:= nil;
 
-    Result:= rSelected^.Inst.Take(takeActTake, curDataType, curData);
+    Result:= ASource^.Inst.Take(takeAction, curDataType, curData);
     if (curData <> nil) then
     begin
       //Add files to end of Array AFiles
@@ -273,7 +380,8 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Take(takeAction: DigIt_Source_TakeAction; var AFileName: String): Boolean;
+function TDigIt_Sources.Take(takeAction: DigIt_Source_TakeAction; var AFileName: String;
+                             ASource: PSourceInfo=nil): Boolean;
 var
    curData: Pointer;
    curDataType: TDigItDataType;
@@ -282,11 +390,13 @@ var
 
 begin
   Result:= False;
-  if (rSelected <> nil) and (rSelected^.Inst <> nil) then
+  if (ASource = nil) then ASource:= rSelected;
+
+  if (ASource <> nil) and (ASource^.Inst <> nil) then
   begin
     curData:= nil;
 
-    res:= rSelected^.Inst.Take(takeAction, curDataType, curData);
+    res:= ASource^.Inst.Take(takeAction, curDataType, curData);
     if (res > 0) and (curData <> nil) then
     begin
       Case curDataType of

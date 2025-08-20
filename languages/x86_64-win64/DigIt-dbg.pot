@@ -143,16 +143,6 @@ msgstr ""
 msgid "Save the Work Session?"
 msgstr ""
 
-#: digit_form_main.rssourcenotfound
-#, object-pascal-format
-msgid "Source %s not Found, try Select another from Menù"
-msgstr ""
-
-#: digit_form_main.rssourcenotselected
-#, object-pascal-format
-msgid "Cannot Select Source %d, try Select another from Menù"
-msgstr ""
-
 #: digit_form_profiles.rsprofiles_addcurrent
 msgctxt "digit_form_profiles.rsprofiles_addcurrent"
 msgid "Add Current Source..."
@@ -243,6 +233,11 @@ msgstr ""
 #: digit_session.rssavingwork
 msgctxt "digit_session.rssavingwork"
 msgid "Saving the Work Session"
+msgstr ""
+
+#: digit_session.rssourcenotselected
+#, object-pascal-format
+msgid "Cannot Select Source \"%s\", try Select another from Menù"
 msgstr ""
 
 #: digit_session.rstakeagain

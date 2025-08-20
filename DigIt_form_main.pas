@@ -38,8 +38,6 @@ resourcestring
   rsCropToDo = '%d files to do';
   rsCounterPrev = 'Value Previous: %d';
 
-  rsSourceNotFound = 'Source %s not Found, try Select another from Menù';
-  rsSourceNotSelected = 'Cannot Select Source %d, try Select another from Menù';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
   rsErrSaveWork = 'Cannot Save Work Session'#13#10'%s'#13#10'%s';
 

@@ -33,6 +33,7 @@ resourcestring
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
+  rsSourceNotSelected = 'Cannot Select Source "%s", try Select another from Menù';
   rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
 
@@ -869,20 +870,16 @@ begin
      Result:= -1;
 
      oldSourceName:= Sources.SelectedName;
-     if Sources.Select(aXML, XMLRoot_Path, newSourceName)
+     if Sources.Select(newSourceName, aXML, XMLRoot_Path)
      then begin
             if (oldSourceName <> newSourceName) then
             begin
               { #note -oMaxM : rSource Switched...Do something? }
             end;
-
-            Result:= Sources.SelectedIndex;
           end
-     else if (newSourceName <> '') then
-          begin
-            //MessageDlg('DigIt', Format(rsSourceNotFound, [newSourceName]), mtInformation, [mbOk], 0);
-            Result:= Sources.SelectedIndex;
-          end;
+     else theBridge.MessageDlg('DigIt', Format(rsSourceNotSelected, [newSourceName]), mtInformation, [mbOk], 0);
+
+     Result:= Sources.SelectedIndex;
 
      if Assigned(OnLoadSource) then OnLoadSource(Self, aXML, IsAutoSave, XMLRoot_Path);
 

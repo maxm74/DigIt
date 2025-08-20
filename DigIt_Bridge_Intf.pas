@@ -65,11 +65,11 @@ type
   //Data Type
   TDigItDataType = (
     diDataType_FileName,      //A Single Filename (PChar)
-    diDataType_FileNameArray, //An IDigIt_Array of Filenames (PChar)
-    diDataType_Bitmap         //Pointer to a Bitmap
+    diDataType_FileNameArray //An IDigIt_Array of Filenames (PChar)
+    //diDataType_Bitmap         //Pointer to a Bitmap
   );
 
-  IDigIt_Bridge =interface;
+  IDigIt_Bridge = interface;
 
   TDigIt_PluginInfo = packed record
     BridgeMinVer: Byte;
@@ -101,18 +101,21 @@ type
   ['{D101B01A-FAD0-C666-CADE-1386A8BF4D22}']
   end;
 
-  IDigIt_Params = Interface
+  IDigIt_Params = interface
   ['{D101B01A-FAD0-C666-CADE-4E30A587BCB3}']
+    function Init: Boolean; stdcall;
+    function Release: Boolean; stdcall;
+
     function GetFromUser: Boolean; stdcall;
     function Duplicate: IDigIt_Params; stdcall;
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Summary(out ASummary: PChar): Integer; stdcall;
 
-    function OnSet: Boolean; stdcall;
+    function OnSelected: Boolean; stdcall;
   end;
 
-  IDigIt_Interface = Interface
+  IDigIt_Interface = interface
     function Flags: TDigItInterfaceKind; stdcall;
     function Init: Boolean; stdcall;
     function Release: Boolean; stdcall;
@@ -120,6 +123,9 @@ type
     function setEnabled(AEnabled: Boolean): Boolean; stdcall;
 
     function Params: IDigIt_Params; stdcall;
+    function Params_New: IDigIt_Params; stdcall;
+    function Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
+
     function UI_Title(out AUI_Title: PChar): Integer; stdcall;
     function UI_ImageIndex: Integer; stdcall;
   end;
@@ -129,7 +135,7 @@ type
   //
   DigIt_Source_TakeAction = (takeActPreview, takeActTake);
 
-  IDigIt_Source = Interface(IDigIt_Interface)
+  IDigIt_Source = interface(IDigIt_Interface)
   ['{D101B01A-FAD0-C666-CADE-699AC76DEE00}']
     //Take a Picture and returns it on aData according with aDataType
     // (if Result is > 1 then aData is a IDigIt_ROArray interface)
@@ -142,7 +148,6 @@ type
   //Get Sub Items so the User can select directly the Device from Menù
   IDigIt_Source_Items = interface(specialize IOpenArrayR<PChar>)
   ['{D101B01A-FAD0-C666-CADE-699AC76DEE01}']
-
     //Select Sub Item, if called with aIndex=-1 then Show User Dialog to Select it
     function Select(aIndex: Integer): Boolean; stdcall;
 
@@ -150,7 +155,7 @@ type
     function Selected(aIndex: Integer): Boolean; stdcall;
   end;
 
-  IDigIt_Sources = Interface
+  IDigIt_Sources = interface
   ['{D101B01A-FAD0-C666-CADE-8344B540E20F}']
     function Register(const aName: PChar; const aClass: IDigIt_Source) :Boolean; stdcall;
     //function UnRegister(const aClass : IDigIt_Source) :Boolean; stdcall; { #note 5 -oMaxM : Implementer unregist the Class}
@@ -183,13 +188,13 @@ type
   end;
   *)
 
-  IDigIt_Settings = Interface
+  IDigIt_Settings = interface
   ['{D101B01A-FAD0-C666-CADE-6B103B8BCBDF}']
     //Path Consts: High Byte = Category, Low Byte = Path
     function Path(const APathID: Word): PChar; stdcall;
   end;
 
-  IDigIt_Bridge = Interface
+  IDigIt_Bridge = interface
   ['{D101B01A-FAD0-C666-CADE-C779BE1D5762}']
     function Sources: IDigIt_Sources; stdcall;
 

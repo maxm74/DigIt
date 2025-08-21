@@ -2,7 +2,10 @@ DigIt CHANGE LOG
 ======================
 
 
-2025/08/20 Added Init,Release methods and Renamed OnSet to OnSelected in IDigIt_Params;
+2025/08/21 Added TDigIt_Source_Common classes;
+           Derived all Sources from TDigIt_Source_Common;
+
+        20 Added Init,Release methods and Renamed OnSet to OnSelected in IDigIt_Params;
            Added Multiple Params Handle in IDigIt_Interface (Params_New, Params_Set);
            Added Get methods in TDigIt_Sources to get Multiple Source;
            Modified Select in TDigIt_Sources to call Get;

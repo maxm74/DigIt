@@ -17,7 +17,7 @@ uses
   Windows, Classes, SysUtils,
   MM_OpenArrayList, MM_Interface_Progress,
   WIA, WiaDef, WIA_LH, WIA_PaperSizes, WIA_SettingsForm,
-  Digit_Bridge_Intf;
+  Digit_Bridge_Intf, DigIt_Source_Common;
 
 const
   DigIt_Source_WIA_Name = 'WIA Device';
@@ -35,11 +35,9 @@ resourcestring
   rsWIACancelling = 'Cancelling acquisition';
 
 type
-  TDigIt_Source_WIA = class;
-
   { TDigIt_Source_WIA_Params }
 
-  TDigIt_Source_WIA_Params  = class(TNoRefCountObject, IDigIt_Params)
+  TDigIt_Source_WIA_Params  = class(TDigIt_Source_Common_Params)
   protected
     DeviceID,
     DeviceName,
@@ -51,21 +49,18 @@ type
     WIAParams: TArrayWIAParams;
     ResMin,
     ResMax: Integer;
-    rOwner: TDigIt_Source_WIA;
+
+    function GetSummary: String; override;
 
   public
-    function Init: Boolean; stdcall;
-    function Release: Boolean; stdcall;
+    function GetFromUser: Boolean; stdcall; override;
+    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
+    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
 
-    function GetFromUser: Boolean; stdcall;
-    function Duplicate: IDigIt_Params; stdcall;
-    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Summary(out ASummary: PChar): Integer; stdcall;
+    function OnSelected: Boolean; stdcall; override;
 
-    function OnSelected: Boolean; stdcall;
+    constructor Create(AOwner: TDigIt_Source_Common); override;
 
-    constructor Create(AOwner: TDigIt_Source_WIA);
     procedure SelectSourceItem(ASource: TWIADevice; AIndex: Integer);
   end;
 
@@ -77,16 +72,11 @@ type
 
   { TDigIt_Source_WIA }
 
-  TDigIt_Source_WIA = class(TNoRefCountObject,
-                            IDigIt_Source, IDigIt_Source_Items,
-                            IMM_ProgressCallback)
+  TDigIt_Source_WIA = class(TDigIt_Source_Common, IDigIt_Source_Items, IMM_ProgressCallback)
   private
     rWIA: TWIAManager;
     rWIASource: TWIADevice;
-    countTakes: Integer;
     DownloadedFiles: TDigIt_Source_WIA_Files;
-    rParams: IDigIt_Params;
-    rEnabled,
     UserCancel: Boolean;
     Progress: IMM_Progress;
 
@@ -95,25 +85,19 @@ type
     function DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
                                  lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
 
+  protected
+    function GetParamsClass: TDigIt_Source_Common_ParamsClass; override;
+    function GetName: String; override;
+
   public
     //IDigIt_Interface Implementation
-    function Flags: TDigItInterfaceKind; stdcall;
-    function Init: Boolean; stdcall;
-    function Release: Boolean; stdcall;
-    function Enabled: Boolean; stdcall;
-    function setEnabled(AEnabled: Boolean): Boolean; stdcall;
-
-    function Params: IDigIt_Params; stdcall;
-    function Params_New: IDigIt_Params; stdcall;
-    function Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
-
-    function UI_Title(out AUI_Title: PChar): Integer; stdcall;
-    function UI_ImageIndex: Integer; stdcall;
+    function Enabled: Boolean; stdcall; override;
+    function UI_ImageIndex: Integer; stdcall; override;
 
     //IDigIt_Source Implementation
                                                        //Take a Picture and returns FileName/s
-    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
-    procedure Clear; stdcall;
+    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall; override;
+    procedure Clear; stdcall; override;
 
     //IDigIt_Source_Items Implementation
     function GetCount: DWord; stdcall;
@@ -131,7 +115,6 @@ type
 implementation
 
 uses Controls, Forms, Dialogs, FileUtil, BGRABitmapTypes, Laz2_XMLCfg,
-     MM_StrUtils,
      Digit_Types, Digit_Bridge_Impl;
 
 var
@@ -140,15 +123,15 @@ var
 
 { TDigIt_Source_WIA_Params }
 
-function TDigIt_Source_WIA_Params.Init: Boolean; stdcall;
+function TDigIt_Source_WIA_Params.GetSummary: String;
 begin
-  Result:= True;
-end;
+  Result:= '';
 
-function TDigIt_Source_WIA_Params.Release: Boolean; stdcall;
-begin
-  Result:= True;
-  Free;
+  if (DeviceName <> '') then
+  begin
+    Result:= DeviceName;
+    if (DeviceItemName <> '') then Result:= Result+' ('+DeviceItemName+')';
+  end;
 end;
 
 function TDigIt_Source_WIA_Params.GetFromUser: Boolean; stdcall;
@@ -159,7 +142,7 @@ var
 begin
   Result :=False;
 
-  with rOwner do
+  with TDigIt_Source_WIA(rOwner) do
   if (getWIA <> nil) then
   try
      if (rWIASource <> nil) then
@@ -191,7 +174,7 @@ var
 begin
   Result:= False;
 
-  with rOwner do
+  with TDigIt_Source_WIA(rOwner) do
   if (getWIA <> nil) then
   try
      rWia.EnumAll:= False;
@@ -272,11 +255,6 @@ begin
 
   finally
   end;
-end;
-
-function TDigIt_Source_WIA_Params.Duplicate: IDigIt_Params; stdcall;
-begin
-  Result:= nil;
 end;
 
 function TDigIt_Source_WIA_Params.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
@@ -388,35 +366,17 @@ begin
   end;
 end;
 
-function TDigIt_Source_WIA_Params.Summary(out ASummary: PChar): Integer; stdcall;
-var
-   res: String;
-
+constructor TDigIt_Source_WIA_Params.Create(AOwner: TDigIt_Source_Common);
 begin
-  Result:= 0;
+  inherited Create(AOwner);
 
-  if (DeviceName <> '') then
-  begin
-    res:= DeviceName;
-    if (DeviceItemName <> '') then res:= res+' ('+DeviceItemName+')';
-
-    ASummary:= StrNew(PChar(res));
-    Result:= Length(ASummary);
-  end;
-end;
-
-constructor TDigIt_Source_WIA_Params.Create(AOwner: TDigIt_Source_WIA);
-begin
-  inherited Create;
-
-  rOwner:= AOwner;
   DeviceID:= '';
   DeviceItemIndex:= -1;
 end;
 
 procedure TDigIt_Source_WIA_Params.SelectSourceItem(ASource: TWIADevice; AIndex: Integer);
 begin
-  with rOwner do
+  with TDigIt_Source_WIA(rOwner) do
   if (ASource <> nil)
   then begin
          rWIASource:= ASource;
@@ -512,75 +472,36 @@ begin
   Application.ProcessMessages;
 end;
 
+function TDigIt_Source_WIA.GetName: String;
+begin
+  Result:= rsWIAName;
+end;
+
 constructor TDigIt_Source_WIA.Create;
 begin
   inherited Create;
 
   rWIA:= nil;
   rWIASource:= nil;
-  rEnabled:= True;
-  countTakes:= -1;
   DownloadedFiles:= TDigIt_Source_WIA_Files.Create;
-  rParams:= nil;
 end;
 
 destructor TDigIt_Source_WIA.Destroy;
 begin
   if (rWIA <> nil) then rWIA.Free;
   if (DownloadedFiles <> nil) then DownloadedFiles.Free;
-  if (rParams <> nil) then rParams.Release;
 
   inherited Destroy;
 end;
 
-function TDigIt_Source_WIA.Flags: TDigItInterfaceKind; stdcall;
+function TDigIt_Source_WIA.GetParamsClass: TDigIt_Source_Common_ParamsClass;
 begin
-  Result:= diSourceStd;
-end;
-
-function TDigIt_Source_WIA.Init: Boolean; stdcall;
-begin
-  Result:= True;
+  Result:= TDigIt_Source_WIA_Params;
 end;
 
 function TDigIt_Source_WIA.Enabled: Boolean; stdcall;
 begin
   Result:= rEnabled and (getWIA <> nil) and (rWIA.DevMgrIntf <> nil);
-end;
-
-function TDigIt_Source_WIA.setEnabled(AEnabled: Boolean): Boolean; stdcall;
-begin
-  rEnabled:= AEnabled;
-  Result:= rEnabled;
-end;
-
-function TDigIt_Source_WIA.Release: Boolean; stdcall;
-begin
-  Free;
-  Result:= True;
-end;
-
-function TDigIt_Source_WIA.Params: IDigIt_Params; stdcall;
-begin
-  Result:= rParams;
-end;
-
-function TDigIt_Source_WIA.Params_New: IDigIt_Params; stdcall;
-begin
-  rParams:= TDigIt_Source_WIA_Params.Create(Self);
-  Result:= rParams;
-end;
-
-function TDigIt_Source_WIA.Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
-begin
-  rParams:= AParams;
-  Result:= True;
-end;
-
-function TDigIt_Source_WIA.UI_Title(out AUI_Title: PChar): Integer; stdcall;
-begin
-  AUI_Title:= StrNew(PChar(rsWIAName));
-  Result:= Length(AUI_Title);
 end;
 
 function TDigIt_Source_WIA.UI_ImageIndex: Integer; stdcall;
@@ -596,13 +517,11 @@ var
    aFormat: TWIAImageFormat;
    capRet: Boolean;
    curParams: TWIAParams;
-   i: Integer;
 
 begin
-  Result:= 0;
-  aData:= nil;
+  Result:= inherited Take(takeAction, aDataType, aData);
+  if (rParams = nil) then exit;
 
-  if (rParams <> nil) then
   with (rParams as TDigIt_Source_WIA_Params) do
   try
      DownloadedFiles.Clear;

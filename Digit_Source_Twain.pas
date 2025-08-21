@@ -16,8 +16,8 @@ interface
 uses
   simpleipc, SyncIPC, Process, Classes, SysUtils,
   MM_OpenArrayList,
-  Twain, DelphiTwain, DelphiTwainTypes, DelphiTwainUtils,
-  Digit_Bridge_Intf, Digit_Source_Twain_Types, DelphiTwain_SelectForm, DelphiTwain_SettingsForm;
+  Twain, DelphiTwain, DelphiTwainTypes, DelphiTwainUtils, DelphiTwain_SelectForm, DelphiTwain_SettingsForm,
+  Digit_Bridge_Intf, DigIt_Source_Common, Digit_Source_Twain_Types;
 
 const
   DigIt_Source_Twain_Name = 'Twain Device';
@@ -27,29 +27,23 @@ resourcestring
   rsTwainExcNotFound = 'Device not found...';
 
 type
-  TDigIt_Source_Twain = class;
-
   { TDigIt_Source_Twain_Params }
 
-  TDigIt_Source_Twain_Params  = class(TNoRefCountObject, IDigIt_Params)
+  TDigIt_Source_Twain_Params  = class(TDigIt_Source_Common_Params)
   protected
     rScannerInfo: TTwainDeviceInfo;
     rTwainParams: TTwainParams;
-    rOwner: TDigIt_Source_Twain;
+
+    function GetSummary: String; override;
 
   public
-    function Init: Boolean; stdcall;
-    function Release: Boolean; stdcall;
+    function GetFromUser: Boolean; stdcall; override;
+    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
+    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
 
-    function GetFromUser: Boolean; stdcall;
-    function Duplicate: IDigIt_Params; stdcall;
-    function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
-    function Summary(out ASummary: PChar): Integer; stdcall;
+    function OnSelected: Boolean; stdcall; override;
 
-    function OnSelected: Boolean; stdcall;
-
-    constructor Create(AOwner: TDigIt_Source_Twain);
+    constructor Create(AOwner: TDigIt_Source_Common); override;
   end;
 
   { TDigIt_Source_WIA_Files}
@@ -60,7 +54,7 @@ type
 
   { TDigIt_Source_Twain }
 
-  TDigIt_Source_Twain = class(TNoRefCountObject, IDigIt_Source)
+  TDigIt_Source_Twain = class(TDigIt_Source_Common)
   private
     rTwain:TCustomDelphiTwain;
     TwainSource:TTwainSource;
@@ -72,11 +66,8 @@ type
     rCommsClient:TSyncIPCClient;
     ipcSourceList:array of TW_IDENTITY;
     countTwain_Source,
-    countIPC_Source,
-    countTakes: Integer;
+    countIPC_Source: Integer;
     DownloadedFiles: TDigIt_Source_Twain_Files;
-    rParams: IDigIt_Params;
-    rEnabled: Boolean;
 
     function getCommsClient: TSyncIPCClient;
     function getTwain: TCustomDelphiTwain;
@@ -103,26 +94,19 @@ type
     property Twain: TCustomDelphiTwain read getTwain;
     property CommsClient:TSyncIPCClient read getCommsClient;
 
+  protected
+    function GetParamsClass: TDigIt_Source_Common_ParamsClass; override;
+    function GetName: String; override;
+
   public
     //IDigIt_Interface Implementation
-    function Flags: TDigItInterfaceKind; stdcall;
-    function Init: Boolean; stdcall;
-    function Release: Boolean; stdcall;
-    function Enabled: Boolean; stdcall;
-    function setEnabled(AEnabled: Boolean): Boolean; stdcall;
-
-    function Params: IDigIt_Params; stdcall;
-    function Params_New: IDigIt_Params; stdcall;
-    function Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
-
-    function UI_Title(out AUI_Title: PChar): Integer; stdcall;
-    function UI_ImageIndex: Integer; stdcall;
+    function Enabled: Boolean; stdcall; override;
+    function UI_ImageIndex: Integer; stdcall; override;
 
     //IDigIt_Source Implementation
                                                        //Take a Picture and returns FileName/s
-    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
-
-    procedure Clear; stdcall;
+    function Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall; override;
+    procedure Clear; stdcall; override;
 
     constructor Create;
     destructor Destroy; override;
@@ -139,17 +123,6 @@ var
 
 { TDigIt_Source_Twain_Params }
 
-function TDigIt_Source_Twain_Params.Init: Boolean; stdcall;
-begin
-  Result:= True;
-end;
-
-function TDigIt_Source_Twain_Params.Release: Boolean; stdcall;
-begin
-  Result:= True;
-  Free;
-end;
-
 function TDigIt_Source_Twain_Params.GetFromUser: Boolean; stdcall;
 var
   newSelectedInfo: TTwainDeviceInfo;
@@ -158,7 +131,7 @@ var
 begin
   Result :=False;
 
-  with rOwner do
+  with TDigIt_Source_Twain(rOwner) do
   try
      if Twain.SourceManagerLoaded then
      begin
@@ -209,11 +182,6 @@ begin
     TwainSelectSource.Free; TwainSelectSource:= Nil;
     TwainSettingsSource.Free; TwainSettingsSource:= Nil;
   end;
-end;
-
-function TDigIt_Source_Twain_Params.Duplicate: IDigIt_Params; stdcall;
-begin
-  Result:= nil;
 end;
 
 function TDigIt_Source_Twain_Params.Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
@@ -283,22 +251,16 @@ begin
   end;
 end;
 
-function TDigIt_Source_Twain_Params.Summary(out ASummary: PChar): Integer; stdcall;
-var
-   res: String;
-
+function TDigIt_Source_Twain_Params.GetSummary: String;
 begin
-  Result:= 0;
+  Result:= '';
 
   if (rScannerInfo.ProductName <> '') then
   begin
-    res:= rScannerInfo.ProductName;
+    Result:= rScannerInfo.ProductName;
     if (rTwainParams.PaperFeed = pfFeeder)
-    then res:= res+' ('+rsFeeder+')'
-    else res:= res+' ('+rsFlatbed+')';
-
-    ASummary:= StrNew(PChar(res));
-    Result:= Length(ASummary);
+    then Result:= Result+' ('+rsFeeder+')'
+    else Result:= Result+' ('+rsFlatbed+')';
   end;
 end;
 
@@ -309,7 +271,7 @@ var
 begin
   Result:= False;
 
-  with rScannerInfo, rOwner do
+  with rScannerInfo, TDigIt_Source_Twain(rOwner) do
   begin
     aIndex:= -1;
     if (Manufacturer<>'') and (ProductFamily<>'') and (ProductName<>'') then
@@ -347,11 +309,10 @@ begin
   end;
 end;
 
-constructor TDigIt_Source_Twain_Params.Create(AOwner: TDigIt_Source_Twain);
+constructor TDigIt_Source_Twain_Params.Create(AOwner: TDigIt_Source_Common);
 begin
-  inherited Create;
+  inherited Create(AOwner);
 
-  rOwner:= AOwner;
   FillChar(rScannerInfo, Sizeof(rScannerInfo), 0);
 end;
 
@@ -720,10 +681,7 @@ begin
   rTwain:= nil;
   rCommsClient:= nil;
   ipcProcess:= nil;
-  rEnabled:= True;
-  countTakes:= -1;
   DownloadedFiles:= TDigIt_Source_Twain_Files.Create;
-  rParams:= nil;
 end;
 
 destructor TDigIt_Source_Twain.Destroy;
@@ -752,55 +710,20 @@ begin
   ASender.FillList(ipcSourceList);
 end;
 
-function TDigIt_Source_Twain.Flags: TDigItInterfaceKind; stdcall;
+function TDigIt_Source_Twain.GetParamsClass: TDigIt_Source_Common_ParamsClass;
 begin
-  Result:= diSourceStd;
+  Result:= TDigIt_Source_Twain_Params;
 end;
 
-function TDigIt_Source_Twain.Init: Boolean; stdcall;
+function TDigIt_Source_Twain.GetName: String;
 begin
-  Result:= True;
+  Result:= rsTwainName;
 end;
 
 function TDigIt_Source_Twain.Enabled: Boolean; stdcall;
 begin
   Result:= rEnabled and
           ((GetTwainDirectory(TWAINLIBRARY_32)<>'') or (GetTwainDirectory(TWAINLIBRARY_64)<>''));
-end;
-
-function TDigIt_Source_Twain.setEnabled(AEnabled: Boolean): Boolean; stdcall;
-begin
-  rEnabled:= AEnabled;
-  Result:= rEnabled;
-end;
-
-function TDigIt_Source_Twain.Release: Boolean; stdcall;
-begin
-  Free;
-  Result:= True;
-end;
-
-function TDigIt_Source_Twain.Params: IDigIt_Params; stdcall;
-begin
-  Result:= rParams;
-end;
-
-function TDigIt_Source_Twain.Params_New: IDigIt_Params; stdcall;
-begin
-  rParams:= TDigIt_Source_Twain_Params.Create(Self);
-  Result:= rParams;
-end;
-
-function TDigIt_Source_Twain.Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
-begin
-  rParams:= AParams;
-  Result:= True;
-end;
-
-function TDigIt_Source_Twain.UI_Title(out AUI_Title: PChar): Integer; stdcall;
-begin
-  AUI_Title:= StrNew(PChar(rsTwainName));
-  Result:= Length(AUI_Title);
 end;
 
 function TDigIt_Source_Twain.UI_ImageIndex: Integer; stdcall;
@@ -817,10 +740,9 @@ var
    i: Integer;
 
 begin
-  Result:= 0;
-  aData:= nil;
+  Result:= inherited Take(takeAction, aDataType, aData);
+  if (rParams = nil) then exit;
 
-  if (rParams <> nil) then
   with (rParams as TDigIt_Source_Twain_Params) do
   try
      DownloadedFiles.Clear;

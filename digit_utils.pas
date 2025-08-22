@@ -36,7 +36,7 @@ function PaperSizesMenuTag_encode(PhysicalUnit: TPhysicalUnit; vert: Boolean; pI
 
 procedure BuildSourcesMenu(AOwner: TComponent;
                            menuSources: TMenu; menuSourcesOnClick: TNotifyEvent;
-                           ASelectedSource: PSourceInfo);
+                           ASelectedSource: PSourceInfo; ASelectedSubItem: Integer=-1);
 
 procedure SourcesMenuTag_decode(ATag: Integer; out Index, SubIndex: Integer);
 function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
@@ -283,7 +283,7 @@ end;
 
 procedure BuildSourcesMenu(AOwner: TComponent;
                            menuSources: TMenu; menuSourcesOnClick: TNotifyEvent;
-                           ASelectedSource: PSourceInfo);
+                           ASelectedSource: PSourceInfo; ASelectedSubItem: Integer);
 var
    i, iSub,
    cSub, res: Integer;
@@ -346,7 +346,10 @@ begin
               newItem.Tag:= SourcesMenuTag_encode(i, iSub);
               newItem.OnClick:= menuSourcesOnClick;
               menuSources.Items.Add(newItem);
-              newItem.Default:= curSelected and curSourceItems.Selected(iSub);
+
+              if (ASelectedSubItem = -1)
+              then newItem.Default:= curSelected and curSourceItems.Selected(iSub)
+              else newItem.Default:= curSelected and (ASelectedSubItem = iSub);
             end;
           end;
 

@@ -16,7 +16,7 @@ interface
 uses
   Classes, SysUtils, Graphics, Forms, Controls, Buttons, ComCtrls, ExtCtrls,
   Menus, Laz2_XMLCfg, BCPanel, BCListBox,
-  Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Session;
+  Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources, DigIt_Session;
 
 resourcestring
   rsProfiles_AddCurrent = 'Add Current Source...';
@@ -49,6 +49,7 @@ type
     panelButtons: TBCPanel;
     procedure btAddProfileClick(Sender: TObject);
     procedure btDelAllClick(Sender: TObject);
+    procedure btEditProfileClick(Sender: TObject);
     procedure btUpDownClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure lvProfilesEdited(Sender: TObject; Item: TListItem;
@@ -64,11 +65,15 @@ type
     procedure UI_LoadFromXML;
     procedure UI_SourceMenuClick(Sender: TObject);
 
+
   public
     class function Execute(ASession: TDigIt_Session; const AFilename: String; var ATitleArray: TStringArray): Boolean;
     class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 
+    class function Add(const ASource: PSourceInfo; const AParams: IDigIt_Params;
+                       const ASourceName, AFilename: String; var ATitleArray: TStringArray): Boolean;
     class function AddCurrent(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+
   end;
 
 var
@@ -80,7 +85,7 @@ implementation
 
 uses Laz2_DOM, FileUtil,
      MM_StrUtils, MM_Form_EditText,
-     DigIt_Sources, DigIt_Utils;
+     DigIt_Utils;
 
 { TDigIt_Profiles_Form }
 
@@ -154,20 +159,85 @@ begin
   end;
 end;
 
+procedure TDigIt_Profiles_Form.btEditProfileClick(Sender: TObject);
+var
+   aXML: TRttiXMLConfig;
+   curItem: TListItem;
+   ASource: PSourceInfo=nil;
+   AParams: IDigIt_Params=nil;
+   curName,
+   curXMPath: String;
+
+begin
+  curItem:= lvProfiles.Selected;
+  if (curItem <> nil) then
+  try
+     aXML:= TRttiXMLConfig.Create(XMLFilename);
+
+     curXMPath:= PROF_Item+IntToStr(curItem.Index)+'/';
+
+     if Sources.Get(ASource, AParams, curName, aXML, curXMPath) then
+     begin
+       if (AParams <> nil) then
+       begin
+         try
+            //Rewrite Profile Title
+            aXML.SetValue(curXMPath+'Name', curItem.Caption);
+
+            //Save Source
+            aXML.SetValue(curXMPath+'Source/Name', curName);
+            aXML.DeletePath(curXMPath+'Source/Params/');
+
+         finally
+           aXML.Free; aXML:= nil;
+         end;
+
+         AParams.Save(PChar(XMLFilename), PChar(curXMPath+'Source/Params'));
+       end;
+     end;
+  finally
+     if (AParams <> nil) then AParams.Release;
+  end;
+end;
+
+procedure TDigIt_Profiles_Form.UI_SourceMenuClick(Sender: TObject);
+var
+   newSourceIndex,
+   newSourceSubIndex: Integer;
+   curItem: TListItem;
+   ASource: PSourceInfo=nil;
+   AParams: IDigIt_Params=nil;
+   curName: String;
+
+begin
+  if (Sender<>nil) and (Sender is TMenuItem) then
+  begin
+    SourcesMenuTag_decode(TMenuItem(Sender).Tag, newSourceIndex, newSourceSubIndex);
+
+    if Sources.Get(ASource, AParams, newSourceIndex, newSourceSubIndex, True) then
+    try
+      curName:= Sources.Key[newSourceIndex];
+      if Add(ASource, AParams, curName, XMLFilename, TitleArray) then
+      begin
+        curItem:= lvProfiles.Items.Add;
+        curItem.Caption:= TitleArray[Length(TitleArray)-1];
+        curItem.SubItems.Add(curName);
+      end;
+
+    finally
+      if (AParams <> nil) then AParams.Release;
+    end;
+  end;
+end;
+
 procedure TDigIt_Profiles_Form.btAddProfileClick(Sender: TObject);
 var
-   tmpArray: TStringArray=nil;
    Pt: TPoint;
 
 begin
-  try
-     BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, Sources.Selected);
-     Pt:= btAddProfile.ClientToScreen(Point(0, btAddProfile.Height));
-     menuSources.PopUp(Pt.X, Pt.Y);
-
-  finally
-    tmpArray:= nil;
-  end;
+  BuildSourcesMenu(Self, menuSources, @UI_SourceMenuClick, nil);
+  Pt:= btAddProfile.ClientToScreen(Point(0, btAddProfile.Height));
+  menuSources.PopUp(Pt.X, Pt.Y);
 end;
 
 procedure TDigIt_Profiles_Form.FormShow(Sender: TObject);
@@ -179,7 +249,6 @@ procedure TDigIt_Profiles_Form.lvProfilesEdited(Sender: TObject; Item: TListItem
 var
    i: Integer;
    dup: Boolean;
-   curPath: String;
    XML: TRttiXMLConfig;
 
 begin
@@ -225,6 +294,7 @@ var
 
 begin
   try
+  try
      XML:= TRttiXMLConfig.Create(XMLFilename);
 
      lvProfiles.Clear;
@@ -240,39 +310,20 @@ begin
        curItem.SubItems.Add(XML.GetValue(PROF_Item+IntToStr(i)+'/Source/Name', ''));
      end;
 
+  except
+  end;
+
   finally
     XML.Free;
     UI_EnableButtons;
   end;
 end;
 
-procedure TDigIt_Profiles_Form.UI_SourceMenuClick(Sender: TObject);
-var
-   newSourceIndex,
-   newSourceSubIndex,
-   iCount: Integer;
-   curItem: TListItem;
-   ATitleArray: TStringArray=nil;
-
-begin
-  if (Sender<>nil) and (Sender is TMenuItem) then
-  try
-    SourcesMenuTag_decode(TMenuItem(Sender).Tag, newSourceIndex, newSourceSubIndex);
-
-    if Sources.Select(newSourceIndex, newSourceSubIndex, True) then
-    begin
-      AddCurrent(XMLFilename, ATitleArray);
-      curItem:= lvProfiles.Items.Add;
-      curItem.Caption:= ATitleArray[Length(ATitleArray)-1];
-      curItem.SubItems.Add(Sources.SelectedName);
-    end;
-
-  finally
-    ATitleArray:= nil;
-  end;
-end;
-
 class function TDigIt_Profiles_Form.Execute(ASession: TDigIt_Session; const AFilename: String; var ATitleArray: TStringArray): Boolean;
+var
+   fCreate: Boolean;
+   fHandle: THandle;
+
 begin
   Result:= False;
   try
@@ -281,17 +332,28 @@ begin
      if (DigIt_Profiles_Form <> nil) then
      with DigIt_Profiles_Form do
      try
-        if CopyFile(AFilename, AFilename+'.tmp') then
+        XMLFilename:= AFilename+'.tmp';
+
+        if not(FileExists(AFilename))
+        then try
+               fHandle:= FileCreate(XMLFilename);
+               FileClose(fHandle);
+               fCreate:= True;
+             except
+               fCreate:= False;
+             end
+        else fCreate:= CopyFile(AFilename, XMLFilename);
+
+        if fCreate then
         begin
-          XMLFilename:= AFilename+'.tmp';
           UI_LoadFromXML;
 
           Result:= (ShowModal = mrOk);
 
           if Result then
           begin
-            Result:= CopyFile(AFilename+'.tmp', AFilename);
-            DeleteFile(AFilename+'.tmp');
+            Result:= CopyFile(XMLFilename, AFilename);
+            DeleteFile(XMLFilename);
             Result:= LoadFromXML(AFilename, ATitleArray);
           end;
 
@@ -355,8 +417,86 @@ begin
        end;
 end;
 
-class function TDigIt_Profiles_Form.AddCurrent(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+class function TDigIt_Profiles_Form.Add(const ASource: PSourceInfo; const AParams: IDigIt_Params;
+                                        const ASourceName, AFilename: String; var ATitleArray: TStringArray): Boolean;
+var
+   newProfileTitleP: PChar;
+   newProfileTitle,
+   curXMPath: String;
+   aXML: TRttiXMLConfig;
+   res, iCount: Integer;
 
+begin
+  if (ASource <> nil) then
+  try
+     chkTitleArray:= @ATitleArray;
+
+     //First tell to Params a Description then to Source
+     newProfileTitleP:= ''; res:= 0;
+     if (AParams <> nil) then
+     begin
+       res:= AParams.Summary(newProfileTitleP);
+       if (res >0 ) and (newProfileTitleP <> '') then
+       begin
+         newProfileTitle:= newProfileTitleP;
+         StrDispose(newProfileTitleP);
+         newProfileTitleP:= '';
+       end;
+     end;
+
+     res:= ASource^.Inst.UI_Title(newProfileTitleP);
+     if (res > 0) and (newProfileTitleP <> '') then
+     begin
+       if (newProfileTitle = '')
+       then newProfileTitle:= newProfileTitleP
+       else newProfileTitle:= newProfileTitle+' - '+newProfileTitleP;
+
+       StrDispose(newProfileTitleP);
+       newProfileTitleP:= '';
+     end;
+
+     Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
+     if Result then
+     begin
+       Result:= False;
+       try
+          aXML:= TRttiXMLConfig.Create(AFilename);
+
+          //Load Profiles Count
+          iCount:= aXML.GetValue('Profiles/Count', 0);
+
+          curXMPath:= PROF_Item+IntToStr(iCount)+'/';
+
+          //Add new Profile as Last
+          aXML.SetValue(curXMPath+'Name', newProfileTitle);
+          aXML.SetValue('Profiles/Count', iCount+1);
+
+          //Save Source
+          aXML.SetValue(curXMPath+'Source/Name', ASourceName);
+          aXML.DeletePath(curXMPath+'Source/Params/');
+
+       finally
+         aXML.Free; aXML:= nil;
+       end;
+
+       //FPC Bug?
+       //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
+       //So we do it after destroying XML.
+
+       if (AParams <> nil)
+       then AParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
+
+       SetLength(ATitleArray, iCount+1);
+       ATitleArray[iCount]:= newProfileTitle;
+       Result:= True;
+     end;
+
+  finally
+    if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
+  end;
+end;
+
+class function TDigIt_Profiles_Form.AddCurrent(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 var
    ASourceParams: IDigIt_Params;
    newProfileTitleP: PChar;
@@ -366,6 +506,11 @@ var
    res, iCount: Integer;
 
 begin
+  Result:= False;
+  if (Sources.Selected <> nil) then Result:= Add(Sources.Selected, Sources.SelectedParams, Sources.SelectedName,
+                                                       AFilename, ATitleArray);
+
+(*oldcode
   if (Sources.Selected <> nil) then
   try
      ASourceParams:= Sources.SelectedParams;
@@ -435,6 +580,7 @@ begin
   finally
     if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
   end;
+  *)
 end;
 
 end.

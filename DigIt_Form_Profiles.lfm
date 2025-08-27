@@ -162,6 +162,7 @@ object DigIt_Profiles_Form: TDigIt_Profiles_Form
       Enabled = False
       Images = imgList
       ImageIndex = 2
+      OnClick = btDelClick
     end
     object btDelAll: TSpeedButton
       Left = 392

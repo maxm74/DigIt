@@ -37,7 +37,7 @@ type
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
 
-    function OnSelected: Boolean; stdcall; override;
+    function Select: Boolean; stdcall; override;
   end;
 
   { TDigIt_Source_Folder }
@@ -140,7 +140,7 @@ begin
   end;
 end;
 
-function TDigIt_Source_Folder_Params.OnSelected: Boolean; stdcall;
+function TDigIt_Source_Folder_Params.Select: Boolean; stdcall;
 begin
   repeat
     Result:= DirectoryExists(Folder);
@@ -195,9 +195,9 @@ end;
 
 destructor TDigIt_Source_Folder.Destroy;
 begin
-  inherited Destroy;
-
   if (xFiles <> nil) then xFiles.Free;
+
+  inherited Destroy;
 end;
 
 function TDigIt_Source_Folder.UI_ImageIndex: Integer; stdcall;

@@ -37,7 +37,7 @@ type
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; virtual;
     function Summary(out ASummary: PChar): Integer; stdcall; virtual;
 
-    function OnSelected: Boolean; stdcall; virtual;
+    function Select: Boolean; stdcall; virtual;
 
     constructor Create(AOwner: TDigIt_Source_Common); virtual;
   end;
@@ -128,7 +128,7 @@ begin
   Result:= Length(ASummary);
 end;
 
-function TDigIt_Source_Common_Params.OnSelected: Boolean; stdcall;
+function TDigIt_Source_Common_Params.Select: Boolean; stdcall;
 begin
   Result:= True;
 end;
@@ -160,14 +160,11 @@ begin
        Result:= nil;
      end;
 
-     if (Result <> nil) then
+     //Try to Get Params from User if fail Release it
+     if (Result <> nil) and (Result.Select) and not(Result.GetFromUser) then
      begin
-       //Try to Get Params from User if fail Release it
-       if not(Result.GetFromUser) then
-       begin
-         Result.Release;
-         Result:= nil;
-       end;
+       Result.Release;
+       Result:= nil;
      end;
 
   except
@@ -191,9 +188,13 @@ end;
 
 destructor TDigIt_Source_Common.Destroy;
 begin
-  inherited Destroy;
+  if (rParams <> nil) then
+  begin
+    rParams.Release;
+    rParams:= nil;
+  end;
 
-  if (rParams <> nil) then rParams.Release;
+  inherited Destroy;
 end;
 
 function TDigIt_Source_Common.Flags: TDigItInterfaceKind; stdcall;
@@ -225,7 +226,12 @@ end;
 
 function TDigIt_Source_Common.Params: IDigIt_Params; stdcall;
 begin
-  Result:= rParams;
+  try
+     Result:= rParams;
+
+  except
+     Result:= nil;
+  end;
 end;
 
 function TDigIt_Source_Common.Params_New: IDigIt_Params; stdcall;

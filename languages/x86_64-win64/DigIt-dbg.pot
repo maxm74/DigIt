@@ -148,8 +148,26 @@ msgctxt "digit_form_profiles.rsprofiles_addcurrent"
 msgid "Add Current Source..."
 msgstr ""
 
+#: digit_form_profiles.rsprofiles_del
+#, object-pascal-format
+msgid ""
+"Delete Profile?\n"
+"%s"
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_delall
+msgid "Delete All Profiles?"
+msgstr ""
+
 #: digit_form_profiles.rsprofiles_invalidtitle_exists
 msgid "Profile Title already exists"
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_sourceerr
+#, object-pascal-format
+msgid ""
+"Cannot Open Source\n"
+"%s"
 msgstr ""
 
 #: digit_form_profiles.rsprofiles_title

@@ -2,7 +2,13 @@ DigIt CHANGE LOG
 ======================
 
 
-2025/08/22 Edit Profiles with new TDigIt_Sources (does not work);
+2025/08/27 Fix RefCount Exception in theBridge;
+           Completed Profiles separation from UI (derived from TOpenArrayString);
+           Completed FormProfiles (need some fix);
+           Twain e WIA Files derived from TOpenArrayString;
+           Change method name IDigIt_Params.OnSelected to Select;
+
+        22 Edit Profiles with new TDigIt_Sources (does not work);
 
         21 Added TDigIt_Source_Common classes;
            Derived all Sources from TDigIt_Source_Common;

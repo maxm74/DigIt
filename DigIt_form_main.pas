@@ -303,6 +303,7 @@ type
     procedure edCropWidthChange(Sender: TObject);
     procedure menuDebugClick(Sender: TObject);
     procedure menuImageFormatClick(Sender: TObject);
+    procedure menuProfilesPopup(Sender: TObject);
     procedure menuRulerViewClick(Sender: TObject);
     procedure rgCropAspectSelectionChanged(Sender: TObject);
     procedure btCropApplyAspectRatioClick(Sender: TObject);
@@ -409,6 +410,7 @@ uses
   LCLIntf, LCLProc, fppdf, FileUtil, LazFileUtils,
   BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff, BGRAFormatUI,
   MM_Interface_Progress, MM_Form_Progress,
+  DigIt_Profiles,
   DigIt_Destination_SaveFiles_SettingsForm,
   DigIt_Form_ExportFiles, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
 
@@ -512,8 +514,7 @@ begin
 
   Settings.Load(nil);
 
-  TDigIt_Profiles_Form.LoadFromXML(Path_Config+File_Profiles, Profiles);
-  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
+//  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
@@ -632,6 +633,7 @@ end;
 
 procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
+  MMForm_Progress:= nil;
   theBridge.Free;
   Counter.Free;
   Session.Free;
@@ -1165,10 +1167,14 @@ end;
 
 procedure TDigIt_Main.itemProfiles_AddCurrentClick(Sender: TObject);
 begin
-  if TDigIt_Profiles_Form.AddCurrent(Path_Config+File_Profiles, Profiles) then
+  if (TDigIt_Profiles_Form.Add(Sources.Selected, Sources.SelectedParams, Sources.SelectedName,
+                              DigIt_Profiles.Profiles.XMLFilename, DigIt_Profiles.Profiles.List)<>'') then
   try
-     BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
-     menuProfiles.Items[Length(Profiles)-1].Default:= True;
+     DigIt_Profiles.Profiles.LoadFromXML;
+
+     BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
+
+     if (menuProfiles.Items.Count > 0) then menuProfiles.Items[DigIt_Profiles.Profiles.Count-1].Default:= True;
 
   finally
   end;
@@ -1176,9 +1182,10 @@ end;
 
 procedure TDigIt_Main.itemProfiles_EditClick(Sender: TObject);
 begin
-  if TDigIt_Profiles_Form.Execute(Session, Path_Config+File_Profiles, Profiles) then
+  if TDigIt_Profiles_Form.Execute(Path_Config+File_Profiles) then
   try
-     BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick, Profiles);
+     DigIt_Profiles.Profiles.LoadFromXML;
+     BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
 
   finally
     DigIt_Profiles_Form.Free; DigIt_Profiles_Form:= nil;
@@ -2029,6 +2036,11 @@ begin
   TBGRAFormatUIContainer.Execute(Session.SaveFormat, Session.SaveWriter);
 end;
 
+procedure TDigIt_Main.menuProfilesPopup(Sender: TObject);
+begin
+  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
+end;
+
 procedure TDigIt_Main.menuRulerViewClick(Sender: TObject);
 var
    curRuler: TRulersSide;
@@ -2269,12 +2281,8 @@ procedure TDigIt_Main.UI_ProfileMenuClick(Sender: TObject);
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   try
-    if (Session.LoadSource(nil, False,
-                           PROF_Item+IntToStr(TMenuItem(Sender).Tag)+'/',
-                           Path_Config+File_Profiles) > -1) then
-    begin
-      TMenuItem(Sender).Default:= True;
-    end;
+    if (Session.LoadSourceFromProfiles(Path_Config+File_Profiles, TMenuItem(Sender).Tag) > -1)
+    then TMenuItem(Sender).Default:= True;
 
   finally
     UI_ToolBar;

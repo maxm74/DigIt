@@ -19,7 +19,7 @@ uses
   {$ifdef BGRAControls}
   BGRAImageManipulation,
   {$endif}
-  DigIt_Types, Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources;
+  DigIt_Types, Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources, DigIt_Profiles;
 
 resourcestring
   rsDestination_Default = 'Save as Files';
@@ -44,8 +44,7 @@ function SourcesMenuTag_encode(Index, SubIndex: Integer): Integer;
 procedure BuildDestinationsMenu(AOwner: TComponent; menuDestinations: TMenu; menuOnClick: TNotifyEvent);
 
 procedure BuildProfilesMenu(AOwner: TComponent;
-                            menuProfiles: TMenu; itemOnClick: TNotifyEvent;
-                            Profiles: TStringArray);
+                            menuProfiles: TMenu; itemOnClick: TNotifyEvent);
 
 function FindMenuItemByTag(AMenu: TMenu; ATag: PtrInt): TMenuItem;
 
@@ -427,7 +426,7 @@ begin
 end;
 
 procedure BuildProfilesMenu(AOwner: TComponent; menuProfiles: TMenu;
-                            itemOnClick: TNotifyEvent; Profiles: TStringArray);
+                            itemOnClick: TNotifyEvent);
 var
    i: Integer;
    newItem: TMenuItem;
@@ -438,13 +437,13 @@ begin
     menuProfiles.Items.Delete(0);
 
   //Hide or Show Separator whether or not there are Profiles
-  menuProfiles.Items[0].Visible:= (Length(Profiles) > 0);
+  menuProfiles.Items[0].Visible:= (DigIt_Profiles.Profiles.Count > 0);
 
-  for i:=Length(Profiles)-1 downto 0 do
+  for i:=DigIt_Profiles.Profiles.Count-1 downto 0 do
   begin
     newItem:= TMenuItem.Create(AOwner);
 
-    newItem.Caption:= Profiles[i];
+    newItem.Caption:= DigIt_Profiles.Profiles[i];
     //newItem.ImageIndex:= ;
     newItem.Tag:= i;
     newItem.OnClick:= itemOnClick;

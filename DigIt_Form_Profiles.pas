@@ -14,17 +14,17 @@ unit DigIt_Form_Profiles;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Forms, Controls, Buttons, ComCtrls, ExtCtrls,
+  Classes, SysUtils, Graphics, Forms, Controls, Buttons, ComCtrls, ExtCtrls, Dialogs,
   Menus, Laz2_XMLCfg, BCPanel, BCListBox,
-  Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources, DigIt_Session;
+  Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources, DigIt_Profiles;
 
 resourcestring
   rsProfiles_AddCurrent = 'Add Current Source...';
+  rsProfiles_Del = 'Delete Profile?'#13#10'%s';
+  rsProfiles_DelAll = 'Delete All Profiles?';
   rsProfiles_Title = 'Profile Title :';
   rsProfiles_InvalidTitle_Exists = 'Profile Title already exists';
-
-const
-  PROF_Item = 'Profiles/Profile_';
+  rsProfiles_SourceErr = 'Cannot Open Source'#13#10'%s';
 
 type
   { TDigIt_Profiles_Form }
@@ -49,6 +49,7 @@ type
     panelButtons: TBCPanel;
     procedure btAddProfileClick(Sender: TObject);
     procedure btDelAllClick(Sender: TObject);
+    procedure btDelClick(Sender: TObject);
     procedure btEditProfileClick(Sender: TObject);
     procedure btUpDownClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -58,8 +59,7 @@ type
       Selected: Boolean);
 
   private
-    XMLFilename: String;
-    TitleArray: TStringArray;
+    newProfiles: TDigIt_Profiles;
 
     procedure UI_EnableButtons;
     procedure UI_LoadFromXML;
@@ -67,13 +67,14 @@ type
 
 
   public
-    class function Execute(ASession: TDigIt_Session; const AFilename: String; var ATitleArray: TStringArray): Boolean;
-    class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
-
+    class function Execute(const AFilename: String): Boolean;
+(*oldcode    class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+*)
     class function Add(const ASource: PSourceInfo; const AParams: IDigIt_Params;
-                       const ASourceName, AFilename: String; var ATitleArray: TStringArray): Boolean;
-    class function AddCurrent(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+                       const ASourceName, AFilename: String; const ATitleArray: TStringArray): String; overload;
+    function Add(const ASource: PSourceInfo; const AParams: IDigIt_Params; const ASourceName: String): String; overload;
 
+//    function AddCurrent(const AFilename: String; var ATitle: TStringArray): Boolean;
   end;
 
 var
@@ -103,37 +104,18 @@ begin
   try
     oldIndex:= curItem.Index;
 
-    lvProfiles.BeginUpdate;
-
     Case TSpeedButton(Sender).Tag of
-      0: lvProfiles.Items.Move(curItem.Index, 0);
-      1: lvProfiles.Items.Move(curItem.Index, lvProfiles.Items.Count-1);
-      2: lvProfiles.Items.Move(curItem.Index, curItem.Index-1);
-      3: lvProfiles.Items.Move(curItem.Index, curItem.Index+1);
+      0: newIndex:= 0;
+      1: newIndex:= lvProfiles.Items.Count-1;
+      2: newIndex:= curItem.Index-1;
+      3: newIndex:= curItem.Index+1;
     end;
 
-    lvProfiles.EndUpdate;
-
-    try
-      newIndex:= curItem.Index;
-
-      { #note : Work directly with the text file, Maybe there is a better way to exchange two items}
-      theFile:= TStringStream.Create();
-      theFile.LoadFromFile(XMLFilename);
-      fileStr:= theFile.DataString;
-      fileStr:= StringReplace(fileStr, 'Profile_'+IntToStr(newIndex), 'Profile_X', [rfReplaceAll, rfIgnoreCase]);
-      fileStr:= StringReplace(fileStr, 'Profile_'+IntToStr(oldIndex), 'Profile_'+IntToStr(newIndex), [rfReplaceAll, rfIgnoreCase]);
-      fileStr:= StringReplace(fileStr, 'Profile_X', 'Profile_'+IntToStr(oldIndex), [rfReplaceAll, rfIgnoreCase]);
-      theFile.Seek(0, soFromBeginning);
-      {$IF SIZEOF(CHAR)=1}
-        theFile.WriteAnsiString(fileStr);
-      {$ELSE}
-        theFile.WriteUnicodeString(fileStr);
-      {$ENDIF}
-      theFile.SaveToFile(XMLFilename);
-
-    finally
-      theFile.Free;
+    if newProfiles.Move(oldIndex, newIndex) then
+    begin
+      lvProfiles.BeginUpdate;
+      lvProfiles.Items.Move(oldIndex, newIndex);
+      lvProfiles.EndUpdate;
     end;
 
   finally
@@ -142,20 +124,31 @@ begin
 end;
 
 procedure TDigIt_Profiles_Form.btDelAllClick(Sender: TObject);
+begin
+  try
+     if (MessageDlg('DigIt', rsProfiles_DelAll, mtConfirmation, [mbYes, mbNo], 0) = mrYes) and
+         newProfiles.Clear(True)
+     then lvProfiles.Clear;
+
+  finally
+     UI_EnableButtons;
+  end;
+end;
+
+procedure TDigIt_Profiles_Form.btDelClick(Sender: TObject);
 var
-   aXML: TRttiXMLConfig;
+   curItem: TListItem;
 
 begin
   try
-     lvProfiles.Clear;
-
-     aXML:= TRttiXMLConfig.CreateClean(XMLFilename);
-
-     //Set Selected Profile
-     aXML.SetValue('Profiles/Count', 0);
+     curItem:= lvProfiles.Selected;
+     if (curItem <> nil) and
+        (MessageDlg('DigIt', Format(rsProfiles_Del, [curItem.Caption]), mtConfirmation, [mbYes, mbNo], 0) = mrYes) and
+        newProfiles.Del(curItem.Index)
+     then lvProfiles.Items.Delete(curItem.Index);
 
   finally
-    aXML.Free;
+     UI_EnableButtons;
   end;
 end;
 
@@ -167,36 +160,31 @@ var
    AParams: IDigIt_Params=nil;
    curName,
    curXMPath: String;
+   connected: Boolean;
 
 begin
   curItem:= lvProfiles.Selected;
-  if (curItem <> nil) then
   try
-     aXML:= TRttiXMLConfig.Create(XMLFilename);
-
-     curXMPath:= PROF_Item+IntToStr(curItem.Index)+'/';
-
-     if Sources.Get(ASource, AParams, curName, aXML, curXMPath) then
+     if (curItem <> nil) and newProfiles.Get(curItem.Index, ASource, AParams, curName) then
      begin
-       if (AParams <> nil) then
-       begin
+       repeat
          try
-            //Rewrite Profile Title
-            aXML.SetValue(curXMPath+'Name', curItem.Caption);
-
-            //Save Source
-            aXML.SetValue(curXMPath+'Source/Name', curName);
-            aXML.DeletePath(curXMPath+'Source/Params/');
-
-         finally
-           aXML.Free; aXML:= nil;
+            connected:= (AParams <> nil) and AParams.Select and AParams.GetFromUser;
+         except
+            connected:= False;
          end;
+       until connected or (MessageDlg('DigIt', Format(rsProfiles_SourceErr, [curItem.Caption]),
+                           mtError, [mbRetry, mbCancel], 0) = mrCancel);
 
-         AParams.Save(PChar(XMLFilename), PChar(curXMPath+'Source/Params'));
-       end;
+       if connected then newProfiles.Put(curItem.Index, curName, curItem.Caption, AParams);
      end;
+
   finally
-     if (AParams <> nil) then AParams.Release;
+     if (AParams <> nil) then
+     begin
+     //  AParams.Release;
+     //  ASource^.Inst.Params_Set(nil);
+     end;
   end;
 end;
 
@@ -207,25 +195,49 @@ var
    curItem: TListItem;
    ASource: PSourceInfo=nil;
    AParams: IDigIt_Params=nil;
-   curName: String;
+   curName,
+   curTitle: String;
+   connected: Boolean;
 
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   begin
     SourcesMenuTag_decode(TMenuItem(Sender).Tag, newSourceIndex, newSourceSubIndex);
 
-    if Sources.Get(ASource, AParams, newSourceIndex, newSourceSubIndex, True) then
+    repeat
+      try
+         if (AParams <> nil) then
+         begin
+           AParams.Release;
+           ASource^.Inst.Params_Set(nil);
+         end;
+
+         connected:= Sources.Get(ASource, AParams, newSourceIndex, newSourceSubIndex, True);
+      except
+         connected:= False;
+      end;
+    until connected or (MessageDlg('DigIt', Format(rsProfiles_SourceErr, [TMenuItem(Sender).Caption]),
+                        mtError, [mbRetry, mbCancel], 0) = mrCancel);
+
+    if connected then
     try
       curName:= Sources.Key[newSourceIndex];
-      if Add(ASource, AParams, curName, XMLFilename, TitleArray) then
+      curTitle:= Add(ASource, AParams, curName, newProfiles.XMLFilename, newProfiles.List);
+      if (curTitle <> '') then
       begin
+        newProfiles.Add(curTitle);
         curItem:= lvProfiles.Items.Add;
-        curItem.Caption:= TitleArray[Length(TitleArray)-1];
+        curItem.Caption:= curTitle;
         curItem.SubItems.Add(curName);
+        lvProfiles.Selected:= curItem;
       end;
 
     finally
-      if (AParams <> nil) then AParams.Release;
+      if (AParams <> nil) then
+      begin
+      //  AParams.Release;
+      //  ASource^.Inst.Params_Set(nil);
+      end;
     end;
   end;
 end;
@@ -249,7 +261,6 @@ procedure TDigIt_Profiles_Form.lvProfilesEdited(Sender: TObject; Item: TListItem
 var
    i: Integer;
    dup: Boolean;
-   XML: TRttiXMLConfig;
 
 begin
   //Avoid Duplicates
@@ -259,12 +270,7 @@ begin
 
   if dup
   then AValue:= Item.Caption
-  else try
-          XML:= TRttiXMLConfig.Create(XMLFilename);
-          XML.SetValue(PROF_Item+IntToStr(Item.Index)+'/'+'Name', AValue);
-       finally
-          XML.Free;
-       end;
+  else newProfiles.SetTitle(Item.Index, AValue);
 end;
 
 procedure TDigIt_Profiles_Form.lvProfilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
@@ -274,44 +280,45 @@ end;
 
 procedure TDigIt_Profiles_Form.UI_EnableButtons;
 var
-   lvCount: Integer;
+   lvCount,
+   lvIndex: Integer;
 
 begin
   lvCount:= lvProfiles.Items.Count;
-  btDel.Enabled:= (lvCount > 0);
+  if (lvProfiles.Selected <> nil)
+  then lvIndex:= lvProfiles.Selected.Index
+  else lvIndex:= -1;
+
+  btEditProfile.Enabled:= (lvCount > 0) and (lvIndex >= 0);
+  btDel.Enabled:= btEditProfile.Enabled;
   btDelAll.Enabled:= (lvCount > 0);
-  btUp.Enabled:= (lvCount > 1) and (lvProfiles.Selected <> nil) and (lvProfiles.Selected.Index > 0);
-  btDown.Enabled:= (lvCount > 1) and (lvProfiles.Selected <> nil) and (lvProfiles.Selected.Index < lvCount-1);
+  btUp.Enabled:= (lvCount > 1) and (lvIndex > 0);
+  btDown.Enabled:= (lvCount > 1) and (lvIndex < lvCount-1);
   btFirst.Enabled:= btUp.Enabled;
   btLast.Enabled:= btDown.Enabled;
 end;
 
 procedure TDigIt_Profiles_Form.UI_LoadFromXML;
 var
-   i, iCount: Integer;
+   i: Integer;
    curItem: TListItem;
    XML: TRttiXMLConfig;
 
 begin
   try
-  try
-     XML:= TRttiXMLConfig.Create(XMLFilename);
-
      lvProfiles.Clear;
 
-     //Load Profiles
-     iCount:= XML.GetValue('Profiles/Count', 0);
-     SetLength(TitleArray, iCount);
-     for i:=0 to iCount-1 do
-     begin
-       curItem:= lvProfiles.Items.Add;
-       TitleArray[i]:= XML.GetValue(PROF_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
-       curItem.Caption:= TitleArray[i];
-       curItem.SubItems.Add(XML.GetValue(PROF_Item+IntToStr(i)+'/Source/Name', ''));
-     end;
+     XML:= TRttiXMLConfig.Create(newProfiles.XMLFilename);
 
-  except
-  end;
+     //Load Profiles Source Names
+     for i:=0 to newProfiles.Count-1 do
+     try
+       curItem:= lvProfiles.Items.Add;
+       curItem.Caption:= newProfiles.Data[i];
+       curItem.SubItems.Add(XML.GetValue(PROFILE_Item+IntToStr(i)+'/Source/Name', ''));
+
+     except
+     end;
 
   finally
     XML.Free;
@@ -319,10 +326,11 @@ begin
   end;
 end;
 
-class function TDigIt_Profiles_Form.Execute(ASession: TDigIt_Session; const AFilename: String; var ATitleArray: TStringArray): Boolean;
+class function TDigIt_Profiles_Form.Execute(const AFilename: String): Boolean;
 var
-   fCreate: Boolean;
-   fHandle: THandle;
+   XML: TRttiXMLConfig=nil;
+   XMLFileName: String;
+   ASelectedParams: IDigIt_Params;
 
 begin
   Result:= False;
@@ -331,49 +339,46 @@ begin
 
      if (DigIt_Profiles_Form <> nil) then
      with DigIt_Profiles_Form do
-     try
-        XMLFilename:= AFilename+'.tmp';
+     begin
+       if (DigIt_Sources.Sources.Selected <> nil) then ASelectedParams:= DigIt_Sources.Sources.Selected^.Inst.Params;
 
-        if not(FileExists(AFilename))
-        then try
-               fHandle:= FileCreate(XMLFilename);
-               FileClose(fHandle);
-               fCreate:= True;
-             except
-               fCreate:= False;
-             end
-        else fCreate:= CopyFile(AFilename, XMLFilename);
+       XMLFileName:= AFilename+'.tmp';
 
-        if fCreate then
-        begin
-          UI_LoadFromXML;
+       if FileExists(AFilename) then CopyFile(AFilename, XMLFileName);
 
-          Result:= (ShowModal = mrOk);
+       newProfiles:= TDigIt_Profiles.Create(XMLFileName);
 
-          if Result then
-          begin
-            Result:= CopyFile(XMLFilename, AFilename);
-            DeleteFile(XMLFilename);
-            Result:= LoadFromXML(AFilename, ATitleArray);
-          end;
+       UI_LoadFromXML;
 
-          //Reload Old Source
-          if (ASession <> nil) then
-          begin
-            ASession.LoadSource(nil, True);
-          end;
-        end;
+       Result:= (ShowModal = mrOk);
 
-     finally
+       //Restore Original Params of Selected Source, The Selected is not changed (we use only Sources.Get methods)
+       if (DigIt_Sources.Sources.Selected <> nil) then
+       begin
+         //DigIt_Sources.Sources.Selected^.Inst.Params_Set(nil);
+         if (ASelectedParams <> nil) then DigIt_Sources.Sources.Selected^.Inst.Params_Set(ASelectedParams);
+       end;
+
+       if Result then
+       begin
+         Result:= CopyFile(XMLFilename, AFilename);
+         DeleteFile(XMLFilename);
+       end;
      end;
 
   finally
-    DigIt_Profiles_Form.Free; DigIt_Profiles_Form:= nil;
+    if (DigIt_Profiles_Form <> nil) then
+    begin
+      DigIt_Profiles_Form.newProfiles.Free;
+      DigIt_Profiles_Form.Free;
+      DigIt_Profiles_Form:= nil;
+    end;
   end;
 end;
 
+(*oldcode
 class function TDigIt_Profiles_Form.LoadFromXML(const AFilename: String;
-  var ATitleArray: TStringArray): Boolean;
+                                                var ATitleArray: TStringArray): Boolean;
 var
    aXML: TRttiXMLConfig;
    i, iCount: Integer;
@@ -389,7 +394,7 @@ begin
      SetLength(ATitleArray, iCount);
      for i:=0 to iCount-1 do
      begin
-       ATitleArray[i]:= aXML.GetValue(PROF_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
+       ATitleArray[i]:= aXML.GetValue(PROFILE_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
      end;
 
      Result:= True;
@@ -398,6 +403,7 @@ begin
     aXML.Free;
   end;
 end;
+*)
 
 //I do it this way to not enable nestedprocvars switch
 var
@@ -418,7 +424,8 @@ begin
 end;
 
 class function TDigIt_Profiles_Form.Add(const ASource: PSourceInfo; const AParams: IDigIt_Params;
-                                        const ASourceName, AFilename: String; var ATitleArray: TStringArray): Boolean;
+                                        const ASourceName, AFilename: String;
+                                        const ATitleArray: TStringArray): String;
 var
    newProfileTitleP: PChar;
    newProfileTitle,
@@ -427,6 +434,7 @@ var
    res, iCount: Integer;
 
 begin
+  Result:= '';
   if (ASource <> nil) then
   try
      chkTitleArray:= @ATitleArray;
@@ -455,17 +463,15 @@ begin
        newProfileTitleP:= '';
      end;
 
-     Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
-     if Result then
+     if TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck) then
      begin
-       Result:= False;
        try
           aXML:= TRttiXMLConfig.Create(AFilename);
 
           //Load Profiles Count
           iCount:= aXML.GetValue('Profiles/Count', 0);
 
-          curXMPath:= PROF_Item+IntToStr(iCount)+'/';
+          curXMPath:= PROFILE_Item+IntToStr(iCount)+'/';
 
           //Add new Profile as Last
           aXML.SetValue(curXMPath+'Name', newProfileTitle);
@@ -476,7 +482,7 @@ begin
           aXML.DeletePath(curXMPath+'Source/Params/');
 
        finally
-         aXML.Free; aXML:= nil;
+         aXML.Free;
        end;
 
        //FPC Bug?
@@ -486,9 +492,7 @@ begin
        if (AParams <> nil)
        then AParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
 
-       SetLength(ATitleArray, iCount+1);
-       ATitleArray[iCount]:= newProfileTitle;
-       Result:= True;
+       Result:= newProfileTitle;
      end;
 
   finally
@@ -496,6 +500,13 @@ begin
   end;
 end;
 
+function TDigIt_Profiles_Form.Add(const ASource: PSourceInfo; const AParams: IDigIt_Params; const ASourceName: String): String;
+begin
+  Result:= Add(ASource, AParams, ASourceName, newProfiles.XMLFilename, newProfiles.List);
+  if (Result <> '') then newProfiles.Add(Result);
+end;
+
+(*oldcode
 class function TDigIt_Profiles_Form.AddCurrent(const AFilename: String; var ATitleArray: TStringArray): Boolean;
 var
    ASourceParams: IDigIt_Params;
@@ -551,7 +562,7 @@ begin
           //Load Profiles Count
           iCount:= aXML.GetValue('Profiles/Count', 0);
 
-          curXMPath:= PROF_Item+IntToStr(iCount)+'/';
+          curXMPath:= PROFILE_Item+IntToStr(iCount)+'/';
 
           //AddCurrent new Profile as Last
           aXML.SetValue(curXMPath+'Name', newProfileTitle);
@@ -582,6 +593,7 @@ begin
   end;
   *)
 end;
+*)
 
 end.
 

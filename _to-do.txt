@@ -1,4 +1,11 @@
+Struttura Base:
+  Sources.Get DEVE sempre creare una Classe Params la libero quando non serve,
+  Sources.Select Elimina la vecchia Classe Params prima di fare il nuovo Get
+  Rimettere il Free della Classe Params in Form_Profiles
+
 Bugs:
+  BuildSourceMenù non si accorge se spengo/accendo uno scanner, l'uso di RefreshList è anomalo;
+
   Image Manipulation Empty Image parte sempre con 21x29.7cm, appena attivo un Righello si corregge
      (probabile manca CreateEmptyImage in Loaded)
 

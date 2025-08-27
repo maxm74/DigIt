@@ -16,7 +16,7 @@ interface
 uses
   Classes, SysUtils,
   MM_Interface_Progress, MM_Interface_MessageDlg,
-  DigIt_Types, Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings, DigIt_Counter;
+  DigIt_Types, Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings, DigIt_Counter, DigIt_Profiles;
 
 type
   TPluginInfo = record
@@ -544,6 +544,7 @@ begin
   DigIt_Counter.Counter:= TDigIt_Counter.Create('Counter0');
   DigIt_Settings.Settings:= TDigIt_Settings.Create;
   DigIt_Sources.Sources:= TDigIt_Sources.Create;
+  DigIt_Profiles.Profiles:= TDigIt_Profiles.Create(Path_Config+File_Profiles);
   //rDestinations:= TDigIt_Destinations.Create;
 end;
 
@@ -551,8 +552,15 @@ destructor TDigIt_Bridge.Destroy;
 begin
   DigIt_Sources.Sources.Free; DigIt_Sources.Sources:= nil;
   DigIt_Settings.Settings.Free; DigIt_Settings.Settings:= nil;
+  DigIt_Profiles.Profiles.Free; DigIt_Profiles.Profiles:= nil;
   rPlugins.Free;
   //rDestinations.free;
+
+  //The compiler tries to decrement the refcount of an object that does not belong to this scope, we avoid the exception
+  try
+     FillChar(rProgress, SizeOf(rProgress), 0);
+  except
+  end;
 
   inherited Destroy;
 end;

@@ -155,6 +155,7 @@ type
 
     function LoadSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
                         XMLRoot_Path: String=''; XML_File: String=''): Integer;
+    function LoadSourceFromProfiles(const AProfilesFilename: String; const AIndex: Integer): Integer;
     procedure SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;
                          XMLRoot_Path: String=''; XML_File: String='');
     procedure LoadSourceFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
@@ -223,7 +224,7 @@ implementation
 uses Graphics, FileUtil, LazFileUtils,
      MM_StrUtils, MM_Interface_MessageDlg,
      BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff,
-     Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Counter;
+     Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Counter, DigIt_Profiles;
 
 procedure TDigIt_Session.SetCapturedFilesSelected(AValue: Integer);
 begin
@@ -886,6 +887,13 @@ begin
   finally
     if aFree then aXML.Free;
   end;
+end;
+
+function TDigIt_Session.LoadSourceFromProfiles(const AProfilesFilename: String; const AIndex: Integer): Integer;
+begin
+  Result:= LoadSource(nil, False,
+                      PROFILE_Item+IntToStr(AIndex)+'/',
+                      AProfilesFilename);
 end;
 
 procedure TDigIt_Session.SaveSource(aXML: TRttiXMLConfig; IsAutoSave: Boolean;

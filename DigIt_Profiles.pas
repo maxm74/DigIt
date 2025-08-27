@@ -14,140 +14,238 @@ interface
 
 uses
   Classes, SysUtils, Laz2_XMLCfg,
-  Digit_Bridge_Intf, Digit_Bridge_Impl;
+  MM_OpenArrayList,
+  Digit_Bridge_Intf, DigIt_Sources;
 
 const
-  PROF_Item = 'Profiles/Profile_';
+  PROFILE_Item = 'Profiles/Profile_';
 
 type
   { TDigIt_Profiles }
 
-  TDigIt_Profiles = class(TNoRefCountObject)
+  TDigIt_Profiles = class(TOpenArrayString)
   private
-    XMLFilename: String;
+    rXMLFilename: String;
 
   public
-    function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
+    constructor Create(const AXMLFilename: String);
 
-    function Add(const AFilename: String; var ATitleArray: TStringArray;
-                 ASource: PSourceInfo; ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
+    function LoadFromXML: Boolean;
+
+    class function Add(const AXMLFilename, ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean; overload;
+    function Add(const ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean; overload;
+
+    function Get(const AIndex: Integer;
+                 var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String): Boolean; overload;
+
+    function Put(const AIndex: Integer;
+                 const ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean; overload;
+
+    function Move(const AFromIndex, AToIndex: Integer): Boolean;
+
+    function SetTitle(const AIndex: Integer; const ATitle: String): Boolean;
+
+    function Clear(AClearXML: Boolean): Boolean; overload;
+
+    property XMLFilename: String read rXMLFilename;
+    property List: TStringArray read rList;
   end;
 
 var
-  DigIt_Profiles: TDigIt_Profiles=nil;
+   Profiles: TDigIt_Profiles=nil;
 
 implementation
 
-{$R *.lfm}
-
-uses Laz2_DOM, FileUtil, MM_StrUtils;
+uses Laz2_DOM, FileUtil;
 
 { TDigIt_Profiles }
 
-function TDigIt_Profiles.LoadFromXML(const AFilename: String;
-                                     var ATitleArray: TStringArray): Boolean;
+constructor TDigIt_Profiles.Create(const AXMLFilename: String);
+begin
+  inherited Create;
+
+  rXMLFilename:= AXMLFilename;
+  LoadFromXML;
+end;
+
+function TDigIt_Profiles.LoadFromXML: Boolean;
 var
    aXML: TRttiXMLConfig;
    i, iCount: Integer;
 
 begin
   Result:= False;
+  rList:= nil;
+
+  if FileExists(rXMLFilename) then
   try
-     aXML:= TRttiXMLConfig.Create(AFilename);
+     aXML:= TRttiXMLConfig.Create(rXMLFilename);
 
      //Load Profiles
-     ATitleArray:= nil;
      iCount:= aXML.GetValue('Profiles/Count', 0);
-     SetLength(ATitleArray, iCount);
+     SetLength(rList, iCount);
      for i:=0 to iCount-1 do
      begin
-       ATitleArray[i]:= aXML.GetValue(PROF_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
+       rList[i]:= aXML.GetValue(PROFILE_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
      end;
 
-     Result:= True;
+  finally
+    aXML.Free;
+  end;
+
+  Result:= True;
+end;
+
+class function TDigIt_Profiles.Add(const AXMLFilename, ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean;
+var
+   curXMPath: String;
+   aXML: TRttiXMLConfig;
+   iCount: Integer;
+
+begin
+  Result:= False;
+  try
+     aXML:= TRttiXMLConfig.Create(AXMLFilename);
+
+     //Load Profiles Count
+     iCount:= aXML.GetValue('Profiles/Count', 0);
+
+     curXMPath:= PROFILE_Item+IntToStr(iCount)+'/';
+
+     //Add new Profile as Last
+     aXML.SetValue(curXMPath+'Name', ATitle);
+     aXML.SetValue('Profiles/Count', iCount+1);
+
+     //Save Source
+     aXML.SetValue(curXMPath+'Source/Name', ASourceName);
+     aXML.DeletePath(curXMPath+'Source/Params/');
+
+  finally
+     aXML.Free;
+  end;
+
+  if (ASourceParams <> nil) then ASourceParams.Save(PChar(AXMLFilename), PChar(curXMPath+'Source/Params'));
+
+  Result:= True;
+end;
+
+function TDigIt_Profiles.Add(const ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean;
+begin
+  Result:= Add(rXMLFilename, ASourceName, ATitle, ASourceParams);
+  if Result then
+  begin
+    Add(ATitle);
+    Result:= (Length(rList) > 0);
+  end;
+end;
+
+function TDigIt_Profiles.Get(const AIndex: Integer;
+                             var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String): Boolean;
+var
+   aXML: TRttiXMLConfig;
+
+begin
+  try
+     aXML:= TRttiXMLConfig.Create(rXMLFilename);
+
+     Result:= Sources.Get(ASource, AParams, ASourceName, aXML, PROFILE_Item+IntToStr(AIndex)+'/');
 
   finally
     aXML.Free;
   end;
 end;
 
-function TDigIt_Profiles.Add(const AFilename: String;
-                             var ATitleArray: TStringArray; ASource: PSourceInfo;
-                             ASourceParams: IDigIt_Params; const ASourceName: String): Boolean;
+function TDigIt_Profiles.Put(const AIndex: Integer;
+                             const ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean;
 var
-   newProfileTitleP: PChar;
-   newProfileTitle,
    curXMPath: String;
    aXML: TRttiXMLConfig;
-   res, iCount: Integer;
 
 begin
-  if (ASource <> nil) then
+  Result:= False;
   try
-     chkTitleArray:= @ATitleArray;
+     aXML:= TRttiXMLConfig.Create(rXMLFilename);
 
-     //First tell to Params a Description then to Source
-     newProfileTitleP:= ''; res:= 0;
-     if (ASourceParams <> nil) then
-     begin
-       res:= ASourceParams.Summary(newProfileTitleP);
-       if (res >0 ) and (newProfileTitleP <> '') then
-       begin
-         newProfileTitle:= newProfileTitleP;
-         StrDispose(newProfileTitleP);
-         newProfileTitleP:= '';
-       end;
-     end;
+     curXMPath:= PROFILE_Item+IntToStr(AIndex)+'/';
 
-     res:= ASource^.Inst.UI_Title(newProfileTitleP);
-     if (res >0 ) and (newProfileTitleP <> '') then
-     begin
-       if (newProfileTitle = '')
-       then newProfileTitle:= newProfileTitleP
-       else newProfileTitle:= newProfileTitle+' - '+newProfileTitleP;
+     //Rewrite Profile Title
+     aXML.SetValue(curXMPath+'Name', ATitle);
 
-       StrDispose(newProfileTitleP);
-       newProfileTitleP:= '';
-     end;
-
-//     Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
-//     if Result then
-     begin
-       Result:= False;
-       try
-          aXML:= TRttiXMLConfig.Create(AFilename);
-
-          //Load Profiles Count
-          iCount:= aXML.GetValue('Profiles/Count', 0);
-
-          curXMPath:= PROF_Item+IntToStr(iCount)+'/';
-
-          //Add new Profile as Last
-          aXML.SetValue(curXMPath+'Name', newProfileTitle);
-          aXML.SetValue('Profiles/Count', iCount+1);
-
-          //Save Source
-          aXML.SetValue(curXMPath+'Source/Name', ASourceName);
-          aXML.DeletePath(curXMPath+'Source/Params/');
-
-       finally
-         aXML.Free; aXML:= nil;
-       end;
-
-       //FPC Bug?
-       //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
-       //So we do it after destroying XML.
-
-       if (ASourceParams <> nil)
-       then ASourceParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
-
-       SetLength(ATitleArray, iCount+1);
-       ATitleArray[iCount]:= newProfileTitle;
-       Result:= True;
-     end;
+     //Save Source
+     aXML.SetValue(curXMPath+'Source/Name', ASourceName);
+     aXML.DeletePath(curXMPath+'Source/Params/');
 
   finally
-    if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
+     aXML.Free;
+  end;
+
+  if (ASourceParams <> nil) then ASourceParams.Save(PChar(rXMLFilename), PChar(curXMPath+'Source/Params'));
+
+  rList[AIndex]:= ATitle;
+  Result:= True;
+end;
+
+function TDigIt_Profiles.Move(const AFromIndex, AToIndex: Integer): Boolean;
+var
+   fileStr: RTLString;
+   theFile: TStringStream;
+
+begin
+  try
+    { #note : Work directly with the text file, Maybe there is a better way to exchange two items}
+    theFile:= TStringStream.Create();
+    theFile.LoadFromFile(rXMLFilename);
+    fileStr:= theFile.DataString;
+    fileStr:= StringReplace(fileStr, 'Profile_'+IntToStr(AToIndex), 'Profile_X', [rfReplaceAll, rfIgnoreCase]);
+    fileStr:= StringReplace(fileStr, 'Profile_'+IntToStr(AFromIndex), 'Profile_'+IntToStr(AToIndex), [rfReplaceAll, rfIgnoreCase]);
+    fileStr:= StringReplace(fileStr, 'Profile_X', 'Profile_'+IntToStr(AFromIndex), [rfReplaceAll, rfIgnoreCase]);
+    theFile.Seek(0, soFromBeginning);
+    {$IF SIZEOF(CHAR)=1}
+      theFile.WriteAnsiString(fileStr);
+    {$ELSE}
+      theFile.WriteUnicodeString(fileStr);
+    {$ENDIF}
+    theFile.SaveToFile(rXMLFilename);
+
+  finally
+    theFile.Free;
+  end;
+end;
+
+function TDigIt_Profiles.SetTitle(const AIndex: Integer; const ATitle: String): Boolean;
+var
+   aXML: TRttiXMLConfig;
+
+begin
+  Result:= False;
+  try
+     aXML:= TRttiXMLConfig.Create(rXMLFilename);
+
+     aXML.SetValue(PROFILE_Item+IntToStr(AIndex)+'/'+'Name', ATitle);
+  finally
+     aXML.Free;
+  end;
+end;
+
+function TDigIt_Profiles.Clear(AClearXML: Boolean): Boolean;
+var
+   aXML: TRttiXMLConfig;
+
+begin
+  Result:= inherited Clear;
+
+  if Result then
+  try
+     Result:= False;
+
+     aXML:= TRttiXMLConfig.CreateClean(rXMLFilename);
+
+     //Set Selected Profile
+     aXML.SetValue('Profiles/Count', 0);
+
+     Result:= True;
+  finally
+    aXML.Free;
   end;
 end;
 

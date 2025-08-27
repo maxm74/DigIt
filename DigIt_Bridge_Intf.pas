@@ -112,7 +112,7 @@ type
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall;
     function Summary(out ASummary: PChar): Integer; stdcall;
 
-    function OnSelected: Boolean; stdcall;
+    function Select: Boolean; stdcall;
   end;
 
   IDigIt_Interface = interface
@@ -148,6 +148,9 @@ type
   //Get Sub Items so the User can select directly the Device from Menù
   IDigIt_Source_Items = interface(specialize IOpenArrayR<PChar>)
   ['{D101B01A-FAD0-C666-CADE-699AC76DEE01}']
+    //Refresh List and return the Count
+    function RefreshList: DWord; stdcall;
+
     //Select Sub Item, if called with aIndex=-1 then Show User Dialog to Select it
     function Select(aIndex: Integer): Boolean; stdcall;
 

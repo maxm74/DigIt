@@ -27,7 +27,6 @@ type
   PSourceInfo = ^TSourceInfo;
 
   TDigIt_Sources = class(specialize TOpenArrayList<TSourceInfo, String>, IDigIt_Sources)
-    function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
   protected
     rSelected: PSourceInfo;
     rSelectedName: String;
@@ -37,6 +36,9 @@ type
     function FreeElement(var aData: TSourceInfo): Boolean; override;
 
   public
+    //IDigIt_Sources implementation
+    function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
+
     constructor Create;
 
     function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
@@ -71,6 +73,60 @@ var
 implementation
 
 { TDigIt_Sources }
+
+function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
+var
+   newData: TSourceInfo;
+
+begin
+  Result:= False;
+  if (aClass = nil) then exit;
+
+  //If the Class cannot Init don't register it and Release
+  if (aClass.Init)
+  then begin
+         newData.Inst:= aClass;
+         Result:= (Add(aName, newData) > -1);
+       end
+  else aClass.Release;
+end;
+(*
+function TDigIt_Sources.UnRegister(const aName: String): Boolean;
+var
+   r : Integer;
+
+begin
+  Result:= False;
+
+  r:= Find(aName);
+  if (r > -1) then
+  begin
+    { #todo 10 -oMaxM : Free the Instances?  }
+    Result:= FreeElement(r);
+
+    Delete(rSourcesList, r, 1);
+    Result:= True;
+  end;
+end;
+
+function TDigIt_Sources.UnRegister(const aClass: IDigIt_Source): Boolean;
+var
+   r : Integer;
+
+begin
+  Result:= False;
+
+  r:= Find(aClass);
+  if (r > -1) then
+  begin
+    { #todo 10 -oMaxM : Free the Instances?  }
+    Result:= FreeElement(r);
+
+    Delete(rSourcesList, r, 1);
+    Result:= True;
+  end;
+end;
+*)
 
 function TDigIt_Sources.FreeElement(var aData: TSourceInfo): Boolean;
 begin
@@ -130,13 +186,10 @@ begin
 
      if (newSource <> nil) then
      begin
+       newParams:= newSource^.Inst.Params;
+
        if GetUserParams then
        begin
-         if (newSource^.Inst is IDigIt_Source_Items)
-         then Result:= (newSource^.Inst as IDigIt_Source_Items).Select(newSourceSubIndex)
-         else Result:= True;
-
-         newParams:= newSource^.Inst.Params;
          if (newParams = nil) then
          begin
            newParams:= newSource^.Inst.Params_New;
@@ -148,14 +201,19 @@ begin
            end;
          end;
 
-         if (newParams <> nil) then Result:= newParams.GetFromUser;
+         if (newSource^.Inst is IDigIt_Source_Items)
+         then begin
+                Result:= (newSource^.Inst as IDigIt_Source_Items).Select(newSourceSubIndex);
+                if (newParams <> nil) then Result:= newParams.GetFromUser;
+              end
+         else if (newParams <> nil) then Result:= newParams.Select and newParams.GetFromUser;
        end
        else Result:= True;
 
        if Result then
        begin
          ASource:= newSource;
-         AParams:= newSource^.Inst.Params;
+         AParams:= newParams;
        end;
      end;
 
@@ -195,11 +253,14 @@ begin
         if (newParams <> nil) then
         begin
           Result:= newParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-//oldcode          if Result then Result:= newParams.OnSelected;
+//          Result:= newParams.Select;
         end;
 
-        ASource:= newSource;
-        AParams:= newParams;
+        if Result then
+        begin
+          ASource:= newSource;
+          AParams:= newParams;
+        end;
      end;
 
   except
@@ -217,7 +278,7 @@ begin
 
   if Result then
   begin
-    if (newParams <> nil) then Result:= newParams.OnSelected;
+    if (newParams <> nil) and not(GetUserParams) then Result:= newParams.Select;
     if Result then
     begin
       rSelected:= newSource;
@@ -238,7 +299,7 @@ begin
 
   if Result then
   begin
-    if (newParams <> nil) then Result:= newParams.OnSelected;
+    if (newParams <> nil) and not(GetUserParams) then Result:= newParams.Select;
     if Result then
     begin
       rSelected:= newSource;
@@ -261,7 +322,7 @@ begin
 
   if Result then
   begin
-    if (newParams <> nil) then Result:= newParams.OnSelected;
+    if (newParams <> nil) then Result:= newParams.Select;
     if Result then
     begin
       rSelected:= newSource;
@@ -418,60 +479,6 @@ begin
     end;
   end;
 end;
-
-function TDigIt_Sources.Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
-var
-   newData: TSourceInfo;
-
-begin
-  Result:= False;
-  if (aClass = nil) then exit;
-
-  //If the Class cannot Init don't register it and Release
-  if (aClass.Init)
-  then begin
-         newData.Inst:= aClass;
-         Result:= (Add(aName, newData) > -1);
-       end
-  else aClass.Release;
-end;
-(*
-function TDigIt_Sources.UnRegister(const aName: String): Boolean;
-var
-   r : Integer;
-
-begin
-  Result:= False;
-
-  r:= Find(aName);
-  if (r > -1) then
-  begin
-    { #todo 10 -oMaxM : Free the Instances?  }
-    Result:= FreeElement(r);
-
-    Delete(rSourcesList, r, 1);
-    Result:= True;
-  end;
-end;
-
-function TDigIt_Sources.UnRegister(const aClass: IDigIt_Source): Boolean;
-var
-   r : Integer;
-
-begin
-  Result:= False;
-
-  r:= Find(aClass);
-  if (r > -1) then
-  begin
-    { #todo 10 -oMaxM : Free the Instances?  }
-    Result:= FreeElement(r);
-
-    Delete(rSourcesList, r, 1);
-    Result:= True;
-  end;
-end;
-*)
 
 end.
 

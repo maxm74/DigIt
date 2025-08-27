@@ -57,7 +57,7 @@ type
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
 
-    function OnSelected: Boolean; stdcall; override;
+    function Select: Boolean; stdcall; override;
 
     constructor Create(AOwner: TDigIt_Source_Common); override;
 
@@ -66,7 +66,7 @@ type
 
   { TDigIt_Source_WIA_Files}
 
-  TDigIt_Source_WIA_Files = class(specialize TOpenArray<String>, IDigIt_ArrayR_PChars)
+  TDigIt_Source_WIA_Files = class(TOpenArrayString, IDigIt_ArrayR_PChars)
     function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
   end;
 
@@ -102,6 +102,7 @@ type
     //IDigIt_Source_Items Implementation
     function GetCount: DWord; stdcall;
     function Get(const AIndex: DWord; out aData: PChar): Boolean; stdcall;
+    function RefreshList: DWord; stdcall;
     function Select(aIndex: Integer): Boolean; stdcall;
     function Selected(aIndex: Integer): Boolean; stdcall;
 
@@ -164,7 +165,7 @@ begin
   end;
 end;
 
-function TDigIt_Source_WIA_Params.OnSelected: Boolean; stdcall;
+function TDigIt_Source_WIA_Params.Select: Boolean; stdcall;
 var
    curSource: TWIADevice;
    curItem: PWIAItem;
@@ -411,7 +412,7 @@ function TDigIt_Source_WIA_Files.Get(const aIndex: DWord; out aData: PChar): Boo
 begin
   aData:= nil;
   try
-     aData:= StrNew(PChar(Get(aIndex)));
+     aData:= StrNew(PChar(GetByIndex(aIndex)));
      Result:= True;
   except
      Result:= False;
@@ -662,6 +663,20 @@ begin
   end;
 end;
 
+function TDigIt_Source_WIA.RefreshList: DWord; stdcall;
+begin
+  Result:= 0;
+  if (getWIA <> nil) then
+  try
+     rWia.EnumAll:= False;
+     rWia.RefreshDeviceList;
+     Result:= rWia.DevicesCount;
+
+  except
+    Result:= 0;
+  end;
+end;
+
 function TDigIt_Source_WIA.Select(aIndex: Integer): Boolean; stdcall;
 var
    curDevice: TWIADevice;
@@ -701,7 +716,7 @@ begin
 
   if (getWIA <> nil) then
   try
-     Result:= (rWIASource <> nil) and (rWia.Devices[aIndex] = rWIASource);
+     Result:= (rWIASource <> nil) and (rWia.Devices[aIndex].ID = rWIASource.ID);
 
   except
     Result:= False;

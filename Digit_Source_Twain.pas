@@ -41,14 +41,14 @@ type
     function Load(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
 
-    function OnSelected: Boolean; stdcall; override;
+    function Select: Boolean; stdcall; override;
 
     constructor Create(AOwner: TDigIt_Source_Common); override;
   end;
 
   { TDigIt_Source_WIA_Files}
 
-  TDigIt_Source_Twain_Files = class(specialize TOpenArray<String>, IDigIt_ArrayR_PChars)
+  TDigIt_Source_Twain_Files = class(TOpenArrayString, IDigIt_ArrayR_PChars)
     function Get(const aIndex: DWord; out aData: PChar): Boolean; stdcall;
   end;
 
@@ -264,7 +264,7 @@ begin
   end;
 end;
 
-function TDigIt_Source_Twain_Params.OnSelected: Boolean; stdcall;
+function TDigIt_Source_Twain_Params.Select: Boolean; stdcall;
 var
    aIndex: Integer;
 
@@ -322,7 +322,7 @@ function TDigIt_Source_Twain_Files.Get(const aIndex: DWord; out aData: PChar): B
 begin
   aData:= nil;
   try
-     aData:= StrNew(PChar(Get(aIndex)));
+     aData:= StrNew(PChar(GetByIndex(aIndex)));
      Result:= True;
   except
      Result:= False;
@@ -694,7 +694,6 @@ begin
   FreeCommsClient;
 
   if (DownloadedFiles<>nil) then DownloadedFiles.Free;
-  if (rParams <> nil) then rParams.Release;
 
   inherited Destroy;
 end;

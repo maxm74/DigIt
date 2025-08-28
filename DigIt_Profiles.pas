@@ -36,7 +36,7 @@ type
     function Add(const ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean; overload;
 
     function Get(const AIndex: Integer;
-                 var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String): Boolean; overload;
+                 out ASource: PSourceInfo; out AParams: IDigIt_Params; out ASourceName: String): Boolean; overload;
 
     function Put(const AIndex: Integer;
                  const ASourceName, ATitle: String; const ASourceParams: IDigIt_Params): Boolean; overload;
@@ -140,7 +140,7 @@ begin
 end;
 
 function TDigIt_Profiles.Get(const AIndex: Integer;
-                             var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String): Boolean;
+                             out ASource: PSourceInfo; out AParams: IDigIt_Params; out ASourceName: String): Boolean;
 var
    aXML: TRttiXMLConfig;
 
@@ -148,7 +148,7 @@ begin
   try
      aXML:= TRttiXMLConfig.Create(rXMLFilename);
 
-     Result:= Sources.Get(ASource, AParams, ASourceName, aXML, PROFILE_Item+IntToStr(AIndex)+'/');
+     Result:= Sources.Get(aXML, PROFILE_Item+IntToStr(AIndex)+'/', True, ASource, AParams, ASourceName);
 
   finally
     aXML.Free;

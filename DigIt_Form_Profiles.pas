@@ -182,8 +182,8 @@ begin
   finally
      if (AParams <> nil) then
      begin
-     //  AParams.Release;
-     //  ASource^.Inst.Params_Set(nil);
+       AParams.Release;
+       if (ASource <> nil) then ASource^.Inst.Params_Set(nil);
      end;
   end;
 end;
@@ -212,7 +212,7 @@ begin
            ASource^.Inst.Params_Set(nil);
          end;
 
-         connected:= Sources.Get(ASource, AParams, newSourceIndex, newSourceSubIndex, True);
+         connected:= Sources.Get(newSourceIndex, newSourceSubIndex, True, True, ASource, AParams);
       except
          connected:= False;
       end;
@@ -235,8 +235,8 @@ begin
     finally
       if (AParams <> nil) then
       begin
-      //  AParams.Release;
-      //  ASource^.Inst.Params_Set(nil);
+        AParams.Release;
+        if (ASource <> nil) then ASource^.Inst.Params_Set(nil);
       end;
     end;
   end;
@@ -328,9 +328,9 @@ end;
 
 class function TDigIt_Profiles_Form.Execute(const AFilename: String): Boolean;
 var
-   XML: TRttiXMLConfig=nil;
    XMLFileName: String;
-   ASelectedParams: IDigIt_Params;
+   oldSource: PSourceInfo;
+   oldParams: IDigIt_Params;
 
 begin
   Result:= False;
@@ -340,7 +340,8 @@ begin
      if (DigIt_Profiles_Form <> nil) then
      with DigIt_Profiles_Form do
      begin
-       if (DigIt_Sources.Sources.Selected <> nil) then ASelectedParams:= DigIt_Sources.Sources.Selected^.Inst.Params;
+       oldSource:= DigIt_Sources.Sources.Selected;
+       oldParams:= DigIt_Sources.Sources.SelectedParams;
 
        XMLFileName:= AFilename+'.tmp';
 
@@ -353,11 +354,7 @@ begin
        Result:= (ShowModal = mrOk);
 
        //Restore Original Params of Selected Source, The Selected is not changed (we use only Sources.Get methods)
-       if (DigIt_Sources.Sources.Selected <> nil) then
-       begin
-         //DigIt_Sources.Sources.Selected^.Inst.Params_Set(nil);
-         if (ASelectedParams <> nil) then DigIt_Sources.Sources.Selected^.Inst.Params_Set(ASelectedParams);
-       end;
+       DigIt_Sources.Sources.Select(oldSource, oldParams);
 
        if Result then
        begin

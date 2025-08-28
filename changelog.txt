@@ -2,7 +2,12 @@ DigIt CHANGE LOG
 ======================
 
 
-2025/08/27 Fix RefCount Exception in theBridge;
+2025/08/28 TDigIt_Sources.Get parameter list has been standardized;
+           TDigIt_Sources.Get Added CreateParams param;
+           TDigIt_Sources.Select always Create a new Params;
+           FormProfiles always create our copy of Params and free it;
+
+        27 Fix RefCount Exception in theBridge;
            Completed Profiles separation from UI (derived from TOpenArrayString);
            Completed FormProfiles (need some fix);
            Twain e WIA Files derived from TOpenArrayString;

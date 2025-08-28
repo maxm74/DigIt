@@ -871,7 +871,7 @@ begin
      Result:= -1;
 
      oldSourceName:= Sources.SelectedName;
-     if Sources.Select(newSourceName, aXML, XMLRoot_Path)
+     if Sources.Select(aXML, XMLRoot_Path, newSourceName)
      then begin
             if (oldSourceName <> newSourceName) then
             begin

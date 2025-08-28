@@ -34,6 +34,7 @@ type
     rSelectedParams: IDigIt_Params;
 
     function FreeElement(var aData: TSourceInfo): Boolean; override;
+    function CompData(aData1, aData2: TSourceInfo): Integer; override;
 
   public
     //IDigIt_Sources implementation
@@ -41,16 +42,17 @@ type
 
     constructor Create;
 
-    function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
-                 SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
-    function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
-                 SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
-    function Get(var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String;
-                 aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean; overload;
+    function Get(SourceName: String; CreateParams, UserParams: Boolean;
+                 out ASource: PSourceInfo; var AParams: IDigIt_Params): Boolean; overload;
+    function Get(SourceIndex, SourceSubIndex: Integer; CreateParams, UserParams: Boolean;
+                 out ASource: PSourceInfo; var AParams: IDigIt_Params): Boolean; overload;
+    function Get(aXML: TRttiXMLConfig; XMLRoot_Path: String; CreateParams: Boolean;
+                 out ASource: PSourceInfo; var AParams: IDigIt_Params; out ASourceName: String): Boolean; overload;
 
-    function Select(SourceName: String; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean=False): Boolean; overload;
-    function Select(out ASourceName: String; aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean; overload;
+    function Select(SourceName: String; UserParams: Boolean=False): Boolean; overload;
+    function Select(SourceIndex, SourceSubIndex: Integer; UserParams: Boolean=False): Boolean; overload;
+    function Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; out ASourceName: String): Boolean; overload;
+    function Select(ASelected: PSourceInfo; AParams: IDigIt_Params): Boolean; overload;
 
     function Save(SourceIndex: Integer; aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
     function Save(aXML: TRttiXMLConfig; XMLRoot_Path: String; SaveParams: Boolean): Boolean; overload;
@@ -144,6 +146,13 @@ begin
   end;
 end;
 
+function TDigIt_Sources.CompData(aData1, aData2: TSourceInfo): Integer;
+begin
+  if (aData1.Inst = aData2.Inst)
+  then Result:= 0
+  else Result:= -1;
+end;
+
 constructor TDigIt_Sources.Create;
 begin
   inherited Create;
@@ -154,8 +163,8 @@ begin
   rSelectedParams:= nil;
 end;
 
-function TDigIt_Sources.Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
-                            SourceName: String; GetUserParams: Boolean): Boolean;
+function TDigIt_Sources.Get(SourceName: String; CreateParams, UserParams: Boolean;
+                            out ASource: PSourceInfo; var AParams: IDigIt_Params): Boolean;
 var
    newSourceI: Integer;
 
@@ -165,56 +174,45 @@ begin
   if (SourceName <> '') then
   try
      newSourceI:= FindByKey(SourceName);
-     if (newSourceI > -1) then Result:= Get(ASource, AParams, newSourceI, -1, GetUserParams);
+     if (newSourceI > -1) then Result:= Get(newSourceI, -1, CreateParams, UserParams, ASource, AParams);
 
   except
     Result:= False;
   end;
 end;
 
-function TDigIt_Sources.Get(var ASource: PSourceInfo; var AParams: IDigIt_Params;
-                            SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
-var
-   newSource: PSourceInfo=nil;
-   newParams: IDigIt_Params=nil;
-
+function TDigIt_Sources.Get(SourceIndex, SourceSubIndex: Integer; CreateParams, UserParams: Boolean;
+                            out ASource: PSourceInfo; var AParams: IDigIt_Params): Boolean;
 begin
   Result:= False;
 
   try
-     newSource:= Data[SourceIndex];
+     ASource:= Data[SourceIndex];
 
-     if (newSource <> nil) then
+     if (ASource <> nil) then
      begin
-       newParams:= newSource^.Inst.Params;
-
-       if GetUserParams then
+       if CreateParams then
        begin
-         if (newParams = nil) then
+         AParams:= ASource^.Inst.Params_New;
+         Result:= ASource^.Inst.Params_Set(AParams);
+         if not(Result) and (AParams <> nil) then
          begin
-           newParams:= newSource^.Inst.Params_New;
-           Result:= newSource^.Inst.Params_Set(newParams);
-           if not(Result) and (newParams <> nil) then
-           begin
-             newParams.Release;
-             newParams:= nil;
-           end;
+           AParams.Release;
+           AParams:= nil;
          end;
+       end;
 
-         if (newSource^.Inst is IDigIt_Source_Items)
+       if UserParams then
+       begin
+         (*
+         if (ASource^.Inst is IDigIt_Source_Items)
          then begin
-                Result:= (newSource^.Inst as IDigIt_Source_Items).Select(newSourceSubIndex);
-                if (newParams <> nil) then Result:= newParams.GetFromUser;
+                Result:= (ASource^.Inst as IDigIt_Source_Items).Select(SourceSubIndex);
+                if (AParams <> nil) then Result:= AParams.GetFromUser;
               end
-         else if (newParams <> nil) then Result:= newParams.Select and newParams.GetFromUser;
+         else*) if (AParams <> nil) then Result:= AParams.GetFromUser;
        end
        else Result:= True;
-
-       if Result then
-       begin
-         ASource:= newSource;
-         AParams:= newParams;
-       end;
      end;
 
   except
@@ -222,12 +220,8 @@ begin
   end;
 end;
 
-function TDigIt_Sources.Get(var ASource: PSourceInfo; var AParams: IDigIt_Params; var ASourceName: String;
-                            aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean;
-var
-   newSource: PSourceInfo=nil;
-   newParams: IDigIt_Params=nil;
-
+function TDigIt_Sources.Get(aXML: TRttiXMLConfig; XMLRoot_Path: String; CreateParams: Boolean;
+                            out ASource: PSourceInfo; var AParams: IDigIt_Params; out ASourceName: String): Boolean;
 begin
   Result:= False;
 
@@ -236,99 +230,125 @@ begin
      //Load a New Source and its Params
      ASourceName:= aXML.GetValue(XMLRoot_Path+'Source/Name', '');
 
-     Result:= Get(newSource, newParams, ASourceName);
-     if Result then
+     Result:= Get(ASourceName, CreateParams, False, ASource, AParams);
+     if Result and
+        (AParams <> nil) then
      begin
-        if (newParams = nil) then
-        begin
-          newParams:= newSource^.Inst.Params_New;
-          Result:= newSource^.Inst.Params_Set(newParams);
-          if not(Result) and (newParams <> nil) then
-          begin
-            newParams.Release;
-            newParams:= nil;
-          end;
-        end;
-
-        if (newParams <> nil) then
-        begin
-          Result:= newParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-//          Result:= newParams.Select;
-        end;
-
-        if Result then
-        begin
-          ASource:= newSource;
-          AParams:= newParams;
-        end;
-     end;
+          Result:= AParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
+//          Result:= AParams.Select;
+      end;
 
   except
     Result:= False;
   end;
 end;
 
-function TDigIt_Sources.Select(SourceName: String; GetUserParams: Boolean): Boolean;
+function TDigIt_Sources.Select(SourceName: String; UserParams: Boolean): Boolean;
 var
    newSource: PSourceInfo=nil;
    newParams: IDigIt_Params=nil;
 
 begin
-  Result:= Get(newSource, newParams, SourceName, GetUserParams);
+  Result:= Get(SourceName, True, UserParams, newSource, newParams);
 
   if Result then
   begin
-    if (newParams <> nil) and not(GetUserParams) then Result:= newParams.Select;
+    if (newParams <> nil) and not(UserParams) then Result:= newParams.Select;
+
     if Result then
     begin
       rSelected:= newSource;
+
+      //Release old Params and replace with new one
+      if (rSelectedParams <> nil) then rSelectedParams.Release;
       rSelectedParams:= newParams;
+
       rSelectedName:= SourceName;
       rSelectedIndex:= FindByKey(rSelectedName);
     end;
-  end;
+  end
+  else if (newParams <> nil) then newParams.Release;
 end;
 
-function TDigIt_Sources.Select(SourceIndex, newSourceSubIndex: Integer; GetUserParams: Boolean): Boolean;
+function TDigIt_Sources.Select(SourceIndex, SourceSubIndex: Integer; UserParams: Boolean): Boolean;
 var
    newSource: PSourceInfo=nil;
    newParams: IDigIt_Params=nil;
 
 begin
-  Result:= Get(newSource, newParams, SourceIndex, newSourceSubIndex, GetUserParams);
+  Result:= Get(SourceIndex, SourceSubIndex, True, UserParams, newSource, newParams);
 
   if Result then
   begin
-    if (newParams <> nil) and not(GetUserParams) then Result:= newParams.Select;
+    if (newParams <> nil) and not(UserParams) then Result:= newParams.Select;
+
     if Result then
     begin
       rSelected:= newSource;
+
+      //Release old Params and replace with new one
+      if (rSelectedParams <> nil) then rSelectedParams.Release;
       rSelectedParams:= newParams;
+
       rSelectedName:= rList[SourceIndex].Key;
       rSelectedIndex:= SourceIndex;
     end;
-  end;
+  end
+  else if (newParams <> nil) then newParams.Release;
 end;
 
-function TDigIt_Sources.Select(out ASourceName: String; aXML: TRttiXMLConfig; XMLRoot_Path: String): Boolean;
+function TDigIt_Sources.Select(aXML: TRttiXMLConfig; XMLRoot_Path: String; out ASourceName: String): Boolean;
 var
    newSource: PSourceInfo=nil;
    newParams: IDigIt_Params=nil;
-   newSourceName: String;
 
 begin
-  Result:= Get(newSource, newParams, newSourceName, aXML, XMLRoot_Path);
-  ASourceName:= newSourceName;
+  Result:= Get(aXML, XMLRoot_Path, True, newSource, newParams, ASourceName);
 
   if Result then
   begin
     if (newParams <> nil) then Result:= newParams.Select;
+
     if Result then
     begin
       rSelected:= newSource;
+
+      //Release old Params and replace with new one
+      if (rSelectedParams <> nil) then rSelectedParams.Release;
       rSelectedParams:= newParams;
-      rSelectedName:= newSourceName;
+
+      rSelectedName:= ASourceName;
       rSelectedIndex:= FindByKey(rSelectedName);
+    end;
+  end
+  else if (newParams <> nil) then newParams.Release;
+end;
+
+function TDigIt_Sources.Select(ASelected: PSourceInfo; AParams: IDigIt_Params): Boolean;
+var
+   newIndex: Integer;
+
+begin
+  Result:= False;
+  if (ASelected = nil) then exit;
+
+  //Check if ASelected is really on our list
+  newIndex:= Find(ASelected^);
+  if (newIndex >= 0) and ASelected^.Inst.Params_Set(AParams) then
+  begin
+    Result:= True;
+    if (AParams <> nil) then Result:= AParams.Select;
+
+    if Result then
+    begin
+      rSelected:= ASelected;
+
+      //Release old Params and replace with new one
+      if (rSelectedParams <> nil) and (rSelectedParams <> AParams) then rSelectedParams.Release;
+      rSelectedParams:= AParams;
+
+      rSelectedIndex:= newIndex;
+      rSelectedName:= rList[newIndex].Key;
     end;
   end;
 end;

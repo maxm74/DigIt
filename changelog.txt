@@ -1,6 +1,9 @@
 DigIt CHANGE LOG
 ======================
 
+2025/09/04 Solved DigIt_Profiles_Form don't Copy tmp XML to profiles File;
+           TDigIt_Sources.Get with SubIndex must select sub item before GetFromUser;
+           BuildSourceMenu Use SourceItems.RefreshList intestead of GetCount (to test)
 
 2025/08/28 TDigIt_Sources.Get parameter list has been standardized;
            TDigIt_Sources.Get Added CreateParams param;

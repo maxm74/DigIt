@@ -159,7 +159,7 @@ begin
 
   rSelected:= nil;
   rSelectedName:= '';
-//oldcode  rSelectedIndex:= -1;
+  rSelectedIndex:= -1;
   rSelectedParams:= nil;
 end;
 
@@ -204,13 +204,12 @@ begin
 
        if UserParams then
        begin
-         (*
          if (ASource^.Inst is IDigIt_Source_Items)
          then begin
                 Result:= (ASource^.Inst as IDigIt_Source_Items).Select(SourceSubIndex);
                 if (AParams <> nil) then Result:= AParams.GetFromUser;
               end
-         else*) if (AParams <> nil) then Result:= AParams.GetFromUser;
+         else if (AParams <> nil) then Result:= AParams.GetFromUser;
        end
        else Result:= True;
      end;
@@ -231,12 +230,8 @@ begin
      ASourceName:= aXML.GetValue(XMLRoot_Path+'Source/Name', '');
 
      Result:= Get(ASourceName, CreateParams, False, ASource, AParams);
-     if Result and
-        (AParams <> nil) then
-     begin
-          Result:= AParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
-//          Result:= AParams.Select;
-      end;
+     if Result and (AParams <> nil)
+     then Result:= AParams.Load(PChar(aXML.Filename), PChar(XMLRoot_Path+'Source/Params'));
 
   except
     Result:= False;

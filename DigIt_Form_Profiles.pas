@@ -353,20 +353,20 @@ begin
 
        Result:= (ShowModal = mrOk);
 
+       newProfiles.Free; newProfiles:= nil;
+
        //Restore Original Params of Selected Source, The Selected is not changed (we use only Sources.Get methods)
        DigIt_Sources.Sources.Select(oldSource, oldParams);
 
-       if Result then
-       begin
-         Result:= CopyFile(XMLFilename, AFilename);
-         DeleteFile(XMLFilename);
-       end;
+       if Result then Result:= CopyFile(XMLFilename, AFilename);
+
+       DeleteFile(XMLFilename);
      end;
 
   finally
     if (DigIt_Profiles_Form <> nil) then
     begin
-      DigIt_Profiles_Form.newProfiles.Free;
+      if (DigIt_Profiles_Form.newProfiles <> nil) then DigIt_Profiles_Form.newProfiles.Free;
       DigIt_Profiles_Form.Free;
       DigIt_Profiles_Form:= nil;
     end;

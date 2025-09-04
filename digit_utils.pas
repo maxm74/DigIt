@@ -325,7 +325,7 @@ begin
       begin
         //Get Sub Items so the User can select directly the Device from Menù
         curSourceItems:= (curSource^.Inst as IDigIt_Source_Items);
-        cSub:= curSourceItems.GetCount;
+        cSub:= curSourceItems.RefreshList; //RefreshList; //oldcode GetCount;
         if (cSub > 0) then
         begin
           newSep:= TMenuItem.Create(AOwner);

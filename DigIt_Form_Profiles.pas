@@ -19,7 +19,7 @@ uses
   Digit_Bridge_Intf, Digit_Bridge_Impl, DigIt_Sources, DigIt_Profiles;
 
 resourcestring
-  rsProfiles_AddCurrent = 'Add Current Source...';
+  rsProfiles_AddCurrent = 'Add Profile...';
   rsProfiles_Del = 'Delete Profile?'#13#10'%s';
   rsProfiles_DelAll = 'Delete All Profiles?';
   rsProfiles_Title = 'Profile Title :';
@@ -28,8 +28,6 @@ resourcestring
 
 type
   { TDigIt_Profiles_Form }
-
-  {# TO-DO : SEPARATE GRAPHICS FROM Profiles Logic (new DigIt_Profiles class and file)}
 
   TDigIt_Profiles_Form = class(TForm)
     BCPanel1: TBCPanel;
@@ -68,13 +66,10 @@ type
 
   public
     class function Execute(const AFilename: String): Boolean;
-(*oldcode    class function LoadFromXML(const AFilename: String; var ATitleArray: TStringArray): Boolean;
-*)
+
     class function Add(const ASource: PSourceInfo; const AParams: IDigIt_Params;
                        const ASourceName, AFilename: String; const ATitleArray: TStringArray): String; overload;
     function Add(const ASource: PSourceInfo; const AParams: IDigIt_Params; const ASourceName: String): String; overload;
-
-//    function AddCurrent(const AFilename: String; var ATitle: TStringArray): Boolean;
   end;
 
 var
@@ -373,35 +368,6 @@ begin
   end;
 end;
 
-(*oldcode
-class function TDigIt_Profiles_Form.LoadFromXML(const AFilename: String;
-                                                var ATitleArray: TStringArray): Boolean;
-var
-   aXML: TRttiXMLConfig;
-   i, iCount: Integer;
-
-begin
-  Result:= False;
-  try
-     aXML:= TRttiXMLConfig.Create(AFilename);
-
-     //Load Profiles
-     ATitleArray:= nil;
-     iCount:= aXML.GetValue('Profiles/Count', 0);
-     SetLength(ATitleArray, iCount);
-     for i:=0 to iCount-1 do
-     begin
-       ATitleArray[i]:= aXML.GetValue(PROFILE_Item+IntToStr(i)+'/Name', 'Profile '+IntToStr(i));
-     end;
-
-     Result:= True;
-
-  finally
-    aXML.Free;
-  end;
-end;
-*)
-
 //I do it this way to not enable nestedprocvars switch
 var
    chkTitleArray: ^TStringArray;
@@ -424,7 +390,6 @@ class function TDigIt_Profiles_Form.Add(const ASource: PSourceInfo; const AParam
                                         const ASourceName, AFilename: String;
                                         const ATitleArray: TStringArray): String;
 var
-   newProfileTitleP: PChar;
    newProfileTitle,
    curXMPath: String;
    aXML: TRttiXMLConfig;
@@ -433,67 +398,41 @@ var
 begin
   Result:= '';
   if (ASource <> nil) then
-  try
-     chkTitleArray:= @ATitleArray;
+  begin
+    chkTitleArray:= @ATitleArray;
 
-     //First tell to Params a Description then to Source
-     newProfileTitleP:= ''; res:= 0;
-     if (AParams <> nil) then
-     begin
-       res:= AParams.Summary(newProfileTitleP);
-       if (res >0 ) and (newProfileTitleP <> '') then
-       begin
-         newProfileTitle:= newProfileTitleP;
-         StrDispose(newProfileTitleP);
-         newProfileTitleP:= '';
-       end;
-     end;
+    newProfileTitle:= Sources.GetTitle(ASource, AParams, True);
 
-     res:= ASource^.Inst.UI_Title(newProfileTitleP);
-     if (res > 0) and (newProfileTitleP <> '') then
-     begin
-       if (newProfileTitle = '')
-       then newProfileTitle:= newProfileTitleP
-       else newProfileTitle:= newProfileTitle+' - '+newProfileTitleP;
+    if TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck) then
+    begin
+      try
+         aXML:= TRttiXMLConfig.Create(AFilename);
 
-       StrDispose(newProfileTitleP);
-       newProfileTitleP:= '';
-     end;
+         //Load Profiles Count
+         iCount:= aXML.GetValue('Profiles/Count', 0);
 
-     if TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck) then
-     begin
-       try
-          aXML:= TRttiXMLConfig.Create(AFilename);
+         curXMPath:= PROFILE_Item+IntToStr(iCount)+'/';
 
-          //Load Profiles Count
-          iCount:= aXML.GetValue('Profiles/Count', 0);
+         //Add new Profile as Last
+         aXML.SetValue(curXMPath+'Name', newProfileTitle);
+         aXML.SetValue('Profiles/Count', iCount+1);
 
-          curXMPath:= PROFILE_Item+IntToStr(iCount)+'/';
+         //Save Source
+         aXML.SetValue(curXMPath+'Source/Name', ASourceName);
+         aXML.DeletePath(curXMPath+'Source/Params/');
 
-          //Add new Profile as Last
-          aXML.SetValue(curXMPath+'Name', newProfileTitle);
-          aXML.SetValue('Profiles/Count', iCount+1);
-
-          //Save Source
-          aXML.SetValue(curXMPath+'Source/Name', ASourceName);
-          aXML.DeletePath(curXMPath+'Source/Params/');
-
-       finally
+      finally
          aXML.Free;
-       end;
+      end;
 
-       //FPC Bug?
-       //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
-       //So we do it after destroying XML.
+      //FPC Bug?
+      //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
+      //So we do it after destroying XML.
 
-       if (AParams <> nil)
-       then AParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
+      if (AParams <> nil) then AParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
 
-       Result:= newProfileTitle;
-     end;
-
-  finally
-    if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
+      Result:= newProfileTitle;
+    end;
   end;
 end;
 
@@ -502,95 +441,6 @@ begin
   Result:= Add(ASource, AParams, ASourceName, newProfiles.XMLFilename, newProfiles.List);
   if (Result <> '') then newProfiles.Add(Result);
 end;
-
-(*oldcode
-class function TDigIt_Profiles_Form.AddCurrent(const AFilename: String; var ATitleArray: TStringArray): Boolean;
-var
-   ASourceParams: IDigIt_Params;
-   newProfileTitleP: PChar;
-   newProfileTitle,
-   curXMPath: String;
-   aXML: TRttiXMLConfig;
-   res, iCount: Integer;
-
-begin
-  Result:= False;
-  if (Sources.Selected <> nil) then Result:= Add(Sources.Selected, Sources.SelectedParams, Sources.SelectedName,
-                                                       AFilename, ATitleArray);
-
-(*oldcode
-  if (Sources.Selected <> nil) then
-  try
-     ASourceParams:= Sources.SelectedParams;
-
-     chkTitleArray:= @ATitleArray;
-
-     //First tell to Params a Description then to Source
-     newProfileTitleP:= ''; res:= 0;
-     if (ASourceParams <> nil) then
-     begin
-       res:= ASourceParams.Summary(newProfileTitleP);
-       if (res >0 ) and (newProfileTitleP <> '') then
-       begin
-         newProfileTitle:= newProfileTitleP;
-         StrDispose(newProfileTitleP);
-         newProfileTitleP:= '';
-       end;
-     end;
-
-     res:= Sources.Selected^.Inst.UI_Title(newProfileTitleP);
-     if (res >0 ) and (newProfileTitleP <> '') then
-     begin
-       if (newProfileTitle = '')
-       then newProfileTitle:= newProfileTitleP
-       else newProfileTitle:= newProfileTitle+' - '+newProfileTitleP;
-
-       StrDispose(newProfileTitleP);
-       newProfileTitleP:= '';
-     end;
-
-     Result:= TFormEditText.Execute(rsProfiles_AddCurrent, rsProfiles_Title, '', newProfileTitle, @AddCheck);
-     if Result then
-     begin
-       Result:= False;
-       try
-          aXML:= TRttiXMLConfig.Create(AFilename);
-
-          //Load Profiles Count
-          iCount:= aXML.GetValue('Profiles/Count', 0);
-
-          curXMPath:= PROFILE_Item+IntToStr(iCount)+'/';
-
-          //AddCurrent new Profile as Last
-          aXML.SetValue(curXMPath+'Name', newProfileTitle);
-          aXML.SetValue('Profiles/Count', iCount+1);
-
-          //Save Source
-          aXML.SetValue(curXMPath+'Source/Name', Sources.SelectedName);
-          aXML.DeletePath(curXMPath+'Source/Params/');
-
-       finally
-         aXML.Free; aXML:= nil;
-       end;
-
-       //FPC Bug?
-       //If a key like "Source/Params" is written to the same open file, even after a flush, it is ignored.
-       //So we do it after destroying XML.
-
-       if (ASourceParams <> nil)
-       then ASourceParams.Save(PChar(AFilename), PChar(curXMPath+'Source/Params'));
-
-       SetLength(ATitleArray, iCount+1);
-       ATitleArray[iCount]:= newProfileTitle;
-       Result:= True;
-     end;
-
-  finally
-    if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
-  end;
-  *)
-end;
-*)
 
 end.
 

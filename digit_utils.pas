@@ -143,34 +143,6 @@ procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 begin
   Paper.w:= PhysicalSizeConvert(cuCentimeter, Paper.w, PhysicalToCSSUnit(PhysicalUnit));
   Paper.h:= PhysicalSizeConvert(cuCentimeter, Paper.h, PhysicalToCSSUnit(PhysicalUnit));
-(*oldcode  Case PhysicalUnit of
-    cuPixel,
-    cuPercent,
-    cuCentimeter: begin
-      Result:= ruPixelsPerCentimeter;
-    end;
-  cuMillimeter: begin
-      Paper.w:= Paper.w / 10;
-      Paper.h:= Paper.h / 10;
-    end;
-    cuInch: begin
-      Paper.w:= Paper.w / 2.54;
-      Paper.h:= Paper.h / 2.54;
-    end;
-    cuPica: begin
-      Paper.w:= Paper.w / 6;
-      Paper.h:= Paper.h / 6;
-
-      Result:= ruPixelsPerInch;
-    end;
-    cuPoint: begin
-      Paper.w:= Paper.w / 72;
-      Paper.h:= Paper.h / 72;
-
-      Result:= ruPixelsPerInch;
-    end;
-  end;
-  *)
 end;
 
 procedure BuildPaperSizesMenu(PhysicalUnit: TPhysicalUnit; AOwner: TComponent; menuPaperSizes: TMenu;
@@ -325,7 +297,7 @@ begin
       begin
         //Get Sub Items so the User can select directly the Device from Menù
         curSourceItems:= (curSource^.Inst as IDigIt_Source_Items);
-        cSub:= curSourceItems.RefreshList; //RefreshList; //oldcode GetCount;
+        cSub:= curSourceItems.RefreshList;
         if (cSub > 0) then
         begin
           newSep:= TMenuItem.Create(AOwner);

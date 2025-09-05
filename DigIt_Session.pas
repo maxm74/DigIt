@@ -432,8 +432,6 @@ begin
        end;
      end;
 *)
-     //rBitmap.Free;
-     //rBitmap:= BitmapN;
      rBitmap.Assign(BitmapN, True); // Associate the new bitmap
 
      rLoadedImageFile:= AImageFile;
@@ -445,13 +443,11 @@ begin
      Result:= True;
 
   finally
-     //oldcode if (BitmapN <> Nil) then BitmapN.Free;
   end;
 end;
 
 procedure TDigIt_Session.EmptyImage(saveToXML: Boolean);
 begin
-  //FreeAndNil(rBitmap);
   rLoadedImageFile:= '';
   if saveToXML then SaveLoadedImage(nil, True);
 

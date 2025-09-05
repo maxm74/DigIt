@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/09/04 Solved DigIt_Profiles_Form don't Copy tmp XML to profiles File;
+2025/09/05 Deleted Menu Profiles OnPopup (updated in Profiles Edit);
+           Added Source_Select with Profiles in MainForm;
+           Added Selected Source in MainForm Caption;
+           Moved Get Source+Params Title in new TDigIt_Sources.GetTitle;
+           Code cleanup;
+
+        04 Solved DigIt_Profiles_Form don't Copy tmp XML to profiles File;
            TDigIt_Sources.Get with SubIndex must select sub item before GetFromUser;
            BuildSourceMenu Use SourceItems.RefreshList intestead of GetCount (to test)
 

@@ -4517,7 +4517,6 @@ object DigIt_Main: TDigIt_Main
   end
   object menuProfiles: TPopupMenu
     Images = imgListMenu
-    OnPopup = menuProfilesPopup
     Left = 432
     Top = 490
     object Separator4: TMenuItem

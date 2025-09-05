@@ -145,7 +145,7 @@ msgstr ""
 
 #: digit_form_profiles.rsprofiles_addcurrent
 msgctxt "digit_form_profiles.rsprofiles_addcurrent"
-msgid "Add Current Source..."
+msgid "Add Profile..."
 msgstr ""
 
 #: digit_form_profiles.rsprofiles_del

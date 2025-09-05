@@ -62,6 +62,8 @@ type
     function Take(takeAction: DigIt_Source_TakeAction; var AFileName: String;
                   ASource: PSourceInfo=nil): Boolean; overload;
 
+    function GetTitle(const ASource: PSourceInfo; const AParams: IDigIt_Params; const AddSourceName: Boolean): String;
+
     property Selected: PSourceInfo read rSelected;
     property SelectedIndex: Integer read rSelectedIndex;
     property SelectedName: String read rSelectedName;
@@ -492,6 +494,51 @@ begin
         end;
       end;
     end;
+  end;
+end;
+
+function TDigIt_Sources.GetTitle(const ASource: PSourceInfo; const AParams: IDigIt_Params; const AddSourceName: Boolean): String;
+var
+   newProfileTitleP: PChar;
+   res: Integer;
+
+begin
+  Result:= '';
+  if (ASource <> nil) then
+  try
+  try
+     //First tell to Params a Description then to Source
+     newProfileTitleP:= ''; res:= 0;
+     if (AParams <> nil) then
+     begin
+       res:= AParams.Summary(newProfileTitleP);
+       if (res >0 ) and (newProfileTitleP <> '') then
+       begin
+         Result:= newProfileTitleP;
+         StrDispose(newProfileTitleP);
+         newProfileTitleP:= '';
+       end;
+     end;
+
+     if AddSourceName then
+     begin
+       res:= ASource^.Inst.UI_Title(newProfileTitleP);
+       if (res > 0) and (newProfileTitleP <> '') then
+       begin
+         if (Result = '')
+         then Result:= newProfileTitleP
+         else Result:= Result+' - '+newProfileTitleP;
+
+         StrDispose(newProfileTitleP);
+         newProfileTitleP:= '';
+       end;
+     end;
+
+  except
+    Result:= '';
+  end;
+  finally
+    if (newProfileTitleP <> '') then StrDispose(newProfileTitleP);
   end;
 end;
 

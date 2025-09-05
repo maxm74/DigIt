@@ -303,7 +303,6 @@ type
     procedure edCropWidthChange(Sender: TObject);
     procedure menuDebugClick(Sender: TObject);
     procedure menuImageFormatClick(Sender: TObject);
-    procedure menuProfilesPopup(Sender: TObject);
     procedure menuRulerViewClick(Sender: TObject);
     procedure rgCropAspectSelectionChanged(Sender: TObject);
     procedure btCropApplyAspectRatioClick(Sender: TObject);
@@ -386,7 +385,9 @@ type
 
     procedure SetPageResizeType(AValue: TDigItFilter_Resize; PredefValues: Boolean);
 
-    function Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean;
+    function Source_Select(newSourceIndex, newSourceSubIndex: Integer): Boolean; overload;
+    function Source_Select(const AProfilesFilename: String; const AIndex: Integer): Boolean; overload;
+
     function Destination_Select(newDestinationIndex: Integer): Boolean;
 
 
@@ -514,14 +515,10 @@ begin
 
   Settings.Load(nil);
 
-//  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
+  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 
   {$ifopt D+}
-    (*imgManipulation.Rulers.PhysicalUnit:= TPhysicalUnit.cuCentimeter;
-    imgManipulation.Rulers.Sides:= [rsdTop, rsdLeft];
-    imgManipulation.Rulers.ShowPhysicalUnit:= True;
-    *)
     menuDebug.Visible:= True;
     lbPrevious.Visible:= True;
 //    MenuMain.OwnerDraw:= True;
@@ -610,6 +607,7 @@ begin
       SES_CropMode(nil, diCropFull);
       UI_ToolBar;
       UI_MenuItemRulersChecks;
+      UI_Caption;
     end;
   end;
 end;
@@ -1185,6 +1183,7 @@ begin
   if TDigIt_Profiles_Form.Execute(Path_Config+File_Profiles) then
   try
      DigIt_Profiles.Profiles.LoadFromXML;
+
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
 
   finally
@@ -1463,17 +1462,6 @@ begin
          aPaper:= Paper_A_cm[4];
          ConvertCmPaperTo(Session.PageSize.PhysicalUnit, aPaper);
          imgManipulation.SetEmptyImageSize(Session.PageSize.PhysicalUnit, aPaper.w, aPaper.h);
-         (*oldcode
-         Case Session.PageSize.PhysicalUnit of
-         TPhysicalUnit.cuPixel: imgManipulation.SetEmptyImageSize(TPhysicalUnit.cuPixel,
-                                                        Paper_A_inch[4].w * 200, Paper_A_inch[4].h * 200);
-         TPhysicalUnit.cuInch: imgManipulation.SetEmptyImageSize(ruPixelsPerInch,
-                                                        Paper_A_inch[4].w, Paper_A_inch[4].h);
-         TPhysicalUnit.cuCentimeter: imgManipulation.SetEmptyImageSize(ruPixelsPerCentimeter,
-                                                        Paper_A_cm[4].w, Paper_A_cm[4].h);
-         end;
-         *)
-
          Session.PageResize:= TDigItFilter_Resize(edPageResizeType.ItemIndex);
        end;
 end;
@@ -1761,12 +1749,6 @@ begin
     end;
   end;
 
-  (* oldcode if not(Session.Loading) then
-  begin
-    UI_FillCounter;
-    UI_ToolBar;
-  end;*)
-
   tbCropMode.ImageIndex:= Integer(Session.CropMode);
 end;
 
@@ -1843,6 +1825,37 @@ begin
   try
      curSource:= Sources.Selected;
      if Sources.Select(newSourceIndex, newSourceSubIndex, True) then
+     begin
+       if (Sources.Selected <> curSource) then
+       begin
+         { #note -oMaxM : rSource Switched...Do something? }
+       end;
+
+       //Save Used Source in AutoSave
+       Session.SaveSource(nil, True);
+
+       //Save Last Used Source in Settings
+       Session.SaveSource(nil, False, '', Path_Config+File_Config);
+
+       Result:= True;
+     end;
+     //else MessageDlg('DigIt', Format(rsSourceNotSelected, [newSourceIndex]), mtInformation, [mbOk], 0);
+
+  except
+    Result:= False;
+  end;
+end;
+
+function TDigIt_Main.Source_Select(const AProfilesFilename: String; const AIndex: Integer): Boolean;
+var
+   curSource: PSourceInfo;
+
+begin
+  Result:= False;
+  try
+     curSource:= Sources.Selected;
+
+     if (Session.LoadSourceFromProfiles(AProfilesFilename, AIndex) > -1) then
      begin
        if (Sources.Selected <> curSource) then
        begin
@@ -2034,11 +2047,6 @@ end;
 procedure TDigIt_Main.menuImageFormatClick(Sender: TObject);
 begin
   TBGRAFormatUIContainer.Execute(Session.SaveFormat, Session.SaveWriter);
-end;
-
-procedure TDigIt_Main.menuProfilesPopup(Sender: TObject);
-begin
-  BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
 end;
 
 procedure TDigIt_Main.menuRulerViewClick(Sender: TObject);
@@ -2281,8 +2289,7 @@ procedure TDigIt_Main.UI_ProfileMenuClick(Sender: TObject);
 begin
   if (Sender<>nil) and (Sender is TMenuItem) then
   try
-    if (Session.LoadSourceFromProfiles(Path_Config+File_Profiles, TMenuItem(Sender).Tag) > -1)
-    then TMenuItem(Sender).Default:= True;
+    if Source_Select(Path_Config+File_Profiles, TMenuItem(Sender).Tag) then TMenuItem(Sender).Default:= True;
 
   finally
     UI_ToolBar;
@@ -2630,17 +2637,15 @@ end;
 
 procedure TDigIt_Main.UI_Caption;
 var
-   capStr: String;
+   capStr, srcStr: String;
 
 begin
-  if Session.Modified then capStr:= '* ' else  capStr:= '';
+  if Session.Modified then capStr:= '* DigIt' else  capStr:= 'DigIt';
 
-  if (Path_Session = Path_DefSession)
-  then capStr:= capStr+'DigIt'
-  else capStr:= capStr+'DigIt'+' - '+Session.FileName;
+  srcStr:= Sources.GetTitle(Sources.Selected, Sources.SelectedParams, False);
+  if (srcStr <> '') then capStr:= capStr+' ['+srcStr+']';
 
-  {#todo 2 -oMaxM : Really Use something like rSource^.Inst.UI_SourceTitle + (rSourceName) }
-  //if (rSourceName <> '') then capStr:= capStr+'  ('+rSourceName+')';
+  if (Path_Session <> Path_DefSession) then capStr:= capStr+' - '+Session.FileName;
 
   Caption:= capStr;
 end;

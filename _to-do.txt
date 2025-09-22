@@ -1,11 +1,7 @@
 Struttura Base:
-  Sources.Get DEVE sempre creare una Classe Params la libero quando non serve,
-  Sources.Select Elimina la vecchia Classe Params prima di fare il nuovo Get
-  Rimettere il Free della Classe Params in Form_Profiles
+  Se durante una operazione c'è una eccezione non deve esere fatto l'autosave
 
 Bugs:
-  BuildSourceMenù non si accorge se spengo/accendo uno scanner, l'uso di RefreshList è anomalo;
-
   Image Manipulation Empty Image parte sempre con 21x29.7cm, appena attivo un Righello si corregge
      (probabile manca CreateEmptyImage in Loaded)
 
@@ -15,6 +11,7 @@ Bugs:
   Esporta PDF con File non A4 (es. Carte d'identità) le misure sono errate
     Acrobat le stampa stretchandole in A4
     Anche in un A4 le misure sono errate (non viene messo il dpi nel pdf? [120dpi di default?])
+    ???FORSE RISOLTO CON NUOVO FCL-PDF
 
 Session:
 

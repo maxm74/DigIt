@@ -7,6 +7,7 @@ object DigIt_Main: TDigIt_Main
   ClientHeight = 812
   ClientWidth = 1411
   DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -14,8 +15,8 @@ object DigIt_Main: TDigIt_Main
   OnShow = FormShow
   object imgManipulation: TBGRAImageManipulation
     Left = 288
-    Height = 483
-    Top = 79
+    Height = 490
+    Top = 72
     Width = 853
     Align = alClient
     EnabledWorkArea = False
@@ -181,8 +182,8 @@ object DigIt_Main: TDigIt_Main
   end
   object rollCounters: TBCExpandPanel
     Left = 1141
-    Height = 483
-    Top = 79
+    Height = 490
+    Top = 72
     Width = 270
     Align = alRight
     Background.Color = clBtnFace
@@ -224,7 +225,7 @@ object DigIt_Main: TDigIt_Main
     ButtonPosition = akLeft
     ButtonSize = 27
     Button.Left = 0
-    Button.Height = 483
+    Button.Height = 490
     Button.Top = 0
     Button.Width = 27
     Button.Caption = 'Page Size & Counter'
@@ -799,17 +800,17 @@ object DigIt_Main: TDigIt_Main
         ItemHeight = 20
         ItemIndex = 1
         Items.Strings = (
-          'Pixel'
-          'Centimeter'
-          'Millimeter'
-          'Inch'
-          'Pica '
-          'Point'
+          'Pixels'
+          'Centimeters'
+          'Millimeters'
+          'Inches'
+          'Picas '
+          'Points'
           'Percent'
         )
         Style = csDropDownList
         TabOrder = 2
-        Text = 'Centimeter'
+        Text = 'Centimeters'
         OnChange = edPageUnitChange
       end
       object BCLabel12: TBCLabel
@@ -896,21 +897,22 @@ object DigIt_Main: TDigIt_Main
   end
   object panelTop: TPanel
     Left = 0
-    Height = 79
+    Height = 72
     Top = 0
     Width = 1411
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 79
+    ClientHeight = 72
     ClientWidth = 1411
     TabOrder = 2
     object tbMain: TToolBar
       Left = 0
       Height = 69
       Top = 0
-      Width = 832
+      Width = 1048
       Align = alNone
+      AutoSize = True
       BorderSpacing.Bottom = 10
       ButtonHeight = 62
       ButtonWidth = 62
@@ -928,19 +930,20 @@ object DigIt_Main: TDigIt_Main
         Left = 514
         Top = 0
         Action = actTake
-        DropdownMenu = menuTake
-        Style = tbsDropDown
+        AutoSize = True
       end
       object tbSepMenu: TToolButton
         Left = 76
         Height = 62
         Top = 0
+        AutoSize = True
         Caption = 'tbSepMenu'
         Style = tbsSeparator
       end
       object tbMenu: TToolButton
         Left = 1
         Top = 0
+        AutoSize = True
         Caption = 'Menù'
         DropdownMenu = MenuMain
         ImageIndex = 3
@@ -949,6 +952,7 @@ object DigIt_Main: TDigIt_Main
       object tbSource: TToolButton
         Left = 164
         Top = 0
+        AutoSize = True
         Caption = 'Source...'
         DropdownMenu = menuSources
         ImageIndex = 4
@@ -958,57 +962,71 @@ object DigIt_Main: TDigIt_Main
         Left = 452
         Top = 0
         Action = actPreview
+        AutoSize = True
       end
       object tbSepTake: TToolButton
-        Left = 347
+        Left = 444
         Height = 62
         Top = 0
+        AutoSize = True
         Caption = 'tbSepTake'
         Style = tbsSeparator
       end
       object tbTimerTake: TToolButton
-        Left = 654
+        Left = 754
         Top = 0
         Action = actTimerTake
+        AutoSize = True
         DropdownMenu = menuTimerTake
         Style = tbsDropDown
       end
       object tbDestination: TToolButton
         Left = 240
         Top = 0
+        AutoSize = True
         Caption = 'Destination...'
         DropdownMenu = menuDestinations
         ImageIndex = 5
         Style = tbsButtonDrop
       end
       object tbCropMode: TToolButton
-        Left = 355
+        Left = 347
         Top = 0
+        AutoSize = True
         Caption = 'Crop Mode'
         DropdownMenu = menuCropMode
         ImageIndex = 0
         Style = tbsButtonDrop
       end
       object tbTakeAgain: TToolButton
-        Left = 591
+        Left = 576
         Top = 0
         Action = actTakeRe
+        AutoSize = True
       end
       object tbProfiles: TToolButton
         Left = 84
         Top = 0
+        AutoSize = True
         Caption = 'Profiles...'
         DropdownMenu = menuProfiles
         ImageIndex = 25
         Style = tbsButtonDrop
       end
+      object tbTakeFB: TToolButton
+        Left = 639
+        Top = 0
+        Action = actTakeBuildDuplex
+        AutoSize = True
+      end
     end
     object tbCrop: TToolBar
-      Left = 751
+      Left = 960
       Height = 69
       Top = 0
-      Width = 625
+      Width = 600
       Align = alNone
+      AutoSize = True
       ButtonHeight = 62
       ButtonWidth = 62
       Caption = 'tbCrop'
@@ -1055,6 +1073,7 @@ object DigIt_Main: TDigIt_Main
         Left = 348
         Height = 62
         Top = 0
+        AutoSize = True
         Caption = 'tbSepClear'
         Style = tbsSeparator
       end
@@ -1068,13 +1087,14 @@ object DigIt_Main: TDigIt_Main
         Left = 99
         Top = 0
         Action = actGoNext
+        AutoSize = True
       end
     end
   end
   object rollCrops: TBCExpandPanel
     Left = 0
-    Height = 483
-    Top = 79
+    Height = 490
+    Top = 72
     Width = 288
     Align = alLeft
     Background.Color = clBtnFace
@@ -1116,7 +1136,7 @@ object DigIt_Main: TDigIt_Main
     ButtonPosition = akLeft
     ButtonSize = 27
     Button.Left = 0
-    Button.Height = 483
+    Button.Height = 490
     Button.Top = 0
     Button.Width = 27
     Button.Caption = 'Crop Areas'
@@ -1128,7 +1148,7 @@ object DigIt_Main: TDigIt_Main
     object cbCropList: TComboBox
       Left = 40
       Height = 28
-      Top = 8
+      Top = 64
       Width = 150
       AutoSize = False
       ItemHeight = 20
@@ -1140,7 +1160,7 @@ object DigIt_Main: TDigIt_Main
       Left = 190
       Height = 32
       Hint = 'Add a Crop Area'
-      Top = 8
+      Top = 64
       Width = 32
       Caption = '+'
       Flat = True
@@ -1152,7 +1172,7 @@ object DigIt_Main: TDigIt_Main
       Left = 222
       Height = 32
       Hint = 'Remove this Crop Area'
-      Top = 8
+      Top = 64
       Width = 32
       Caption = '-'
       Flat = True
@@ -1162,8 +1182,8 @@ object DigIt_Main: TDigIt_Main
     end
     object panelCropArea: TBCPanel
       Left = 28
-      Height = 450
-      Top = 46
+      Height = 388
+      Top = 94
       Width = 252
       Background.Color = clBtnFace
       Background.Gradient1.StartColor = clWhite
@@ -1341,19 +1361,19 @@ object DigIt_Main: TDigIt_Main
         Width = 129
         AutoSize = False
         ItemHeight = 20
-        ItemIndex = 0
+        ItemIndex = 1
         Items.Strings = (
-          'Pixel'
-          'Centimeter'
-          'Millimeter'
-          'Inch'
-          'Pica '
-          'Point'
+          'Pixels'
+          'Centimeters'
+          'Millimeters'
+          'Inches'
+          'Picas '
+          'Points'
           'Percent'
         )
         Style = csDropDownList
         TabOrder = 0
-        Text = 'Pixel'
+        Text = 'Centimeters'
         OnChange = edCropUnit_TypeChange
       end
       object BCLabel5: TBCLabel
@@ -1754,7 +1774,7 @@ object DigIt_Main: TDigIt_Main
       Left = 256
       Height = 28
       Hint = 'Duplicate this Area'
-      Top = 8
+      Top = 64
       Width = 29
       Flat = True
       Images = imgListMenu
@@ -1763,6 +1783,35 @@ object DigIt_Main: TDigIt_Main
       ShowHint = True
       ParentShowHint = False
       OnClick = btCropDuplicateClick
+    end
+    object Label12: TLabel
+      Left = 40
+      Height = 20
+      Top = 40
+      Width = 246
+      Caption = 'Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object btTemplatesEdit: TSpeedButton
+      Left = 28
+      Height = 28
+      Top = 4
+      Width = 120
+      Alignment = taLeftJustify
+      Caption = 'Templates ...'
+      Images = imgListMenu
+      ImageIndex = 16
+    end
+    object btTemplatesAdd: TSpeedButton
+      Left = 148
+      Height = 28
+      Top = 4
+      Width = 138
+      Alignment = taLeftJustify
+      Caption = 'Add Template'
+      Images = imgListMenu
+      ImageIndex = 16
     end
   end
   object imgListMain: TImageList
@@ -2937,11 +2986,10 @@ object DigIt_Main: TDigIt_Main
       Caption = 'Timer Take'
       Enabled = False
       ImageIndex = 9
-      Visible = False
       OnExecute = actTimerTakeExecute
     end
     object actTakeBuildDuplex: TAction
-      Caption = 'Take and Build Front/Back'
+      Caption = 'Take Front/Back'
       Enabled = False
       ImageIndex = 10
       OnExecute = actTakeExecute
@@ -4501,20 +4549,6 @@ object DigIt_Main: TDigIt_Main
       OnClick = itemCropModeClick
     end
   end
-  object menuTake: TPopupMenu
-    Images = imgListMain
-    Left = 868
-    Top = 493
-    object itemTake: TMenuItem
-      Action = actTake
-    end
-    object itemTakeAgain: TMenuItem
-      Action = actTakeRe
-    end
-    object itemBuildDuplex: TMenuItem
-      Action = actTakeBuildDuplex
-    end
-  end
   object menuProfiles: TPopupMenu
     Images = imgListMenu
     Left = 432
@@ -4537,33 +4571,33 @@ object DigIt_Main: TDigIt_Main
     Left = 432
     Top = 416
     object itemRulerPixel: TMenuItem
-      Caption = 'Pixel'
+      Caption = 'Pixels'
       OnClick = itemRulerClick
     end
     object itemRulerCentimeter: TMenuItem
       Tag = 1
-      Caption = 'Centimeter'
+      Caption = 'Centimeters'
       Default = True
       OnClick = itemRulerClick
     end
     object itemRulerMillimeter: TMenuItem
       Tag = 2
-      Caption = 'Millimeter'
+      Caption = 'Millimeters'
       OnClick = itemRulerClick
     end
     object itemRulerInch: TMenuItem
       Tag = 3
-      Caption = 'Inch'
+      Caption = 'Inches'
       OnClick = itemRulerClick
     end
     object itemRulerPica: TMenuItem
       Tag = 4
-      Caption = 'Pica'
+      Caption = 'Picas'
       OnClick = itemRulerClick
     end
     object itemRulerPoint: TMenuItem
       Tag = 5
-      Caption = 'Point'
+      Caption = 'Points'
       OnClick = itemRulerClick
     end
     object itemRulerPercent: TMenuItem

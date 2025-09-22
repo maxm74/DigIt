@@ -59,7 +59,6 @@ type
     countTakes: Integer;
 
     constructor Create;
-    destructor Destroy; override;
 
     //IDigIt_Interface Implementation
     function Flags: TDigItInterfaceKind; stdcall; virtual;
@@ -184,17 +183,6 @@ begin
   rParams:= nil;
   rEnabled:= True;
   countTakes:= -1;
-end;
-
-destructor TDigIt_Source_Common.Destroy;
-begin
-  if (rParams <> nil) then
-  begin
-    rParams.Release;
-    rParams:= nil;
-  end;
-
-  inherited Destroy;
 end;
 
 function TDigIt_Source_Common.Flags: TDigItInterfaceKind; stdcall;

@@ -1,7 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
-2025/09/05 Deleted Menu Profiles OnPopup (updated in Profiles Edit);
+2025/09/22 Fixed Folder Source Bug with only one file;
+           ExportFiles use new FCL-PDF for Sizes (to test);
+           UI Adjusted some Captions and Translations;
+           UI Added ToolBar reposition and size calculation;
+
+        05 Deleted Menu Profiles OnPopup (updated in Profiles Edit);
            Added Source_Select with Profiles in MainForm;
            Added Selected Source in MainForm Caption;
            Moved Get Source+Params Title in new TDigIt_Sources.GetTitle;

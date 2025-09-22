@@ -159,61 +159,69 @@ msgstr "Avvio una Nuova Sessione Lavoro?"
 msgid "Save the Work Session?"
 msgstr "Salvo la Sessione Lavoro?"
 
-#: digit_form_main.rssourcenotfound
-#, object-pascal-format
-msgid "Source %s not Found, try Select another from Menù"
-msgstr "Sorgente %s non Trovata, prova a Selezionarne un'altra dal Menù"
-
-#: digit_form_main.rssourcenotselected
-#, object-pascal-format
-msgid "Cannot Select Source %d, try Select another from Menù"
-msgstr "Impossibile Selezionare la Sorgente %d, prova a Selezionarne un'altra dal Menù"
-
 #: digit_form_profiles.rsprofiles_addcurrent
 msgctxt "digit_form_profiles.rsprofiles_addcurrent"
-msgid "Add Current Source..."
-msgstr "Aggiungi Sorgente Attuale..."
+msgid "Add Profile..."
+msgstr "Aggiungi Profilo..."
+
+#: digit_form_profiles.rsprofiles_del
+#, object-pascal-format
+msgid ""
+"Delete Profile?\n"
+"%s"
+msgstr ""
+"Cancellare il profilo?\n"
+"%s"
+
+#: digit_form_profiles.rsprofiles_delall
+msgid "Delete All Profiles?"
+msgstr "Cancellare tutti i profili?"
 
 #: digit_form_profiles.rsprofiles_invalidtitle_exists
 msgid "Profile Title already exists"
 msgstr "Titolo del Profilo già esistente"
+
+#: digit_form_profiles.rsprofiles_sourceerr
+#, object-pascal-format
+msgid ""
+"Cannot Open Source\n"
+"%s"
+msgstr ""
+"Non posso Aprire la Sorgente\n"
+"%s"
 
 #: digit_form_profiles.rsprofiles_title
 msgid "Profile Title :"
 msgstr "Titolo Profilo :"
 
 #: digit_session.rsclearqueue
-#, fuzzy
 msgctxt "digit_session.rsclearqueue"
 msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
 
 #: digit_session.rsdeleteall
-#, fuzzy
 msgctxt "digit_session.rsdeleteall"
 msgid "Delete All Captured Pages?"
 msgstr "Elimino tutte le Pagine Acquisite?"
 
 #: digit_session.rsdeleteallfiles
-#, fuzzy
 msgctxt "digit_session.rsdeleteallfiles"
 msgid "Do I also Delete Files from the disk?"
 msgstr "Elimino anche i Files dal disco?"
 
 #: digit_session.rsdeletecaptured
-#, object-pascal-format, fuzzy
+#, object-pascal-format
 msgctxt "digit_session.rsdeletecaptured"
 msgid "Delete Captured Page %s ?"
 msgstr "Elimino la Pagina Acquisita %s ?"
 
 #: digit_session.rserrincomplete
-#, fuzzy
 msgctxt "digit_session.rserrincomplete"
 msgid "Operation not completed, do I keep the processed files?"
 msgstr "Operazione non completata, conservo i file elaborati?"
 
 #: digit_session.rserrloadwork
-#, object-pascal-format, fuzzy
+#, object-pascal-format
 msgctxt "digit_session.rserrloadwork"
 msgid ""
 "Cannot Load Work Session\n"
@@ -223,61 +231,57 @@ msgstr ""
 "%s"
 
 #: digit_session.rsnofilesdownloaded
-#, fuzzy
 msgctxt "digit_session.rsnofilesdownloaded"
-msgid "NO Files Downloaded "
-msgstr "NESSUN File Scaricato "
+msgid "NO Files Acquired"
+msgstr "NESSUN File Acquisito"
 
 #: digit_session.rsnomorefiles
-#, fuzzy
 msgctxt "digit_session.rsnomorefiles"
 msgid "There are no more files to process, should I clear the Work Queue?"
 msgstr "Non ci sono più file da elaborare, devo cancellare la Coda di Lavoro?"
 
 #: digit_session.rssaveworkcopy
-#, fuzzy
 msgctxt "digit_session.rssaveworkcopy"
 msgid "Create a Copy of the Work Session or Move it?"
 msgstr "Creare una Copia della sessione di Lavoro o Spostarla?"
 
 #: digit_session.rssavingcaptured
-#, fuzzy
 msgctxt "digit_session.rssavingcaptured"
 msgid "Saving Captured Files"
 msgstr "Salvando i Files Acquisiti"
 
 #: digit_session.rssavingdone
-#, fuzzy
 msgctxt "digit_session.rssavingdone"
 msgid "Saved Done"
 msgstr "Salvataggio Completato"
 
 #: digit_session.rssavingsessionfiles
-#, fuzzy
 msgctxt "digit_session.rssavingsessionfiles"
 msgid "Saving Session Files"
 msgstr "Salvando i Files di Sessione"
 
 #: digit_session.rssavingsources
-#, fuzzy
 msgctxt "digit_session.rssavingsources"
 msgid "Saving Sources Files"
 msgstr "Salvando i File Sorgenti"
 
 #: digit_session.rssavingswitch
-#, fuzzy
 msgctxt "digit_session.rssavingswitch"
 msgid "Switching to New Work Session"
 msgstr "Passando alla Nuova Sessione Lavoro"
 
 #: digit_session.rssavingwork
-#, fuzzy
 msgctxt "digit_session.rssavingwork"
 msgid "Saving the Work Session"
 msgstr "Salvando la Sessione Lavoro"
 
+#: digit_session.rssourcenotselected
+#, object-pascal-format
+msgid "Source \"%s\" not founded, try Select another from Menù"
+msgstr "Sorgente %s non Trovata, prova a Selezionarne un'altra dal Menù"
+
 #: digit_session.rstakeagain
-#, object-pascal-format, fuzzy
+#, object-pascal-format
 msgctxt "digit_session.rstakeagain"
 msgid "Replace the last %d taked files with a new Take?"
 msgstr "Sostituisco gli ultimi %d file catturati con una nuova Cattura?"
@@ -442,6 +446,10 @@ msgstr "Su"
 msgid "Export Settings -"
 msgstr "Impostazioni Esportazione -"
 
+#: tdigit_exportfiles.cbcopyasis.caption
+msgid "Copy as is"
+msgstr "Copia così com'è"
+
 #: tdigit_exportfiles.cbpapersize.text
 msgid "Same as the Image Size"
 msgstr "Uguale a Dimensione Immagine"
@@ -601,8 +609,8 @@ msgid "Take"
 msgstr "Cattura"
 
 #: tdigit_main.acttakebuildduplex.caption
-msgid "Take and Build Front/Back"
-msgstr "Cattura e Costruisci Fronte/Retro"
+msgid "Take Front/Back"
+msgstr "Cattura Fronte/Retro"
 
 #: tdigit_main.acttakere.caption
 msgid "Re-Take"
@@ -627,11 +635,9 @@ msgid "Height :"
 msgstr "Altezza :"
 
 #: tdigit_main.bclabel12.caption
-#, fuzzy
-#| msgid "Fixed side:"
 msgctxt "tdigit_main.bclabel12.caption"
 msgid "Unit :"
-msgstr "Lato fisso:"
+msgstr "Unità :"
 
 #: tdigit_main.bclabel13.caption
 msgid "Before :"
@@ -765,6 +771,14 @@ msgctxt "tdigit_main.btprotateright.hint"
 msgid "Rotate Right"
 msgstr "Ruota a Destra"
 
+#: tdigit_main.bttemplatesadd.caption
+msgid "Add Template"
+msgstr "Aggiungi Modello"
+
+#: tdigit_main.bttemplatesedit.caption
+msgid "Templates ..."
+msgstr "Modelli ..."
+
 #: tdigit_main.btzback.hint
 msgid "To Back"
 msgstr "In Fondo"
@@ -788,18 +802,18 @@ msgid "DigIt"
 msgstr "DigIt"
 
 #: tdigit_main.edcropunit_type.text
-#, fuzzy
-#| msgid "pixels"
-msgid "Pixel"
-msgstr "pixels"
+msgctxt "tdigit_main.edcropunit_type.text"
+msgid "Centimeters"
+msgstr "Centimetri"
 
 #: tdigit_main.edpageresizetype.text
 msgid "Full Size"
-msgstr ""
+msgstr "Dimensione Intera"
 
 #: tdigit_main.edpageunit.text
-msgid "Centimeter"
-msgstr ""
+msgctxt "tdigit_main.edpageunit.text"
+msgid "Centimeters"
+msgstr "Centimetri"
 
 #: tdigit_main.itemcropmodecustom.caption
 msgctxt "tdigit_main.itemcropmodecustom.caption"
@@ -820,6 +834,36 @@ msgstr "Aggiungi Sorgente Attuale..."
 msgid "Edit..."
 msgstr "Modifica..."
 
+#: tdigit_main.itemrulercentimeter.caption
+msgctxt "tdigit_main.itemrulercentimeter.caption"
+msgid "Centimeters"
+msgstr "Centimetri"
+
+#: tdigit_main.itemrulerinch.caption
+msgid "Inches"
+msgstr "Pollici"
+
+#: tdigit_main.itemrulermillimeter.caption
+msgid "Millimeters"
+msgstr "Millimetri"
+
+#: tdigit_main.itemrulerpercent.caption
+msgid "Percent"
+msgstr "Percentuale"
+
+#: tdigit_main.itemrulerpica.caption
+msgid "Picas"
+msgstr ""
+
+#: tdigit_main.itemrulerpixel.caption
+msgctxt "tdigit_main.itemrulerpixel.caption"
+msgid "Pixels"
+msgstr ""
+
+#: tdigit_main.itemrulerpoint.caption
+msgid "Points"
+msgstr "Punti"
+
 #: tdigit_main.label1.caption
 msgid "Z Order :"
 msgstr "Ordine Z :"
@@ -832,6 +876,10 @@ msgstr "Ribalta :"
 #: tdigit_main.label11.caption
 msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr "Contatore ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+
+#: tdigit_main.label12.caption
+msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr "Aree Taglio ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 
 #: tdigit_main.label2.caption
 msgctxt "tdigit_main.label2.caption"
@@ -884,17 +932,53 @@ msgstr ""
 msgid "Load XML"
 msgstr ""
 
+#: tdigit_main.menuprojectnew.caption
+msgid "New ..."
+msgstr "Nuova ..."
+
+#: tdigit_main.menuprojectopen.caption
+msgid "Open ..."
+msgstr "Apri ..."
+
+#: tdigit_main.menuprojectsave.caption
+msgid "Save"
+msgstr "Salva"
+
+#: tdigit_main.menuprojectsaveas.caption
+msgid "Save as ..."
+msgstr "Salva come ..."
+
+#: tdigit_main.menurulerbottom.caption
+msgid "Bottom"
+msgstr "Sotto"
+
+#: tdigit_main.menurulerleft.caption
+msgid "Left"
+msgstr "Sinistra"
+
+#: tdigit_main.menurulerright.caption
+msgid "Right"
+msgstr "Destra"
+
+#: tdigit_main.menurulertop.caption
+msgid "Top"
+msgstr "Sopra"
+
 #: tdigit_main.menusaveprofiles.caption
 msgid "Save Profiles"
-msgstr ""
+msgstr "Salva Profilo"
 
 #: tdigit_main.menusavesettings.caption
 msgid "Save Settings"
-msgstr ""
+msgstr "Salva Impostazioni"
 
 #: tdigit_main.menusavexml.caption
 msgid "Save XML"
 msgstr ""
+
+#: tdigit_main.menusession.caption
+msgid "Work Session"
+msgstr "Session Lavoro"
 
 #: tdigit_main.menutimertakeconfig.caption
 msgid "Config Timer"
@@ -903,6 +987,14 @@ msgstr "Configura Timer"
 #: tdigit_main.menutimertakestop.caption
 msgid "Stop Timer"
 msgstr "Ferma Timer"
+
+#: tdigit_main.menuview.caption
+msgid "View"
+msgstr "Visualizza"
+
+#: tdigit_main.menuviewrulers.caption
+msgid "Rulers"
+msgstr "Righelli"
 
 #: tdigit_main.opensessiondlg.title
 msgid "Open Existing Session"
@@ -999,8 +1091,8 @@ msgctxt "tdigit_main.tbsource.caption"
 msgid "Source..."
 msgstr "Sorgente..."
 
-#: tdigit_profiles_form.btaddfiles1.caption
-msgctxt "tdigit_profiles_form.btaddfiles1.caption"
+#: tdigit_profiles_form.btaddprofile.caption
+msgctxt "tdigit_profiles_form.btaddprofile.caption"
 msgid "Add ..."
 msgstr "Aggiungi ..."
 
@@ -1161,4 +1253,3 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
-

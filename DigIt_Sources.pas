@@ -41,6 +41,7 @@ type
     function Register(const aName: PChar; const aClass: IDigIt_Source): Boolean; stdcall;
 
     constructor Create;
+    destructor Destroy; override;
 
     function Get(SourceName: String; CreateParams, UserParams: Boolean;
                  out ASource: PSourceInfo; var AParams: IDigIt_Params): Boolean; overload;
@@ -163,6 +164,17 @@ begin
   rSelectedName:= '';
   rSelectedIndex:= -1;
   rSelectedParams:= nil;
+end;
+
+destructor TDigIt_Sources.Destroy;
+begin
+ (* if (rSelectedParams <> nil) then
+  begin
+    rSelectedParams.Release;
+    rSelectedParams:= nil;
+  end;
+  *)
+  inherited Destroy;
 end;
 
 function TDigIt_Sources.Get(SourceName: String; CreateParams, UserParams: Boolean;

@@ -219,21 +219,19 @@ begin
 
   if (xFiles <> nil) and (xFiles.Count > 0) then
   Case takeAction of
-    takeActPreview: begin
-       aData:= StrNew(PChar(xFiles[0]));
-       Result:= 1;
-       aDataType:= diDataType_FileName;
-    end;
-    takeActTake: begin
-       Result:= xFiles.Count;
-
-       if (Result = 1 )
-       then aData:= StrNew(PChar(xFiles[0]))
-       else aData:= Self as IDigIt_ArrayR_PChars;
-
-       aDataType:= diDataType_FileNameArray;
-    end;
+    takeActPreview: Result:= 1;
+    takeActTake:    Result:= xFiles.Count;
   end;
+
+  if (Result = 1 )
+  then begin
+         aData:= StrNew(PChar(xFiles[0]));
+         aDataType:= diDataType_FileName;
+       end
+  else begin
+         aData:= Self as IDigIt_ArrayR_PChars;
+         aDataType:= diDataType_FileNameArray;
+       end;
 end;
 
 procedure TDigIt_Source_Folder.Clear; stdcall;

@@ -25,7 +25,7 @@ resourcestring
   rsSavingSwitch = 'Switching to New Work Session';
   rsSavingDone = 'Saved Done';
   rsSaveWorkCopy = 'Create a Copy of the Work Session or Move it?';
-  rsNoFilesDownloaded = 'NO Files Downloaded ';
+  rsNoFilesDownloaded = 'NO Files Acquired';
   rsTakeAgain = 'Replace the last %d taked files with a new Take?';
   rsNoMoreFiles = 'There are no more files to process, should I clear the Work Queue?';
   rsClearQueue = 'Clear the Work Queue?';
@@ -33,7 +33,7 @@ resourcestring
   rsDeleteAll = 'Delete All Captured Pages?';
   rsDeleteAllFiles = 'Do I also Delete Files from the disk?';
 
-  rsSourceNotSelected = 'Cannot Select Source "%s", try Select another from Menù';
+  rsSourceNotSelected = 'Source "%s" not founded, try Select another from Menù';
   rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
 
@@ -1566,6 +1566,7 @@ var
    i,
    lenCropAreas: Integer;
    curBitmap: TBGRABitmap;
+   tmp: Single;
 
 begin
   rSourceFilesIndex:= ASourceFileIndex;
@@ -1600,12 +1601,15 @@ begin
          SourceFiles[rSourceFilesIndex].cStart:= Counter.Value;
        end;
 
-  //imgManipulation.getAllBitmaps(@SaveCallBack, Integer(isReTake), True);
   for i:=0 to lenCropAreas-1 do
   try
-    curBitmap:= rBitmap.GetPart(PhysicalSizeToPixels(rBitmap, CropAreas[i]), True, False);
+     tmp:= CropAreas[i].Left;
+     CropAreas[i].Left:= CropAreas[i].Right;
+     CropAreas[i].Right:= tmp;
 
-    CropImage(curBitmap, isReTake);
+    curBitmap:= rBitmap.GetPart(PhysicalSizeToRoundedPixels(CropAreas[i], rBitmap, True), True, True);
+
+    if (curBitmap<>nil) then CropImage(curBitmap, isReTake);
 
   finally
     if (curBitmap<>nil) then curBitmap.Free;

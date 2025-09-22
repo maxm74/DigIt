@@ -92,6 +92,8 @@ type
     btCrop_Del: TBGRASpeedButton;
     btCRotateLeft: TSpeedButton;
     btCRotateRight: TSpeedButton;
+    btTemplatesEdit: TSpeedButton;
+    btTemplatesAdd: TSpeedButton;
     btPageSizes: TSpeedButton;
     btPageSizesToCrops: TSpeedButton;
     btPaperSizes: TSpeedButton;
@@ -118,12 +120,10 @@ type
     edPageResizeType: TComboBox;
     imgListChecks: TImageList;
     imgListCaptured: TImageList;
-    itemTake: TMenuItem;
-    itemTakeAgain: TMenuItem;
-    itemBuildDuplex: TMenuItem;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
+    Label12: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label8: TLabel;
@@ -187,7 +187,6 @@ type
     menuSources: TPopupMenu;
     menuTimerTake: TPopupMenu;
     menuCropMode: TPopupMenu;
-    menuTake: TPopupMenu;
     rgCropAspect: TRadioGroup;
     rollCounters: TBCExpandPanel;
     rollCrops: TBCExpandPanel;
@@ -231,6 +230,7 @@ type
     tbCaptSep2: TToolButton;
     tbCapturedToImg: TToolButton;
     tbProfiles: TToolButton;
+    tbTakeFB: TToolButton;
 
     procedure actCapturedDeleteAllExecute(Sender: TObject);
     procedure actCapturedDeleteExecute(Sender: TObject);
@@ -371,6 +371,7 @@ type
     procedure UI_ToolBar;
     procedure UI_ToolBar_Captured;
     procedure UI_ToolBarMods;
+    procedure UI_ToolBarRePosition;
     procedure UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);
     procedure UI_MenuItemRulersChecks;
     procedure UI_ThumbnailUpdate(AIndex: Integer; AFileName: String); overload;
@@ -1750,6 +1751,8 @@ begin
   end;
 
   tbCropMode.ImageIndex:= Integer(Session.CropMode);
+
+  UI_ToolBarRePosition;
 end;
 
 procedure TDigIt_Main.SES_CropImage(Sender: TObject; ABitmap: TBGRABitmap; iCapturedFiles: Integer; IsReCrop: Boolean);
@@ -2557,15 +2560,33 @@ begin
     if (curAct <> nil) and (curAct.ShortCut <> 0)
     then curAct.Caption:= curAct.Caption+' ('+ShortCutToText(curAct.ShortCut)+')';
   end;
-  tbMain.AdjustSize;
-  tbCrop.AdjustSize;
-  tbCrop.Left:= tbMain.Left+tbMain.Width+40;
 
   for i:=0 to tbCaptured.ButtonCount-1 do
   begin
     curBtn:= tbCaptured.Buttons[i];
     if (curBtn <> nil) then curBtn.Hint:= curBtn.Caption;
   end;
+
+  UI_ToolBarRePosition;
+end;
+
+procedure TDigIt_Main.UI_ToolBarRePosition;
+var
+   i, w: Integer;
+
+begin
+  tbMain.AdjustSize;
+  tbCrop.AdjustSize;
+
+  w:= 0;
+  for i:=0 to tbMain.ButtonCount-1 do inc(w, tbMain.Buttons[i].Width);
+  tbMain.Width:= w;
+
+  w:= 0;
+  for i:=0 to tbCrop.ButtonCount-1 do inc(w, tbCrop.Buttons[i].Width);
+  tbCrop.Width:= w;
+
+  tbCrop.Left:= tbMain.Left+tbMain.Width+8;
 end;
 
 procedure TDigIt_Main.UI_MenuItemsChecks(newSourceI, newDestinationI: Integer);

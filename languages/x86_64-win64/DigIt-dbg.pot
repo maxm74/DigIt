@@ -210,7 +210,7 @@ msgstr ""
 
 #: digit_session.rsnofilesdownloaded
 msgctxt "digit_session.rsnofilesdownloaded"
-msgid "NO Files Downloaded "
+msgid "NO Files Acquired"
 msgstr ""
 
 #: digit_session.rsnomorefiles
@@ -255,7 +255,7 @@ msgstr ""
 
 #: digit_session.rssourcenotselected
 #, object-pascal-format
-msgid "Cannot Select Source \"%s\", try Select another from Menù"
+msgid "Source \"%s\" not founded, try Select another from Menù"
 msgstr ""
 
 #: digit_session.rstakeagain
@@ -582,7 +582,7 @@ msgid "Take"
 msgstr ""
 
 #: tdigit_main.acttakebuildduplex.caption
-msgid "Take and Build Front/Back"
+msgid "Take Front/Back"
 msgstr ""
 
 #: tdigit_main.acttakere.caption
@@ -744,6 +744,14 @@ msgctxt "tdigit_main.btprotateright.hint"
 msgid "Rotate Right"
 msgstr ""
 
+#: tdigit_main.bttemplatesadd.caption
+msgid "Add Template"
+msgstr ""
+
+#: tdigit_main.bttemplatesedit.caption
+msgid "Templates ..."
+msgstr ""
+
 #: tdigit_main.btzback.hint
 msgctxt "tdigit_main.btzback.hint"
 msgid "To Back"
@@ -770,7 +778,7 @@ msgstr ""
 
 #: tdigit_main.edcropunit_type.text
 msgctxt "tdigit_main.edcropunit_type.text"
-msgid "Pixel"
+msgid "Centimeters"
 msgstr ""
 
 #: tdigit_main.edpageresizetype.text
@@ -779,7 +787,7 @@ msgstr ""
 
 #: tdigit_main.edpageunit.text
 msgctxt "tdigit_main.edpageunit.text"
-msgid "Centimeter"
+msgid "Centimeters"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption
@@ -804,15 +812,15 @@ msgstr ""
 
 #: tdigit_main.itemrulercentimeter.caption
 msgctxt "tdigit_main.itemrulercentimeter.caption"
-msgid "Centimeter"
+msgid "Centimeters"
 msgstr ""
 
 #: tdigit_main.itemrulerinch.caption
-msgid "Inch"
+msgid "Inches"
 msgstr ""
 
 #: tdigit_main.itemrulermillimeter.caption
-msgid "Millimeter"
+msgid "Millimeters"
 msgstr ""
 
 #: tdigit_main.itemrulerpercent.caption
@@ -820,16 +828,16 @@ msgid "Percent"
 msgstr ""
 
 #: tdigit_main.itemrulerpica.caption
-msgid "Pica"
+msgid "Picas"
 msgstr ""
 
 #: tdigit_main.itemrulerpixel.caption
 msgctxt "tdigit_main.itemrulerpixel.caption"
-msgid "Pixel"
+msgid "Pixels"
 msgstr ""
 
 #: tdigit_main.itemrulerpoint.caption
-msgid "Point"
+msgid "Points"
 msgstr ""
 
 #: tdigit_main.label1.caption
@@ -843,6 +851,10 @@ msgstr ""
 
 #: tdigit_main.label11.caption
 msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
+#: tdigit_main.label12.caption
+msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr ""
 
 #: tdigit_main.label2.caption

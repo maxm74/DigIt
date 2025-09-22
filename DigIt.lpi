@@ -41,7 +41,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../../Packages/DelphiTwain/units"/>
+            <OtherUnitFiles Value="../../Packages/DelphiTwain/units;fcl-pdf"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
           </SearchPaths>
           <BuildMacros>

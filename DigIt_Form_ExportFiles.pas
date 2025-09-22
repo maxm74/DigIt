@@ -120,7 +120,7 @@ implementation
 
 uses LCLIntf, FileUtil, LazFileUtils, DigIt_Utils,
      MM_StrUtils, MM_FilesUtils,
-     BGRAReadJpeg, BGRAWriteJpeg, BGRAWriteTiff, fpPDF, BGRAPdf,
+     BGRAReadJpeg, BGRAWriteJpeg, BGRAWriteTiff, fpPDF, BGRAUnits,
      BGRAFormatUI,
      Digit_Bridge_Impl;
 
@@ -400,11 +400,11 @@ end;
 
 function TDigIt_ExportFiles.SaveAsPDF(out pdfFileName: String): Boolean;
 var
-  PDF: TBGRAPDFDocument;
+  PDF: TPDFDocument;
   P: TPDFPage;
   S: TPDFSection;
   paper: TPDFPaper;
-  curImg: TBGRAPDFImageItem;
+  curImg: TPDFImageItem;
   IDX, i,
   lenCaptured,
   curPaper: Integer;
@@ -416,6 +416,7 @@ var
   loadImg,
   ImgInStream: Boolean;
   jpgInfo: TJPEGInfo;
+  imgW, imgH: TPDFFloat;
 
 begin
   Result:= False;
@@ -432,14 +433,14 @@ begin
      srcBitmap:= TBGRABitmap.Create;
      MemStream:= TMemoryStream.Create;
 
-     PDF:= TBGRAPDFDocument.Create(Nil);
+     PDF:= TPDFDocument.Create(Nil);
      PDF.Infos.Title := edTitle.Text;
      PDF.Infos.Author := edAuthor.Text;
      PDF.Infos.Producer := edProducer.Text;
      PDF.Infos.Keywords:= edKeyWords.Text;
      PDF.Infos.ApplicationName := Application.Title+' ver '+DigIt_Version;
      PDF.Infos.CreationDate := Now;
-     PDF.Options := [poCompressImages, poUseRawJPEG];
+     PDF.Options := [poPageOriginAtTop, poCompressImages, poUseRawJPEG];
 
      lenCaptured:= Length(CapturedFiles)-1;
      cStr:= IntToStr(lenCaptured+1);
@@ -499,11 +500,14 @@ begin
          IDX:= PDF.Images.AddJPEGStream(MemStream, jpgInfo.Width, jpgInfo.Height);
          if (IDX >= 0) then
          begin
-           curImg:= TBGRAPDFImageItem(PDF.Images[IDX]);
+           curImg:= TPDFImageItem(PDF.Images[IDX]);
 
            if jpgInfo.GrayScale
            then curImg.ColorSpace:= csDeviceGray
            else curImg.ColorSpace:= csDeviceRGB;
+
+           imgW:= PixelsToPhysicalSize(jpgInfo.Width, jpgInfo.ResolutionUnit, jpgInfo.ResolutionX, cuPoint);
+           imgH:= PixelsToPhysicalSize(jpgInfo.Height, jpgInfo.ResolutionUnit, jpgInfo.ResolutionY, cuPoint);
 
            (*case curPaper of   Add In Next Version
              Integer(ptCustom): begin
@@ -516,17 +520,24 @@ begin
 
              end;
              255:  begin*)
-               //P.PaperType:= ptCustom;
-               P.UnitOfMeasure:= uomPixels;
+               P.PaperType:= ptCustom;
+              // P.UnitOfMeasure:= uomCentimeters;
+
                //Set Paper to Full image size
-               paper.W:= jpgInfo.Width;
-               paper.H:= jpgInfo.Height;
+               paper.W:= imgW;    //595.276 841.89
+               paper.H:= imgH;
+               (* Unused in PDF ??
+               paper.Printable.T:= 12;
+               paper.Printable.L:= 12;
+               paper.Printable.B:= paper.W-12;
+               paper.Printable.T:= paper.H-12;
+               *)
                P.Paper:=paper;
              (*end;
              else P.PaperType:= TPDFPaperType(curPaper);
            end;*)
 
-           P.AddObject(TPDFImage.Create(PDF, 0, 0, jpgInfo.Width, jpgInfo.Height, IDX));
+           P.AddObject(TPDFImage.Create(PDF, 0, 0, imgW, imgH, IDX));
            S.AddPage(P);
          end;
 

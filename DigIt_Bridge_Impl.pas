@@ -121,9 +121,10 @@ type
     procedure SetMsgInterface(const AMsgInterface: IMM_MessageDlg);
 
     //Useful functions
-    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False); overload;
-    procedure ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer); overload;
-    procedure ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer); overload;
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False; CancelVisible: Boolean=True); overload;
+    procedure ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer; CancelVisible: Boolean=True); overload;
+    procedure ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer; CancelVisible: Boolean=True); overload;
+    procedure ProgressShowWaiting(ACaption: String; CancelVisible: Boolean=False); overload;
     procedure ProgressHide;
     function ProgressCancelled: Boolean;
 
@@ -603,7 +604,7 @@ begin
   rMsg:= AMsgInterface;
 end;
 
-procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean=False);
+procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax: Integer; CurrentMarquee: Boolean; CancelVisible: Boolean);
 begin
   if (rProgress <> nil) then
   begin
@@ -613,11 +614,11 @@ begin
     then rProgress.SetCurrent(0, 100, 0, True)
     else rProgress.SetCurrentVisible(False);
 
-    rProgress.Show(PChar(ACaption));
+    rProgress.Show(PChar(ACaption), CancelVisible);
   end;
 end;
 
-procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer);
+procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMarquee: Boolean; CurrentMin, CurrentMax: Integer; CancelVisible: Boolean);
 begin
   if (rProgress <> nil) then
   begin
@@ -627,11 +628,11 @@ begin
 
     rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentMin, False);
 
-    rProgress.Show(PChar(ACaption));
+    rProgress.Show(PChar(ACaption), CancelVisible);
   end;
 end;
 
-procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer);
+procedure TDigIt_Bridge.ProgressShow(ACaption: String; TotalMin, TotalMax, CurrentMin, CurrentMax: Integer; CancelVisible: Boolean);
 begin
   if (rProgress <> nil) then
   begin
@@ -639,8 +640,13 @@ begin
     rProgress.SetCurrent(CurrentMin, CurrentMax, CurrentMin, False);
     rProgress.SetTotalVisible(True);
     rProgress.SetCurrentVisible(True);
-    rProgress.Show(PChar(ACaption));
+    rProgress.Show(PChar(ACaption), CancelVisible);
   end;
+end;
+
+procedure TDigIt_Bridge.ProgressShowWaiting(ACaption: String; CancelVisible: Boolean);
+begin
+  if (rProgress <> nil) then rProgress.ShowWaiting(PChar(ACaption), CancelVisible);
 end;
 
 procedure TDigIt_Bridge.ProgressHide;

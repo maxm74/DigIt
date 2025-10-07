@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.7\n"
 
 #: digit_form_buildduplex.caption_cancel
 msgctxt "digit_form_buildduplex.caption_cancel"
@@ -304,6 +304,14 @@ msgctxt "digit_source_folder.rsfoldselect"
 msgid "Select a Folder"
 msgstr "Seleziona una Cartella"
 
+#: digit_source_twain.rstwainconnecting
+#, object-pascal-format
+msgctxt "digit_source_twain.rstwainconnecting"
+msgid ""
+"Connecting to Device\n"
+"%s"
+msgstr ""
+
 #: digit_source_twain.rstwainexcnotfound
 msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
@@ -336,6 +344,14 @@ msgstr "Acquisendo da %s a %d dpi"
 #: digit_source_wia.rswiacancelling
 msgid "Cancelling acquisition"
 msgstr "Annullando l'acquisizione"
+
+#: digit_source_wia.rswiaconnecting
+#, object-pascal-format
+msgctxt "digit_source_wia.rswiaconnecting"
+msgid ""
+"Connecting to Device\n"
+"%s"
+msgstr ""
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
@@ -460,7 +476,7 @@ msgstr "Ricorsiva"
 
 #: tdigit_exportfiles.cbusejpgasis.caption
 msgid "Use JPeg Files as is"
-msgstr "Usa file JPEG così come sono"
+msgstr "Usa File JPeg così come sono"
 
 #: tdigit_exportfiles.label1.caption
 msgctxt "tdigit_exportfiles.label1.caption"
@@ -609,8 +625,9 @@ msgid "Take"
 msgstr "Cattura"
 
 #: tdigit_main.acttakebuildduplex.caption
-msgid "Take Front/Back"
-msgstr "Cattura Fronte/Retro"
+msgctxt "tdigit_main.acttakebuildduplex.caption"
+msgid "Build Front/Back"
+msgstr "Crea Fronte/Retro"
 
 #: tdigit_main.acttakere.caption
 msgid "Re-Take"
@@ -1171,7 +1188,7 @@ msgstr "&Indietro"
 
 #: twizardbuildduplex.caption
 msgid "Build Front/Back..."
-msgstr "Costruisci Fronte/Retro..."
+msgstr "Crea Fronte/Retro..."
 
 #: twizardbuildduplex.cbfirstpageblank.caption
 msgid "First Page is Blank"
@@ -1197,7 +1214,7 @@ msgstr "Clicca Avanti quando si è pronti"
 
 #: twizardbuildduplex.label5.caption
 msgid "Finished... Click End to Build Front/Back Pages"
-msgstr "Finito... Clicca Fine per Costruire le pagine Fronte/Retro"
+msgstr "Finito... Clicca Fine per Creare le pagine Fronte/Retro"
 
 #: twizardbuildduplex.label6.caption
 msgid "Select what type of collage you want to make"
@@ -1253,3 +1270,4 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
+

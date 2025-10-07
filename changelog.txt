@@ -1,6 +1,12 @@
 DigIt CHANGE LOG
 ======================
 
+2025/10/07 Added Waiting for Source Connection Dialog;
+           Added CancelVisible default param to Bridge_Impl ProgressShow;
+           Added ProgressShowWaiting to Bridge_Impl;
+           Changed actTakeBuildDuplex Caption;
+           Changed some Italian translation;
+
 2025/09/22 Fixed Folder Source Bug with only one file;
            ExportFiles use new FCL-PDF for Sizes (to test);
            UI Adjusted some Captions and Translations;

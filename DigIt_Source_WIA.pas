@@ -30,6 +30,7 @@ resourcestring
   rsWIAAcquiringTotal = 'Acquiring from %s at %d dpi';
   rsWIAAcquired = 'Acquired %d Pages';
   rsWIADevItemSel = 'Device found '#13#10'%s %s'#13#10'but Item %s not...'#13#10'Select the First Item %s ?';
+  rsWIAConnecting = 'Connecting to Device'#13#10'%s';
   rsWIAExcConnect = 'Error Connecting Device';
   rsWIAExcNotFound = 'Device not found...';
   rsWIACancelling = 'Cancelling acquisition';
@@ -82,9 +83,11 @@ type
 
     function getWIA: TWIAManager;
 
-    function DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
-                                 lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
+    function DeviceAfterTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
+                                      lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
 
+    function DeviceBeforeTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice;
+                                      lFlags: LONG; pWiaTransferParams: PWiaTransferParams): Boolean;
   protected
     function GetParamsClass: TDigIt_Source_Common_ParamsClass; override;
     function GetName: String; override;
@@ -183,17 +186,23 @@ begin
 
      if (DeviceID <> '') or ((DeviceManufacturer <> '') and (DeviceName <> '')) then
      repeat
-       {$ifopt D-}theBridge.Cursor(crHourGlass);{$endif}
+       {$ifopt D-}
+       theBridge.Cursor(crHourGlass);
+       theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [DeviceID+'/'+DeviceItemName]));
+       {$endif}
        Application.ProcessMessages;
 
        rWia.RefreshDeviceList;
 
        //Try to Open searching by ID and ItemName
        rWIA.SelectDeviceItem(DeviceID, DeviceItemName, curSource, aIndex);
+
        if (curSource = nil)
        then begin
               //Device not founded, search with DeviceName/DeviceManufacturer
+              {$ifopt D-}theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [DeviceManufacturer+'-'+DeviceName]));{$endif}
               aIndex:= rWia.FindDevice(DeviceName, DeviceManufacturer);
+
               if (aIndex >= 0) then
               begin
                 //Device found, try to connect
@@ -234,18 +243,25 @@ begin
               begin
                 //We have found the Device but not the Item, ask the user what to do
                 curItem:= curSource.Items[0];
-                if (curItem <> nil) then
-                Case theBridge.MessageDlg('DigIt WIA',
-                                Format(rsWIADevItemSel, [DeviceName, DeviceManufacturer, DeviceItemName, curItem^.Name]),
-                                mtConfirmation, [mbYes, mbRetry, mbAbort], 0) of
-                mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
-                mrAbort: break;
-                end;
+                if (curItem <> nil)
+                then Case theBridge.MessageDlg('DigIt WIA', Format(rsWIADevItemSel,
+                                               [DeviceName, DeviceManufacturer, DeviceItemName, curItem^.Name]),
+                                               mtConfirmation, [mbYes, mbRetry, mbAbort], 0) of
+                     mrYes: begin curSource.SelectedItemIndex:= 0; aIndex:= curSource.SelectedItemIndex; end;
+                     mrAbort: break;
+                     end
+                else //If there are no items then it is a scanner not connected
+                     if (theBridge.MessageDlg('DigIt WIA', rsWIAExcConnect+#13#10+DeviceName+#13#10+DeviceManufacturer,
+                                              mtError, [mbRetry, mbAbort], 0)=mrAbort)
+                     then break;
               end;
             end;
     until (aIndex > -1);
 
+    {$ifopt D-}
     theBridge.Cursor(crDefault);
+    theBridge.ProgressHide;
+    {$endif}
 
     if (aIndex = -1)
     then Result:= Select(-1) and GetFromUser //User has selected Abort, Get Another Device from List and it's Params
@@ -380,6 +396,11 @@ begin
   with TDigIt_Source_WIA(rOwner) do
   if (ASource <> nil)
   then begin
+         {$ifopt D-}
+         theBridge.Cursor(crHourGlass);
+         theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [ASource.ID]));
+         {$endif}
+
          rWIASource:= ASource;
          rWIASource.SelectedItemIndex:= AIndex;
          DeviceID:= rWIASource.ID;
@@ -393,6 +414,11 @@ begin
          DeviceManufacturer:= rWIASource.Manufacturer;
          DeviceName:= rWIASource.Name;
          rWIASource.GetResolutionsLimit(ResMin, ResMax);
+
+         {$ifopt D-}
+         theBridge.Cursor(crDefault);
+         theBridge.ProgressHide;
+         {$endif}
        end
   else begin
          DeviceID:= '';
@@ -427,14 +453,15 @@ begin
   if (rWIA = nil) then
   begin
     rWIA := TWIAManager.Create;
-    rWia.OnAfterDeviceTransfer:= @DeviceTransferEvent;
+    rWIA.OnAfterDeviceTransfer:= @DeviceAfterTransferEvent;
+    rWIA.OnBeforeDeviceTransfer:= @DeviceBeforeTransferEvent;
   end;
 
   Result :=rWIA;
 end;
 
-function TDigIt_Source_WIA.DeviceTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice; lFlags: LONG;
-                                               pWiaTransferParams: PWiaTransferParams): Boolean;
+function TDigIt_Source_WIA.DeviceAfterTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice; lFlags: LONG;
+                                                    pWiaTransferParams: PWiaTransferParams): Boolean;
 begin
   Result:= not(UserCancel);
 
@@ -469,6 +496,14 @@ begin
 //    Memo2.Lines.Add('WIA_TRANSFER_MSG_'+IntToHex(pWiaTransferParams^.lMessage)+' : '+IntToStr(pWiaTransferParams^.lPercentComplete)+'% err='+IntToHex(pWiaTransferParams^.hrErrorStatus));
   end;
   end;
+
+  Application.ProcessMessages;
+end;
+
+function TDigIt_Source_WIA.DeviceBeforeTransferEvent(AWiaManager: TWIAManager; AWiaDevice: TWIADevice; lFlags: LONG;
+                                                     pWiaTransferParams: PWiaTransferParams): Boolean;
+begin
+  Result:= not(UserCancel);
 
   Application.ProcessMessages;
 end;
@@ -583,6 +618,8 @@ begin
                    aFormat:= wifBMP;
                    aExt:= '.bmp';
                  end;
+
+            if UserCancel then exit;
 
             Result:= rWIASource.Download(curPath, WIA_TakeFileName, aExt,
                                          aFormat, DownloadedFiles.rList);

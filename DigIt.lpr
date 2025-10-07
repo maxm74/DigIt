@@ -27,8 +27,6 @@ begin
   GetLanguageIDs(Lang,FallbackLang);
   Translations.TranslateUnitResourceStrings('LCLStrConsts',
                       PODirectory+'lclstrconsts.%s.po',Lang,FallbackLang);
-(*  Translations.TranslateUnitResourceStrings('lr_const',
-                      PODirectory+'lr_const.%s.po',Lang,FallbackLang);*)
 end;
 
 {$R *.res}

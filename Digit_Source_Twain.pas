@@ -24,6 +24,7 @@ const
 
 resourcestring
   rsTwainName = 'Twain Device';
+  rsTwainConnecting = 'Connecting to Device'#13#10'%s';
   rsTwainExcNotFound = 'Device not found...';
 
 type
@@ -276,6 +277,12 @@ begin
     aIndex:= -1;
     if (Manufacturer<>'') and (ProductFamily<>'') and (ProductName<>'') then
     repeat
+      {$ifopt D-}
+      theBridge.Cursor(crHourGlass);
+      theBridge.ProgressShowWaiting(Format(rsTwainConnecting, [Manufacturer+'-'+ProductName]));
+      {$endif}
+      Application.ProcessMessages;
+
       //Try to Open searching by Name Until Opened or user select Abort
       if FromAddList
       then aIndex :=IPC_FindSource(Manufacturer, ProductFamily, ProductName)
@@ -293,6 +300,11 @@ begin
              then break;
            end;
     until (aIndex > -1);
+
+    {$ifopt D-}
+    theBridge.Cursor(crDefault);
+    theBridge.ProgressHide;
+    {$endif}
 
     if (aIndex = -1)
     then Result:= GetFromUser //User has selected Abort, Get Another Device from List
@@ -733,8 +745,7 @@ end;
 function TDigIt_Source_Twain.Take(takeAction: DigIt_Source_TakeAction; out aDataType: TDigItDataType; out aData: Pointer): DWord; stdcall;
 var
    sessPath,
-   curPath,
-   curFile: String;
+   curPath: String;
    capRet: TCapabilityRet;
    i: Integer;
 

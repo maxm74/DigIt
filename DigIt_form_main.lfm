@@ -973,7 +973,7 @@ object DigIt_Main: TDigIt_Main
         Style = tbsSeparator
       end
       object tbTimerTake: TToolButton
-        Left = 754
+        Left = 757
         Top = 0
         Action = actTimerTake
         AutoSize = True
@@ -2989,7 +2989,7 @@ object DigIt_Main: TDigIt_Main
       OnExecute = actTimerTakeExecute
     end
     object actTakeBuildDuplex: TAction
-      Caption = 'Take Front/Back'
+      Caption = 'Build Front/Back'
       Enabled = False
       ImageIndex = 10
       OnExecute = actTakeExecute

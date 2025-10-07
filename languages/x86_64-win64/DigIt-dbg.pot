@@ -313,6 +313,13 @@ msgstr ""
 msgid "Cancelling acquisition"
 msgstr ""
 
+#: digit_source_wia.rswiaconnecting
+#, object-pascal-format
+msgid ""
+"Connecting to Device\n"
+"%s"
+msgstr ""
+
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
 msgid ""
@@ -582,7 +589,8 @@ msgid "Take"
 msgstr ""
 
 #: tdigit_main.acttakebuildduplex.caption
-msgid "Take Front/Back"
+msgctxt "tdigit_main.acttakebuildduplex.caption"
+msgid "Build Front/Back"
 msgstr ""
 
 #: tdigit_main.acttakere.caption

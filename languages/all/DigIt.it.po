@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.7\n"
 
 #: digit_form_buildduplex.caption_cancel
 msgctxt "digit_form_buildduplex.caption_cancel"
@@ -460,7 +460,7 @@ msgstr "Ricorsiva"
 
 #: tdigit_exportfiles.cbusejpgasis.caption
 msgid "Use JPeg Files as is"
-msgstr "Usa file JPEG così come sono"
+msgstr "Usa File JPeg così come sono"
 
 #: tdigit_exportfiles.label1.caption
 msgctxt "tdigit_exportfiles.label1.caption"
@@ -609,8 +609,9 @@ msgid "Take"
 msgstr "Cattura"
 
 #: tdigit_main.acttakebuildduplex.caption
-msgid "Take Front/Back"
-msgstr "Cattura Fronte/Retro"
+msgctxt "tdigit_main.acttakebuildduplex.caption"
+msgid "Build Front/Back"
+msgstr "Crea Fronte/Retro"
 
 #: tdigit_main.acttakere.caption
 msgid "Re-Take"
@@ -773,7 +774,7 @@ msgstr "Ruota a Destra"
 
 #: tdigit_main.bttemplatesadd.caption
 msgid "Add Template"
-msgstr "Agg. Modello"
+msgstr "Aggiungi Modello"
 
 #: tdigit_main.bttemplatesedit.caption
 msgid "Templates ..."
@@ -1171,7 +1172,7 @@ msgstr "&Indietro"
 
 #: twizardbuildduplex.caption
 msgid "Build Front/Back..."
-msgstr "Costruisci Fronte/Retro..."
+msgstr "Crea Fronte/Retro..."
 
 #: twizardbuildduplex.cbfirstpageblank.caption
 msgid "First Page is Blank"
@@ -1197,7 +1198,7 @@ msgstr "Clicca Avanti quando si è pronti"
 
 #: twizardbuildduplex.label5.caption
 msgid "Finished... Click End to Build Front/Back Pages"
-msgstr "Finito... Clicca Fine per Costruire le pagine Fronte/Retro"
+msgstr "Finito... Clicca Fine per Creare le pagine Fronte/Retro"
 
 #: twizardbuildduplex.label6.caption
 msgid "Select what type of collage you want to make"

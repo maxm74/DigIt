@@ -77,6 +77,13 @@ Const
   clLime    = $00FF00;
   clWaterMark = $F0F0F0;
 
+  //MaxM: since now TPDFUnitOfMeasure = FpUnitOfMeasure.TUnitOfMeasure we declare constants here so
+  //      packages using fcl-pdf will not have to add the FpUnitOfMeasure unit in the uses section
+  uomInches = FpUnitOfMeasure.uomInches;
+  uomMillimeters = FpUnitOfMeasure.uomMillimeters;
+  uomCentimeters = FpUnitOfMeasure.uomCentimeters;
+  uomPixels = FpUnitOfMeasure.uomPixels;
+
 type
   TPDFPaperType = (ptCustom, ptA4, ptA5, ptLetter, ptLegal, ptExecutive, ptComm10, ptMonarch, ptDL, ptC5, ptB5);
   TPDFPaperOrientation = (ppoPortrait,ppoLandscape);

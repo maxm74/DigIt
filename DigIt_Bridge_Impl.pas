@@ -543,7 +543,7 @@ begin
 
   rPlugins:= TDigIt_Plugins.Create;
   DigIt_Counter.Counter:= TDigIt_Counter.Create('Counter0');
-  DigIt_Settings.Settings:= TDigIt_Settings.Create;
+  DigIt_Settings.Settings:= TDigIt_Settings.Create(nil);
   DigIt_Sources.Sources:= TDigIt_Sources.Create;
   DigIt_Profiles.Profiles:= TDigIt_Profiles.Create(Path_Config+File_Profiles);
   //rDestinations:= TDigIt_Destinations.Create;

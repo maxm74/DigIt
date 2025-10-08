@@ -514,8 +514,6 @@ begin
     OnCropFile_Full:= @SES_CropFileFull;
   end;
 
-  Settings.Load(nil);
-
   BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
   BuildDestinationsMenu(Self, menuDestinations, @UI_DestinationMenuClick);
 

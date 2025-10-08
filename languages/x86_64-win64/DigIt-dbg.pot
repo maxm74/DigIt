@@ -280,6 +280,14 @@ msgctxt "digit_source_folder.rsfoldselect"
 msgid "Select a Folder"
 msgstr ""
 
+#: digit_source_twain.rstwainconnecting
+#, object-pascal-format
+msgctxt "digit_source_twain.rstwainconnecting"
+msgid ""
+"Connecting to Device\n"
+"%s"
+msgstr ""
+
 #: digit_source_twain.rstwainexcnotfound
 msgctxt "digit_source_twain.rstwainexcnotfound"
 msgid "Device not found..."
@@ -315,6 +323,7 @@ msgstr ""
 
 #: digit_source_wia.rswiaconnecting
 #, object-pascal-format
+msgctxt "digit_source_wia.rswiaconnecting"
 msgid ""
 "Connecting to Device\n"
 "%s"

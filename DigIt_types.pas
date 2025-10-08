@@ -26,7 +26,8 @@ resourcestring
   rsProcessed = 'Processed %d / %s';
 
 const
-  DigIt_Version = '0.2.0';
+  DigIt_Name = 'DigIt';
+  DigIt_Version = '0.4.0';
 
   Ext_Sess  = '.digs';
   Ext_Thumb = '.digt';

@@ -20,28 +20,37 @@ const
   SET_Path = 'Settings/';
 
 type
-
   { TSessionSettings }
-
   TSessionSettings = class(TPersistent)
   protected
     rStartup_Path,
     rStartup_File: String;
     rConfirmSaveOnClose: Boolean;
-
   published
     property Startup_Path: String read rStartup_Path write rStartup_Path;
     property Startup_File: String read rStartup_File write rStartup_File;
     property ConfirmSaveOnClose: Boolean read rConfirmSaveOnClose write rConfirmSaveOnClose;
   end;
 
+  { TLanguageSettings }
+  TLanguageSettings = class(TPersistent)
+  protected
+    rLangID: String;
+    rTranslate: Boolean;
+  published
+    property Translate: Boolean read rTranslate write rTranslate;
+    property LangID: String read rLangID write rLangID;
+  end;
+
   { TDigIt_Settings }
   TDigIt_Settings = class(TNoRefCountObject, IDigIt_Settings)
   protected
+    rLanguage: TLanguageSettings;
     rSession: TSessionSettings;
 
   public
-    constructor Create;
+    constructor Create; overload;
+    constructor Create(aXML: TRttiXMLConfig); overload;
     destructor Destroy; override;
 
     procedure Default;
@@ -58,6 +67,7 @@ type
     function Path(const APathID: Word): PChar; stdcall; { #note 10 -oMaxM : Test in External LIBRARY }
 
   published
+    property Language: TLanguageSettings read rLanguage write rLanguage;
     property Session: TSessionSettings read rSession write rSession;
   end;
 
@@ -73,13 +83,21 @@ constructor TDigIt_Settings.Create;
 begin
   inherited Create;
 
+  rLanguage:= TLanguageSettings.Create;
   rSession:= TSessionSettings.Create;
 
   Default;
 end;
 
+constructor TDigIt_Settings.Create(aXML: TRttiXMLConfig);
+begin
+  Create;
+  Load(aXML);
+end;
+
 destructor TDigIt_Settings.Destroy;
 begin
+  rLanguage.Free;
   rSession.Free;
 
   inherited Destroy;
@@ -87,6 +105,9 @@ end;
 
 procedure TDigIt_Settings.Default;
 begin
+  rLanguage.Translate:= True;
+  rLanguage.LangID:= '';
+
   rSession.Startup_Path:= '';
   rSession.Startup_File:= '';
   rSession.ConfirmSaveOnClose:= True;

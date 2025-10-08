@@ -1,7 +1,13 @@
 DigIt CHANGE LOG
 ======================
 
-2025/10/07 Added Waiting for Source Connection Dialog;
+2025/10/08 Added Language to Settings;
+           Moved Settings Load in Bridge_Impl;
+           Added TranslateLanguage proc in Utils;
+           Main Project use TranslateLanguage proc;
+           WIA Source ProgressShowWaiting use Manufacturer and Name not ID;
+
+        07 Added Waiting for Source Connection Dialog;
            Added CancelVisible default param to Bridge_Impl ProgressShow;
            Added ProgressShowWaiting to Bridge_Impl;
            Changed actTakeBuildDuplex Caption;

@@ -188,7 +188,7 @@ begin
      repeat
        {$ifopt D-}
        theBridge.Cursor(crHourGlass);
-       theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [DeviceID+'/'+DeviceItemName]));
+       theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [DeviceID+'\'+DeviceItemName]));
        {$endif}
        Application.ProcessMessages;
 
@@ -398,7 +398,7 @@ begin
   then begin
          {$ifopt D-}
          theBridge.Cursor(crHourGlass);
-         theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [ASource.ID]));
+         theBridge.ProgressShowWaiting(Format(rsWIAConnecting, [ASource.Manufacturer+'-'+ASource.Name]));
          {$endif}
 
          rWIASource:= ASource;

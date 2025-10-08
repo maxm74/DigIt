@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  LCLVersion, DefaultTranslator, LCLTranslator, gettext, Translations, SysUtils,
+  LCLVersion, SysUtils,
   Forms, lazcontrols,
   DigIt_Types, DigIt_Bridge_Intf, DigIt_Bridge_Impl,
   DigIt_Settings, DigIt_Sources, DigIt_Session, DigIt_Utils,
@@ -17,22 +17,10 @@ uses
   DigIt_Destinations,
   DigIt_Form_Main, Digit_Bridge_Impl_UI_Form;
 
-procedure TranslateLCL;
-var
-  PODirectory, Lang, FallbackLang: String;
-begin
-  PODirectory:=  ExtractFilePath(Application.ExeName) +'languages/';
-  Lang:='';
-  FallbackLang:='';
-  GetLanguageIDs(Lang,FallbackLang);
-  Translations.TranslateUnitResourceStrings('LCLStrConsts',
-                      PODirectory+'lclstrconsts.%s.po',Lang,FallbackLang);
-end;
-
 {$R *.res}
 
 begin
-  TranslateLCL;
+  TranslateLanguage(false);
   RequireDerivedFormResource := True;
   Application.Scaled:=True;
   Application.Initialize;

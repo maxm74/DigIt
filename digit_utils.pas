@@ -56,6 +56,8 @@ function GetUserName: String;
 
 procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 
+procedure TranslateLanguage(ForceUpdate: Boolean);
+
 
 implementation
 
@@ -65,7 +67,9 @@ uses
 {$else}
  users, baseunix,
 {$endif}
- BGRAUnits;
+ LCLTranslator, gettext, Translations,
+ BGRAUnits,
+ DigIt_Settings;
 
 type
   TPaperSizesArray = array of TPaperSizes;
@@ -143,6 +147,28 @@ procedure ConvertCmPaperTo(PhysicalUnit: TPhysicalUnit; var Paper: TPaperSize);
 begin
   Paper.w:= PhysicalSizeConvert(cuCentimeter, Paper.w, PhysicalToCSSUnit(PhysicalUnit));
   Paper.h:= PhysicalSizeConvert(cuCentimeter, Paper.h, PhysicalToCSSUnit(PhysicalUnit));
+end;
+
+procedure TranslateLanguage(ForceUpdate: Boolean);
+var
+  PODirectory, Lang, FallbackLang: String;
+
+begin
+  if (Settings <> nil) and (Settings.Language.Translate) then
+  begin
+      PODirectory:=  Path_Application +'languages'+DirectorySeparator;
+
+      if (Settings.Language.LangID = '')
+      then GetLanguageIDs(Lang, FallbackLang)
+      else begin
+             Lang:= Settings.Language.LangID;
+             FallbackLang:= '';
+           end;
+
+      SetDefaultLang(Lang, PODirectory, DigIt_Name, ForceUpdate);
+      Translations.TranslateUnitResourceStrings('LCLStrConsts',
+                                                PODirectory+'lclstrconsts.%s.po',Lang,FallbackLang);
+  end;
 end;
 
 procedure BuildPaperSizesMenu(PhysicalUnit: TPhysicalUnit; AOwner: TComponent; menuPaperSizes: TMenu;

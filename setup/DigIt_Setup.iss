@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "DigIt"
-#define MyAppVersion "0.3"
+#define MyAppVersion "0.4"
 #define MyAppPublisher "Massimo Magnano"
 #define MyAppURL "https://github.com/maxm74/DigIt"
 #define MyAppExeName "DigIt.exe"

@@ -311,6 +311,8 @@ msgid ""
 "Connecting to Device\n"
 "%s"
 msgstr ""
+"Connettendo al Dispositivo\n"
+"%s"
 
 #: digit_source_twain.rstwainexcnotfound
 msgctxt "digit_source_twain.rstwainexcnotfound"
@@ -352,6 +354,8 @@ msgid ""
 "Connecting to Device\n"
 "%s"
 msgstr ""
+"Connettendo al Dispositivo\n"
+"%s"
 
 #: digit_source_wia.rswiadevitemsel
 #, object-pascal-format
@@ -790,7 +794,7 @@ msgstr "Ruota a Destra"
 
 #: tdigit_main.bttemplatesadd.caption
 msgid "Add Template"
-msgstr "Aggiungi Modello"
+msgstr "Agg. Modello"
 
 #: tdigit_main.bttemplatesedit.caption
 msgid "Templates ..."
@@ -995,7 +999,7 @@ msgstr ""
 
 #: tdigit_main.menusession.caption
 msgid "Work Session"
-msgstr "Session Lavoro"
+msgstr "Sessione Lavoro"
 
 #: tdigit_main.menutimertakeconfig.caption
 msgid "Config Timer"
@@ -1270,4 +1274,3 @@ msgstr "Sorgente..."
 #: twizardbuildduplex.tbwizard.caption
 msgid "tbWizard"
 msgstr ""
-

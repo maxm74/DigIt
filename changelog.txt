@@ -1,6 +1,10 @@
 DigIt CHANGE LOG
 ======================
 
+2025/10/31 Release 0.4;
+           Solved Select from one Source to Another Bug;
+           Updated Languages;
+
 2025/10/08 Added Language to Settings;
            Moved Settings Load in Bridge_Impl;
            Added TranslateLanguage proc in Utils;

@@ -1,23 +1,21 @@
-Struttura Base:
-  Se durante una operazione c'è una eccezione non deve esere fatto l'autosave
-
 Bugs:
+
   Image Manipulation Empty Image parte sempre con 21x29.7cm, appena attivo un Righello si corregge
      (probabile manca CreateEmptyImage in Loaded)
 
   Area Intera
-      cambio Valore uno in meno non sostituisce le icone su Captured
+      cambio Valore uno in meno aggiunge alla fine e non sostituisce le icone su Captured
 
-  Esporta PDF con File non A4 (es. Carte d'identità) le misure sono errate
-    Acrobat le stampa stretchandole in A4
-    Anche in un A4 le misure sono errate (non viene messo il dpi nel pdf? [120dpi di default?])
-    ???FORSE RISOLTO CON NUOVO FCL-PDF
+  Esporta PDF
+    se si stampa senza Adattamento (es. Carte d'identità) taglia l'immagine negli angoli
+    (margini di 5 mm)
+
+Struttura Base:
+  Se durante una operazione c'è una eccezione non deve esere fatto l'autosave
 
 Session:
 
 Main:
-  riprendi sessione : barra di captured alla fine
-  
   Take/Preview con Countdown
   Take automatico, Giorni della Settimana con Checkbox e Orari (eventuali notifiche via email,etc)
 

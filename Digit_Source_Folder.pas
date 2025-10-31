@@ -38,6 +38,8 @@ type
     function Save(const xml_File: PChar; const xml_RootPath: PChar): Boolean; stdcall; override;
 
     function Select: Boolean; stdcall; override;
+
+    constructor Create(AOwner: TDigIt_Source_Common); override;
   end;
 
   { TDigIt_Source_Folder }
@@ -152,6 +154,13 @@ begin
       mrAbort: break;
       end;
   until Result;
+end;
+
+constructor TDigIt_Source_Folder_Params.Create(AOwner: TDigIt_Source_Common);
+begin
+  inherited Create(AOwner);
+
+  Folder:= '';
 end;
 
 { TDigIt_Source_Folder }

@@ -229,6 +229,9 @@ end;
 
 function TDigIt_Source_Common.Params_Set(const AParams: IDigIt_Params): Boolean; stdcall;
 begin
+  //prevent garbage from freeing the instance, it will do it correctly TDigIt_Sources
+  Pointer(rParams):= nil;
+
   rParams:= AParams;
   Result:= True;
 end;

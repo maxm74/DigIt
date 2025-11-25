@@ -1130,6 +1130,7 @@ object DigIt_Main: TDigIt_Main
     Rounding.RoundX = 1
     Rounding.RoundY = 1
     TabOrder = 3
+    Visible = False
     TextAlignment = taLeftJustify
     CollapseKind = akLeft
     ExpandedSize = 288

@@ -1,6 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
+2025/11/25 Hide rollCrops in FullArea Mode (Beppe's first suggestion)
+
 2025/10/31 Release 0.4;
            Solved Select from one Source to Another Bug;
            Updated Languages;

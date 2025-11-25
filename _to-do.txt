@@ -1,5 +1,8 @@
 Bugs:
 
+  Area Personalizzata
+     Taglia di nuovo alla fine sbaglia l'indice e lo rimette all'inizio
+
   Image Manipulation Empty Image parte sempre con 21x29.7cm, appena attivo un Righello si corregge
      (probabile manca CreateEmptyImage in Loaded)
 

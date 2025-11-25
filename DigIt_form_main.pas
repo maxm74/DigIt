@@ -1733,7 +1733,7 @@ begin
       imgManipulation.clearCropAreas;
       imgManipulation.Opacity:= 0;
       imgManipulation.EnabledWorkArea:= False;
-      rollCrops.Enabled:= False; rollCrops.Collapsed:= True;
+      rollCrops.Visible:= False;
       rollCounters.Collapsed:= True;
 
       tbCropMode.Caption:= rsCropFull;
@@ -1742,7 +1742,7 @@ begin
       tbCrop.Visible:= True;
       imgManipulation.Opacity:= 64; //128; {#to-do Add to Settings}
       imgManipulation.EnabledWorkArea:= True;
-      rollCrops.Enabled:= True; rollCrops.Collapsed:= False;
+      rollCrops.Visible:= True; rollCrops.Collapsed:= False;
       rollCounters.Collapsed:= False;
       tbCropMode.Caption:= rsCropCust;
     end;

@@ -1,0 +1,15 @@
+[submodule "use/bgrabitmap"]
+	path = use/bgrabitmap
+	url = git@github.com:bgrabitmap/bgrabitmap.git
+[submodule "use/bgracontrols"]
+	path = use/bgracontrols
+	url = git@github.com:bgrabitmap/bgracontrols.git
+[submodule "use/DelphiTwain"]
+	path = use/DelphiTwain
+	url = git@github.com:maxm74/DelphiTwain.git
+[submodule "use/MaxM"]
+	path = use/MaxM
+	url = git@github.com:maxm74/MaxM.git
+[submodule "use/WIAPascal"]
+	path = use/WIAPascal
+	url = git@github.com:maxm74/WIAPascal.git

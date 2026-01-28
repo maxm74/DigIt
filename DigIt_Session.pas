@@ -1630,13 +1630,9 @@ var
   curImageFile: String;
 
 begin
-  try
-     Result:= Sources.Take(takeActPreview, curImageFile);
-     if Result then Result:= LoadImage(curImageFile, True);
-     if not(Result) then theBridge.MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
-
-  finally
-  end;
+  Result:= Sources.Take(takeActPreview, curImageFile);
+  if Result then Result:= LoadImage(curImageFile, True);
+  if not(Result) then theBridge.MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 end;
 
 function TDigIt_Session.actTake(isReTake: Boolean; CustomTake: TCustomTakeMethod): DWord;
@@ -1728,8 +1724,9 @@ begin
    end
    else theBridge.MessageDlg(rsNoFilesDownloaded, mtError, [mbOk], 0);
 
+   Save(True);
+
   finally
-    Save(True);
     theBridge.ProgressHide;
   end;
 end;
@@ -1755,31 +1752,28 @@ var
   end;
 
 begin
-  try
-    lenSources:= Length(SourceFiles);
-    if (rSourceFilesIndex = -1) then rSourceFilesIndex:= 0;
+  lenSources:= Length(SourceFiles);
+  if (rSourceFilesIndex = -1) then rSourceFilesIndex:= 0;
 
-    if (rSourceFilesIndex = lenSources) or
-       (SourceFiles[rSourceFilesIndex].cCount > 0)
-    then CropFiles(rSourceFilesIndex, True) //Re Crop
-    else begin
-           CropFiles(rSourceFilesIndex, False);
+  if (rSourceFilesIndex = lenSources) or
+     (SourceFiles[rSourceFilesIndex].cCount > 0)
+  then CropFiles(rSourceFilesIndex, True) //Re Crop
+  else begin
+         CropFiles(rSourceFilesIndex, False);
 
-           if (rSourceFilesIndex > rLastCroppedIndex) then rLastCroppedIndex:= rSourceFilesIndex;
+         if (rSourceFilesIndex > rLastCroppedIndex) then rLastCroppedIndex:= rSourceFilesIndex;
 
-           inc(rSourceFilesIndex);
-         end;
+         inc(rSourceFilesIndex);
+       end;
 
-    if not(CheckEndOfFiles)
-    then if (rSourceFilesIndex > -1) and (rSourceFilesIndex < Length(SourceFiles))
-         then if not(LoadImage(SourceFiles[rSourceFilesIndex].fName, False))
-              then begin
-                     { #todo -oMaxM : do something if LoadImage Fails? }
-                   end;
+  if not(CheckEndOfFiles)
+  then if (rSourceFilesIndex > -1) and (rSourceFilesIndex < Length(SourceFiles))
+       then if not(LoadImage(SourceFiles[rSourceFilesIndex].fName, False))
+            then begin
+                   { #todo -oMaxM : do something if LoadImage Fails? }
+                 end;
 
-  finally
-    SaveSource_CapturedFiles(nil, True);
-  end;
+  SaveSource_CapturedFiles(nil, True);
 end;
 
 procedure TDigIt_Session.actGoNext;
@@ -1787,22 +1781,19 @@ var
    new_SourceFilesIndex: Integer;
 
 begin
-  try
-     new_SourceFilesIndex:= rSourceFilesIndex;
-     if (new_SourceFilesIndex >= 0) and (new_SourceFilesIndex < Length(SourceFiles)-1) then
-     begin
-       inc(new_SourceFilesIndex);
-       if LoadImage(SourceFiles[new_SourceFilesIndex].fName, False) then
-       begin
-         if (SourceFiles[new_SourceFilesIndex].cCount > 0)
-         then Counter_Assign(SourceFiles[new_SourceFilesIndex].cStart);
-         rSourceFilesIndex:= new_SourceFilesIndex;
-       end;
-     end;
-
-  finally
-    SaveSource_CapturedFiles(nil, True);
+  new_SourceFilesIndex:= rSourceFilesIndex;
+  if (new_SourceFilesIndex >= 0) and (new_SourceFilesIndex < Length(SourceFiles)-1) then
+  begin
+    inc(new_SourceFilesIndex);
+    if LoadImage(SourceFiles[new_SourceFilesIndex].fName, False) then
+    begin
+      if (SourceFiles[new_SourceFilesIndex].cCount > 0)
+      then Counter_Assign(SourceFiles[new_SourceFilesIndex].cStart);
+      rSourceFilesIndex:= new_SourceFilesIndex;
+    end;
   end;
+
+  SaveSource_CapturedFiles(nil, True);
 end;
 
 procedure TDigIt_Session.actGoBack;
@@ -1810,26 +1801,23 @@ var
    new_SourceFilesIndex: Integer;
 
 begin
-  try
-     new_SourceFilesIndex:= rSourceFilesIndex;
-     if (new_SourceFilesIndex > 0) then
-     begin
-       //We've already cut the last one, start with the penultimate one
-       if (new_SourceFilesIndex >= Length(SourceFiles)) then new_SourceFilesIndex:= Length(SourceFiles)-1;
+  new_SourceFilesIndex:= rSourceFilesIndex;
+  if (new_SourceFilesIndex > 0) then
+  begin
+    //We've already cut the last one, start with the penultimate one
+    if (new_SourceFilesIndex >= Length(SourceFiles)) then new_SourceFilesIndex:= Length(SourceFiles)-1;
 
-       dec(new_SourceFilesIndex);
+    dec(new_SourceFilesIndex);
 
-       if LoadImage(SourceFiles[new_SourceFilesIndex].fName, False) then
-       begin
-         if (SourceFiles[new_SourceFilesIndex].cCount > 0)
-         then Counter_Assign(SourceFiles[new_SourceFilesIndex].cStart);
-         rSourceFilesIndex:= new_SourceFilesIndex;
-       end;
-     end;
-
-  finally
-    SaveSource_CapturedFiles(nil, True);
+    if LoadImage(SourceFiles[new_SourceFilesIndex].fName, False) then
+    begin
+      if (SourceFiles[new_SourceFilesIndex].cCount > 0)
+      then Counter_Assign(SourceFiles[new_SourceFilesIndex].cStart);
+      rSourceFilesIndex:= new_SourceFilesIndex;
+    end;
   end;
+
+  SaveSource_CapturedFiles(nil, True);
 end;
 
 procedure TDigIt_Session.actCropAll;
@@ -1887,8 +1875,9 @@ begin
       if theBridge.ProgressSetTotal(Format(rsProcessed, [rSourceFilesIndex-1, cStr]), rSourceFilesIndex+1) then break;
     Until Finished;
 
-  finally
     SaveSource_CapturedFiles(nil, True);
+
+  finally
     theBridge.ProgressHide;
   end;
 end;
@@ -1897,12 +1886,9 @@ procedure TDigIt_Session.actClearQueue;
 begin
   if (theBridge.MessageDlg('DigIt', rsClearQueue, mtConfirmation, [mbYes, mbNo], 0) = mrNo) then exit;
 
-  try
-    Clear_SourceFiles(True);
+  Clear_SourceFiles(True);
 
-  finally
-    SaveSource_CapturedFiles(nil, True);
-  end;
+  SaveSource_CapturedFiles(nil, True);
 end;
 
 procedure TDigIt_Session.actCapturedDeleteAll(UserConfirm: Boolean);
@@ -1916,7 +1902,7 @@ begin
   //Delete all File in FileSystem ?
   if (theBridge.MessageDlg('DigIt', rsDeleteAllFiles, mtConfirmation, [mbYes, mbNo], 0) = mrYes)
   then for i:=0 to Length(CapturedFiles)-1 do
-         DeleteFile(CapturedFiles[i].fName);
+          DeleteFile(CapturedFiles[i].fName);
 
   //Clear Array and ListView
   Clear_Captured;
@@ -1957,6 +1943,8 @@ begin
   finally
     if (Counter.Value >= Length(CapturedFiles)) then Counter.Value:= Length(CapturedFiles)-1;
   end;
+
+  SaveCapturedFiles(nil, True);
 end;
 
 procedure TDigIt_Session.GetEnabledActions(out actPreview_Enabled, actTake_Enabled, actTakeRe_Enabled,

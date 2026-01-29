@@ -2104,27 +2104,32 @@ var
   curIndex :Integer;
 
 begin
-  (*
-  //If we are in FullArea Mode and user add an Area switch to Custom Mode
-  if (Session.CropMode <> diCropCustom) and not(imgManipulation.Empty)
-  then Session.CropMode:= diCropCustom;
-  *)
+  try
+     (*
+     //If we are in FullArea Mode and user add an Area switch to Custom Mode
+     if (Session.CropMode <> diCropCustom) and not(imgManipulation.Empty)
+     then Session.CropMode:= diCropCustom;
+     *)
 
-  curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
+     curIndex :=imgManipulation.CropAreas.IndexOf(CropArea);
 
-  if (CropArea.Name='') then CropArea.Name:='Name '+IntToStr(curIndex);
+     if (CropArea.Name='') then CropArea.Name:='Name '+IntToStr(curIndex);
 
-  CropArea.Icons:=[cIcoIndex];
+     CropArea.Icons:=[cIcoIndex];
 
-  cbCropList.AddItem(CropArea.Name, CropArea);
-  cbCropList.ItemIndex:=cbCropList.Items.IndexOfObject(CropArea);
+     cbCropList.AddItem(CropArea.Name, CropArea);
+     cbCropList.ItemIndex:=cbCropList.Items.IndexOfObject(CropArea);
 
-  CropAreas_Changed:= True;
+     if (Length(Session.CropAreas) = 0)
+     then CropAreasToPhysicalRectArray  //Update the crop areas immediately so the toolbar buttons update
+     else CropAreas_Changed:= True;
 
-  if not(Session.Loading) then
-  begin
-    UI_FillCropArea(CropArea);
-    UI_ToolBar;
+  finally
+     if not(Session.Loading) then
+     begin
+       UI_FillCropArea(CropArea);
+       UI_ToolBar;
+     end;
   end;
 end;
 
@@ -2134,24 +2139,31 @@ var
 
 begin
   try
-    if not(Closing) then
-    begin
-      CropAreas_Changed:= True;
+     if not(Closing) then
+     begin
+       CropAreas_Changed:= True;
 
-      delIndex :=cbCropList.Items.IndexOfObject(CropArea);
-      if (delIndex<>-1) then cbCropList.Items.Delete(delIndex);
+       delIndex :=cbCropList.Items.IndexOfObject(CropArea);
+       if (delIndex<>-1) then cbCropList.Items.Delete(delIndex);
 
-      (*
-      //If there are no more Crops switch to FullArea Mode
-      if (imgManipulation.CropAreas.Count = 0)
-      then Session.CropMode:= diCropFull
-      else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
-      *)
+       (*
+       //If there are no more Crops switch to FullArea Mode
+       if (imgManipulation.CropAreas.Count = 0)
+       then Session.CropMode:= diCropFull
+       else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
+       *)
 
-      if not(Session.Loading) then UI_ToolBar;
-    end;
+       if (imgManipulation.CropAreas.Count = 0)
+       then CropAreasToPhysicalRectArray  //Update the crop areas immediately so the toolbar buttons update
+       else CropAreas_Changed:= True;
+     end;
 
-  except
+  finally
+     if not(Session.Loading) then
+     begin
+       UI_FillCropArea(imgManipulation.SelectedCropArea);
+       UI_ToolBar;
+     end;
   end;
 end;
 

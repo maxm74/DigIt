@@ -1960,8 +1960,6 @@ begin
   bCommonCond:= (Sources.Selected<>nil) and (Sources.Selected^.Inst <> nil);
 
   actPreview_Enabled:= bCommonCond;
-  actTake_Enabled:= bCommonCond; // and DirectoryExists(Path_Session_Pictures)
-  actTakeRe_Enabled:= bCommonCond and (rLastTakedLength > 0);
 
   if (rCropMode = diCropCustom) then
   begin
@@ -1981,6 +1979,9 @@ begin
 
     actClearQueue_Enabled:= bCommonCond and (lenSources > 0);
   end;
+
+  actTake_Enabled:= bCommonCond; // and DirectoryExists(Path_Session_Pictures)
+  actTakeRe_Enabled:= bCommonCond and (rLastTakedLength > 0);
 end;
 
 procedure TDigIt_Session.GetEnabledActions_Captured(out actCapturedDeleteAll_Enabled, actCapturedDelete_Enabled: Boolean);

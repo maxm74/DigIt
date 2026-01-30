@@ -2138,25 +2138,23 @@ var
    delIndex :Integer;
 
 begin
+  if not(Closing) then
   try
-     if not(Closing) then
-     begin
-       CropAreas_Changed:= True;
+     CropAreas_Changed:= True;
 
-       delIndex :=cbCropList.Items.IndexOfObject(CropArea);
-       if (delIndex<>-1) then cbCropList.Items.Delete(delIndex);
+     delIndex :=cbCropList.Items.IndexOfObject(CropArea);
+     if (delIndex<>-1) then cbCropList.Items.Delete(delIndex);
 
-       (*
-       //If there are no more Crops switch to FullArea Mode
-       if (imgManipulation.CropAreas.Count = 0)
-       then Session.CropMode:= diCropFull
-       else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
-       *)
+     (*
+     //If there are no more Crops switch to FullArea Mode
+     if (imgManipulation.CropAreas.Count = 0)
+     then Session.CropMode:= diCropFull
+     else panelCropArea.Enabled:= (cbCropList.Items.Count>0);
+     *)
 
-       if (imgManipulation.CropAreas.Count = 0)
-       then CropAreasToPhysicalRectArray  //Update the crop areas immediately so the toolbar buttons update
-       else CropAreas_Changed:= True;
-     end;
+     if (imgManipulation.CropAreas.Count = 0)
+     then CropAreasToPhysicalRectArray  //Update the crop areas immediately so the toolbar buttons update
+     else CropAreas_Changed:= True;
 
   finally
      if not(Session.Loading) then

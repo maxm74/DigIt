@@ -1564,13 +1564,19 @@ procedure TDigIt_Session.CropFiles(ASourceFileIndex: Integer; isReTake: Boolean)
 var
    oldCount: DWord;
    i,
+   lenSources,
    lenCropAreas: Integer;
    curBitmap: TBGRABitmap;
    tmp: Single;
 
 begin
   rSourceFilesIndex:= ASourceFileIndex;
+  lenSources:= Length(SourceFiles);
   lenCropAreas:= Length(CropAreas);
+
+  if (rSourceFilesIndex < 0)
+  then rSourceFilesIndex:= 0
+  else if (rSourceFilesIndex >= lenSources) then rSourceFilesIndex:= lenSources-1;
 
   if isReTake
   then begin

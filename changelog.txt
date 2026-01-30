@@ -1,7 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
-2026/01/29 Solved Bug in Custom Mode Take Button don't update when Crop Areas is nil/not nil
+2026/01/30 Solved Bug Crop again at the end, get the index wrong and put it back at the beginning
+        29 Solved Bug in Custom Mode Take Button don't update when Crop Areas is nil/not nil
         26 Exception in Session Actions don't auto-save
 
 2025/11/25 Hide rollCrops in FullArea Mode (Beppe's first suggestion)

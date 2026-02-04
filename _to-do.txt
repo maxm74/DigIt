@@ -7,7 +7,10 @@ Bugs:
      (probabile manca CreateEmptyImage in Loaded)
 
   Area Intera
+      Delete di un Captured la prima volta decrementa il contatore di -2
       cambio Valore uno in meno aggiunge alla fine e non sostituisce le icone su Captured
+
+      "Valutare se il contatore deve essere modificabile dall'utente"
 
   Esporta PDF
     se si stampa senza Adattamento (es. Carte d'identità) taglia l'immagine negli angoli

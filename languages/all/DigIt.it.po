@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #: digit_form_buildduplex.caption_cancel
 msgctxt "digit_form_buildduplex.caption_cancel"
@@ -198,6 +198,11 @@ msgstr "Titolo Profilo :"
 msgctxt "digit_session.rsclearqueue"
 msgid "Clear the Work Queue?"
 msgstr "Cancello la Coda di Lavoro?"
+
+#: digit_session.rsconfirmreplacefiles
+#, object-pascal-format
+msgid "File %s already Exists, Replace it?"
+msgstr "File %s Esiste già, lo Sostituisco?"
 
 #: digit_session.rsdeleteall
 msgctxt "digit_session.rsdeleteall"

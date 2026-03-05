@@ -179,6 +179,11 @@ msgctxt "digit_session.rsclearqueue"
 msgid "Clear the Work Queue?"
 msgstr ""
 
+#: digit_session.rsconfirmreplacefiles
+#, object-pascal-format
+msgid "File %s already Exists, Replace it?"
+msgstr ""
+
 #: digit_session.rsdeleteall
 msgctxt "digit_session.rsdeleteall"
 msgid "Delete All Captured Pages?"

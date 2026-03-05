@@ -424,7 +424,7 @@ begin
 
   if (Counter<>nil) then
   begin
-    Counter.Value_Next:= edCounterValue.Value;
+    Session.Counter_Assign(edCounterValue.Value-1);
     lbCounterExample.Caption:= Counter.GetValue(True);
   end;
 end;

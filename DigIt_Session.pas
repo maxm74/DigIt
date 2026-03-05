@@ -36,6 +36,7 @@ resourcestring
   rsSourceNotSelected = 'Source "%s" not founded, try Select another from Menù';
   rsErrIncomplete = 'Operation not completed, do I keep the processed files?';
   rsErrLoadWork = 'Cannot Load Work Session'#13#10'%s';
+  rsConfirmReplaceFiles = 'File %s already Exists, Replace it?';
 
 type
 
@@ -132,9 +133,9 @@ type
     procedure SetDefaultStartupValues;
     destructor Destroy; override;
 
-    procedure Counter_Dec(AValue: Integer);
-    procedure Counter_Inc(AValue: Integer);
-    procedure Counter_Assign(AValue: Integer);
+    procedure Counter_Dec(AValue: DWord);
+    procedure Counter_Inc(AValue: DWord);
+    procedure Counter_Assign(AValue: DWord);
 
     function LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
     procedure EmptyImage(saveToXML: Boolean);
@@ -343,7 +344,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TDigIt_Session.Counter_Dec(AValue: Integer);
+procedure TDigIt_Session.Counter_Dec(AValue: DWord);
 begin
   if (AValue > 0) then
   begin
@@ -353,7 +354,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Session.Counter_Inc(AValue: Integer);
+procedure TDigIt_Session.Counter_Inc(AValue: DWord);
 begin
   if (AValue > 0) then
   begin
@@ -363,11 +364,14 @@ begin
   end;
 end;
 
-procedure TDigIt_Session.Counter_Assign(AValue: Integer);
+procedure TDigIt_Session.Counter_Assign(AValue: DWord);
 begin
-  Counter.Value:= AValue;
-  rCapturedFilesIndex:= AValue-1;
-  if (rCapturedFilesIndex > Length(CapturedFiles)-1) then rCapturedFilesIndex:= Length(CapturedFiles)-1;
+  if (AValue > 0) then
+  begin
+    Counter.Value:= AValue;
+    rCapturedFilesIndex:= AValue-1;
+    if (rCapturedFilesIndex > Length(CapturedFiles)-1) then rCapturedFilesIndex:= Length(CapturedFiles)-1;
+  end;
 end;
 
 function TDigIt_Session.LoadImage(AImageFile: String; saveToXML: Boolean): Boolean;
@@ -1504,13 +1508,18 @@ var
    c,
    old_CounterValue,
    old_CapturedFilesIndex: Integer;
-   cStr: String;
+   cStr,
+   fStr: String;
    UserCancel,
+   curReTake,
+   doCrop,
+   ReplaceFiles,
    KeepFiles: Boolean;
 
 begin
   try
      UserCancel:= False;
+     ReplaceFiles:= False;
 
      //Store old Values so if user Cancel Operation we can rollback
      old_CapturedFilesIndex:= rCapturedFilesIndex;
@@ -1529,7 +1538,31 @@ begin
        if UserCancel then break;
 
        try
-          CropImage(rBitmap, isReTake and (i < rLastTakedLength));
+          doCrop:= True;
+          curReTake:= isReTake and (i < rLastTakedLength);
+
+          if not(curReTake) then
+          begin
+            fStr:= Counter.GetValue(True);
+
+            //If is not ReTake but the file exists the User has changed the Counter Params, ask for confirmation
+            if FileExists(Path_Session_Pictures+fStr+ExtensionSeparator+SaveExt) then
+            begin
+              if ReplaceFiles
+              then curReTake:= True
+              else
+              Case theBridge.MessageDlg('DigIt', Format(rsConfirmReplaceFiles, [fStr]), mtConfirmation, [mbYes, mbYesToAll, mbNo, mbCancel], 0) of
+              mrYes: curReTake:= True;
+              mrYesToAll: begin ReplaceFiles:= True; curReTake:= True; end;
+              mrNo: doCrop:= False;
+              mrCancel: UserCancel:= True;
+              end;
+            end;
+          end;
+
+          if UserCancel then break;
+          if doCrop then CropImage(rBitmap, curReTake);
+
        except
          UserCancel:= True;
          break;
@@ -1947,7 +1980,7 @@ begin
      rCapturedFilesIndex:= Length(CapturedFiles)-1;
 
   finally
-    if (Counter.Value >= Length(CapturedFiles)) then Counter.Value:= Length(CapturedFiles)-1;
+    if (Counter.Value >= Length(CapturedFiles)) then Counter.Value:= Length(CapturedFiles);
   end;
 
   SaveCapturedFiles(nil, True);

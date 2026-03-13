@@ -11,6 +11,7 @@ uses
   Forms, lazcontrols,
   DigIt_Types, DigIt_Bridge_Intf, DigIt_Bridge_Impl,
   DigIt_Settings, DigIt_Sources, DigIt_Session, DigIt_Utils,
+  DigIt_Profiles, DigIt_Templates,
   DigIt_Source_Common,
   Digit_Source_WIA, Digit_Source_Twain,
   Digit_Source_Folder,

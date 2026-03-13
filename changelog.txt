@@ -1,10 +1,14 @@
 DigIt CHANGE LOG
 ======================
 
-2026/03/05 Solved Bug: Deleting a Captured item the first time decrements the counter by -2;
+2026/03/13 Added Templates class;
+           Added Selected param to Load/SaveCropAreas;
+           Added Session CropAreas_Selected;
+           Some UI Fixes for CropAreas List;
+
+        05 Solved Bug: Deleting a Captured item the first time decrements the counter by -2;
            Solved Bug: If I decrement the Counter, it adds it to the end and does not replace the icons on the Captured item;
            Added confirm for Captured File Replace in Full Area;
-           If there is an exception during an operation, autosave is not performed.
 
 2026/01/30 Solved Bug Crop again at the end, get the index wrong and put it back at the beginning
         29 Solved Bug in Custom Mode Take Button don't update when Crop Areas is nil/not nil

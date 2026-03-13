@@ -2314,6 +2314,8 @@ begin
    then begin
            inFillBoxUI :=True;
            panelCropArea.Enabled :=True;
+           btCropDuplicate.Enabled :=True;
+           btCrop_Del.Enabled :=True;
            edCropName.Text :=ACropArea.Name;
            edCropUnit_Type.ItemIndex :=Integer(ACropArea.AreaUnit);
 
@@ -2352,7 +2354,11 @@ begin
 
            inFillBoxUI :=False;
         end
-   else panelCropArea.Enabled :=False;
+   else begin
+          panelCropArea.Enabled :=False;
+          btCropDuplicate.Enabled :=False;
+          btCrop_Del.Enabled :=False;
+        end;
 
    btPageSizesToCrops.Enabled:= (imgManipulation.CropAreas.Count > 0);
 end;

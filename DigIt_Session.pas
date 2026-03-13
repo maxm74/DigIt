@@ -98,6 +98,7 @@ type
     SaveExt: String;
 
     CropAreas: TPhysicalRectArray;
+    CropAreas_Selected: Integer;
 
     //Load Save from XML Events
     OnLoadSource,
@@ -169,8 +170,8 @@ type
     procedure SaveLoadedImage(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SaveSource_CapturedFiles(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SaveSource_CapturedIndexes(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
-    procedure SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+    procedure LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean; var ASelected: Integer);
+    procedure SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean; ASelected: Integer=-1);
     procedure LoadPageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
     procedure SavePageSettings(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
 
@@ -727,7 +728,8 @@ end;
 procedure TDigIt_Session.Load(IsAutoSave: Boolean);
 var
    newSourceI,
-   newDestinationI: Integer;
+   newDestinationI,
+   newSelectedArea: Integer;
    aXML: TRttiXMLConfig;
 
 begin
@@ -750,7 +752,7 @@ begin
      aXML.GetValue('CropMode', rCropMode, TypeInfo(TDigItCropMode));
 
      if (rCropMode = diCropCustom)
-     then LoadCropAreas(aXML, IsAutoSave)
+     then LoadCropAreas(aXML, IsAutoSave, CropAreas_Selected)
      else CropAreas:= nil;
 
      if Assigned(OnLoadXML) then OnLoadXML(Self, aXML, IsAutoSave);
@@ -788,7 +790,7 @@ begin
      aXML.SetValue('CropMode', rCropMode, TypeInfo(TDigItCropMode));
 
      if (rCropMode = diCropCustom)
-     then SaveCropAreas(aXML, IsAutoSave)
+     then SaveCropAreas(aXML, IsAutoSave, CropAreas_Selected)
      else aXML.DeletePath(SES_CropAreas);
 
      if Assigned(OnSaveXML) then OnSaveXML(Self, aXML, IsAutoSave);
@@ -1303,7 +1305,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Session.LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Session.LoadCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean; var ASelected: Integer);
 var
    aFree: Boolean;
    i, newCount, newSelected: integer;
@@ -1318,7 +1320,7 @@ begin
              else aXML:= TRttiXMLConfig.Create(Path_Session+rFileName+Ext_Sess);
 
      newCount:= aXML.GetValue(SES_CropAreas+'Count', -1);
-     //newSelected:= aXML.GetValue(SES_CropAreas+'Selected', -1);  IN UI See TCropAreaList.Load
+     ASelected:= aXML.GetValue(SES_CropAreas+'Selected', -1);
 
      CropAreas:= nil;
      SetLength(CropAreas, newCount);
@@ -1345,7 +1347,7 @@ begin
   end;
 end;
 
-procedure TDigIt_Session.SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean);
+procedure TDigIt_Session.SaveCropAreas(aXML: TRttiXMLConfig; IsAutoSave: Boolean; ASelected: Integer);
 var
    aFree: Boolean;
    i: integer;
@@ -1362,7 +1364,7 @@ begin
      aXML.DeletePath(SES_CropAreas);
 
      aXML.SetValue(SES_CropAreas+'Count', Length(CropAreas));
-     //aXML.SetValue(SES_CropAreas+'Selected', fOwner.SelectedCropArea.Index); IN UI See TCropAreaList.Save
+     if (ASelected >= 0) then aXML.SetValue(SES_CropAreas+'Selected', ASelected);
 
      for i:=0 to Length(CropAreas)-1 do
      begin

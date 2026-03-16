@@ -1,7 +1,8 @@
 DigIt CHANGE LOG
 ======================
 
-2026/03/13 Added Templates class;
+2026/03/16 Moved Counter inside Session
+        13 Added Templates class;
            Added Selected param to Load/SaveCropAreas;
            Added Session CropAreas_Selected;
            Some UI Fixes for CropAreas List;

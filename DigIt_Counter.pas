@@ -56,10 +56,6 @@ type
       property UserData: Integer read rUserData write rUserData;
     end;
 
-var
-   Counter: TDigIt_Counter;
-
-
 implementation
 
 { TDigIt_Counter }

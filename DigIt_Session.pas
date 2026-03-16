@@ -15,7 +15,7 @@ interface
 uses
   Classes, SysUtils, Laz2_XMLCfg, FPImage,
   BGRABitmap, BGRABitmapTypes,
-  DigIt_Types, DigIt_Bridge_Intf;
+  DigIt_Types, DigIt_Bridge_Intf, DigIt_Counter;
 
 resourcestring
   rsSavingWork = 'Saving the Work Session';
@@ -89,9 +89,10 @@ type
     function GetImageResolutionInfo: TImageResolutionInfo;
 
   public
+    Counter: TDigIt_Counter;
+
     SourceFiles: TSourceFileArray;
     CapturedFiles: TCapturedFileArray;
-
 
     SaveFormat: TBGRAImageFormat;
     SaveWriter: TFPCustomImageWriter;
@@ -226,7 +227,7 @@ implementation
 uses Graphics, FileUtil, LazFileUtils,
      MM_StrUtils, MM_Interface_MessageDlg,
      BGRAUnits, BGRAWriteJPeg, BGRAWriteTiff,
-     Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Counter, DigIt_Profiles;
+     Digit_Bridge_Impl, DigIt_Utils, DigIt_Sources, DigIt_Profiles;
 
 procedure TDigIt_Session.SetCapturedFilesSelected(AValue: Integer);
 begin
@@ -297,6 +298,8 @@ begin
 
   rPageSize:= TDigItPhysicalSize.Create(DefaultResInfo, TPhysicalUnit.cuCentimeter, 21, 29.7);
 
+  Counter:= TDigIt_Counter.Create('Counter0');
+
   SetDefaultStartupValues;
 end;
 
@@ -341,6 +344,8 @@ begin
     rBitmap.Free;
     rBitmap:= nil;
   end;
+
+  Counter.Free; Counter:= nil;
 
   inherited Destroy;
 end;

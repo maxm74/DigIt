@@ -16,7 +16,7 @@ interface
 uses
   Classes, SysUtils,
   MM_Interface_Progress, MM_Interface_MessageDlg,
-  DigIt_Types, Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings, DigIt_Counter, DigIt_Profiles;
+  DigIt_Types, Digit_Bridge_Intf, DigIt_Sources, DigIt_Settings, DigIt_Profiles;
 
 type
   TPluginInfo = record
@@ -542,7 +542,6 @@ begin
   inherited Create;
 
   rPlugins:= TDigIt_Plugins.Create;
-  DigIt_Counter.Counter:= TDigIt_Counter.Create('Counter0');
   DigIt_Settings.Settings:= TDigIt_Settings.Create(nil);
   DigIt_Sources.Sources:= TDigIt_Sources.Create;
   DigIt_Profiles.Profiles:= TDigIt_Profiles.Create(Path_Config+File_Profiles);

@@ -422,10 +422,10 @@ procedure TDigIt_Main.edCounterValueChange(Sender: TObject);
 begin
   if inFillCounterUI then exit;
 
-  if (Counter<>nil) then
+  if (Session.Counter<>nil) then
   begin
     Session.Counter_Assign(edCounterValue.Value-1);
-    lbCounterExample.Caption:= Counter.GetValue(True);
+    lbCounterExample.Caption:= Session.Counter.GetValue(True);
   end;
 end;
 
@@ -433,28 +433,28 @@ procedure TDigIt_Main.edCounterValueStringDigitsChange(Sender: TObject);
 begin
   if inFillCounterUI then exit;
 
-  if (Counter<>nil) then
+  if (Session.Counter<>nil) then
   begin
-    Counter.Value_StringDigits:= edCounterValueStringDigits.Value;
-    lbCounterExample.Caption:= Counter.GetValue(True);
+    Session.Counter.Value_StringDigits:= edCounterValueStringDigits.Value;
+    lbCounterExample.Caption:= Session.Counter.GetValue(True);
   end;
 end;
 
 procedure TDigIt_Main.edCounterValueStringPreEditingDone(Sender: TObject);
 begin
-  if (Counter<>nil) then
+  if (Session.Counter<>nil) then
   begin
-    Counter.Value_StringPre:= edCounterValueStringPre.Text;
-    lbCounterExample.Caption:= Counter.GetValue(True);
+    Session.Counter.Value_StringPre:= edCounterValueStringPre.Text;
+    lbCounterExample.Caption:= Session.Counter.GetValue(True);
   end;
 end;
 
 procedure TDigIt_Main.edCounterValueStringPostEditingDone(Sender: TObject);
 begin
-  if (Counter<>nil) then
+  if (Session.Counter<>nil) then
   begin
-    Counter.Value_StringPost:= edCounterValueStringPost.Text;
-    lbCounterExample.Caption:= Counter.GetValue(True);
+    Session.Counter.Value_StringPost:= edCounterValueStringPost.Text;
+    lbCounterExample.Caption:= Session.Counter.GetValue(True);
   end;
 end;
 
@@ -632,7 +632,6 @@ procedure TDigIt_Main.FormDestroy(Sender: TObject);
 begin
   MMForm_Progress:= nil;
   theBridge.Free;
-  Counter.Free;
   Session.Free;
 end;
 
@@ -2365,16 +2364,16 @@ end;
 
 procedure TDigIt_Main.UI_FillCounter;
 begin
-   if (Counter <> nil)
+   if (Session.Counter <> nil)
    then begin
            inFillCounterUI:= True;
            panelCounter.Enabled:= True;
-           edCounterValue.Value:= Counter.Value_Next;
-           edCounterValueStringDigits.Value:= Counter.Value_StringDigits;
-           edCounterValueStringPre.Text:= Counter.Value_StringPre;
-           edCounterValueStringPost.Text:= Counter.Value_StringPost;
-           {$ifopt D+} lbPrevious.Caption:= Format(rsCounterPrev, [Counter.Value_Previous]); {$endif}
-           lbCounterExample.Caption:= Counter.GetValue(True);
+           edCounterValue.Value:= Session.Counter.Value_Next;
+           edCounterValueStringDigits.Value:= Session.Counter.Value_StringDigits;
+           edCounterValueStringPre.Text:= Session.Counter.Value_StringPre;
+           edCounterValueStringPost.Text:= Session.Counter.Value_StringPost;
+           {$ifopt D+} lbPrevious.Caption:= Format(rsCounterPrev, [Session.Counter.Value_Previous]); {$endif}
+           lbCounterExample.Caption:= Session.Counter.GetValue(True);
            inFillCounterUI:= False;
         end
    else panelCounter.Enabled:= False;

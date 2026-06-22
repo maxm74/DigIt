@@ -494,6 +494,9 @@ begin
            jpgInfo.Width:= srcBitmap.Width;
            jpgInfo.Height:= srcBitmap.Height;
            jpgInfo.GrayScale:= TBGRAWriterJPEG(SaveWriter).GrayScale;
+           jpgInfo.ResolutionUnit:= srcBitmap.ResolutionUnit;
+           jpgInfo.ResolutionX:= srcBitmap.ResolutionX;
+           jpgInfo.ResolutionY:= srcBitmap.ResolutionY;
          end;
 
          P := PDF.Pages.AddPage;

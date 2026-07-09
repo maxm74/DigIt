@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="13"/>
     <General>
       <Flags>
         <CompatibilityMode Value="True"/>
@@ -89,7 +89,6 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--debug-log=digit.log"/>
         <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
       <FormatVersion Value="2"/>
@@ -107,31 +106,34 @@
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="9">
       <Item1>
-        <PackageName Value="MaxM_Forms"/>
+        <PackageName Value="MaxM_UI"/>
       </Item1>
       <Item2>
-        <PackageName Value="WIAPascal_pkg"/>
+        <PackageName Value="MaxM_Forms"/>
       </Item2>
       <Item3>
-        <PackageName Value="DelphiTwain_pkg"/>
+        <PackageName Value="WIAPascal_pkg"/>
       </Item3>
       <Item4>
-        <PackageName Value="MaxM_Commons"/>
+        <PackageName Value="DelphiTwain_pkg"/>
       </Item4>
       <Item5>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="MaxM_Commons"/>
       </Item5>
       <Item6>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="LazControls"/>
       </Item6>
       <Item7>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item7>
       <Item8>
-        <PackageName Value="LCL"/>
+        <PackageName Value="bgracontrols"/>
       </Item8>
+      <Item9>
+        <PackageName Value="LCL"/>
+      </Item9>
     </RequiredPackages>
     <Units Count="24">
       <Unit0>
@@ -164,7 +166,7 @@
       <Unit6>
         <Filename Value="DigIt_Form_Templates.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="DigIt_Templates"/>
+        <ComponentName Value="DigIt_Templates_Form"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit6>

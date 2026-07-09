@@ -72,7 +72,7 @@
 {"hash":205364240,"name":"tdigit_main.btcropduplicateop.hint","sourcebytes":[68,117,112,108,105,99,97,116,101,32,119,104,101,110,32,82,111,116,97,116,101,47,70,108,105,112],"value":"Duplicate when Rotate/Flip"},
 {"hash":53796337,"name":"tdigit_main.btcropduplicate.hint","sourcebytes":[68,117,112,108,105,99,97,116,101,32,116,104,105,115,32,65,114,101,97],"value":"Duplicate this Area"},
 {"hash":137535223,"name":"tdigit_main.label12.caption","sourcebytes":[67,114,111,112,32,65,114,101,97,115,32,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151,203,151],"value":"Crop Areas \u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7\u02D7"},
-{"hash":91102,"name":"tdigit_main.bttemplatesedit.caption","sourcebytes":[84,101,109,112,108,97,116,101,115,32,46,46,46],"value":"Templates ..."},
+{"hash":74633219,"name":"tdigit_main.bttemplatesedit.caption","sourcebytes":[84,101,109,112,108,97,116,101,115],"value":"Templates"},
 {"hash":4017429,"name":"tdigit_main.bttemplatesadd.caption","sourcebytes":[65,100,100,32,84,101,109,112,108,97,116,101],"value":"Add Template"},
 {"hash":126668695,"name":"tdigit_main.actpreview.caption","sourcebytes":[80,114,101,118,105,101,119],"value":"Preview"},
 {"hash":370709,"name":"tdigit_main.acttake.caption","sourcebytes":[84,97,107,101],"value":"Take"},

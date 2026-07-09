@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="13"/>
+    <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="DigIt"/>
+      <Scaled Value="True"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <XPManifest>
+        <DpiAware Value="True"/>
+        <TextName Value="MaxM.DigIt.DigIt"/>
+        <TextDesc Value="Application to automatically scan and cut images."/>
+      </XPManifest>
+      <Resources Count="2">
+        <Resource_0 FileName="images\digit-icon.ico" Type="ICON" ResourceName="DIGIT-ICON"/>
+        <Resource_1 FileName="images\digit-icon-files.ico" Type="ICON" ResourceName="DIGIT-ICON-FILES"/>
+      </Resources>
+    </General>
+    <i18n>
+      <EnableI18N Value="True"/>
+      <OutDir Value="languages/$(TargetCPU)-$(TargetOS)"/>
+    </i18n>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <MinorVersionNr Value="3"/>
+      <StringTable CompanyName="MaxM" LegalCopyright="2025 Massimo Magnano" ProductName="DigIt"/>
+    </VersionInfo>
+    <BuildModes Count="2">
+      <Item1 Name="Release" Default="True"/>
+      <Item2 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/DigIt-dbg"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
+            <SrcPath Value="/Users/maxm/lazarus/fpcsrc/packages/users/src/"/>
+          </SearchPaths>
+          <BuildMacros>
+            <Count Value="1"/>
+            <Item1>
+              <Identifier Value="debug"/>
+            </Item1>
+          </BuildMacros>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleOperator Value="False"/>
+              <AllowLabel Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dBGRAControls"/>
+            <OtherDefines Count="1">
+              <Define0 Value="BGRAControls"/>
+            </OtherDefines>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="2">
+        <Mode0 Name="default">
+          <local>
+            <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode0>
+        <Mode1 Name="Debug">
+          <local>
+            <CommandLineParams Value="--debug-log=digit.log"/>
+            <LaunchingApplication PathPlusParams="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode1>
+      </Modes>
+    </RunParams>
+    <RequiredPackages Count="7">
+      <Item1>
+        <PackageName Value="MaxM_UI"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="MaxM_Forms"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="MaxM_Commons"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="LazControls"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="BGRABitmapPack"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="bgracontrols"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="LCL"/>
+      </Item7>
+    </RequiredPackages>
+    <Units Count="22">
+      <Unit0>
+        <Filename Value="DigIt.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="DigIt_Form_Main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DigIt_Main"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="DigIt_Utils.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="_appunti.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="DigIt_Settings.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="DigIt_Types.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="DigIt_Form_Templates.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DigIt_Templates_Form"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="_to-do.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="DigIt_Bridge_Intf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge_Intf"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="DigIt_Bridge_Impl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge_Impl"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="DigIt_Sources.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="DigIt_Destinations.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="DigIt_Form_BuildDuplex.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="WizardBuildDuplex"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="Digit_Source_Folder.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="DigIt_Form_ExportFiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DigIt_ExportFiles"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="DigIt_Counter.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="DigIt_Form_Profiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DigIt_Profiles_Form"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="DigIt_Session.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="DigIt_Bridge_Impl_UI_Form.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Digit_Bridge_Impl_UI_Form"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="DigIt_Source_Common.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="DigIt_Profiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DigIt_Profiles_Form"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="DigIt_Templates.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit21>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="bin/$(TargetCPU)-$(TargetOS)/DigIt"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="/Users/maxm/lazarus/fpcsrc/packages/users/src/"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <CStyleOperator Value="False"/>
+        <AllowLabel Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Checks>
+        <OverflowChecks Value="True"/>
+        <StackChecks Value="True"/>
+      </Checks>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf3"/>
+      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CustomOptions Value="-dBGRAControls"/>
+      <OtherDefines Count="1">
+        <Define0 Value="BGRAControls"/>
+      </OtherDefines>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="5">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+      <Item4>
+        <Name Value="EInvalidGraphic"/>
+      </Item4>
+      <Item5>
+        <Name Value="EListError"/>
+      </Item5>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

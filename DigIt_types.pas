@@ -175,6 +175,8 @@ const
 var
    Path_Application,
    Path_Config,
+   Path_Templates,
+   Path_Templates_User,
    Path_Temp,
    Path_DefSession,
    Path_DefSession_Scan,
@@ -324,6 +326,14 @@ initialization
    Path_Config:= GetAppConfigDir(False);
    Path_Temp:= GetTempDir(False)+'DigIt'+DirectorySeparator;
 //   Path_Temp:= Path_Config+'tmp'+DirectorySeparator;
+
+   {$ifopt D+}
+       Path_Templates:= ExpandFileName('..\..\', Path_Application)+'Templates'+DirectorySeparator;
+   {$else}
+       Path_Templates:= Path_Application+'Templates'+DirectorySeparator;
+   {$endif}
+   Path_Templates_User:= Path_Config+'Templates'+DirectorySeparator;
+
 
    Path_DefSession:= Path_Config+'Session'+DirectorySeparator;
    Path_DefSession_Scan:= Path_DefSession+'Scan'+DirectorySeparator;

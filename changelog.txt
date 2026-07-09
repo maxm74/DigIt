@@ -1,5 +1,8 @@
 DigIt CHANGE LOG
 ======================
+2026/07/09 Added MacOs Project;
+           Twain Source use 64bit THandle intestead of 32bit;
+		   First Version of Templates;
 
 2026/03/16 Moved Counter inside Session
         13 Added Templates class;

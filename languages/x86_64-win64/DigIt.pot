@@ -768,7 +768,7 @@ msgid "Add Template"
 msgstr ""
 
 #: tdigit_main.bttemplatesedit.caption
-msgid "Templates ..."
+msgid "Templates"
 msgstr ""
 
 #: tdigit_main.btzback.hint
@@ -1138,12 +1138,8 @@ msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
 msgstr ""
 
-#: tdigit_templates.bcpanel1.caption
-msgid "BCPanel1"
-msgstr ""
-
-#: tdigit_templates.caption
-msgid "DigIt_Templates"
+#: tdigit_templates_form.caption
+msgid "DigIt_Templates_Form"
 msgstr ""
 
 #: twizardbuildduplex.btcancel.caption

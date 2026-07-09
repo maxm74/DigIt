@@ -1,4 +1,9 @@
 {"version":1,"strings":[
-{"hash":142117523,"name":"tdigit_templates.caption","sourcebytes":[68,105,103,73,116,95,84,101,109,112,108,97,116,101,115],"value":"DigIt_Templates"},
-{"hash":141053841,"name":"tdigit_templates.bcpanel1.caption","sourcebytes":[66,67,80,97,110,101,108,49],"value":"BCPanel1"}
+{"hash":152329773,"name":"tdigit_templates_form.caption","sourcebytes":[68,105,103,73,116,95,84,101,109,112,108,97,116,101,115,95,70,111,114,109],"value":"DigIt_Templates_Form"},
+{"hash":175584516,"name":"tdigit_templates_form.tabload.caption","sourcebytes":[116,97,98,76,111,97,100],"value":"tabLoad"},
+{"hash":41618261,"name":"tdigit_templates_form.lbtitle.caption","sourcebytes":[108,98,84,105,116,108,101],"value":"lbTitle"},
+{"hash":180636393,"name":"tdigit_templates_form.lbsummary.caption","sourcebytes":[108,98,83,117,109,109,97,114,121],"value":"lbSummary"},
+{"hash":175610037,"name":"tdigit_templates_form.tabsave.caption","sourcebytes":[116,97,98,83,97,118,101],"value":"tabSave"},
+{"hash":182738053,"name":"tdigit_templates_form.lbsummarysave.caption","sourcebytes":[108,98,83,117,109,109,97,114,121,83,97,118,101],"value":"lbSummarySave"},
+{"hash":194710341,"name":"tdigit_templates_form.edtitle.text","sourcebytes":[101,100,84,105,116,108,101],"value":"edTitle"}
 ]}

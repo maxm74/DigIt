@@ -262,6 +262,8 @@ type
     procedure btPaperSizesClick(Sender: TObject);
     procedure btPFlipClick(Sender: TObject);
     procedure btPRotateClick(Sender: TObject);
+    procedure btTemplatesAddClick(Sender: TObject);
+    procedure btTemplatesEditClick(Sender: TObject);
     procedure btZFrontClick(Sender: TObject);
     procedure btZBackClick(Sender: TObject);
     procedure btZUpClick(Sender: TObject);
@@ -414,7 +416,7 @@ uses
   MM_Interface_Progress, MM_Form_Progress,
   DigIt_Profiles,
   DigIt_Destination_SaveFiles_SettingsForm,
-  DigIt_Form_ExportFiles, DigIt_Form_BuildDuplex, DigIt_Form_Profiles;
+  DigIt_Form_ExportFiles, DigIt_Form_BuildDuplex, DigIt_Form_Profiles, DigIt_Form_Templates;
 
 { TDigIt_Main }
 
@@ -924,6 +926,22 @@ begin
                                     edPageWidth.Value, edPageHeight.Value);
 end;
 
+procedure TDigIt_Main.btTemplatesAddClick(Sender: TObject);
+begin
+
+end;
+
+procedure TDigIt_Main.btTemplatesEditClick(Sender: TObject);
+var
+   SelectedTemplate: String;
+
+begin
+  if TDigIt_Templates_Form.Execute(SelectedTemplate) then
+  try
+  finally
+  end;
+end;
+
 procedure TDigIt_Main.ItemSizesClick(Sender: TObject);
 var
    PhysicalUnit: TPhysicalUnit;
@@ -1185,7 +1203,7 @@ begin
      BuildProfilesMenu(Self, menuProfiles, @UI_ProfileMenuClick);
 
   finally
-    DigIt_Profiles_Form.Free; DigIt_Profiles_Form:= nil;
+    //oldcode DigIt_Profiles_Form.Free; DigIt_Profiles_Form:= nil;
   end;
 end;
 

@@ -32,7 +32,7 @@ type
     function TwainProcessMessages(Sender: TObject; const Index: Integer): Boolean;
 
     procedure TwainAcquireNative(Sender: TObject; const Index: Integer;
-                                 nativeHandle: TW_UINT32; var Cancel: Boolean);
+                                 nativeHandle: THandle; var Cancel: Boolean);
 
   protected
     function MessageReceived(AMsgID:Integer):Boolean; override; overload;
@@ -169,7 +169,7 @@ begin
 end;
 
 procedure TTwain32SyncIPCServer.TwainAcquireNative(Sender: TObject; const Index: Integer;
-                                                   nativeHandle: TW_UINT32; var Cancel: Boolean);
+                                                   nativeHandle: THandle; var Cancel: Boolean);
 begin
   with TCustomDelphiTwain(Sender).Source[Index] do
   try

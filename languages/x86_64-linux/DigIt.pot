@@ -140,11 +140,29 @@ msgstr ""
 
 #: digit_form_profiles.rsprofiles_addcurrent
 msgctxt "digit_form_profiles.rsprofiles_addcurrent"
-msgid "Add Current Source..."
+msgid "Add Profile..."
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_del
+#, object-pascal-format
+msgid ""
+"Delete Profile?\n"
+"%s"
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_delall
+msgid "Delete All Profiles?"
 msgstr ""
 
 #: digit_form_profiles.rsprofiles_invalidtitle_exists
 msgid "Profile Title already exists"
+msgstr ""
+
+#: digit_form_profiles.rsprofiles_sourceerr
+#, object-pascal-format
+msgid ""
+"Cannot Open Source\n"
+"%s"
 msgstr ""
 
 #: digit_form_profiles.rsprofiles_title
@@ -154,6 +172,11 @@ msgstr ""
 #: digit_session.rsclearqueue
 msgctxt "digit_session.rsclearqueue"
 msgid "Clear the Work Queue?"
+msgstr ""
+
+#: digit_session.rsconfirmreplacefiles
+#, object-pascal-format
+msgid "File %s already Exists, Replace it?"
 msgstr ""
 
 #: digit_session.rsdeleteall
@@ -187,7 +210,7 @@ msgstr ""
 
 #: digit_session.rsnofilesdownloaded
 msgctxt "digit_session.rsnofilesdownloaded"
-msgid "NO Files Downloaded "
+msgid "NO Files Acquired"
 msgstr ""
 
 #: digit_session.rsnomorefiles
@@ -232,7 +255,7 @@ msgstr ""
 
 #: digit_session.rssourcenotselected
 #, object-pascal-format
-msgid "Cannot Select Source \"%s\", try Select another from Menù"
+msgid "Source \"%s\" not founded, try Select another from Menù"
 msgstr ""
 
 #: digit_session.rstakeagain
@@ -493,7 +516,7 @@ msgid "Take"
 msgstr ""
 
 #: tdigit_main.acttakebuildduplex.caption
-msgid "Take and Build Front/Back"
+msgid "Build Front/Back"
 msgstr ""
 
 #: tdigit_main.acttakere.caption
@@ -674,7 +697,7 @@ msgstr ""
 
 #: tdigit_main.edcropunit_type.text
 msgctxt "tdigit_main.edcropunit_type.text"
-msgid "Pixel"
+msgid "Centimeters"
 msgstr ""
 
 #: tdigit_main.edpageresizetype.text
@@ -683,7 +706,7 @@ msgstr ""
 
 #: tdigit_main.edpageunit.text
 msgctxt "tdigit_main.edpageunit.text"
-msgid "Centimeter"
+msgid "Centimeters"
 msgstr ""
 
 #: tdigit_main.itemcropmodecustom.caption
@@ -707,15 +730,15 @@ msgstr ""
 
 #: tdigit_main.itemrulercentimeter.caption
 msgctxt "tdigit_main.itemrulercentimeter.caption"
-msgid "Centimeter"
+msgid "Centimeters"
 msgstr ""
 
 #: tdigit_main.itemrulerinch.caption
-msgid "Inch"
+msgid "Inches"
 msgstr ""
 
 #: tdigit_main.itemrulermillimeter.caption
-msgid "Millimeter"
+msgid "Millimeters"
 msgstr ""
 
 #: tdigit_main.itemrulerpercent.caption
@@ -723,16 +746,16 @@ msgid "Percent"
 msgstr ""
 
 #: tdigit_main.itemrulerpica.caption
-msgid "Pica"
+msgid "Picas"
 msgstr ""
 
 #: tdigit_main.itemrulerpixel.caption
 msgctxt "tdigit_main.itemrulerpixel.caption"
-msgid "Pixel"
+msgid "Pixels"
 msgstr ""
 
 #: tdigit_main.itemrulerpoint.caption
-msgid "Point"
+msgid "Points"
 msgstr ""
 
 #: tdigit_main.label1.caption
@@ -746,6 +769,10 @@ msgstr ""
 
 #: tdigit_main.label11.caption
 msgid "Counter ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
+msgstr ""
+
+#: tdigit_main.label12.caption
+msgid "Crop Areas ˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗˗"
 msgstr ""
 
 #: tdigit_main.label2.caption
@@ -800,18 +827,22 @@ msgid "Load XML"
 msgstr ""
 
 #: tdigit_main.menuprojectnew.caption
+msgctxt "tdigit_main.menuprojectnew.caption"
 msgid "New ..."
 msgstr ""
 
 #: tdigit_main.menuprojectopen.caption
+msgctxt "tdigit_main.menuprojectopen.caption"
 msgid "Open ..."
 msgstr ""
 
 #: tdigit_main.menuprojectsave.caption
+msgctxt "tdigit_main.menuprojectsave.caption"
 msgid "Save"
 msgstr ""
 
 #: tdigit_main.menuprojectsaveas.caption
+msgctxt "tdigit_main.menuprojectsaveas.caption"
 msgid "Save as ..."
 msgstr ""
 
@@ -845,6 +876,30 @@ msgstr ""
 
 #: tdigit_main.menusession.caption
 msgid "Work Session"
+msgstr ""
+
+#: tdigit_main.menutemplates.caption
+msgid "Templates"
+msgstr ""
+
+#: tdigit_main.menutemplatesnew.caption
+msgctxt "tdigit_main.menutemplatesnew.caption"
+msgid "New ..."
+msgstr ""
+
+#: tdigit_main.menutemplatesopen.caption
+msgctxt "tdigit_main.menutemplatesopen.caption"
+msgid "Open ..."
+msgstr ""
+
+#: tdigit_main.menutemplatessave.caption
+msgctxt "tdigit_main.menutemplatessave.caption"
+msgid "Save"
+msgstr ""
+
+#: tdigit_main.menutemplatessaveas.caption
+msgctxt "tdigit_main.menutemplatessaveas.caption"
+msgid "Save as ..."
 msgstr ""
 
 #: tdigit_main.menutimertakeconfig.caption
@@ -1013,12 +1068,32 @@ msgctxt "tdigit_profiles_form.lvprofiles.columns[1].caption"
 msgid "Source"
 msgstr ""
 
-#: tdigit_templates.bcpanel1.caption
-msgid "BCPanel1"
+#: tdigit_templates_form.caption
+msgid "DigIt_Templates_Form"
 msgstr ""
 
-#: tdigit_templates.caption
-msgid "DigIt_Templates"
+#: tdigit_templates_form.edtitle.text
+msgid "edTitle"
+msgstr ""
+
+#: tdigit_templates_form.lbsummary.caption
+msgid "lbSummary"
+msgstr ""
+
+#: tdigit_templates_form.lbsummarysave.caption
+msgid "lbSummarySave"
+msgstr ""
+
+#: tdigit_templates_form.lbtitle.caption
+msgid "lbTitle"
+msgstr ""
+
+#: tdigit_templates_form.tabload.caption
+msgid "tabLoad"
+msgstr ""
+
+#: tdigit_templates_form.tabsave.caption
+msgid "tabSave"
 msgstr ""
 
 #: twizardbuildduplex.btcancel.caption

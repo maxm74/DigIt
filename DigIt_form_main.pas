@@ -92,8 +92,6 @@ type
     btCrop_Del: TBGRASpeedButton;
     btCRotateLeft: TSpeedButton;
     btCRotateRight: TSpeedButton;
-    btTemplatesEdit: TSpeedButton;
-    btTemplatesAdd: TSpeedButton;
     btPageSizes: TSpeedButton;
     btPageSizesToCrops: TSpeedButton;
     btPaperSizes: TSpeedButton;
@@ -143,6 +141,11 @@ type
     itemRulerPica: TMenuItem;
     itemRulerPoint: TMenuItem;
     itemRulerPercent: TMenuItem;
+    menuTemplatesSaveAs: TMenuItem;
+    menuTemplatesSave: TMenuItem;
+    menuTemplatesNew: TMenuItem;
+    menuTemplatesOpen: TMenuItem;
+    menuTemplates: TMenuItem;
     menuRulerBottom: TMenuItem;
     menuRulerRight: TMenuItem;
     menuRulerTop: TMenuItem;

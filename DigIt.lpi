@@ -42,7 +42,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../../Packages/DelphiTwain/units;fcl-pdf"/>
-            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <BuildMacros>
             <Count Value="1"/>
@@ -262,7 +262,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

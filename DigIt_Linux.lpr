@@ -14,7 +14,7 @@ uses
   DigIt_Source_Common, 
   Digit_Source_Folder,
   DigIt_Destinations,
-  DigIt_Form_Main, DigIt_Bridge_Impl_UI_Form;
+  DigIt_Form_Main, DigIt_Bridge_Impl_UI_Form, DigIt_Profiles, DigIt_Templates;
 
 procedure TranslateLCL;
 var

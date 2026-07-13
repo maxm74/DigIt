@@ -1,5 +1,8 @@
 DigIt CHANGE LOG
 ======================
+2026/07/13 Moved Templates to Main Menu; 
+           Updated Linux\Windows Project File.
+		   
 2026/07/09 Added MacOs Project;
            Twain Source use 64bit THandle intestead of 32bit;
 		   First Version of Templates;

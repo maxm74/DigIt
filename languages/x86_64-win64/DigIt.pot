@@ -763,14 +763,6 @@ msgctxt "tdigit_main.btprotateright.hint"
 msgid "Rotate Right"
 msgstr ""
 
-#: tdigit_main.bttemplatesadd.caption
-msgid "Add Template"
-msgstr ""
-
-#: tdigit_main.bttemplatesedit.caption
-msgid "Templates"
-msgstr ""
-
 #: tdigit_main.btzback.hint
 msgid "To Back"
 msgstr ""
@@ -925,14 +917,17 @@ msgid "Load XML"
 msgstr ""
 
 #: tdigit_main.menuprojectnew.caption
+msgctxt "tdigit_main.menuprojectnew.caption"
 msgid "New ..."
 msgstr ""
 
 #: tdigit_main.menuprojectopen.caption
+msgctxt "tdigit_main.menuprojectopen.caption"
 msgid "Open ..."
 msgstr ""
 
 #: tdigit_main.menuprojectsave.caption
+msgctxt "tdigit_main.menuprojectsave.caption"
 msgid "Save"
 msgstr ""
 
@@ -970,6 +965,30 @@ msgstr ""
 
 #: tdigit_main.menusession.caption
 msgid "Work Session"
+msgstr ""
+
+#: tdigit_main.menutemplates.caption
+msgctxt "tdigit_main.menutemplates.caption"
+msgid "Templates"
+msgstr ""
+
+#: tdigit_main.menutemplatesnew.caption
+msgctxt "tdigit_main.menutemplatesnew.caption"
+msgid "New ..."
+msgstr ""
+
+#: tdigit_main.menutemplatesopen.caption
+msgctxt "tdigit_main.menutemplatesopen.caption"
+msgid "Open ..."
+msgstr ""
+
+#: tdigit_main.menutemplatessave.caption
+msgctxt "tdigit_main.menutemplatessave.caption"
+msgid "Save"
+msgstr ""
+
+#: tdigit_main.menutemplatessaveas.caption
+msgid "Save As ..."
 msgstr ""
 
 #: tdigit_main.menutimertakeconfig.caption
@@ -1140,6 +1159,30 @@ msgstr ""
 
 #: tdigit_templates_form.caption
 msgid "DigIt_Templates_Form"
+msgstr ""
+
+#: tdigit_templates_form.edtitle.text
+msgid "edTitle"
+msgstr ""
+
+#: tdigit_templates_form.lbsummary.caption
+msgid "lbSummary"
+msgstr ""
+
+#: tdigit_templates_form.lbsummarysave.caption
+msgid "lbSummarySave"
+msgstr ""
+
+#: tdigit_templates_form.lbtitle.caption
+msgid "lbTitle"
+msgstr ""
+
+#: tdigit_templates_form.tabload.caption
+msgid "tabLoad"
+msgstr ""
+
+#: tdigit_templates_form.tabsave.caption
+msgid "tabSave"
 msgstr ""
 
 #: twizardbuildduplex.btcancel.caption

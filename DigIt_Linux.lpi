@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="13"/>
     <General>
       <Flags>
         <CompatibilityMode Value="True"/>
@@ -37,11 +37,11 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/DigIt-dbg"/>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)/DigIt-dbg"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)"/>
           </SearchPaths>
           <BuildMacros>
             <Count Value="1"/>
@@ -97,27 +97,33 @@
         </Mode1>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="6">
+    <RequiredPackages Count="8">
       <Item1>
-        <PackageName Value="MaxM_Forms"/>
+        <PackageName Value="SanePascal_pkg"/>
       </Item1>
       <Item2>
-        <PackageName Value="MaxM_Commons"/>
+        <PackageName Value="MaxM_UI"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="MaxM_Forms"/>
       </Item3>
       <Item4>
-        <PackageName Value="BGRABitmapPack"/>
+        <PackageName Value="MaxM_Commons"/>
       </Item4>
       <Item5>
-        <PackageName Value="bgracontrols"/>
+        <PackageName Value="LazControls"/>
       </Item5>
       <Item6>
-        <PackageName Value="LCL"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item6>
+      <Item7>
+        <PackageName Value="bgracontrols"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="LCL"/>
+      </Item8>
     </RequiredPackages>
-    <Units Count="20">
+    <Units Count="22">
       <Unit0>
         <Filename Value="DigIt_Linux.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -216,16 +222,24 @@
         <Filename Value="DigIt_Source_Common.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
+      <Unit20>
+        <Filename Value="DigIt_Profiles.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="DigIt_Templates.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit21>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="bin/$(TargetCPU)-$(TargetOS)/DigIt"/>
+      <Filename Value="bin/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)/DigIt"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(FPCVer)"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
